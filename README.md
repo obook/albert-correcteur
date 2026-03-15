@@ -6,15 +6,18 @@ Fonctionne comme [LanguageTool](https://addons.mozilla.org/fr/firefox/addon/lang
 
 ## Fonctionnalités
 
-- Vérification automatique 2 secondes après l'arrêt de la saisie
+- Vérification automatique 3 secondes après l'arrêt de la saisie
+- Vérification cyclique de tous les champs de la page (priorité au champ actif)
 - Vérification manuelle en cliquant sur le badge Albert dans le coin du champ
 - Soulignements colorés selon le type d'erreur :
   - **Rouge** — orthographe
   - **Orange** — grammaire
   - **Bleu** — style
 - Popup de suggestion avec explication et correction en un clic
+- Animation de rotation du logo pendant la vérification
 - Fonctionne sur les `<textarea>`, `<input>` et les éléments `contenteditable`
 - Détection automatique des nouveaux champs ajoutés dynamiquement (SPA, etc.)
+- Respect de la limite API (backoff automatique en cas de rate limit)
 
 ## Prérequis
 
@@ -42,7 +45,7 @@ Le fichier `firefox-release/albert-correcteur.xpi` est généré. L'installation
 1. Cliquer sur l'icône Albert dans la barre d'outils de Firefox
 2. Renseigner :
    - **Clé API Albert** (obligatoire) — au format `sk-...`
-   - **Modèle** (optionnel) — laisser vide pour le modèle par défaut
+   - **Modèle** — menu déroulant chargé dynamiquement depuis l'API (modèles `text-generation`)
    - **URL de l'API** (optionnel) — par défaut `https://albert.api.etalab.gouv.fr`
 3. Cliquer sur "Enregistrer"
 
@@ -71,6 +74,3 @@ L'extension utilise l'endpoint `/v1/chat/completions` de l'API Albert (compatibl
 
 Pour les `<textarea>` et `<input>`, un overlay transparent est positionné par-dessus le champ pour afficher les soulignements sans modifier le contenu. Pour les éléments `contenteditable`, les erreurs sont directement encapsulées dans des `<span>`.
 
-## Projet lié
-
-- [albert-cli](../albert-cli/) — client en ligne de commande pour l'API Albert
