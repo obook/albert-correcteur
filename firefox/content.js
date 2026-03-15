@@ -4,18 +4,20 @@
 (() => {
   "use strict";
 
-  const DEBOUNCE_MS = 2000;
+  const DEBOUNCE_MS = 3000;
   const MIN_TEXT_LENGTH = 10;
-  const CYCLE_INTERVAL_MS = 10000; // Intervalle entre chaque vérification cyclique (max ~6 rpm)
+  const CYCLE_INTERVAL_MS = 30000;
+  const SCAN_DEBOUNCE_MS = 500;
 
   // URL du logo embarqué dans l'extension
   const ICON_URL = browser.runtime.getURL("icons/icon.svg");
 
   // ── État global ──
   const fieldStates = new WeakMap();
-  const trackedFields = new Set(); // Tous les champs suivis (pour le cycle)
+  const trackedFields = new Set();
   let activePopup = null;
-  let checkInProgress = false; // Verrou pour éviter les appels simultanés
+  let checkInProgress = false;
+  let rateLimited = false;
 
   // ══════════════════════════════════════════════════════════════════════
   // Utilitaires
@@ -41,9 +43,16 @@
 
   function getOrCreateState(el) {
     if (!fieldStates.has(el)) {
-      fieldStates.set(el, { timer: null, corrections: [], overlay: null, badge: null, attached: false, lastCheckedText: "" });
+      fieldStates.set(el, {
+        timer: null, corrections: [], overlay: null, badge: null,
+        attached: false, lastCheckedText: "", scrollHandler: null,
+      });
     }
     return fieldStates.get(el);
+  }
+
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   // ══════════════════════════════════════════════════════════════════════
@@ -63,7 +72,6 @@
     img.alt = "Albert";
     badge.appendChild(img);
 
-    // Positionner le badge
     const parent = el.offsetParent || document.body;
     if (getComputedStyle(parent).position === "static") {
       parent.style.position = "relative";
@@ -111,16 +119,17 @@
     }
 
     const state = getOrCreateState(el);
-
-    // Ne pas revérifier si le texte n'a pas changé
     if (state.lastCheckedText === text) return;
-
     if (state.badge) state.badge.classList.add("albert-loading");
 
     try {
       const response = await browser.runtime.sendMessage({ type: "check", text });
       if (response.error) {
         console.warn("[Albert]", response.error);
+        if (response.error.includes("Limite de débit")) {
+          rateLimited = true;
+          setTimeout(() => { rateLimited = false; }, 30000);
+        }
         return;
       }
       state.corrections = response.corrections || [];
@@ -144,6 +153,11 @@
       state.overlay.remove();
       state.overlay = null;
     }
+    // Retirer le scroll handler
+    if (state.scrollHandler) {
+      el.removeEventListener("scroll", state.scrollHandler);
+      state.scrollHandler = null;
+    }
     if (state.badge) {
       state.badge.classList.remove("albert-has-errors");
     }
@@ -166,7 +180,6 @@
       renderContentEditable(el, state);
     }
 
-    // Badge rouge si erreurs
     if (state.badge) {
       state.badge.classList.toggle("albert-has-errors", state.corrections.length > 0);
       state.badge.title = state.corrections.length > 0
@@ -178,7 +191,13 @@
   // ── Overlay pour textarea/input ──
 
   function renderOverlay(el, state) {
+    // Nettoyer l'ancien overlay et son scroll handler
     if (state.overlay) state.overlay.remove();
+    if (state.scrollHandler) {
+      el.removeEventListener("scroll", state.scrollHandler);
+      state.scrollHandler = null;
+    }
+
     if (state.corrections.length === 0) {
       state.overlay = null;
       return;
@@ -188,8 +207,7 @@
     overlay.className = "albert-overlay";
     syncOverlayStyle(el, overlay);
 
-    const text = el.value;
-    overlay.innerHTML = buildHighlightedHTML(text, state.corrections);
+    overlay.innerHTML = buildHighlightedHTML(el.value, state.corrections);
 
     const parent = el.offsetParent || document.body;
     if (getComputedStyle(parent).position === "static") {
@@ -198,13 +216,14 @@
     parent.appendChild(overlay);
     state.overlay = overlay;
 
-    // Sync scroll
+    // Sync scroll (un seul handler, référencé pour pouvoir le retirer)
     overlay.scrollTop = el.scrollTop;
     overlay.scrollLeft = el.scrollLeft;
-    el.addEventListener("scroll", () => {
+    state.scrollHandler = () => {
       overlay.scrollTop = el.scrollTop;
       overlay.scrollLeft = el.scrollLeft;
-    });
+    };
+    el.addEventListener("scroll", state.scrollHandler, { passive: true });
 
     // Rendre les marks cliquables
     overlay.querySelectorAll(".albert-error").forEach((mark) => {
@@ -360,8 +379,8 @@
     document.body.appendChild(popup);
 
     const markRect = markEl.getBoundingClientRect();
-    popup.style.top = (markRect.bottom + window.scrollY + 4) + "px";
-    popup.style.left = (markRect.left + window.scrollX) + "px";
+    popup.style.top = (markRect.bottom + 4) + "px";
+    popup.style.left = markRect.left + "px";
 
     requestAnimationFrame(() => {
       const popupRect = popup.getBoundingClientRect();
@@ -369,7 +388,7 @@
         popup.style.left = (window.innerWidth - popupRect.width - 10) + "px";
       }
       if (popupRect.bottom > window.innerHeight - 10) {
-        popup.style.top = (markRect.top + window.scrollY - popupRect.height - 4) + "px";
+        popup.style.top = (markRect.top - popupRect.height - 4) + "px";
       }
     });
 
@@ -433,30 +452,25 @@
     });
   }
 
+  const FIELD_SELECTOR = "textarea, input[type='text'], input:not([type]), [contenteditable='true']";
+
   function scanFields() {
-    document.querySelectorAll("textarea, input[type='text'], input:not([type]), [contenteditable='true']")
-      .forEach(attachField);
+    document.querySelectorAll(FIELD_SELECTOR).forEach(attachField);
   }
 
-  const observer = new MutationObserver((mutations) => {
-    for (const m of mutations) {
-      for (const node of m.addedNodes) {
-        if (node.nodeType !== Node.ELEMENT_NODE) continue;
-        if (isTextField(node)) attachField(node);
-        node.querySelectorAll?.("textarea, input[type='text'], input:not([type]), [contenteditable='true']")
-          .forEach(attachField);
-      }
-    }
+  // MutationObserver avec debounce pour éviter de ralentir la page
+  let scanTimer = null;
+  const observer = new MutationObserver(() => {
+    clearTimeout(scanTimer);
+    scanTimer = setTimeout(scanFields, SCAN_DEBOUNCE_MS);
   });
 
   // ══════════════════════════════════════════════════════════════════════
   // Vérification cyclique de tous les champs
   // ══════════════════════════════════════════════════════════════════════
-  // Parcourt tous les champs un par un (file d'attente séquentielle)
-  // pour ne pas surcharger l'API avec des requêtes parallèles.
 
   async function cycleCheckAll() {
-    if (checkInProgress) return;
+    if (checkInProgress || rateLimited) return;
     checkInProgress = true;
 
     try {
@@ -467,15 +481,25 @@
         }
       }
 
-      for (const el of trackedFields) {
+      // Le champ actif en premier
+      const active = document.activeElement;
+      const sorted = [...trackedFields].sort((a, b) => {
+        if (a === active) return -1;
+        if (b === active) return 1;
+        return 0;
+      });
+
+      for (const el of sorted) {
+        if (rateLimited) break;
+
         const text = getTextContent(el);
         if (text.trim().length < MIN_TEXT_LENGTH) continue;
 
         const state = getOrCreateState(el);
-        // Ne vérifier que si le texte a changé depuis la dernière vérification
         if (state.lastCheckedText === text) continue;
 
         await triggerCheck(el);
+        await sleep(7000);
       }
     } finally {
       checkInProgress = false;
