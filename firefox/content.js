@@ -35,6 +35,24 @@
     return false;
   }
 
+  // Détecte si un contenteditable est géré par un éditeur riche (CKEditor, TinyMCE, etc.)
+  // qui ne tolère pas la modification directe du DOM.
+  function isRichEditor(el) {
+    if (!el.isContentEditable) return false;
+    // CKEditor 5 : classe ck-editor__editable ou attribut data-cke
+    if (el.classList.contains("ck-editor__editable")) return true;
+    if (el.closest(".ck-editor")) return true;
+    if (el.hasAttribute("data-cke-enter-mode")) return true;
+    // TinyMCE : id contenant "tinymce" ou body dans une iframe tinymce
+    if (el.id && el.id.includes("tinymce")) return true;
+    if (el.dataset.mceStyle !== undefined) return true;
+    // Quill
+    if (el.classList.contains("ql-editor")) return true;
+    // ProseMirror (utilisé par Tiptap, etc.)
+    if (el.classList.contains("ProseMirror")) return true;
+    return false;
+  }
+
   function getTextContent(el) {
     const tag = el.tagName.toLowerCase();
     if (tag === "textarea" || tag === "input") return el.value;
@@ -161,7 +179,7 @@
     if (state.badge) {
       state.badge.classList.remove("albert-has-errors");
     }
-    if (el.isContentEditable) {
+    if (el.isContentEditable && !isRichEditor(el)) {
       el.querySelectorAll(".albert-error").forEach((mark) => {
         const parent = mark.parentNode;
         parent.replaceChild(document.createTextNode(mark.textContent), mark);
@@ -174,7 +192,8 @@
     const state = getOrCreateState(el);
     const tag = el.tagName.toLowerCase();
 
-    if (tag === "textarea" || tag === "input") {
+    if (tag === "textarea" || tag === "input" || isRichEditor(el)) {
+      // Overlay pour les textarea, input et éditeurs riches (CKEditor, TinyMCE, etc.)
       renderOverlay(el, state);
     } else if (el.isContentEditable) {
       renderContentEditable(el, state);
@@ -207,7 +226,8 @@
     overlay.className = "albert-overlay";
     syncOverlayStyle(el, overlay);
 
-    overlay.innerHTML = buildHighlightedHTML(el.value, state.corrections);
+    const text = getTextContent(el);
+    overlay.innerHTML = buildHighlightedHTML(text, state.corrections);
 
     const parent = el.offsetParent || document.body;
     if (getComputedStyle(parent).position === "static") {
@@ -421,15 +441,87 @@
       el.value = before + suggestion + after;
       el.dispatchEvent(new Event("input", { bubbles: true }));
     } else if (el.isContentEditable) {
-      const marks = el.querySelectorAll(`.albert-error[data-idx="${correction.idx}"]`);
-      marks.forEach((mark) => {
-        const textNode = document.createTextNode(suggestion);
-        mark.parentNode.replaceChild(textNode, mark);
-        textNode.parentNode.normalize();
-      });
+      if (isRichEditor(el)) {
+        // Pour les éditeurs riches : sélectionner le texte erroné puis
+        // utiliser execCommand pour que l'éditeur détecte le changement.
+        applyViaSelection(el, correction, suggestion);
+      } else {
+        const marks = el.querySelectorAll(`.albert-error[data-idx="${correction.idx}"]`);
+        marks.forEach((mark) => {
+          const textNode = document.createTextNode(suggestion);
+          mark.parentNode.replaceChild(textNode, mark);
+          textNode.parentNode.normalize();
+        });
+      }
     }
 
+    // Invalider le cache pour forcer une revérification
+    const state = getOrCreateState(el);
+    state.lastCheckedText = "";
     scheduleCheck(el);
+  }
+
+  // Applique une correction via Selection + execCommand (compatible éditeurs riches).
+  // Construit un mapping innerText ↔ nœuds texte pour gérer les <br> et blocs.
+  function applyViaSelection(el, correction, suggestion) {
+    el.focus();
+
+    // Construire le mapping entre les offsets innerText et les nœuds texte
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_ALL);
+    const segments = []; // { node, start, end } pour chaque nœud texte
+    let innerOffset = 0;
+    let current;
+
+    while ((current = walker.nextNode())) {
+      if (current.nodeType === Node.TEXT_NODE) {
+        const len = current.textContent.length;
+        segments.push({ node: current, start: innerOffset, end: innerOffset + len });
+        innerOffset += len;
+      } else if (current.nodeType === Node.ELEMENT_NODE) {
+        const tag = current.tagName.toLowerCase();
+        // innerText ajoute \n pour <br>, <p>, <div>, etc.
+        if (tag === "br") {
+          innerOffset += 1;
+        } else if (["p", "div", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6"].includes(tag)) {
+          if (innerOffset > 0) innerOffset += 1;
+        }
+      }
+    }
+
+    // Trouver le(s) nœud(s) texte couvrant l'erreur
+    const errStart = correction.offset;
+    const errEnd = correction.offset + correction.length;
+
+    let startNode = null, startOffset = 0;
+    let endNode = null, endOffset = 0;
+
+    for (const seg of segments) {
+      if (!startNode && errStart >= seg.start && errStart <= seg.end) {
+        startNode = seg.node;
+        startOffset = errStart - seg.start;
+      }
+      if (errEnd >= seg.start && errEnd <= seg.end) {
+        endNode = seg.node;
+        endOffset = errEnd - seg.start;
+        break;
+      }
+    }
+
+    if (!startNode || !endNode) return;
+
+    // Sélectionner le texte erroné
+    const range = document.createRange();
+    range.setStart(startNode, startOffset);
+    range.setEnd(endNode, endOffset);
+
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+
+    // Petit délai pour que l'éditeur prenne en compte la sélection
+    setTimeout(() => {
+      document.execCommand("insertText", false, suggestion);
+    }, 10);
   }
 
   // ══════════════════════════════════════════════════════════════════════
