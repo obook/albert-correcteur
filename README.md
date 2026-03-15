@@ -1,8 +1,6 @@
 # Albert Correcteur — Extension Firefox
 
-Extension Firefox de correction orthographique et grammaticale française, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM).
-
-Fonctionne comme [LanguageTool](https://addons.mozilla.org/fr/firefox/addon/languagetool/) : détecte les erreurs dans les champs texte des pages web et propose des corrections en un clic.
+Extension Firefox de correction orthographique et grammaticale française, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web et propose des corrections en un clic.
 
 ## Fonctionnalités
 
