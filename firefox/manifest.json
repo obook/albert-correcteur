@@ -29,7 +29,16 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": [
+        "albert-state.js",
+        "albert-utils.js",
+        "albert-badge.js",
+        "albert-render.js",
+        "albert-popup.js",
+        "albert-apply.js",
+        "albert-check.js",
+        "albert-main.js"
+      ],
       "css": ["content.css"],
       "run_at": "document_idle",
       "all_frames": true

@@ -14,6 +14,8 @@ Extension Firefox de correction orthographique et grammaticale française, propu
 - Popup de suggestion avec explication et correction en un clic
 - Animation de rotation du logo pendant la vérification
 - Fonctionne sur les `<textarea>`, `<input>` et les éléments `contenteditable`
+- Compatible avec les éditeurs riches (CKEditor, TinyMCE, Quill, ProseMirror)
+- Injection dans les iframes (éditeurs intégrés type EcoleDirecte)
 - Détection automatique des nouveaux champs ajoutés dynamiquement (SPA, etc.)
 - Respect de la limite API (backoff automatique en cas de rate limit)
 
@@ -54,7 +56,14 @@ albert-ext/
 ├── firefox/                  ← sources de l'extension
 │   ├── manifest.json         ← manifeste Firefox (Manifest V2)
 │   ├── background.js         ← appels API Albert (chat/completions)
-│   ├── content.js            ← détection des champs, soulignements, popups
+│   ├── albert-state.js       ← configuration et état partagé (namespace Albert)
+│   ├── albert-utils.js       ← fonctions utilitaires (détection champs, éditeurs)
+│   ├── albert-badge.js       ← gestion du badge (icône dans le coin du champ)
+│   ├── albert-check.js       ← vérification via l'API (debounce, cycle, rate limit)
+│   ├── albert-render.js      ← rendu des corrections (overlay, contenteditable)
+│   ├── albert-popup.js       ← popup de suggestion
+│   ├── albert-apply.js       ← application des corrections dans le texte
+│   ├── albert-main.js        ← point d'entrée (scan, observer, démarrage)
 │   ├── content.css           ← styles des soulignements et popups
 │   ├── icons/                ← logo Albert (SVG + PNG)
 │   └── popup/                ← interface de configuration
@@ -70,5 +79,7 @@ albert-ext/
 
 L'extension utilise l'endpoint `/v1/chat/completions` de l'API Albert (compatible OpenAI) avec un prompt système qui demande au modèle de retourner les erreurs au format JSON structuré (offset, longueur, type, message, suggestions).
 
-Pour les `<textarea>` et `<input>`, un overlay transparent est positionné par-dessus le champ pour afficher les soulignements sans modifier le contenu. Pour les éléments `contenteditable`, les erreurs sont directement encapsulées dans des `<span>`.
+Pour les `<textarea>`, `<input>` et les éditeurs riches (CKEditor, TinyMCE, etc.), un overlay transparent est positionné par-dessus le champ pour afficher les soulignements sans modifier le contenu. Pour les éléments `contenteditable` simples, les erreurs sont directement encapsulées dans des `<span>`.
+
+Les content scripts sont découpés en modules (namespace `window.Albert`) chargés dans l'ordre par le manifest, pour faciliter la maintenance.
 
