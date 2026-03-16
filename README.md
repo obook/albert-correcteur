@@ -15,7 +15,7 @@ Extension Firefox de correction orthographique et grammaticale française, propu
 - Animation de rotation du logo pendant la vérification
 - Fonctionne sur les `<textarea>`, `<input>` et les éléments `contenteditable`
 - Compatible avec les éditeurs riches (CKEditor, TinyMCE, Quill, ProseMirror)
-- Injection dans les iframes (éditeurs intégrés type EcoleDirecte)
+- Injection dans les iframes (éditeurs intégrés)
 - Détection automatique des nouveaux champs ajoutés dynamiquement (SPA, etc.)
 - Respect de la limite API (backoff automatique en cas de rate limit)
 
