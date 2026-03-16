@@ -32,6 +32,17 @@ Extension Firefox de correction orthographique et grammaticale française, propu
 2. Cliquer sur "Charger un module temporaire…"
 3. Sélectionner le fichier `firefox/manifest.json`
 
+### Installation persistante (Firefox Developer Edition)
+
+```bash
+sudo ./install-firefox-dev.sh
+```
+
+Puis dans Firefox Developer Edition :
+1. Aller à `about:config` → passer `xpinstall.signatures.required` à `false`
+2. Aller à `about:addons` → roue dentée → "Installer un module depuis un fichier"
+3. Sélectionner `firefox-release/albert-correcteur.xpi`
+
 ### Depuis le fichier .xpi
 
 ```bash
@@ -39,6 +50,21 @@ Extension Firefox de correction orthographique et grammaticale française, propu
 ```
 
 Le fichier `firefox-release/albert-correcteur.xpi` est généré. L'installation directe du `.xpi` nécessite Firefox ESR, Developer Edition ou Nightly (les extensions non signées sont bloquées sur Firefox stable).
+
+### Publication sur addons.mozilla.org
+
+1. Créer un compte sur https://addons.mozilla.org/developers/
+2. Générer des clés API sur https://addons.mozilla.org/developers/addon/api/key/
+3. Configurer les credentials :
+   ```bash
+   echo 'AMO_API_KEY=votre_jwt_issuer' >> ~/.amo-credentials
+   echo 'AMO_API_SECRET=votre_jwt_secret' >> ~/.amo-credentials
+   chmod 600 ~/.amo-credentials
+   ```
+4. Publier :
+   ```bash
+   ./firefox-publish.sh
+   ```
 
 ## Configuration
 
@@ -72,6 +98,8 @@ albert-ext/
 │       └── popup.js
 ├── firefox-release/          ← extension packagée (.xpi)
 ├── firefox-build.sh          ← script de packaging
+├── firefox-publish.sh        ← script de publication sur addons.mozilla.org
+├── install-firefox-dev.sh    ← script d'installation de Firefox Developer Edition
 └── images/                   ← logos sources
 ```
 

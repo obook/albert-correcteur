@@ -1,2 +1,5 @@
 firefox-release/
 TODO.md
+.env
+*credentials*
+.amo-*
