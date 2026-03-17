@@ -27,10 +27,14 @@ build:
     - cd sources
     - zip -r "../${XPI_NAME}" . -x ".*"
     - cd ..
+    - echo "XPI_NAME=${XPI_NAME}" > build.env
+    - echo "VERSION=${VERSION}" >> build.env
     - echo "Extension packagée → ${XPI_NAME}"
   artifacts:
     paths:
       - "albert-correcteur_*.xpi"
+    reports:
+      dotenv: build.env
     expire_in: never
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v/'
@@ -44,16 +48,15 @@ release:
     - job: build
       artifacts: true
   script:
-    - VERSION="${CI_COMMIT_TAG#v}"
-    - echo "Création de la release ${CI_COMMIT_TAG}"
+    - echo "Création de la release ${CI_COMMIT_TAG} — ${XPI_NAME}"
   release:
     tag_name: $CI_COMMIT_TAG
     name: "Albert Correcteur ${CI_COMMIT_TAG}"
     description: "Release ${CI_COMMIT_TAG} — Extension Firefox Albert Correcteur"
     assets:
       links:
-        - name: "albert-correcteur_${CI_COMMIT_TAG#v}.xpi"
-          url: "${CI_PROJECT_URL}/-/jobs/${CI_JOB_ID}/artifacts/raw/albert-correcteur_${CI_COMMIT_TAG#v}.xpi"
+        - name: "${XPI_NAME}"
+          url: "${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/${XPI_NAME}?job=build"
           link_type: package
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v/'
