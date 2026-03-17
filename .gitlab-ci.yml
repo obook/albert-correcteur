@@ -3,7 +3,7 @@ stages:
   - build
   - release
 
-# ── Tests unitaires (sur chaque push) ──
+# ── Tests unitaires (uniquement sur les tags v*) ──
 
 tests:
   stage: test
@@ -12,7 +12,7 @@ tests:
     - node --version
     - for f in tests/test-*.js; do echo "── $(basename $f) ──" && node "$f"; done
   rules:
-    - when: always
+    - if: '$CI_COMMIT_TAG =~ /^v/'
 
 # ── Build du .xpi (uniquement sur les tags v*) ──
 
