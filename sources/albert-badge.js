@@ -52,6 +52,6 @@ Albert.positionBadge = function (el, badge) {
   const borderRight = parseFloat(cs.borderRightWidth) || 0;
   const paddingRight = parseFloat(cs.paddingRight) || 0;
   const paddingBottom = parseFloat(cs.paddingBottom) || 0;
-  badge.style.top = (rect.bottom - parentRect.top - borderBottom - paddingBottom - 22) + "px";
-  badge.style.left = (rect.right - parentRect.left - borderRight - paddingRight - 22) + "px";
+  badge.style.top = (rect.bottom - parentRect.top - borderBottom - paddingBottom - 16) + "px";
+  badge.style.left = (rect.right - parentRect.left - borderRight - paddingRight - 16) + "px";
 };
