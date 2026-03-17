@@ -14,7 +14,6 @@ Albert.attachField = function (el) {
   state.attached = true;
 
   Albert.trackedFields.add(el);
-  Albert.ensureBadge(el);
 
   el.addEventListener("input", () => {
     const st = Albert.getOrCreateState(el);
@@ -38,8 +37,14 @@ Albert.attachField = function (el) {
     Albert.scheduleCheck(el);
   });
   el.addEventListener("focus", () => {
-    const badge = Albert.ensureBadge(el);
-    Albert.positionBadge(el, badge);
+    const st = Albert.getOrCreateState(el);
+    if (!st.focused) {
+      st.focused = true;
+      Albert.ensureBadge(el);
+      // Lancer la vérification immédiatement au premier focus
+      Albert.scheduleCheck(el);
+    }
+    if (st.badge) Albert.positionBadge(el, st.badge);
   });
 };
 

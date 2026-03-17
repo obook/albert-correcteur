@@ -12,7 +12,7 @@ window.Albert = {
 
   // URLs des logos embarqués dans l'extension
   ICON_URL: browser.runtime.getURL("icons/icon.svg"),
-  ICON_OK_URL: browser.runtime.getURL("icons/icon-ok.svg"),
+  ICON_ERROR_URL: browser.runtime.getURL("icons/icon-error.svg"),
 
   // ── État global ──
   fieldStates: new WeakMap(),

@@ -175,12 +175,13 @@ Les content scripts partagent le namespace `window.Albert` et sont chargés dans
 
 ### États du badge
 
+Le badge n'apparaît qu'au premier focus sur un champ.
+
 | Classe CSS | Icône | Signification |
 |------------|-------|---------------|
-| *(aucune)* | Normale, semi-transparente | Inactif |
-| `albert-loading` | Rotation + halo bleu | Vérification en cours |
-| `albert-has-errors` | Normale, opaque | Erreurs trouvées |
-| `albert-no-errors` | Verte (`icon-ok.svg`) | Aucune erreur |
+| `albert-loading` | Normale en rotation | Vérification en cours |
+| `albert-has-errors` | Deux branches rouges (`icon-error.svg`) | Erreurs trouvées |
+| `albert-no-errors` | Normale rouge/bleue (`icon.svg`) | Aucune erreur |
 | `albert-rate-limited` | Grisée | Limite API atteinte |
 
 ### Prompts

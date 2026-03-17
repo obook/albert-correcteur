@@ -119,8 +119,8 @@ test("icons/icon.svg existe", () => {
   assert.ok(fs.existsSync(path.join(FIREFOX, "icons", "icon.svg")));
 });
 
-test("icons/icon-ok.svg existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "icons", "icon-ok.svg")));
+test("icons/icon-error.svg existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "icons", "icon-error.svg")));
 });
 
 test("icons/icon-48.png existe", () => {

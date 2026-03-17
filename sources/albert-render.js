@@ -44,9 +44,9 @@ Albert.renderCorrections = function (el) {
     const langSuffix = langLabel ? ` [${langLabel}]` : "";
     state.badge.classList.toggle("albert-has-errors", hasErrors);
     state.badge.classList.toggle("albert-no-errors", !hasErrors);
-    // Changer l'icône selon l'état
+    // Changer l'icône selon l'état : rouge si erreurs, normal (rouge/bleu) si OK
     const img = state.badge.querySelector("img");
-    if (img) img.src = hasErrors ? Albert.ICON_URL : Albert.ICON_OK_URL;
+    if (img) img.src = hasErrors ? Albert.ICON_ERROR_URL : Albert.ICON_URL;
     state.badge.title = hasErrors
       ? `${state.corrections.length} erreur${state.corrections.length > 1 ? "s" : ""} trouvée${state.corrections.length > 1 ? "s" : ""}${langSuffix}`
       : `Albert Correcteur — Aucune erreur${langSuffix}`;

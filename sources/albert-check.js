@@ -164,10 +164,12 @@ Albert.cycleCheckAll = async function () {
     for (const el of sorted) {
       if (Albert.rateLimited) break;
 
+      const state = Albert.getOrCreateState(el);
+      if (!state.focused) continue;
+
       const text = Albert.getTextContent(el);
       if (text.trim().length < Albert.MIN_TEXT_LENGTH) continue;
 
-      const state = Albert.getOrCreateState(el);
       if (state.lastCheckedText === text) continue;
 
       await Albert.triggerCheck(el);
