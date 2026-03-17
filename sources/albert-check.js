@@ -129,6 +129,7 @@ Albert.triggerCheck = async function (el) {
     const raw = response.corrections || [];
     state.corrections = Albert.filterIgnoredCorrections(raw, text);
     state.lang = response.lang || "fr";
+    state.checkedText = text;
     state.lastCheckedText = text;
     Albert.renderCorrections(el);
   } catch (err) {

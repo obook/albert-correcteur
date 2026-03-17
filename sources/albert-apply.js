@@ -5,15 +5,45 @@
 
 Albert.applyingCorrection = false;
 
+// Retrouve l'offset réel du mot erroné dans le texte actuel.
+// L'offset original peut être décalé si une correction précédente a changé la longueur du texte.
+Albert.findRealOffset = function (currentText, correction, checkedText) {
+  const originalWord = checkedText.slice(correction.offset, correction.offset + correction.length);
+
+  // Vérifier d'abord à l'offset original
+  if (currentText.slice(correction.offset, correction.offset + correction.length) === originalWord) {
+    return correction.offset;
+  }
+
+  // Sinon, chercher le mot dans le texte actuel (première occurrence)
+  const idx = currentText.indexOf(originalWord);
+  if (idx !== -1) return idx;
+
+  // Dernier recours : chercher autour de l'offset original (±50 chars)
+  const searchStart = Math.max(0, correction.offset - 50);
+  const searchEnd = Math.min(currentText.length, correction.offset + 50);
+  const region = currentText.slice(searchStart, searchEnd);
+  const localIdx = region.indexOf(originalWord);
+  if (localIdx !== -1) return searchStart + localIdx;
+
+  return -1; // mot introuvable
+};
+
 // Applique une suggestion de correction dans le champ.
 Albert.applySuggestion = function (el, correction, suggestion) {
   Albert.applyingCorrection = true;
   const tag = el.tagName.toLowerCase();
+  const state = Albert.getOrCreateState(el);
 
   if (tag === "textarea" || tag === "input") {
-    // Textarea / Input : remplacement direct dans la valeur
-    const before = el.value.slice(0, correction.offset);
-    const after = el.value.slice(correction.offset + correction.length);
+    // Retrouver l'offset réel dans le texte actuel
+    const realOffset = Albert.findRealOffset(el.value, correction, state.checkedText || el.value);
+    if (realOffset === -1) {
+      Albert.applyingCorrection = false;
+      return;
+    }
+    const before = el.value.slice(0, realOffset);
+    const after = el.value.slice(realOffset + correction.length);
     el.value = before + suggestion + after;
     el.dispatchEvent(new Event("input", { bubbles: true }));
   } else if (el.isContentEditable) {
@@ -33,7 +63,6 @@ Albert.applySuggestion = function (el, correction, suggestion) {
   }
 
   // Invalider le cache pour forcer une revérification
-  const state = Albert.getOrCreateState(el);
   state.lastCheckedText = "";
   // Remettre le flag après un court délai (pour couvrir le dispatchEvent)
   setTimeout(() => { Albert.applyingCorrection = false; }, 50);
