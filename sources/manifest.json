@@ -6,7 +6,8 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "albert-correcteur@ac-bordeaux.fr",
-      "strict_min_version": "109.0"
+      "strict_min_version": "109.0",
+      "update_url": "https://forge.apps.education.fr/booklageolivier/albert-ext/-/raw/main/updates.json"
     }
   },
   "permissions": [
