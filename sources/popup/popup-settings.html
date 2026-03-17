@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup-settings.css">
+</head>
+<body>
+  <div class="header">
+    <a href="#" id="back-btn" class="back" title="Retour">←</a>
+    <h1>Paramètres</h1>
+  </div>
+
+  <div class="setting">
+    <label>Thème de la popup de correction</label>
+    <div class="theme-options">
+      <label class="theme-option">
+        <input type="radio" name="theme" value="dark">
+        <span class="theme-preview theme-preview-dark"></span>
+        <span>Sombre</span>
+      </label>
+      <label class="theme-option">
+        <input type="radio" name="theme" value="light">
+        <span class="theme-preview theme-preview-light"></span>
+        <span>Clair</span>
+      </label>
+      <label class="theme-option">
+        <input type="radio" name="theme" value="auto">
+        <span class="theme-preview theme-preview-auto"></span>
+        <span>Automatique</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="setting">
+    <label>Dictionnaire personnel</label>
+    <p class="setting-desc">Mots ignorés par le correcteur.</p>
+    <div id="ignored-words" class="ignored-words"></div>
+    <p id="no-words" class="setting-desc" style="display:none;">Aucun mot ignoré.</p>
+  </div>
+
+  <div id="status" class="status"></div>
+
+  <script src="popup-settings.js"></script>
+</body>
+</html>

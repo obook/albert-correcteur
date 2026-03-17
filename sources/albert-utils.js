@@ -65,3 +65,30 @@ Albert.escapeHTML = function (str) {
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 };
+
+// ── Dictionnaire personnel (mots ignorés) ──
+
+Albert.loadIgnoredWords = async function () {
+  const result = await browser.storage.local.get("ignoredWords");
+  Albert.ignoredWords = new Set(result.ignoredWords || []);
+};
+
+Albert.saveIgnoredWords = async function () {
+  await browser.storage.local.set({ ignoredWords: [...Albert.ignoredWords] });
+};
+
+Albert.ignoreWord = async function (word) {
+  Albert.ignoredWords.add(word.toLowerCase());
+  await Albert.saveIgnoredWords();
+};
+
+// Filtre les corrections en excluant les mots du dictionnaire personnel.
+Albert.filterIgnoredCorrections = function (corrections, text) {
+  return corrections.filter((c) => {
+    const word = text.slice(c.offset, c.offset + c.length).toLowerCase();
+    return !Albert.ignoredWords.has(word);
+  });
+};
+
+// Charger le dictionnaire au démarrage
+Albert.loadIgnoredWords();

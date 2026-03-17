@@ -39,10 +39,12 @@ Albert.renderCorrections = function (el) {
   }
 
   if (state.badge) {
+    const langLabel = { fr: "FR", en: "EN", es: "ES", de: "DE" }[state.lang] || "";
     state.badge.classList.toggle("albert-has-errors", state.corrections.length > 0);
+    const langSuffix = langLabel ? ` [${langLabel}]` : "";
     state.badge.title = state.corrections.length > 0
-      ? `${state.corrections.length} erreur${state.corrections.length > 1 ? "s" : ""} trouvée${state.corrections.length > 1 ? "s" : ""}`
-      : "Albert Correcteur — Aucune erreur";
+      ? `${state.corrections.length} erreur${state.corrections.length > 1 ? "s" : ""} trouvée${state.corrections.length > 1 ? "s" : ""}${langSuffix}`
+      : `Albert Correcteur — Aucune erreur${langSuffix}`;
   }
 };
 

@@ -112,6 +112,55 @@ button:hover {
 .status.ok { color: #27ae60; }
 .status.err { color: #e74c3c; }
 
+.limits-section {
+  margin-top: 14px;
+  background: #f6f6f6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.limits-section summary {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  padding: 8px 10px;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.limits-section summary::before {
+  content: "▸ ";
+}
+
+.limits-section[open] summary::before {
+  content: "▾ ";
+}
+
+.limits-section summary:hover {
+  background: #eee;
+}
+
+.limits-info {
+  font-size: 12px;
+  color: #333;
+  line-height: 1.6;
+  padding: 6px 10px 10px;
+}
+
+.limits-info .limit-row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.limits-info .limit-value {
+  font-weight: 600;
+}
+
+.limits-info .limit-value.unlimited {
+  color: #27ae60;
+}
+
 .footer {
   margin-top: 16px;
   padding-top: 10px;
@@ -127,4 +176,9 @@ button:hover {
 
 .footer a:hover {
   text-decoration: underline;
+}
+
+.footer-sep {
+  color: #ccc;
+  margin: 0 4px;
 }

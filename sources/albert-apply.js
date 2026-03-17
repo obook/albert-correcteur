@@ -3,8 +3,11 @@
 
 "use strict";
 
+Albert.applyingCorrection = false;
+
 // Applique une suggestion de correction dans le champ.
 Albert.applySuggestion = function (el, correction, suggestion) {
+  Albert.applyingCorrection = true;
   const tag = el.tagName.toLowerCase();
 
   if (tag === "textarea" || tag === "input") {
@@ -32,6 +35,8 @@ Albert.applySuggestion = function (el, correction, suggestion) {
   // Invalider le cache pour forcer une revérification
   const state = Albert.getOrCreateState(el);
   state.lastCheckedText = "";
+  // Remettre le flag après un court délai (pour couvrir le dispatchEvent)
+  setTimeout(() => { Albert.applyingCorrection = false; }, 50);
   Albert.scheduleCheck(el);
 };
 

@@ -7,7 +7,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SRC_DIR="$SCRIPT_DIR/firefox"
+SRC_DIR="$SCRIPT_DIR/sources"
 CREDENTIALS="$HOME/.amo-credentials"
 
 # Vérifier web-ext

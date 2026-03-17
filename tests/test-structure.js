@@ -1,0 +1,154 @@
+// Tests — Vérification de la structure du projet.
+
+const assert = require("assert");
+const fs = require("fs");
+const path = require("path");
+
+const ROOT = path.join(__dirname, "..");
+const FIREFOX = path.join(ROOT, "sources");
+
+let passed = 0;
+let failed = 0;
+
+function test(name, fn) {
+  try {
+    fn();
+    console.log(`  ✓ ${name}`);
+    passed++;
+  } catch (e) {
+    console.log(`  ✗ ${name}`);
+    console.log(`    ${e.message}`);
+    failed++;
+  }
+}
+
+console.log("Structure du projet :");
+
+// ── Dossiers ──
+
+test("Dossier sources/ existe", () => {
+  assert.ok(fs.existsSync(FIREFOX));
+});
+
+test("Dossier sources/css/ existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "css")));
+});
+
+test("Dossier sources/icons/ existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "icons")));
+});
+
+test("Dossier sources/popup/ existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "popup")));
+});
+
+test("Dossier sources/prompts/ existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "prompts")));
+});
+
+// ── Manifest ──
+
+test("manifest.json existe et est du JSON valide", () => {
+  const content = fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8");
+  const manifest = JSON.parse(content);
+  assert.ok(manifest);
+});
+
+test("manifest.json — manifest_version = 2", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
+  assert.strictEqual(manifest.manifest_version, 2);
+});
+
+test("manifest.json — a un ID gecko", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
+  assert.ok(manifest.browser_specific_settings.gecko.id);
+});
+
+test("manifest.json — background script déclaré", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
+  assert.ok(manifest.background.scripts.includes("background.js"));
+});
+
+test("manifest.json — content scripts déclarés", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
+  const cs = manifest.content_scripts[0];
+  assert.ok(cs.js.length > 0);
+  assert.ok(cs.css.length > 0);
+});
+
+test("manifest.json — tous les JS content scripts existent", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
+  for (const jsFile of manifest.content_scripts[0].js) {
+    assert.ok(fs.existsSync(path.join(FIREFOX, jsFile)), `Manquant : ${jsFile}`);
+  }
+});
+
+test("manifest.json — tous les CSS content scripts existent", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
+  for (const cssFile of manifest.content_scripts[0].css) {
+    assert.ok(fs.existsSync(path.join(FIREFOX, cssFile)), `Manquant : ${cssFile}`);
+  }
+});
+
+test("manifest.json — options_ui déclaré", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
+  assert.ok(manifest.options_ui);
+  assert.ok(manifest.options_ui.page);
+});
+
+test("manifest.json — popup déclarée", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
+  assert.ok(manifest.browser_action.default_popup);
+});
+
+// ── Fichiers clés ──
+
+test("background.js existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "background.js")));
+});
+
+test("popup/popup.html existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "popup", "popup.html")));
+});
+
+test("popup/popup-settings.html existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "popup", "popup-settings.html")));
+});
+
+test("icons/icon.svg existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "icons", "icon.svg")));
+});
+
+test("icons/icon-48.png existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "icons", "icon-48.png")));
+});
+
+test("icons/icon-96.png existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "icons", "icon-96.png")));
+});
+
+// ── Scripts ──
+
+test("firefox-build.sh existe et est exécutable", () => {
+  const stat = fs.statSync(path.join(ROOT, "firefox-build.sh"));
+  assert.ok(stat.mode & 0o111, "firefox-build.sh n'est pas exécutable");
+});
+
+test("firefox-publish.sh existe et est exécutable", () => {
+  const stat = fs.statSync(path.join(ROOT, "firefox-publish.sh"));
+  assert.ok(stat.mode & 0o111, "firefox-publish.sh n'est pas exécutable");
+});
+
+test("install-firefox-dev.sh existe et est exécutable", () => {
+  const stat = fs.statSync(path.join(ROOT, "install-firefox-dev.sh"));
+  assert.ok(stat.mode & 0o111, "install-firefox-dev.sh n'est pas exécutable");
+});
+
+// ── Pas de content.css résiduel ──
+
+test("content.css absent (découpé en css/)", () => {
+  assert.ok(!fs.existsSync(path.join(FIREFOX, "content.css")), "content.css ne devrait plus exister");
+});
+
+console.log(`\n${passed} passé(s), ${failed} échoué(s)`);
+process.exit(failed > 0 ? 1 : 0);

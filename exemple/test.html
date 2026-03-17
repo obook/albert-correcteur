@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Test Albert Correcteur</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      padding: 0 20px;
+      color: #333;
+    }
+    h1 { font-size: 20px; }
+    label { display: block; margin: 20px 0 6px; font-weight: 600; }
+    textarea, input[type="text"], [contenteditable] {
+      width: 100%;
+      padding: 10px;
+      font-size: 14px;
+      font-family: inherit;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    textarea { height: 120px; resize: vertical; }
+    [contenteditable] {
+      min-height: 80px;
+      background: #fff;
+    }
+    .section { margin-bottom: 30px; }
+  </style>
+</head>
+<body>
+  <h1>Test Albert Correcteur</h1>
+
+  <div class="section">
+    <label for="ta1">Textarea (texte avec erreurs)</label>
+    <textarea id="ta1">Bonnjour a tous ! Je suis contant de vous revoir. Cet exemple et fait pour tester l'extention Albert.</textarea>
+  </div>
+
+  <div class="section">
+    <label for="ta2">Textarea (vide)</label>
+    <textarea id="ta2"></textarea>
+  </div>
+
+  <div class="section">
+    <label for="input1">Input text</label>
+    <input type="text" id="input1" value="Il a manger tout les gateaux.">
+  </div>
+
+  <div class="section">
+    <label>Contenteditable (FR)</label>
+    <div contenteditable="true">Je pence que sa va marcher. Les faute d'ortographe seront detectées.</div>
+  </div>
+
+  <h1>Test multilingue</h1>
+
+  <div class="section">
+    <label for="ta-en">Anglais (erreurs)</label>
+    <textarea id="ta-en">I was very hapyy to see that the informations was correct. He don't know what happend yesterday.</textarea>
+  </div>
+
+  <div class="section">
+    <label for="ta-es">Espagnol (erreurs)</label>
+    <textarea id="ta-es">Ayer yo fue al mercado y compré mucho frutas. El niño esta muy contento de haver llegado.</textarea>
+  </div>
+
+  <div class="section">
+    <label for="ta-de">Allemand (erreurs)</label>
+    <textarea id="ta-de">Ich habe gestern ein sehr gutes Buch gelest. Die Kinder sind in der Schule und sie lernt viel.</textarea>
+  </div>
+</body>
+</html>

@@ -30,11 +30,12 @@ Extension Firefox de correction orthographique et grammaticale française, propu
 
 1. Ouvrir `about:debugging#/runtime/this-firefox` dans Firefox
 2. Cliquer sur "Charger un module temporaire…"
-3. Sélectionner le fichier `firefox/manifest.json`
+3. Sélectionner le fichier `sources/manifest.json`
 
 ### Installation persistante (Firefox Developer Edition)
 
 ```bash
+# Installation de Firefox Developer Edition
 sudo ./install-firefox-dev.sh
 ```
 
@@ -42,6 +43,16 @@ Puis dans Firefox Developer Edition :
 1. Aller à `about:config` → passer `xpinstall.signatures.required` à `false`
 2. Aller à `about:addons` → roue dentée → "Installer un module depuis un fichier"
 3. Sélectionner `firefox-release/albert-correcteur.xpi`
+
+### Recharger après modification
+
+Après avoir recompilé le `.xpi` avec `./firefox-build.sh`, il n'est pas nécessaire de désinstaller l'extension :
+
+1. Aller à `about:addons`
+2. Roue dentée → "Installer un module depuis un fichier"
+3. Sélectionner le nouveau `albert-correcteur.xpi`
+
+Firefox détecte le même ID et met à jour l'extension en conservant la configuration.
 
 ### Depuis le fichier .xpi
 
@@ -79,23 +90,40 @@ Le fichier `firefox-release/albert-correcteur.xpi` est généré. L'installation
 
 ```
 albert-ext/
-├── firefox/                  ← sources de l'extension
+├── sources/                  ← sources de l'extension
 │   ├── manifest.json         ← manifeste Firefox (Manifest V2)
-│   ├── background.js         ← appels API Albert (chat/completions)
+│   ├── background.js         ← appels API Albert, détection de langue
 │   ├── albert-state.js       ← configuration et état partagé (namespace Albert)
-│   ├── albert-utils.js       ← fonctions utilitaires (détection champs, éditeurs)
+│   ├── albert-utils.js       ← fonctions utilitaires (détection champs, dictionnaire)
 │   ├── albert-badge.js       ← gestion du badge (icône dans le coin du champ)
 │   ├── albert-check.js       ← vérification via l'API (debounce, cycle, rate limit)
 │   ├── albert-render.js      ← rendu des corrections (overlay, contenteditable)
-│   ├── albert-popup.js       ← popup de suggestion
+│   ├── albert-popup.js       ← popup de correction (navigation, modes, thèmes)
 │   ├── albert-apply.js       ← application des corrections dans le texte
 │   ├── albert-main.js        ← point d'entrée (scan, observer, démarrage)
-│   ├── content.css           ← styles des soulignements et popups
+│   ├── css/                  ← styles découpés
+│   │   ├── badge.css         ← icône Albert
+│   │   ├── overlay.css       ← soulignements d'erreurs
+│   │   ├── popup-dark.css    ← popup thème sombre
+│   │   └── popup-light.css   ← popup thème clair
+│   ├── prompts/              ← prompts éditables
+│   │   ├── correction.txt
+│   │   └── reformulation.txt
 │   ├── icons/                ← logo Albert (SVG + PNG)
 │   └── popup/                ← interface de configuration
 │       ├── popup.html
 │       ├── popup.css
-│       └── popup.js
+│       ├── popup.js
+│       ├── popup-status.js
+│       ├── popup-models.js
+│       ├── popup-limits.js
+│       ├── popup-settings.html
+│       ├── popup-settings.css
+│       └── popup-settings.js
+├── tests/                    ← tests unitaires
+│   ├── run-all.sh
+│   └── test-*.js
+├── exemple/                  ← page HTML de test
 ├── firefox-release/          ← extension packagée (.xpi)
 ├── firefox-build.sh          ← script de packaging
 ├── firefox-publish.sh        ← script de publication sur addons.mozilla.org

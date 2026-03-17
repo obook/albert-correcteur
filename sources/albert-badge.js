@@ -5,7 +5,10 @@
 // Crée ou récupère le badge pour un champ de saisie.
 Albert.ensureBadge = function (el) {
   const state = Albert.getOrCreateState(el);
-  if (state.badge && document.contains(state.badge)) return state.badge;
+  if (state.badge && document.contains(state.badge)) {
+    Albert.updateBadgeVisibility(el, state.badge);
+    return state.badge;
+  }
 
   const badge = document.createElement("div");
   badge.className = "albert-badge";
@@ -22,6 +25,7 @@ Albert.ensureBadge = function (el) {
   }
   parent.appendChild(badge);
   Albert.positionBadge(el, badge);
+  Albert.updateBadgeVisibility(el, badge);
 
   badge.addEventListener("click", (e) => {
     e.preventDefault();
@@ -31,6 +35,12 @@ Albert.ensureBadge = function (el) {
 
   state.badge = badge;
   return badge;
+};
+
+// Affiche ou masque le badge selon que le champ est vide ou non.
+Albert.updateBadgeVisibility = function (el, badge) {
+  const text = Albert.getTextContent(el);
+  badge.style.display = text.trim().length > 0 ? "flex" : "none";
 };
 
 // Positionne le badge dans le coin inférieur droit du champ.

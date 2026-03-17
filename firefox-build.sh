@@ -1,15 +1,15 @@
 #!/bin/bash
 # Construit le fichier .xpi pour installation directe dans Firefox.
-# Usage : ./build.sh
+# Usage : ./firefox-build.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-SRC_DIR="$SCRIPT_DIR/firefox"
+SRC_DIR="$SCRIPT_DIR/sources"
 OUT_DIR="$SCRIPT_DIR/firefox-release"
 OUT="$OUT_DIR/albert-correcteur.xpi"
 
 # Vérifier que le dossier source existe
 if [ ! -d "$SRC_DIR" ]; then
-    echo "Erreur : le dossier firefox/ est introuvable."
+    echo "Erreur : le dossier sources/ est introuvable."
     exit 1
 fi
 

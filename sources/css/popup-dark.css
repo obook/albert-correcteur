@@ -1,0 +1,245 @@
+/* ── Popup de suggestion (thème sombre — par défaut) ── */
+.albert-popup {
+  position: fixed;
+  z-index: 2147483647;
+  background: #1e1e2e;
+  border: 1px solid #3a3a4a;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  max-width: 380px;
+  min-width: 240px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  color: #e0e0e0;
+  line-height: 1.4;
+  overflow: hidden;
+}
+
+/* ── Header ── */
+.albert-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #3a3a4a;
+  background: #272738;
+}
+
+.albert-popup-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.albert-popup-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.albert-popup-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* Menu mode (Correcteur / Reformuler) */
+.albert-popup-mode-wrap {
+  position: relative;
+}
+
+.albert-popup-mode-btn {
+  background: none;
+  border: none;
+  color: #e0e0e0;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.albert-popup-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.albert-popup-chevron {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.albert-popup-mode-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background: #272738;
+  border: 1px solid #3a3a4a;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  min-width: 160px;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.albert-popup-mode-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.albert-popup-mode-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.albert-popup-mode-item.active {
+  color: #fff;
+}
+
+.albert-popup-check {
+  color: #6cb6ff;
+  font-size: 14px;
+}
+
+/* Poignée de déplacement */
+.albert-popup-handle {
+  cursor: grab;
+  color: #888;
+  font-size: 16px;
+  padding: 0 4px;
+  user-select: none;
+  letter-spacing: 2px;
+}
+
+.albert-popup-handle:hover {
+  color: #bbb;
+}
+
+/* Bouton fermer */
+.albert-popup-close {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.albert-popup-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Corps ── */
+.albert-popup-body {
+  padding: 10px 14px;
+}
+
+.albert-popup-msg-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.albert-popup-message {
+  color: #ccc;
+  flex: 1;
+}
+
+.albert-popup-ignore-rule {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.albert-popup-ignore-rule:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.albert-popup-extract {
+  color: #aaa;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.albert-popup-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.albert-popup-suggestion {
+  display: inline-block;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.albert-popup-suggestion:hover {
+  background: #2563eb;
+}
+
+.albert-popup-dismiss {
+  display: inline-block;
+  background: none;
+  color: #999;
+  border: 1px solid #4a4a5a;
+  border-radius: 4px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.albert-popup-dismiss:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ccc;
+}
+
+/* ── Footer : navigation ── */
+.albert-popup-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-top: 1px solid #3a3a4a;
+  background: #272738;
+}
+
+.albert-popup-nav {
+  background: none;
+  border: none;
+  color: #6cb6ff;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: inherit;
+}
+
+.albert-popup-nav:hover {
+  background: rgba(255, 255, 255, 0.08);
+}

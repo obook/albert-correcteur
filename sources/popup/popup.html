@@ -29,10 +29,20 @@
     <div id="status" class="status"></div>
   </form>
 
+  <details id="limits-section" class="limits-section" style="display: none;">
+    <summary>Limites du compte</summary>
+    <div id="limits-info" class="limits-info"></div>
+  </details>
+
   <div class="footer">
+    <a href="#" id="open-settings">Paramètres</a>
+    <span class="footer-sep">·</span>
     <a href="https://albert.sites.beta.gouv.fr/" target="_blank">Obtenir une clé API</a>
   </div>
 
+  <script src="popup-status.js"></script>
+  <script src="popup-models.js"></script>
+  <script src="popup-limits.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

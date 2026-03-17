@@ -16,7 +16,25 @@ Albert.attachField = function (el) {
   Albert.trackedFields.add(el);
   Albert.ensureBadge(el);
 
-  el.addEventListener("input", () => Albert.scheduleCheck(el));
+  el.addEventListener("input", () => {
+    const st = Albert.getOrCreateState(el);
+    if (st.badge) Albert.updateBadgeVisibility(el, st.badge);
+
+    // Si c'est une correction appliquée par Albert, ne pas tout effacer
+    if (Albert.applyingCorrection) return;
+
+    // Saisie utilisateur : revenir à l'état initial
+    if (st.badge) {
+      st.badge.classList.remove("albert-has-errors");
+      st.badge.title = "Albert Correcteur";
+    }
+    if (st.overlay) {
+      st.overlay.remove();
+      st.overlay = null;
+    }
+    Albert.closePopup();
+    Albert.scheduleCheck(el);
+  });
   el.addEventListener("focus", () => {
     const badge = Albert.ensureBadge(el);
     Albert.positionBadge(el, badge);
@@ -30,8 +48,20 @@ Albert.scanFields = function () {
 
 // MutationObserver avec debounce pour détecter les nouveaux champs
 // ajoutés dynamiquement (SPA, modales, etc.) sans ralentir la page.
+// Ignore les mutations causées par les propres éléments d'Albert.
 let scanTimer = null;
-const observer = new MutationObserver(() => {
+const observer = new MutationObserver((mutations) => {
+  const isAlbertOnly = mutations.every((m) => {
+    for (const node of m.addedNodes) {
+      if (node.nodeType === Node.ELEMENT_NODE && node.className && typeof node.className === "string" && node.className.startsWith("albert-")) {
+        continue;
+      }
+      return false;
+    }
+    return m.addedNodes.length > 0;
+  });
+  if (isAlbertOnly) return;
+
   clearTimeout(scanTimer);
   scanTimer = setTimeout(Albert.scanFields, Albert.SCAN_DEBOUNCE_MS);
 });
