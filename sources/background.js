@@ -121,7 +121,8 @@ async function checkText(text, mode) {
     if (!response.ok) {
       const detail = await response.text();
       if (response.status === 429) {
-        return { error: "Limite de débit dépassée. Réessayez dans quelques secondes." };
+        const retryAfter = parseInt(response.headers.get("Retry-After"), 10) || 30;
+        return { error: `Limite de débit dépassée. Pause de ${retryAfter}s.`, retryAfter };
       }
       return { error: `Erreur API (${response.status}) : ${detail}` };
     }

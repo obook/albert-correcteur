@@ -38,6 +38,14 @@
   opacity: 1;
 }
 
+.albert-badge.albert-rate-limited {
+  opacity: 1;
+}
+
+.albert-badge.albert-rate-limited img {
+  filter: grayscale(1) opacity(0.5);
+}
+
 @keyframes albert-spin {
   0%   { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }

@@ -40,6 +40,7 @@
         "albert-render.js",
         "albert-popup.js",
         "albert-apply.js",
+        "toast/albert-toast.js",
         "albert-check.js",
         "albert-main.js"
       ],
@@ -47,7 +48,8 @@
         "css/badge.css",
         "css/overlay.css",
         "css/popup-dark.css",
-        "css/popup-light.css"
+        "css/popup-light.css",
+        "toast/toast.css"
       ],
       "run_at": "document_idle",
       "all_frames": true

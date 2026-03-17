@@ -1,0 +1,57 @@
+/* ── Toast de notification ── */
+.albert-toast {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #1e1e2e;
+  color: #e0e0e0;
+  border: 1px solid #3a3a4a;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  padding: 10px 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  max-width: 360px;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+
+.albert-toast.albert-toast-visible {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.albert-toast-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.albert-toast-message {
+  flex: 1;
+}
+
+.albert-toast-close {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.albert-toast-close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}

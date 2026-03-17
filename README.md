@@ -106,6 +106,9 @@ albert-ext/
 │   │   ├── overlay.css       ← soulignements d'erreurs
 │   │   ├── popup-dark.css    ← popup thème sombre
 │   │   └── popup-light.css   ← popup thème clair
+│   ├── toast/                ← notifications toast
+│   │   ├── albert-toast.js   ← affichage du toast
+│   │   └── toast.css         ← style du toast
 │   ├── prompts/              ← prompts éditables
 │   │   ├── correction.txt
 │   │   └── reformulation.txt

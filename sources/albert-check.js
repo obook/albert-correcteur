@@ -51,6 +51,34 @@ Albert.recordRequest = function () {
   Albert.requestCountToday++;
 };
 
+// Affiche un avertissement de limite sur les badges et via un toast.
+Albert.showRateLimitWarning = function (el, message) {
+  // Griser tous les badges
+  for (const field of Albert.trackedFields) {
+    const st = Albert.getOrCreateState(field);
+    if (st.badge) {
+      st.badge.classList.add("albert-rate-limited");
+      st.badge.title = message;
+    }
+  }
+
+  // Afficher le toast
+  const delay = /(\d+)s/.exec(message);
+  const sec = delay ? parseInt(delay[1], 10) : 30;
+  Albert.showToast(message, sec);
+
+  // Retirer l'état visuel après la pause
+  setTimeout(() => {
+    for (const field of Albert.trackedFields) {
+      const st = Albert.getOrCreateState(field);
+      if (st.badge) {
+        st.badge.classList.remove("albert-rate-limited");
+        st.badge.title = "Albert Correcteur";
+      }
+    }
+  }, sec * 1000);
+};
+
 // Programme une vérification après un délai (debounce).
 Albert.scheduleCheck = function (el) {
   const state = Albert.getOrCreateState(el);
@@ -76,8 +104,8 @@ Albert.triggerCheck = async function (el) {
   const limitMsg = Albert.checkRateLimit();
   if (limitMsg) {
     console.warn("[Albert]", limitMsg);
+    Albert.showRateLimitWarning(el, limitMsg);
     Albert.rateLimited = true;
-    // Réessayer dans 60s si c'est une limite par minute
     const delay = limitMsg.includes("jour") ? 3600000 : 60000;
     setTimeout(() => { Albert.rateLimited = false; }, delay);
     return;
@@ -90,9 +118,11 @@ Albert.triggerCheck = async function (el) {
     const response = await browser.runtime.sendMessage({ type: "check", text, mode: Albert.mode });
     if (response.error) {
       console.warn("[Albert]", response.error);
-      if (response.error.includes("Limite de débit")) {
+      if (response.retryAfter || response.error.includes("Limite de débit") || response.error.includes("Pause")) {
+        const delay = (response.retryAfter || 30) * 1000;
         Albert.rateLimited = true;
-        setTimeout(() => { Albert.rateLimited = false; }, 30000);
+        Albert.showRateLimitWarning(el, response.error);
+        setTimeout(() => { Albert.rateLimited = false; }, delay);
       }
       return;
     }
