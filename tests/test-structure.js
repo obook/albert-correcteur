@@ -119,12 +119,14 @@ test("icons/icon.svg existe", () => {
   assert.ok(fs.existsSync(path.join(FIREFOX, "icons", "icon.svg")));
 });
 
-test("icons/icon-48.png existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "icons", "icon-48.png")));
+test("icons/icon-ok.svg existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "icons", "icon-ok.svg")));
 });
 
-test("icons/icon-96.png existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "icons", "icon-96.png")));
+test("Pas de PNG résiduels dans icons/", () => {
+  const icons = fs.readdirSync(path.join(FIREFOX, "icons"));
+  const pngs = icons.filter((f) => f.endsWith(".png"));
+  assert.strictEqual(pngs.length, 0, `PNG résiduels : ${pngs.join(", ")}`);
 });
 
 // ── Scripts ──
@@ -144,10 +146,71 @@ test("install-firefox-dev.sh existe et est exécutable", () => {
   assert.ok(stat.mode & 0o111, "install-firefox-dev.sh n'est pas exécutable");
 });
 
-// ── Pas de content.css résiduel ──
+// ── Dossier toast ──
+
+test("Dossier sources/toast/ existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "toast")));
+});
+
+test("toast/albert-toast.js existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "toast", "albert-toast.js")));
+});
+
+test("toast/toast.css existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "toast", "toast.css")));
+});
+
+// ── Manifest : permissions ──
+
+test("manifest.json — permission contextMenus", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
+  assert.ok(manifest.permissions.includes("contextMenus"), "Permission contextMenus manquante");
+});
+
+test("manifest.json — permission storage", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
+  assert.ok(manifest.permissions.includes("storage"), "Permission storage manquante");
+});
+
+// ── Manifest : icônes SVG uniquement ──
+
+test("manifest.json — icônes pointent vers des SVG", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
+  for (const [size, file] of Object.entries(manifest.icons)) {
+    assert.ok(file.endsWith(".svg"), `Icône ${size} n'est pas un SVG : ${file}`);
+  }
+  assert.ok(manifest.browser_action.default_icon.endsWith(".svg"), "default_icon n'est pas un SVG");
+});
+
+// ── Fichiers résiduels ──
 
 test("content.css absent (découpé en css/)", () => {
   assert.ok(!fs.existsSync(path.join(FIREFOX, "content.css")), "content.css ne devrait plus exister");
+});
+
+test("Pas de fichier popup.js résiduel dans firefox/", () => {
+  assert.ok(!fs.existsSync(path.join(ROOT, "firefox")), "Le dossier firefox/ ne devrait plus exister");
+});
+
+// ── Page de test ──
+
+test("Dossier exemple/ existe", () => {
+  assert.ok(fs.existsSync(path.join(ROOT, "exemple")));
+});
+
+test("exemple/test.html existe", () => {
+  assert.ok(fs.existsSync(path.join(ROOT, "exemple", "test.html")));
+});
+
+// ── Tests ──
+
+test("Dossier tests/ existe", () => {
+  assert.ok(fs.existsSync(path.join(ROOT, "tests")));
+});
+
+test("tests/run-all.sh existe et est exécutable", () => {
+  const stat = fs.statSync(path.join(ROOT, "tests", "run-all.sh"));
+  assert.ok(stat.mode & 0o111, "run-all.sh n'est pas exécutable");
 });
 
 console.log(`\n${passed} passé(s), ${failed} échoué(s)`);

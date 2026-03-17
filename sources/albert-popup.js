@@ -308,4 +308,157 @@ Albert.closePopup = function () {
   }
 };
 
-// Le popup ne se ferme que via le bouton fermer (croix).
+// ── Popup de reformulation (résultat du menu contextuel) ──
+
+Albert.showReformulationPopup = function (originalText, suggestions) {
+  Albert.closePopup();
+
+  const themeClass = Albert.getPopupThemeClass();
+  const popup = document.createElement("div");
+  popup.className = "albert-popup" + (themeClass ? " " + themeClass : "");
+
+  // Header
+  const header = document.createElement("div");
+  header.className = "albert-popup-header";
+
+  const headerLeft = document.createElement("div");
+  headerLeft.className = "albert-popup-header-left";
+
+  const icon = document.createElement("img");
+  icon.src = Albert.ICON_URL;
+  icon.alt = "Albert";
+  icon.className = "albert-popup-icon";
+  headerLeft.appendChild(icon);
+
+  const title = document.createElement("span");
+  title.className = "albert-popup-mode-btn";
+  title.textContent = "Reformuler";
+  title.style.cursor = "default";
+  headerLeft.appendChild(title);
+
+  header.appendChild(headerLeft);
+
+  const headerRight = document.createElement("div");
+  headerRight.className = "albert-popup-header-right";
+
+  const handle = document.createElement("div");
+  handle.className = "albert-popup-handle";
+  handle.textContent = "⠿";
+  handle.title = "Déplacer";
+  headerRight.appendChild(handle);
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "albert-popup-close";
+  closeBtn.textContent = "✕";
+  closeBtn.addEventListener("click", () => Albert.closePopup());
+  headerRight.appendChild(closeBtn);
+
+  header.appendChild(headerRight);
+  popup.appendChild(header);
+
+  // Corps
+  const body = document.createElement("div");
+  body.className = "albert-popup-body";
+
+  if (suggestions.length === 0) {
+    const msg = document.createElement("div");
+    msg.className = "albert-popup-message";
+    msg.textContent = "Aucune reformulation proposée.";
+    body.appendChild(msg);
+  }
+
+  suggestions.forEach((s) => {
+    const block = document.createElement("div");
+    block.style.marginBottom = "8px";
+
+    if (s.message) {
+      const msg = document.createElement("div");
+      msg.className = "albert-popup-message";
+      msg.textContent = s.message;
+      block.appendChild(msg);
+    }
+
+    const sugBox = document.createElement("div");
+    sugBox.className = "albert-popup-suggestions";
+
+    (s.suggestions || []).forEach((sug) => {
+      const btn = document.createElement("button");
+      btn.className = "albert-popup-suggestion";
+      btn.textContent = sug;
+      btn.addEventListener("click", () => {
+        Albert.replaceSelection(sug);
+        Albert.closePopup();
+      });
+      sugBox.appendChild(btn);
+    });
+    block.appendChild(sugBox);
+    body.appendChild(block);
+  });
+
+  popup.appendChild(body);
+  document.body.appendChild(popup);
+
+  // Positionner près de la sélection
+  const sel = window.getSelection();
+  if (sel.rangeCount > 0) {
+    const range = sel.getRangeAt(0);
+    const rect = range.getBoundingClientRect();
+    popup.style.top = (rect.bottom + 4) + "px";
+    popup.style.left = rect.left + "px";
+
+    requestAnimationFrame(() => {
+      const popupRect = popup.getBoundingClientRect();
+      if (popupRect.right > window.innerWidth - 10) {
+        popup.style.left = (window.innerWidth - popupRect.width - 10) + "px";
+      }
+      if (popupRect.bottom > window.innerHeight - 10) {
+        popup.style.top = (rect.top - popupRect.height - 4) + "px";
+      }
+    });
+  } else {
+    // Centrer si pas de sélection visible
+    popup.style.top = "20%";
+    popup.style.left = "50%";
+    popup.style.transform = "translateX(-50%)";
+  }
+
+  Albert.initPopupDrag(popup, handle);
+  Albert.activePopup = popup;
+};
+
+// Remplace la sélection courante par le texte donné.
+Albert.replaceSelection = function (text) {
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return;
+
+  const range = sel.getRangeAt(0);
+  const activeEl = document.activeElement;
+
+  // Textarea / Input
+  if (activeEl && (activeEl.tagName === "TEXTAREA" || activeEl.tagName === "INPUT")) {
+    const start = activeEl.selectionStart;
+    const end = activeEl.selectionEnd;
+    activeEl.value = activeEl.value.slice(0, start) + text + activeEl.value.slice(end);
+    activeEl.selectionStart = activeEl.selectionEnd = start + text.length;
+    activeEl.dispatchEvent(new Event("input", { bubbles: true }));
+    return;
+  }
+
+  // Contenteditable
+  range.deleteContents();
+  range.insertNode(document.createTextNode(text));
+  sel.collapseToEnd();
+};
+
+// Écoute les résultats de reformulation depuis le background script.
+browser.runtime.onMessage.addListener((message) => {
+  if (message.type !== "reformulateResult") return;
+
+  if (message.result.error) {
+    Albert.showToast(message.result.error, 5);
+    return;
+  }
+
+  const suggestions = message.result.corrections || [];
+  Albert.showReformulationPopup(message.originalText, suggestions);
+});

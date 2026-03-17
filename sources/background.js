@@ -147,6 +147,28 @@ async function checkText(text, mode) {
   }
 }
 
+// ── Menu contextuel : Reformuler avec Albert ──
+
+browser.contextMenus.create({
+  id: "albert-reformulate",
+  title: "Reformuler avec Albert",
+  contexts: ["selection"],
+});
+
+browser.contextMenus.onClicked.addListener(async (info, tab) => {
+  if (info.menuItemId !== "albert-reformulate") return;
+  const text = info.selectionText;
+  if (!text || text.trim().length < 3) return;
+
+  const result = await checkText(text, "reformulation");
+  // Envoyer le résultat au content script de l'onglet actif
+  browser.tabs.sendMessage(tab.id, {
+    type: "reformulateResult",
+    originalText: text,
+    result,
+  });
+});
+
 // Invalider le cache des limites quand la config change (clé API, modèle, URL)
 browser.storage.onChanged.addListener((changes) => {
   if (changes.apiKey || changes.model || changes.apiBase) {
