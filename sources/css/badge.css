@@ -38,6 +38,10 @@
   opacity: 1;
 }
 
+.albert-badge.albert-no-errors {
+  opacity: 1;
+}
+
 .albert-badge.albert-rate-limited {
   opacity: 1;
 }

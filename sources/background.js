@@ -122,7 +122,18 @@ async function checkText(text, mode) {
       const detail = await response.text();
       if (response.status === 429) {
         const retryAfter = parseInt(response.headers.get("Retry-After"), 10) || 30;
-        return { error: `Limite de débit dépassée. Pause de ${retryAfter}s.`, retryAfter };
+        // Extraire le type de limite depuis la réponse API si disponible
+        let limitType = "";
+        try {
+          const err = JSON.parse(detail);
+          const msg = (err.detail || err.message || "").toLowerCase();
+          if (msg.includes("rpm") || msg.includes("requests per minute")) limitType = "requêtes/minute (rpm)";
+          else if (msg.includes("rpd") || msg.includes("requests per day")) limitType = "requêtes/jour (rpd)";
+          else if (msg.includes("tpm") || msg.includes("tokens per minute")) limitType = "tokens/minute (tpm)";
+          else if (msg.includes("tpd") || msg.includes("tokens per day")) limitType = "tokens/jour (tpd)";
+        } catch { /* réponse non-JSON */ }
+        const desc = limitType ? `Limite ${limitType} dépassée.` : "Limite de débit dépassée.";
+        return { error: `${desc} Pause de ${retryAfter}s.`, retryAfter };
       }
       return { error: `Erreur API (${response.status}) : ${detail}` };
     }

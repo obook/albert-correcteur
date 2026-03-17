@@ -10,8 +10,9 @@ window.Albert = {
   CYCLE_INTERVAL_MS: 30000,
   SCAN_DEBOUNCE_MS: 500,
 
-  // URL du logo embarqué dans l'extension
+  // URLs des logos embarqués dans l'extension
   ICON_URL: browser.runtime.getURL("icons/icon.svg"),
+  ICON_OK_URL: browser.runtime.getURL("icons/icon-ok.svg"),
 
   // ── État global ──
   fieldStates: new WeakMap(),

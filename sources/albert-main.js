@@ -25,7 +25,9 @@ Albert.attachField = function (el) {
 
     // Saisie utilisateur : revenir à l'état initial
     if (st.badge) {
-      st.badge.classList.remove("albert-has-errors");
+      st.badge.classList.remove("albert-has-errors", "albert-no-errors");
+      const img = st.badge.querySelector("img");
+      if (img) img.src = Albert.ICON_URL;
       st.badge.title = "Albert Correcteur";
     }
     if (st.overlay) {

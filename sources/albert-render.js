@@ -39,10 +39,15 @@ Albert.renderCorrections = function (el) {
   }
 
   if (state.badge) {
+    const hasErrors = state.corrections.length > 0;
     const langLabel = { fr: "FR", en: "EN", es: "ES", de: "DE" }[state.lang] || "";
-    state.badge.classList.toggle("albert-has-errors", state.corrections.length > 0);
     const langSuffix = langLabel ? ` [${langLabel}]` : "";
-    state.badge.title = state.corrections.length > 0
+    state.badge.classList.toggle("albert-has-errors", hasErrors);
+    state.badge.classList.toggle("albert-no-errors", !hasErrors);
+    // Changer l'icône selon l'état
+    const img = state.badge.querySelector("img");
+    if (img) img.src = hasErrors ? Albert.ICON_URL : Albert.ICON_OK_URL;
+    state.badge.title = hasErrors
       ? `${state.corrections.length} erreur${state.corrections.length > 1 ? "s" : ""} trouvée${state.corrections.length > 1 ? "s" : ""}${langSuffix}`
       : `Albert Correcteur — Aucune erreur${langSuffix}`;
   }

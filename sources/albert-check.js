@@ -34,12 +34,12 @@ Albert.checkRateLimit = function () {
   // Vérifier rpm (requêtes par minute)
   if (limits.rpm && Albert.requestTimestamps.length >= limits.rpm) {
     const waitSec = Math.ceil((60000 - (now - Albert.requestTimestamps[0])) / 1000);
-    return `Limite atteinte (${limits.rpm} req/min). Pause ${waitSec}s.`;
+    return `Limite requêtes/minute (rpm) atteinte : ${limits.rpm} max. Pause ${waitSec}s.`;
   }
 
   // Vérifier rpd (requêtes par jour)
   if (limits.rpd && Albert.requestCountToday >= limits.rpd) {
-    return `Limite journalière atteinte (${limits.rpd} req/jour). Réessayez demain.`;
+    return `Limite requêtes/jour (rpd) atteinte : ${limits.rpd} max. Réessayez demain.`;
   }
 
   return null;
