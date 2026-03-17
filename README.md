@@ -11,7 +11,7 @@
 ## Fonctionnalités
 
 - Vérification automatique 3 secondes après l'arrêt de la saisie
-- Vérification cyclique de tous les champs de la page (priorité au champ actif)
+- Vérification du champs de saisie dès le focus
 - Vérification manuelle en cliquant sur le badge Albert dans le coin du champ
 - Soulignements colorés selon le type d'erreur :
   - **Rouge** — orthographe
@@ -26,10 +26,10 @@
 - Respect de la limite API (backoff automatique en cas de rate limit)
 - **Reformulation** via le menu contextuel (clic droit dans un champ de saisie)
 - **Traduction** via le menu contextuel (clic droit sur n'importe quelle sélection de texte)
-  - Langues : français, anglais, espagnol, allemand
+  - Langues de traduction : français, anglais, espagnol, allemand
+  - Détection automatique de la langue source
   - Traduction automatique à l'ouverture dans la dernière langue choisie
   - Bouton "Copier" pour récupérer le résultat
-- Détection automatique de la langue source (FR, EN, ES, DE)
 
 ## Conformité RGPD
 
