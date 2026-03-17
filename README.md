@@ -4,7 +4,7 @@
 
 **Téléchargement** : [addons.mozilla.org (page développeur)](https://addons.mozilla.org/fr/developers/addon/a8876f404af94bbda3d2/versions)
 
-| Correction | Traduction |
+| Correction et reformulation | Traduction multi-langues |
 |:---:|:---:|
 | ![Correction](media/Screenshot_20260317_212610.png) | ![Traduction](media/Screenshot_20260317_212505.png) |
 
