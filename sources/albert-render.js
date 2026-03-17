@@ -72,7 +72,7 @@ Albert.renderOverlay = function (el, state) {
   Albert.syncOverlayStyle(el, overlay);
 
   const text = Albert.getTextContent(el);
-  overlay.innerHTML = Albert.buildHighlightedHTML(text, state.corrections);
+  Albert.buildHighlightedDOM(overlay, text, state.corrections);
 
   const parent = el.offsetParent || document.body;
   if (getComputedStyle(parent).position === "static") {
@@ -122,31 +122,31 @@ Albert.syncOverlayStyle = function (el, overlay) {
   overlay.style.overflowWrap = cs.overflowWrap || "break-word";
 };
 
-// Génère le HTML avec les erreurs soulignées.
-Albert.buildHighlightedHTML = function (text, corrections) {
+// Construit les nœuds DOM avec les erreurs soulignées dans le container.
+Albert.buildHighlightedDOM = function (container, text, corrections) {
+  container.textContent = "";
   const sorted = corrections
     .map((c, i) => ({ ...c, idx: i }))
     .sort((a, b) => a.offset - b.offset);
 
-  let html = "";
   let cursor = 0;
 
   for (const c of sorted) {
     if (c.offset < cursor) continue;
     if (c.offset > cursor) {
-      html += Albert.escapeHTML(text.slice(cursor, c.offset));
+      container.appendChild(document.createTextNode(text.slice(cursor, c.offset)));
     }
-    const errorText = text.slice(c.offset, c.offset + c.length);
-    const typeClass = `albert-error-${c.type || "grammar"}`;
-    html += `<span class="albert-error ${typeClass}" data-idx="${c.idx}">${Albert.escapeHTML(errorText)}</span>`;
+    const span = document.createElement("span");
+    span.className = `albert-error albert-error-${c.type || "grammar"}`;
+    span.dataset.idx = c.idx;
+    span.textContent = text.slice(c.offset, c.offset + c.length);
+    container.appendChild(span);
     cursor = c.offset + c.length;
   }
 
   if (cursor < text.length) {
-    html += Albert.escapeHTML(text.slice(cursor));
+    container.appendChild(document.createTextNode(text.slice(cursor)));
   }
-
-  return html;
 };
 
 // ── Contenteditable simple (pas d'éditeur riche) ──

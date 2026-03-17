@@ -41,14 +41,20 @@ async function fetchAndShowLimits() {
       }
     }
 
-    limitsInfo.innerHTML = "";
+    limitsInfo.textContent = "";
     for (const [type, value] of Object.entries(merged)) {
       const label = LIMIT_LABELS[type] || type;
       const display = value === null ? "illimité" : value.toLocaleString("fr-FR");
       const cls = value === null ? "limit-value unlimited" : "limit-value";
       const row = document.createElement("div");
       row.className = "limit-row";
-      row.innerHTML = `<span>${label}</span><span class="${cls}">${display}</span>`;
+      const labelSpan = document.createElement("span");
+      labelSpan.textContent = label;
+      const valueSpan = document.createElement("span");
+      valueSpan.className = cls;
+      valueSpan.textContent = display;
+      row.appendChild(labelSpan);
+      row.appendChild(valueSpan);
       limitsInfo.appendChild(row);
     }
     limitsSection.style.display = "block";

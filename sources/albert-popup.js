@@ -65,7 +65,11 @@ Albert.showPopup = function (el, correction, markEl) {
   const modeBtn = document.createElement("button");
   modeBtn.className = "albert-popup-mode-btn";
   modeBtn.textContent = Albert.mode === "correction" ? "Correcteur" : "Reformuler";
-  modeBtn.innerHTML += ' <span class="albert-popup-chevron">▾</span>';
+  const chevron = document.createElement("span");
+  chevron.className = "albert-popup-chevron";
+  chevron.textContent = "▾";
+  modeBtn.appendChild(document.createTextNode(" "));
+  modeBtn.appendChild(chevron);
 
   const modeMenu = document.createElement("div");
   modeMenu.className = "albert-popup-mode-menu";
@@ -80,7 +84,11 @@ Albert.showPopup = function (el, correction, markEl) {
     item.className = "albert-popup-mode-item";
     item.textContent = m.label;
     if (m.id === Albert.mode) {
-      item.innerHTML += ' <span class="albert-popup-check">✓</span>';
+      const check = document.createElement("span");
+      check.className = "albert-popup-check";
+      check.textContent = "✓";
+      item.appendChild(document.createTextNode(" "));
+      item.appendChild(check);
       item.classList.add("active");
     }
     item.addEventListener("click", (e) => {
@@ -88,7 +96,11 @@ Albert.showPopup = function (el, correction, markEl) {
       Albert.mode = m.id;
       modeMenu.style.display = "none";
       // Mettre à jour le bouton
-      modeBtn.innerHTML = m.label + ' <span class="albert-popup-chevron">▾</span>';
+      modeBtn.textContent = m.label + " ";
+      const chev = document.createElement("span");
+      chev.className = "albert-popup-chevron";
+      chev.textContent = "▾";
+      modeBtn.appendChild(chev);
       // Relancer la vérification si on change de mode
       const st = Albert.getOrCreateState(el);
       st.lastCheckedText = "";
@@ -145,7 +157,7 @@ Albert.showPopup = function (el, correction, markEl) {
   const ignoreBtn = document.createElement("button");
   ignoreBtn.className = "albert-popup-ignore-rule";
   ignoreBtn.title = "Désactiver la règle partout";
-  ignoreBtn.innerHTML = "⊘";
+  ignoreBtn.textContent = "⊘";
   ignoreBtn.addEventListener("click", async (e) => {
     e.stopPropagation();
     const text = Albert.getTextContent(el);
@@ -200,7 +212,7 @@ Albert.showPopup = function (el, correction, markEl) {
 
     const prevBtn = document.createElement("button");
     prevBtn.className = "albert-popup-nav albert-popup-nav-prev";
-    prevBtn.innerHTML = "← Précédent";
+    prevBtn.textContent = "← Précédent";
     prevBtn.title = "Précédent";
     prevBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -210,7 +222,7 @@ Albert.showPopup = function (el, correction, markEl) {
 
     const nextBtn = document.createElement("button");
     nextBtn.className = "albert-popup-nav albert-popup-nav-next";
-    nextBtn.innerHTML = "Suivant →";
+    nextBtn.textContent = "Suivant →";
     nextBtn.title = "Suivant";
     nextBtn.addEventListener("click", (e) => {
       e.stopPropagation();
