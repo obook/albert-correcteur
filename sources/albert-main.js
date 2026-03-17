@@ -69,4 +69,7 @@ const observer = new MutationObserver((mutations) => {
 // ── Démarrage ──
 Albert.scanFields();
 observer.observe(document.body, { childList: true, subtree: true });
+
+// Première vérification rapide (1s après le chargement), puis cycle régulier
+setTimeout(Albert.cycleCheckAll, 1000);
 setInterval(Albert.cycleCheckAll, Albert.CYCLE_INTERVAL_MS);
