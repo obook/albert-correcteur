@@ -123,10 +123,16 @@ test("icons/icon-ok.svg existe", () => {
   assert.ok(fs.existsSync(path.join(FIREFOX, "icons", "icon-ok.svg")));
 });
 
-test("Pas de PNG résiduels dans icons/", () => {
-  const icons = fs.readdirSync(path.join(FIREFOX, "icons"));
-  const pngs = icons.filter((f) => f.endsWith(".png"));
-  assert.strictEqual(pngs.length, 0, `PNG résiduels : ${pngs.join(", ")}`);
+test("icons/icon-48.png existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "icons", "icon-48.png")));
+});
+
+test("icons/icon-96.png existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "icons", "icon-96.png")));
+});
+
+test("icons/icon-128.png existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "icons", "icon-128.png")));
 });
 
 // ── Scripts ──
@@ -174,12 +180,12 @@ test("manifest.json — permission storage", () => {
 
 // ── Manifest : icônes SVG uniquement ──
 
-test("manifest.json — icônes pointent vers des SVG", () => {
+test("manifest.json — icônes pointent vers des PNG", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
   for (const [size, file] of Object.entries(manifest.icons)) {
-    assert.ok(file.endsWith(".svg"), `Icône ${size} n'est pas un SVG : ${file}`);
+    assert.ok(file.endsWith(".png"), `Icône ${size} n'est pas un PNG : ${file}`);
   }
-  assert.ok(manifest.browser_action.default_icon.endsWith(".svg"), "default_icon n'est pas un SVG");
+  assert.ok(manifest.browser_action.default_icon.endsWith(".png"), "default_icon n'est pas un PNG");
 });
 
 // ── Fichiers résiduels ──
