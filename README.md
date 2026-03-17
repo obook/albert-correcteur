@@ -2,6 +2,8 @@
 
 **Extension expérimentale** de correction orthographique et grammaticale française pour Firefox, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web et propose des corrections en un clic.
 
+**Téléchargement** : [addons.mozilla.org (page développeur)](https://addons.mozilla.org/fr/developers/addon/a8876f404af94bbda3d2/versions)
+
 ## Fonctionnalités
 
 - Vérification automatique 3 secondes après l'arrêt de la saisie
