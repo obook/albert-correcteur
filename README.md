@@ -69,7 +69,8 @@ Pour les `<textarea>`, `<input>` et les éditeurs riches (CKEditor, TinyMCE, etc
 
 Voir [ARCHITECTURE.md](ARCHITECTURE.md) pour l'arborescence, les flux et les détails techniques.
 
-## Licence du logo
+## Licences
 
-Le logo Albert est issu du projet [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Les contenus du site Albert sont proposés sous [licence Ouverte Etalab 2.0](https://github.com/etalab/licence-ouverte/blob/master/LO.md), qui autorise la réutilisation libre, y compris à des fins commerciales, sous réserve de mention de la source.
+- **Code source** : [licence MIT](LICENSE)
+- **Logo Albert** : issu du projet [Albert](https://albert.sites.beta.gouv.fr/) (DINUM), sous [licence Ouverte Etalab 2.0](https://github.com/etalab/licence-ouverte/blob/master/LO.md)
 
