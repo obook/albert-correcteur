@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Albert Correcteur",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Extension expérimentale de correction orthographique et grammaticale française propulsée par l'API Albert (DINUM).",
   "browser_specific_settings": {
     "gecko": {
@@ -26,11 +26,11 @@
   },
   "browser_action": {
     "default_icon": "icons/icon-48.png",
-    "default_popup": "popup/popup.html",
+    "default_popup": "popup-configuration/popup.html",
     "default_title": "Albert Correcteur"
   },
   "options_ui": {
-    "page": "popup/popup-settings.html",
+    "page": "popup-configuration/popup-settings.html",
     "open_in_tab": false
   },
   "background": {
@@ -44,7 +44,11 @@
         "albert-utils.js",
         "albert-badge.js",
         "albert-render.js",
-        "albert-popup.js",
+        "popup-contenu/albert-popup-common.js",
+        "popup-contenu/albert-popup-correction.js",
+        "popup-contenu/albert-popup-reformulation.js",
+        "popup-contenu/albert-popup-traduction.js",
+        "popup-contenu/albert-popup-messages.js",
         "albert-apply.js",
         "toast/albert-toast.js",
         "albert-check.js",

@@ -38,8 +38,12 @@ test("Dossier sources/icons/ existe", () => {
   assert.ok(fs.existsSync(path.join(FIREFOX, "icons")));
 });
 
-test("Dossier sources/popup/ existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "popup")));
+test("Dossier sources/popup-configuration/ existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "popup-configuration")));
+});
+
+test("Dossier sources/popup-contenu/ existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "popup-contenu")));
 });
 
 test("Dossier sources/prompts/ existe", () => {
@@ -108,11 +112,11 @@ test("background.js existe", () => {
 });
 
 test("popup/popup.html existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "popup", "popup.html")));
+  assert.ok(fs.existsSync(path.join(FIREFOX, "popup-configuration", "popup.html")));
 });
 
 test("popup/popup-settings.html existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "popup", "popup-settings.html")));
+  assert.ok(fs.existsSync(path.join(FIREFOX, "popup-configuration", "popup-settings.html")));
 });
 
 test("icons/icon.svg existe", () => {
