@@ -1,8 +1,12 @@
 # Albert Correcteur — Extension Firefox
 
-**Extension expérimentale** de correction orthographique et grammaticale française pour Firefox, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web et propose des corrections en un clic.
+**Extension expérimentale** de correction orthographique, grammaticale et de traduction pour Firefox, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web, propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné (français, anglais, espagnol, allemand).
 
 **Téléchargement** : [addons.mozilla.org (page développeur)](https://addons.mozilla.org/fr/developers/addon/a8876f404af94bbda3d2/versions)
+
+| Correction | Traduction |
+|:---:|:---:|
+| ![Correction](media/Screenshot_20260317_212610.png) | ![Traduction](media/Screenshot_20260317_212505.png) |
 
 ## Fonctionnalités
 
@@ -20,6 +24,12 @@
 - Injection dans les iframes (éditeurs intégrés)
 - Détection automatique des nouveaux champs ajoutés dynamiquement (SPA, etc.)
 - Respect de la limite API (backoff automatique en cas de rate limit)
+- **Reformulation** via le menu contextuel (clic droit dans un champ de saisie)
+- **Traduction** via le menu contextuel (clic droit sur n'importe quelle sélection de texte)
+  - Langues : français, anglais, espagnol, allemand
+  - Traduction automatique à l'ouverture dans la dernière langue choisie
+  - Bouton "Copier" pour récupérer le résultat
+- Détection automatique de la langue source (FR, EN, ES, DE)
 
 ## Conformité RGPD
 
@@ -36,45 +46,11 @@
 
 ## Installation
 
-### Chargement temporaire (développement)
+1. Télécharger le `.xpi` signé depuis [addons.mozilla.org](https://addons.mozilla.org/fr/developers/addon/a8876f404af94bbda3d2/versions)
+2. Dans Firefox : `about:addons` → roue dentée → "Installer un module depuis un fichier"
+3. Sélectionner le fichier `.xpi`
 
-1. Ouvrir `about:debugging#/runtime/this-firefox` dans Firefox
-2. Cliquer sur "Charger un module temporaire…"
-3. Sélectionner le fichier `sources/manifest.json`
-
-### Installation persistante (Firefox Developer Edition)
-
-```bash
-# Installation de Firefox Developer Edition
-sudo ./install-firefox-dev.sh
-```
-
-Puis dans Firefox Developer Edition :
-1. Aller à `about:config` → passer `xpinstall.signatures.required` à `false`
-2. Aller à `about:addons` → roue dentée → "Installer un module depuis un fichier"
-3. Sélectionner `firefox-release/albert-correcteur.xpi`
-
-### Recharger après modification
-
-Après avoir recompilé le `.xpi` avec `./firefox-build.sh`, il n'est pas nécessaire de désinstaller l'extension :
-
-1. Aller à `about:addons`
-2. Roue dentée → "Installer un module depuis un fichier"
-3. Sélectionner le nouveau `albert-correcteur.xpi`
-
-Firefox détecte le même ID et met à jour l'extension en conservant la configuration.
-
-### Depuis le fichier .xpi
-
-```bash
-./firefox-build.sh
-```
-
-Le fichier `firefox-release/albert-correcteur.xpi` est généré. L'installation directe du `.xpi` nécessite Firefox ESR, Developer Edition ou Nightly (les extensions non signées sont bloquées sur Firefox stable).
-
-### Publication sur addons.mozilla.org
-
-Voir [MOZILLA.md](MOZILLA.md).
+Pour le développement local avec Firefox Developer Edition, voir [FIREFOX-DEV.md](FIREFOX-DEV.md).
 
 ## Configuration
 

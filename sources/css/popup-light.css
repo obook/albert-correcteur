@@ -81,3 +81,15 @@
 .albert-theme-light .albert-popup-nav:hover {
   background: rgba(0, 0, 0, 0.04);
 }
+
+/* ── Traduction thème clair ── */
+.albert-theme-light .albert-popup-lang-select {
+  background: #fff;
+  border-color: #ddd;
+  color: #333;
+}
+
+.albert-theme-light .albert-popup-translation-result {
+  background: #f6f6f6;
+  color: #333;
+}

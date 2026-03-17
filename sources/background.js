@@ -47,6 +47,60 @@ async function buildPrompt(mode, lang) {
   return template.replace(/\{\{LANG\}\}/g, langName);
 }
 
+async function buildTranslationPrompt(langSource, langCible) {
+  const template = await loadPromptTemplate("traduction");
+  const srcName = LANG_NAMES[langSource] || "français";
+  const tgtName = LANG_NAMES[langCible] || "français";
+  return template.replace(/\{\{LANG_SOURCE\}\}/g, srcName).replace(/\{\{LANG_CIBLE\}\}/g, tgtName);
+}
+
+async function translateText(text, targetLang) {
+  const config = await loadConfig();
+  if (!config.apiKey) {
+    return { error: "Clé API non configurée." };
+  }
+
+  const langSource = detectLanguage(text);
+  const systemPrompt = await buildTranslationPrompt(langSource, targetLang);
+
+  try {
+    const body = {
+      model: config.model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: text },
+      ],
+      temperature: 0.1,
+      response_format: { type: "json_object" },
+    };
+
+    const response = await fetch(`${config.apiBase}/v1/chat/completions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${config.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const detail = await response.text();
+      if (response.status === 429) {
+        const retryAfter = parseInt(response.headers.get("Retry-After"), 10) || 30;
+        return { error: `Limite de débit dépassée. Pause de ${retryAfter}s.`, retryAfter };
+      }
+      return { error: `Erreur API (${response.status}) : ${detail}` };
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || "{}";
+    const parsed = JSON.parse(content);
+    return { translation: parsed.translation || "", langSource, langCible: targetLang };
+  } catch (err) {
+    return { error: `Erreur réseau : ${err.message}` };
+  }
+}
+
 async function loadConfig() {
   const result = await browser.storage.local.get(["apiKey", "apiBase", "model"]);
   return {
@@ -152,21 +206,31 @@ async function checkText(text, mode) {
 browser.contextMenus.create({
   id: "albert-reformulate",
   title: "Reformuler avec Albert",
+  contexts: ["editable"],
+});
+
+browser.contextMenus.create({
+  id: "albert-translate",
+  title: "Traduire avec Albert",
   contexts: ["selection"],
 });
 
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId !== "albert-reformulate") return;
   const text = info.selectionText;
   if (!text || text.trim().length < 3) return;
 
-  const result = await checkText(text, "reformulation");
-  // Envoyer le résultat au content script de l'onglet actif
-  browser.tabs.sendMessage(tab.id, {
-    type: "reformulateResult",
-    originalText: text,
-    result,
-  });
+  if (info.menuItemId === "albert-reformulate") {
+    const result = await checkText(text, "reformulation");
+    browser.tabs.sendMessage(tab.id, {
+      type: "reformulateResult",
+      originalText: text,
+      result,
+    });
+  }
+
+  if (info.menuItemId === "albert-translate") {
+    browser.tabs.sendMessage(tab.id, { type: "translateGetSelection" });
+  }
 });
 
 // Invalider le cache des limites quand la config change (clé API, modèle, URL)
@@ -189,6 +253,10 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   if (message.type === "getLimits") {
     fetchLimits().then(sendResponse);
+    return true;
+  }
+  if (message.type === "translate") {
+    translateText(message.text, message.targetLang).then(sendResponse);
     return true;
   }
 });

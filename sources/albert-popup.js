@@ -506,15 +506,218 @@ Albert.applyReformulation = function (originalText, replacement) {
   Albert.savedSelection = null;
 };
 
-// Écoute les résultats de reformulation depuis le background script.
-browser.runtime.onMessage.addListener((message) => {
-  if (message.type !== "reformulateResult") return;
+// ── Popup de traduction ──
 
-  if (message.result.error) {
-    Albert.showToast(message.result.error, 5);
+const TRANSLATE_LANGS = [
+  { code: "fr", label: "Français" },
+  { code: "en", label: "Anglais" },
+  { code: "es", label: "Espagnol" },
+  { code: "de", label: "Allemand" },
+];
+
+// Dernière langue sélectionnée (persistée dans storage)
+Albert.lastTranslateLang = "en";
+browser.storage.local.get("lastTranslateLang").then((r) => {
+  if (r.lastTranslateLang) Albert.lastTranslateLang = r.lastTranslateLang;
+});
+
+const LANG_LABELS = { fr: "Français", en: "Anglais", es: "Espagnol", de: "Allemand" };
+
+// Lance la traduction et met à jour la popup.
+Albert.doTranslate = async function (originalText, targetLang, resultDiv, copyBtn, loadingMsg, langInfoEl) {
+  if (loadingMsg) loadingMsg.textContent = "Traduction en cours…";
+  if (langInfoEl) langInfoEl.textContent = "";
+  resultDiv.style.display = "none";
+  copyBtn.style.display = "none";
+
+  // Sauvegarder la langue choisie
+  Albert.lastTranslateLang = targetLang;
+  browser.storage.local.set({ lastTranslateLang: targetLang });
+
+  const response = await browser.runtime.sendMessage({
+    type: "translate",
+    text: originalText,
+    targetLang,
+  });
+
+  if (response.error) {
+    Albert.showToast(response.error, 5);
+    if (loadingMsg) loadingMsg.textContent = "";
     return;
   }
 
-  const suggestions = message.result.corrections || [];
-  Albert.showReformulationPopup(message.originalText, suggestions);
+  if (loadingMsg) loadingMsg.textContent = "";
+  if (langInfoEl && response.langSource) {
+    langInfoEl.textContent = (LANG_LABELS[response.langSource] || response.langSource) + " → " + (LANG_LABELS[targetLang] || targetLang);
+  }
+  resultDiv.textContent = response.translation;
+  resultDiv.style.display = "block";
+  copyBtn.style.display = "inline-block";
+};
+
+Albert.showTranslationPopup = function (originalText) {
+  Albert.closePopup();
+
+  const themeClass = Albert.getPopupThemeClass();
+  const popup = document.createElement("div");
+  popup.className = "albert-popup" + (themeClass ? " " + themeClass : "");
+
+  // ── Header : icône, sélecteur de langue, bouton traduire, poignée, fermer ──
+  const header = document.createElement("div");
+  header.className = "albert-popup-header";
+
+  const headerLeft = document.createElement("div");
+  headerLeft.className = "albert-popup-header-left";
+
+  const icon = document.createElement("img");
+  icon.src = Albert.ICON_URL;
+  icon.alt = "Albert";
+  icon.className = "albert-popup-icon";
+  headerLeft.appendChild(icon);
+
+  // Sélecteur de langue dans le header
+  const langSelect = document.createElement("select");
+  langSelect.className = "albert-popup-lang-select";
+
+  TRANSLATE_LANGS.forEach((l) => {
+    const opt = document.createElement("option");
+    opt.value = l.code;
+    opt.textContent = l.label;
+    if (l.code === Albert.lastTranslateLang) opt.selected = true;
+    langSelect.appendChild(opt);
+  });
+  headerLeft.appendChild(langSelect);
+
+  // Bouton traduire dans le header
+  const translateBtn = document.createElement("button");
+  translateBtn.className = "albert-popup-translate-btn";
+  translateBtn.textContent = "Traduire";
+  headerLeft.appendChild(translateBtn);
+
+  header.appendChild(headerLeft);
+
+  const headerRight = document.createElement("div");
+  headerRight.className = "albert-popup-header-right";
+
+  const handle = document.createElement("div");
+  handle.className = "albert-popup-handle";
+  handle.textContent = "⠿";
+  handle.title = "Déplacer";
+  headerRight.appendChild(handle);
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "albert-popup-close";
+  closeBtn.textContent = "✕";
+  closeBtn.addEventListener("click", () => Albert.closePopup());
+  headerRight.appendChild(closeBtn);
+
+  header.appendChild(headerRight);
+  popup.appendChild(header);
+
+  // ── Corps ──
+  const body = document.createElement("div");
+  body.className = "albert-popup-body";
+
+  // Indication de langue (ex: "Français → Anglais")
+  const langInfoEl = document.createElement("div");
+  langInfoEl.className = "albert-popup-extract";
+  body.appendChild(langInfoEl);
+
+  // Message de chargement
+  const loadingMsg = document.createElement("div");
+  loadingMsg.className = "albert-popup-message";
+  loadingMsg.textContent = "Traduction en cours…";
+  body.appendChild(loadingMsg);
+
+  // Zone de résultat
+  const resultDiv = document.createElement("div");
+  resultDiv.className = "albert-popup-translation-result";
+  resultDiv.style.display = "none";
+  body.appendChild(resultDiv);
+
+  // Bouton copier
+  const copyBtn = document.createElement("button");
+  copyBtn.className = "albert-popup-suggestion";
+  copyBtn.textContent = "Copier";
+  copyBtn.style.display = "none";
+  copyBtn.style.marginTop = "8px";
+  body.appendChild(copyBtn);
+
+  popup.appendChild(body);
+  document.body.appendChild(popup);
+
+  // ── Positionnement ──
+  const saved = Albert.savedSelection;
+  if (saved && saved.clickPos) {
+    popup.style.top = (saved.clickPos.y + 4) + "px";
+    popup.style.left = saved.clickPos.x + "px";
+    requestAnimationFrame(() => {
+      const popupRect = popup.getBoundingClientRect();
+      if (popupRect.right > window.innerWidth - 10) {
+        popup.style.left = (window.innerWidth - popupRect.width - 10) + "px";
+      }
+      if (popupRect.bottom > window.innerHeight - 10) {
+        popup.style.top = (saved.clickPos.y - popupRect.height - 4) + "px";
+      }
+    });
+  } else {
+    popup.style.top = "20%";
+    popup.style.left = "50%";
+    popup.style.transform = "translateX(-50%)";
+  }
+
+  Albert.initPopupDrag(popup, handle);
+  Albert.activePopup = popup;
+
+  // ── Actions ──
+
+  // Bouton traduire (relancer avec la langue choisie)
+  translateBtn.addEventListener("click", () => {
+    Albert.doTranslate(originalText, langSelect.value, resultDiv, copyBtn, loadingMsg, langInfoEl);
+  });
+
+  // Copier
+  copyBtn.addEventListener("click", () => {
+    navigator.clipboard.writeText(resultDiv.textContent).then(() => {
+      copyBtn.textContent = "Copié !";
+      setTimeout(() => { copyBtn.textContent = "Copier"; }, 2000);
+    }).catch(() => {
+      const ta = document.createElement("textarea");
+      ta.value = resultDiv.textContent;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+      copyBtn.textContent = "Copié !";
+      setTimeout(() => { copyBtn.textContent = "Copier"; }, 2000);
+    });
+  });
+
+  // Traduction automatique à l'ouverture dans la dernière langue
+  Albert.doTranslate(originalText, Albert.lastTranslateLang, resultDiv, copyBtn, loadingMsg, langInfoEl);
+};
+
+// Écoute les messages du background script.
+browser.runtime.onMessage.addListener((message) => {
+  if (message.type === "reformulateResult") {
+    if (message.result.error) {
+      Albert.showToast(message.result.error, 5);
+      return;
+    }
+    const suggestions = message.result.corrections || [];
+    Albert.showReformulationPopup(message.originalText, suggestions);
+  }
+
+  if (message.type === "translateGetSelection") {
+    // Récupérer le texte complet depuis la sélection sauvegardée
+    const saved = Albert.savedSelection;
+    const fullText = saved ? saved.text : window.getSelection().toString();
+    if (!fullText || fullText.trim().length < 3) {
+      Albert.showToast("Sélectionnez du texte à traduire.", 3);
+      return;
+    }
+    // Couper le texte s'il est trop long (2000 caractères max)
+    const textToTranslate = fullText.length > 2000 ? fullText.slice(0, 2000) : fullText;
+    Albert.showTranslationPopup(textToTranslate);
+  }
 });
