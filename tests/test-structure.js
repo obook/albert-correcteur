@@ -146,9 +146,8 @@ test("firefox-build.sh existe et est exécutable", () => {
   assert.ok(stat.mode & 0o111, "firefox-build.sh n'est pas exécutable");
 });
 
-test("firefox-publish.sh existe et est exécutable", () => {
-  const stat = fs.statSync(path.join(ROOT, "firefox-publish.sh"));
-  assert.ok(stat.mode & 0o111, "firefox-publish.sh n'est pas exécutable");
+test("firefox-publish.sh supprimé", () => {
+  assert.ok(!fs.existsSync(path.join(ROOT, "firefox-publish.sh")), "firefox-publish.sh ne devrait plus exister");
 });
 
 test("install-firefox-dev.sh existe et est exécutable", () => {
@@ -221,6 +220,69 @@ test("Dossier tests/ existe", () => {
 test("tests/run-all.sh existe et est exécutable", () => {
   const stat = fs.statSync(path.join(ROOT, "tests", "run-all.sh"));
   assert.ok(stat.mode & 0o111, "run-all.sh n'est pas exécutable");
+});
+
+// ── Popup contenu ──
+
+test("popup-contenu/albert-popup-common.js existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "popup-contenu", "albert-popup-common.js")));
+});
+
+test("popup-contenu/albert-popup-correction.js existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "popup-contenu", "albert-popup-correction.js")));
+});
+
+test("popup-contenu/albert-popup-reformulation.js existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "popup-contenu", "albert-popup-reformulation.js")));
+});
+
+test("popup-contenu/albert-popup-traduction.js existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "popup-contenu", "albert-popup-traduction.js")));
+});
+
+test("popup-contenu/albert-popup-messages.js existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "popup-contenu", "albert-popup-messages.js")));
+});
+
+test("Ancien albert-popup.js supprimé", () => {
+  assert.ok(!fs.existsSync(path.join(FIREFOX, "albert-popup.js")), "albert-popup.js ne devrait plus exister");
+});
+
+// ── Prompts ──
+
+test("prompts/traduction.txt existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "prompts", "traduction.txt")));
+});
+
+test("prompts/traduction.txt contient {{LANG_SOURCE}} et {{LANG_CIBLE}}", () => {
+  const content = fs.readFileSync(path.join(FIREFOX, "prompts", "traduction.txt"), "utf-8");
+  assert.ok(content.includes("{{LANG_SOURCE}}"), "{{LANG_SOURCE}} manquant");
+  assert.ok(content.includes("{{LANG_CIBLE}}"), "{{LANG_CIBLE}} manquant");
+});
+
+// ── Licence ──
+
+test("LICENSE existe", () => {
+  assert.ok(fs.existsSync(path.join(ROOT, "LICENSE")));
+});
+
+test("LICENSE contient MIT", () => {
+  const content = fs.readFileSync(path.join(ROOT, "LICENSE"), "utf-8");
+  assert.ok(content.includes("MIT License"));
+});
+
+// ── Fichiers supprimés ──
+
+test("updates.json supprimé", () => {
+  assert.ok(!fs.existsSync(path.join(ROOT, "updates.json")), "updates.json ne devrait plus exister");
+});
+
+test("MOZILLA.md supprimé", () => {
+  assert.ok(!fs.existsSync(path.join(ROOT, "MOZILLA.md")), "MOZILLA.md ne devrait plus exister");
+});
+
+test("Ancien dossier popup/ supprimé", () => {
+  assert.ok(!fs.existsSync(path.join(FIREFOX, "popup")), "Le dossier popup/ ne devrait plus exister");
 });
 
 console.log(`\n${passed} passé(s), ${failed} échoué(s)`);
