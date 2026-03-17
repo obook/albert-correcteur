@@ -19,6 +19,14 @@ Extension Firefox de correction orthographique et grammaticale française, propu
 - Détection automatique des nouveaux champs ajoutés dynamiquement (SPA, etc.)
 - Respect de la limite API (backoff automatique en cas de rate limit)
 
+## Conformité RGPD
+
+- **Aucune bibliothèque externe** : pas de CDN, pas de dépendance tierce, tout est embarqué dans l'extension
+- **Aucun appel réseau** en dehors du serveur API Albert configuré par l'utilisateur
+- **Détection de langue locale** : réalisée côté client sans appel externe
+- **Polices système** uniquement (`-apple-system`, `Segoe UI`, etc.)
+- Les données saisies ne transitent que vers le serveur API Albert choisi
+
 ## Prérequis
 
 - Firefox 109 ou supérieur
@@ -86,59 +94,11 @@ Le fichier `firefox-release/albert-correcteur.xpi` est généré. L'installation
    - **URL de l'API** (optionnel) — par défaut `https://albert.api.etalab.gouv.fr`
 3. Cliquer sur "Enregistrer"
 
-## Structure du projet
-
-```
-albert-ext/
-├── sources/                  ← sources de l'extension
-│   ├── manifest.json         ← manifeste Firefox (Manifest V2)
-│   ├── background.js         ← appels API Albert, détection de langue
-│   ├── albert-state.js       ← configuration et état partagé (namespace Albert)
-│   ├── albert-utils.js       ← fonctions utilitaires (détection champs, dictionnaire)
-│   ├── albert-badge.js       ← gestion du badge (icône dans le coin du champ)
-│   ├── albert-check.js       ← vérification via l'API (debounce, cycle, rate limit)
-│   ├── albert-render.js      ← rendu des corrections (overlay, contenteditable)
-│   ├── albert-popup.js       ← popup de correction (navigation, modes, thèmes)
-│   ├── albert-apply.js       ← application des corrections dans le texte
-│   ├── albert-main.js        ← point d'entrée (scan, observer, démarrage)
-│   ├── css/                  ← styles découpés
-│   │   ├── badge.css         ← icône Albert
-│   │   ├── overlay.css       ← soulignements d'erreurs
-│   │   ├── popup-dark.css    ← popup thème sombre
-│   │   └── popup-light.css   ← popup thème clair
-│   ├── toast/                ← notifications toast
-│   │   ├── albert-toast.js   ← affichage du toast
-│   │   └── toast.css         ← style du toast
-│   ├── prompts/              ← prompts éditables
-│   │   ├── correction.txt
-│   │   └── reformulation.txt
-│   ├── icons/                ← logo Albert (SVG + PNG)
-│   └── popup/                ← interface de configuration
-│       ├── popup.html
-│       ├── popup.css
-│       ├── popup.js
-│       ├── popup-status.js
-│       ├── popup-models.js
-│       ├── popup-limits.js
-│       ├── popup-settings.html
-│       ├── popup-settings.css
-│       └── popup-settings.js
-├── tests/                    ← tests unitaires
-│   ├── run-all.sh
-│   └── test-*.js
-├── exemple/                  ← page HTML de test
-├── firefox-release/          ← extension packagée (.xpi)
-├── firefox-build.sh          ← script de packaging
-├── firefox-publish.sh        ← script de publication sur addons.mozilla.org
-├── install-firefox-dev.sh    ← script d'installation de Firefox Developer Edition
-└── images/                   ← logos sources
-```
-
-## Comment ça marche
+## Fonctionnement
 
 L'extension utilise l'endpoint `/v1/chat/completions` de l'API Albert (compatible OpenAI) avec un prompt système qui demande au modèle de retourner les erreurs au format JSON structuré (offset, longueur, type, message, suggestions).
 
 Pour les `<textarea>`, `<input>` et les éditeurs riches (CKEditor, TinyMCE, etc.), un overlay transparent est positionné par-dessus le champ pour afficher les soulignements sans modifier le contenu. Pour les éléments `contenteditable` simples, les erreurs sont directement encapsulées dans des `<span>`.
 
-Les content scripts sont découpés en modules (namespace `window.Albert`) chargés dans l'ordre par le manifest, pour faciliter la maintenance.
+Voir [ARCHITECTURE.md](ARCHITECTURE.md) pour l'arborescence, les flux et les détails techniques.
 
