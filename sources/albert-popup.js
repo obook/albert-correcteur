@@ -310,6 +310,36 @@ Albert.closePopup = function () {
 
 // ── Popup de reformulation (résultat du menu contextuel) ──
 
+// Sauvegarde du contexte de la sélection avant que le menu contextuel ne la perde.
+Albert.savedSelection = null;
+
+document.addEventListener("contextmenu", (e) => {
+  const activeEl = document.activeElement;
+  const sel = window.getSelection();
+  const clickPos = { x: e.clientX, y: e.clientY };
+
+  if (activeEl && (activeEl.tagName === "TEXTAREA" || activeEl.tagName === "INPUT")) {
+    Albert.savedSelection = {
+      type: "input",
+      el: activeEl,
+      start: activeEl.selectionStart,
+      end: activeEl.selectionEnd,
+      text: activeEl.value.slice(activeEl.selectionStart, activeEl.selectionEnd),
+      clickPos,
+    };
+  } else if (sel.rangeCount > 0 && !sel.isCollapsed) {
+    const range = sel.getRangeAt(0);
+    Albert.savedSelection = {
+      type: "range",
+      range: range.cloneRange(),
+      text: sel.toString(),
+      clickPos,
+    };
+  } else {
+    Albert.savedSelection = null;
+  }
+});
+
 Albert.showReformulationPopup = function (originalText, suggestions) {
   Albert.closePopup();
 
@@ -386,7 +416,7 @@ Albert.showReformulationPopup = function (originalText, suggestions) {
       btn.className = "albert-popup-suggestion";
       btn.textContent = sug;
       btn.addEventListener("click", () => {
-        Albert.replaceSelection(sug);
+        Albert.applyReformulation(originalText, sug);
         Albert.closePopup();
       });
       sugBox.appendChild(btn);
@@ -398,13 +428,11 @@ Albert.showReformulationPopup = function (originalText, suggestions) {
   popup.appendChild(body);
   document.body.appendChild(popup);
 
-  // Positionner près de la sélection
-  const sel = window.getSelection();
-  if (sel.rangeCount > 0) {
-    const range = sel.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-    popup.style.top = (rect.bottom + 4) + "px";
-    popup.style.left = rect.left + "px";
+  // Positionner près du clic droit
+  const saved = Albert.savedSelection;
+  if (saved && saved.clickPos) {
+    popup.style.top = (saved.clickPos.y + 4) + "px";
+    popup.style.left = saved.clickPos.x + "px";
 
     requestAnimationFrame(() => {
       const popupRect = popup.getBoundingClientRect();
@@ -412,11 +440,10 @@ Albert.showReformulationPopup = function (originalText, suggestions) {
         popup.style.left = (window.innerWidth - popupRect.width - 10) + "px";
       }
       if (popupRect.bottom > window.innerHeight - 10) {
-        popup.style.top = (rect.top - popupRect.height - 4) + "px";
+        popup.style.top = (saved.clickPos.y - popupRect.height - 4) + "px";
       }
     });
   } else {
-    // Centrer si pas de sélection visible
     popup.style.top = "20%";
     popup.style.left = "50%";
     popup.style.transform = "translateX(-50%)";
@@ -426,28 +453,45 @@ Albert.showReformulationPopup = function (originalText, suggestions) {
   Albert.activePopup = popup;
 };
 
-// Remplace la sélection courante par le texte donné.
-Albert.replaceSelection = function (text) {
-  const sel = window.getSelection();
-  if (!sel.rangeCount) return;
+// Applique la reformulation en utilisant la sélection sauvegardée.
+Albert.applyReformulation = function (originalText, replacement) {
+  const saved = Albert.savedSelection;
 
-  const range = sel.getRangeAt(0);
-  const activeEl = document.activeElement;
-
-  // Textarea / Input
-  if (activeEl && (activeEl.tagName === "TEXTAREA" || activeEl.tagName === "INPUT")) {
-    const start = activeEl.selectionStart;
-    const end = activeEl.selectionEnd;
-    activeEl.value = activeEl.value.slice(0, start) + text + activeEl.value.slice(end);
-    activeEl.selectionStart = activeEl.selectionEnd = start + text.length;
-    activeEl.dispatchEvent(new Event("input", { bubbles: true }));
-    return;
+  // Éviter le double point final : si l'original ne finit pas par une ponctuation
+  // mais que la suggestion en ajoute une, la retirer
+  const punctuation = [".", "!", "?", ";", ":"];
+  const origEnds = punctuation.includes(originalText.trim().slice(-1));
+  const replEnds = punctuation.includes(replacement.trim().slice(-1));
+  if (!origEnds && replEnds) {
+    replacement = replacement.trim().slice(0, -1);
   }
 
-  // Contenteditable
-  range.deleteContents();
-  range.insertNode(document.createTextNode(text));
-  sel.collapseToEnd();
+  if (saved && saved.type === "input") {
+    // Textarea / Input : remplacement à la position sauvegardée
+    const el = saved.el;
+    const idx = el.value.indexOf(originalText, Math.max(0, saved.start - 10));
+    if (idx !== -1) {
+      el.value = el.value.slice(0, idx) + replacement + el.value.slice(idx + originalText.length);
+      el.selectionStart = el.selectionEnd = idx + replacement.length;
+    } else {
+      // Fallback : remplacement à la position sauvegardée
+      el.value = el.value.slice(0, saved.start) + replacement + el.value.slice(saved.end);
+      el.selectionStart = el.selectionEnd = saved.start + replacement.length;
+    }
+    el.focus();
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  } else if (saved && saved.type === "range") {
+    // Contenteditable : remplacement via le range sauvegardé
+    const range = saved.range;
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    range.deleteContents();
+    range.insertNode(document.createTextNode(replacement));
+    sel.collapseToEnd();
+  }
+
+  Albert.savedSelection = null;
 };
 
 // Écoute les résultats de reformulation depuis le background script.
