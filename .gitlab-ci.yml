@@ -1,6 +1,7 @@
 stages:
   - test
   - build
+  - sign
   - release
   - update
 
@@ -40,24 +41,52 @@ build:
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v/'
 
+# ── Signature Mozilla (uniquement sur les tags v*) ──
+# Nécessite les variables CI/CD WEB_EXT_API_KEY et WEB_EXT_API_SECRET (identifiants AMO)
+
+sign:
+  stage: sign
+  image: node:20-alpine
+  needs:
+    - job: build
+      artifacts: true
+  script:
+    - npm install -g web-ext
+    - VERSION="${CI_COMMIT_TAG#v}"
+    - XPI_NAME="albert-correcteur_${VERSION}.xpi"
+    - web-ext sign --source-dir=sources/ --channel=unlisted --api-key="${WEB_EXT_API_KEY}" --api-secret="${WEB_EXT_API_SECRET}"
+    - SIGNED_XPI=$(ls web-ext-artifacts/*.xpi)
+    - cp "${SIGNED_XPI}" "${XPI_NAME}"
+    - echo "XPI_NAME=${XPI_NAME}" > build.env
+    - echo "VERSION=${VERSION}" >> build.env
+    - echo "Extension signée → ${XPI_NAME}"
+  artifacts:
+    paths:
+      - "albert-correcteur_*.xpi"
+    reports:
+      dotenv: build.env
+    expire_in: never
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v/'
+
 # ── Release GitForge (uniquement sur les tags v*) ──
 
 release:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   needs:
-    - job: build
+    - job: sign
       artifacts: true
   script:
     - echo "Création de la release ${CI_COMMIT_TAG} — ${XPI_NAME}"
   release:
     tag_name: $CI_COMMIT_TAG
     name: "Albert Correcteur ${CI_COMMIT_TAG}"
-    description: "Release ${CI_COMMIT_TAG} — Extension Firefox Albert Correcteur"
+    description: "Release ${CI_COMMIT_TAG} — Extension Firefox Albert Correcteur (signée Mozilla)"
     assets:
       links:
         - name: "${XPI_NAME}"
-          url: "${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/${XPI_NAME}?job=build"
+          url: "${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/${XPI_NAME}?job=sign"
           link_type: package
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v/'
@@ -74,7 +103,7 @@ update-manifest:
     - apk add --no-cache git
   script:
     - VERSION="${CI_COMMIT_TAG#v}"
-    - XPI_URL="${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/albert-correcteur_${VERSION}.xpi?job=build"
+    - XPI_URL="${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/albert-correcteur_${VERSION}.xpi?job=sign"
     - git clone "https://oauth2:${CI_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" /tmp/repo
     - cd /tmp/repo
     - |
