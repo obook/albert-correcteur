@@ -42,14 +42,16 @@
 
 ## Prérequis
 
-- Firefox 109 ou supérieur
+- Firefox 128 ou supérieur
 - Une clé API Albert (réservée aux agents de la fonction publique d'État) → [Demander un accès](https://albert.sites.beta.gouv.fr/)
 
 ## Installation
 
-1. Télécharger le `.xpi` signé depuis les [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-ext/-/releases)
+1. Télécharger le `.xpi` signé par Mozilla depuis les [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-ext/-/releases)
 2. Dans Firefox : `about:addons` → roue dentée → "Installer un module depuis un fichier"
 3. Sélectionner le fichier `.xpi`
+
+Le `.xpi` est signé automatiquement par Mozilla (canal unlisted) lors du pipeline CI/CD, ce qui permet l'installation sur **Firefox standard** sans manipulation.
 
 Pour le développement local avec Firefox Developer Edition, voir [FIREFOX-DEV.md](FIREFOX-DEV.md).
 

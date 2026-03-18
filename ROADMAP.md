@@ -1,5 +1,28 @@
 # Roadmap Albert Correcteur
 
+## v0.2.3 — Signature Mozilla du .xpi (terminé)
+
+**Statut** : livré — release v0.2.3
+
+### Problème
+
+Le `.xpi` distribué n'était pas signé par Mozilla, ce qui empêchait l'installation sur Firefox standard (seul Firefox Developer Edition avec `xpinstall.signatures.required = false` fonctionnait).
+
+### Correctif
+
+- Ajout d'un stage `sign` dans le pipeline CI/CD utilisant `web-ext sign --channel=unlisted`
+- Le `.xpi` est désormais signé automatiquement par Mozilla à chaque release
+- Les URLs de la release GitForge et de `updates.json` pointent vers le `.xpi` signé
+- Installation possible sur **Firefox standard** sans manipulation de `about:config`
+
+### Fichiers modifiés
+
+- `.gitlab-ci.yml` — nouveau stage `sign` entre `build` et `release`, URLs mises à jour vers `job=sign`
+- `sources/manifest.json` — version 0.2.3
+- `README.md` — mention de la signature Mozilla, prérequis Firefox 128+
+- `ARCHITECTURE.md` — pipeline CI/CD mis à jour (5 stages)
+- `ROADMAP.md` — ajout de cette section
+
 ## v0.2.2 — Mises à jour automatiques et correction lien de téléchargement (terminé)
 
 **Statut** : livré — release v0.2.2
