@@ -52,18 +52,20 @@ albert-ext/
 │
 ├── tests/                            ← Tests unitaires (Node.js, sans dépendance)
 │   ├── run-all.sh                    ← Lance toutes les suites
-│   └── test-*.js                     ← 8 suites, ~110 tests
+│   └── test-*.js                     ← 8 suites, 129 tests
 │
-├── exemple/                          ← Page HTML de test multilingue
+├── exemple/                          ← Pages de test
+│   ├── test.html                     ← Page de test multilingue + éditeurs React
+│   └── test-react-editors.js         ← Simulation re-rendu React (Draft.js/Lexical)
 ├── media/                            ← Captures d'écran pour le README
 ├── images/                           ← Logo PNG pour GitForge
 │
 ├── README.md                         ← Documentation principale
 ├── ARCHITECTURE.md                   ← Ce fichier
+├── ROADMAP.md                        ← Roadmap et sprints
 ├── FIREFOX-DEV.md                    ← Installation Firefox Developer Edition
 ├── LICENSE                           ← Licence MIT
 ├── .gitlab-ci.yml                    ← Pipeline CI/CD (tests, build, release sur tags v*)
-├── updates.json                      ← Mise à jour automatique Firefox
 ├── firefox-build.sh                  ← Script de packaging (.xpi)
 └── install-firefox-dev.sh            ← Script d'installation Firefox Dev Edition
 ```
@@ -122,7 +124,9 @@ L'extension se compose de deux parties :
          ▼ clic sur une suggestion
   albert-apply.js (applySuggestion)
          │
-         └── Remplace le mot dans le champ
+         ├── Remplace le mot dans le champ
+         ├── Retire la correction de la liste, recalcule les offsets restants
+         └── Re-rend l'overlay immédiatement (suppression instantanée du soulignement)
 ```
 
 ### Flux de reformulation (menu contextuel)
@@ -221,7 +225,7 @@ Les content scripts partagent le namespace `window.Albert` et sont chargés dans
 | Ordre | Module | Rôle |
 |-------|--------|------|
 | 1 | `albert-state.js` | Constantes, état global, URLs des icônes |
-| 2 | `albert-utils.js` | Détection champs, éditeurs riches, dictionnaire |
+| 2 | `albert-utils.js` | Détection champs, éditeurs riches (CKEditor, TinyMCE, Quill, ProseMirror, Draft.js, Lexical), dictionnaire |
 | 3 | `albert-badge.js` | Création et positionnement du badge |
 | 4 | `albert-render.js` | Rendu des soulignements (overlay/contenteditable) |
 | 5 | `popup-contenu/albert-popup-common.js` | Thème, drag, close, positionnement, sélection |
