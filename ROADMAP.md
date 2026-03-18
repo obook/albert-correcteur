@@ -1,5 +1,25 @@
 # Roadmap Albert Correcteur
 
+## v0.2.4 — Correction traduction de textes longs et techniques (terminé)
+
+**Statut** : livré — release v0.2.4
+
+### Problème
+
+La traduction de textes longs ou techniques (anglais vers français) pouvait échouer silencieusement : le texte restait en anglais dans la popup. Deux causes identifiées : absence de `max_tokens` dans l'appel API (réponse tronquée) et prompt trop permissif sur le contenu technique.
+
+### Correctif
+
+- Ajout de `max_tokens: 4096` dans l'appel API de traduction (`background.js`)
+- Renforcement du prompt de traduction : traduction obligatoire du contenu technique, règle "langue cible" précisée avec "intégralement"
+
+### Fichiers modifiés
+
+- `sources/background.js` — ajout `max_tokens: 4096` pour la traduction
+- `sources/prompts/traduction.txt` — prompt renforcé
+- `sources/manifest.json` — version 0.2.4
+- `ROADMAP.md` — ajout de cette section
+
 ## v0.2.3 — Signature Mozilla du .xpi (terminé)
 
 **Statut** : livré — release v0.2.3
