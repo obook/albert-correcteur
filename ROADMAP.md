@@ -1,5 +1,29 @@
 # Roadmap Albert Correcteur
 
+## v0.2.2 — Mises à jour automatiques et correction lien de téléchargement (terminé)
+
+**Statut** : livré — release v0.2.2
+
+### Problème
+
+Le lien de téléchargement dans le README pointait vers la page développeur AMO (`/developers/addon/...`), inaccessible aux utilisateurs. De plus, l'extension n'avait plus de mécanisme de mise à jour automatique depuis la suppression de `update_url` et `updates.json` en v0.2.1.
+
+### Correctif
+
+- Remplacement du lien AMO développeur par le lien public des Releases GitForge
+- Restauration de `update_url` dans `manifest.json` pointant vers `updates.json` sur la branche main
+- Création de `updates.json` avec le lien vers le `.xpi` signé
+- Ajout d'un stage CI `update-manifest` qui met à jour automatiquement `updates.json` à chaque release
+
+### Fichiers modifiés
+
+- `README.md` — liens de téléchargement corrigés, mention des mises à jour automatiques
+- `sources/manifest.json` — version 0.2.2, ajout `update_url`
+- `updates.json` — nouveau fichier de manifeste de mise à jour
+- `.gitlab-ci.yml` — nouveau stage `update` pour mise à jour automatique de `updates.json`
+- `ARCHITECTURE.md` — ajout de `updates.json` dans l'arborescence
+- `ROADMAP.md` — ajout de cette section
+
 ## v0.2.1 — Compatibilité avec l'éditeur x.com (terminé)
 
 **Statut** : livré — release v0.2.1

@@ -273,8 +273,12 @@ test("LICENSE contient MIT", () => {
 
 // ── Fichiers supprimés ──
 
-test("updates.json supprimé", () => {
-  assert.ok(!fs.existsSync(path.join(ROOT, "updates.json")), "updates.json ne devrait plus exister");
+test("updates.json existe et est du JSON valide", () => {
+  const p = path.join(ROOT, "updates.json");
+  assert.ok(fs.existsSync(p), "updates.json doit exister");
+  const data = JSON.parse(fs.readFileSync(p, "utf8"));
+  assert.ok(data.addons["albert-correcteur@ac-bordeaux.fr"], "doit contenir l'addon albert-correcteur");
+  assert.ok(data.addons["albert-correcteur@ac-bordeaux.fr"].updates.length > 0, "doit contenir au moins une entrée de mise à jour");
 });
 
 test("MOZILLA.md supprimé", () => {

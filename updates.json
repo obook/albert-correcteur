@@ -1,0 +1,12 @@
+{
+  "addons": {
+    "albert-correcteur@ac-bordeaux.fr": {
+      "updates": [
+        {
+          "version": "0.2.2",
+          "update_link": "https://forge.apps.education.fr/booklageolivier/albert-ext/-/jobs/artifacts/v0.2.2/raw/albert-correcteur_0.2.2.xpi?job=build"
+        }
+      ]
+    }
+  }
+}

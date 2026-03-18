@@ -65,7 +65,8 @@ albert-ext/
 ├── ROADMAP.md                        ← Roadmap et sprints
 ├── FIREFOX-DEV.md                    ← Installation Firefox Developer Edition
 ├── LICENSE                           ← Licence MIT
-├── .gitlab-ci.yml                    ← Pipeline CI/CD (tests, build, release sur tags v*)
+├── updates.json                      ← Manifeste de mise à jour Firefox (auto-update)
+├── .gitlab-ci.yml                    ← Pipeline CI/CD (tests, build, release, mise à jour updates.json)
 ├── firefox-build.sh                  ← Script de packaging (.xpi)
 └── install-firefox-dev.sh            ← Script d'installation Firefox Dev Edition
 ```

@@ -24,6 +24,7 @@
 - Injection dans les iframes (éditeurs intégrés)
 - Détection automatique des nouveaux champs ajoutés dynamiquement (SPA, etc.)
 - Respect de la limite API (backoff automatique en cas de rate limit)
+- **Mises à jour automatiques** via `updates.json` (Firefox vérifie périodiquement les nouvelles versions)
 - **Reformulation** via le menu contextuel (clic droit dans un champ de saisie)
 - **Traduction** via le menu contextuel (clic droit sur n'importe quelle sélection de texte)
   - Langues de traduction : français, anglais, espagnol, allemand
