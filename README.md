@@ -20,7 +20,7 @@
 - Popup de suggestion avec explication et correction en un clic
 - Animation de rotation du logo pendant la vérification
 - Fonctionne sur les `<textarea>`, `<input>` et les éléments `contenteditable`
-- Compatible avec les éditeurs riches (CKEditor, TinyMCE, Quill, ProseMirror)
+- Compatible avec les éditeurs riches (CKEditor, TinyMCE, Quill, ProseMirror, Draft.js, Lexical)
 - Injection dans les iframes (éditeurs intégrés)
 - Détection automatique des nouveaux champs ajoutés dynamiquement (SPA, etc.)
 - Respect de la limite API (backoff automatique en cas de rate limit)

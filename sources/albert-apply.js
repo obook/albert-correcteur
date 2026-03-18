@@ -49,7 +49,6 @@ Albert.applySuggestion = function (el, correction, suggestion) {
   } else if (el.isContentEditable) {
     if (Albert.isRichEditor(el)) {
       // Éditeur riche : remplacement via Selection + execCommand
-      // TODO: le remplacement ne fonctionne pas toujours correctement
       Albert.applyViaSelection(el, correction, suggestion);
     } else {
       // Contenteditable simple : remplacement direct du DOM
@@ -60,6 +59,24 @@ Albert.applySuggestion = function (el, correction, suggestion) {
         textNode.parentNode.normalize();
       });
     }
+  }
+
+  // Retirer la correction appliquée et ajuster les offsets des suivantes
+  const delta = suggestion.length - correction.length;
+  state.corrections = state.corrections
+    .filter((c) => c !== correction)
+    .map((c) => {
+      if (c.offset > correction.offset) {
+        return Object.assign({}, c, { offset: c.offset + delta });
+      }
+      return c;
+    });
+
+  // Re-rendre l'overlay (avec délai pour les éditeurs riches, après execCommand)
+  if (el.isContentEditable && Albert.isRichEditor(el)) {
+    setTimeout(() => Albert.renderCorrections(el), 20);
+  } else {
+    Albert.renderCorrections(el);
   }
 
   // Invalider le cache pour forcer une revérification

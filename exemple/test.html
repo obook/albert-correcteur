@@ -28,6 +28,19 @@
       background: #fff;
     }
     .section { margin-bottom: 30px; }
+    .DraftEditor-root, .lexical-editor {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+      min-height: 80px;
+      font-size: 14px;
+      background: #fff;
+    }
+    .DraftEditor-root { border-color: #1da1f2; }
+    .lexical-editor { border-color: #6c5ce7; }
+    .draft-editor { outline: none; min-height: 60px; }
+    .react-rerender-flash { animation: flash 0.3s; }
+    @keyframes flash { 0% { background: #fff3cd; } 100% { background: transparent; } }
   </style>
 </head>
 <body>
@@ -52,6 +65,28 @@
     <label>Contenteditable (FR)</label>
     <div contenteditable="true">Je pence que sa va marcher. Les faute d'ortographe seront detectées.</div>
   </div>
+
+  <h1>Test éditeurs React (bug x.com)</h1>
+  <p style="font-size:13px;color:#666;">Ces champs simulent les éditeurs Draft.js et Lexical utilisés par x.com, Facebook, etc.
+    L'extension doit les détecter comme éditeurs riches (overlay, pas de spans injectés dans le DOM).
+    Le script <code>test-react-editors.js</code> simule le re-rendu React à la sélection :
+    si l'extension injectait des spans, ils disparaîtraient.</p>
+
+  <div class="section">
+    <label>Draft.js (structure x.com)</label>
+    <div class="DraftEditor-root">
+      <div class="DraftEditor-editorContainer">
+        <div contenteditable="true" data-contents="true" role="textbox" class="draft-editor">Je suis contant de vous revoir. Cet exemple et fait pour tester l'extention Albert sur x.com.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>Lexical (successeur de Draft.js)</label>
+    <div data-lexical-editor="true" contenteditable="true" role="textbox" class="lexical-editor">Bonnjour a tous, je pence que sa va marcher avec Lexical.</div>
+  </div>
+
+  <script src="test-react-editors.js"></script>
 
   <h1>Test multilingue</h1>
 

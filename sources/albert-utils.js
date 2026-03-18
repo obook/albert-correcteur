@@ -31,6 +31,13 @@ Albert.isRichEditor = function (el) {
   if (el.classList.contains("ql-editor")) return true;
   // ProseMirror (utilisé par Tiptap, etc.)
   if (el.classList.contains("ProseMirror")) return true;
+  // Draft.js (utilisé par x.com/Twitter, Facebook, etc.)
+  if (el.classList.contains("DraftEditor-editorContainer")) return true;
+  if (el.closest(".DraftEditor-root")) return true;
+  if (el.hasAttribute("data-contents")) return true;
+  // Lexical (successeur de Draft.js, utilisé par Meta)
+  if (el.hasAttribute("data-lexical-editor")) return true;
+  if (el.closest("[data-lexical-editor]")) return true;
   return false;
 };
 
