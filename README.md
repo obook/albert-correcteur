@@ -2,7 +2,7 @@
 
 **Extension expérimentale** de correction orthographique, grammaticale et de traduction pour Firefox, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web, propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné (français, anglais, espagnol, allemand).
 
-**Téléchargement** : [addons.mozilla.org (page développeur)](https://addons.mozilla.org/fr/developers/addon/a8876f404af94bbda3d2/versions)
+**Téléchargement** : [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-ext/-/releases)
 
 | Correction et reformulation | Traduction multi-langues |
 |:---:|:---:|
@@ -46,7 +46,7 @@
 
 ## Installation
 
-1. Télécharger le `.xpi` signé depuis [addons.mozilla.org](https://addons.mozilla.org/fr/developers/addon/a8876f404af94bbda3d2/versions)
+1. Télécharger le `.xpi` signé depuis les [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-ext/-/releases)
 2. Dans Firefox : `about:addons` → roue dentée → "Installer un module depuis un fichier"
 3. Sélectionner le fichier `.xpi`
 
