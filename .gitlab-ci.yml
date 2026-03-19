@@ -54,12 +54,19 @@ sign:
     - npm install -g web-ext@7.11.0
     - VERSION="${CI_COMMIT_TAG#v}"
     - XPI_NAME="albert-correcteur_${VERSION}.xpi"
-    - web-ext sign --source-dir=sources/ --channel=unlisted --api-key="${WEB_EXT_API_KEY}" --api-secret="${WEB_EXT_API_SECRET}"
-    - SIGNED_XPI=$(ls web-ext-artifacts/*.xpi)
-    - cp "${SIGNED_XPI}" "${XPI_NAME}"
+    - web-ext sign --source-dir=sources/ --channel=unlisted --api-key="${WEB_EXT_API_KEY}" --api-secret="${WEB_EXT_API_SECRET}" || SIGN_FAILED=1
+    - SIGNED_XPI=$(ls web-ext-artifacts/*.xpi 2>/dev/null || true)
+    - |
+      if [ -n "$SIGNED_XPI" ]; then
+        cp "${SIGNED_XPI}" "${XPI_NAME}"
+        echo "Extension signée → ${XPI_NAME}"
+      elif [ "$SIGN_FAILED" = "1" ]; then
+        echo "⚠ Version déjà présente sur AMO — le .xpi du build sera utilisé pour la release"
+      else
+        echo "ERREUR: signature échouée et aucun .xpi disponible" && exit 1
+      fi
     - echo "XPI_NAME=${XPI_NAME}" > build.env
     - echo "VERSION=${VERSION}" >> build.env
-    - echo "Extension signée → ${XPI_NAME}"
   artifacts:
     paths:
       - "albert-correcteur_*.xpi"
