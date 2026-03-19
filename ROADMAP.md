@@ -1,5 +1,27 @@
 # Roadmap Albert Correcteur
 
+## v0.2.5 — Correction remplacement de mots dans CKEditor / EcoleDirecte (terminé)
+
+**Statut** : livré — release v0.2.5
+
+### Problème
+
+Dans l'éditeur de texte CKEditor d'EcoleDirecte, les mots corrigés étaient mal remplacés : l'espace précédant le mot était supprimé et la dernière lettre de l'ancien mot restait. Exemple : "motivé et intéréssé" devenait "motivé etintéresséé".
+
+### Cause
+
+La fonction `applyViaSelection` utilise un TreeWalker pour construire un mapping entre les offsets `innerText` et les positions DOM. Pour les éléments bloc (`<div>`, `<p>`, etc.), le code ajoutait un retour à la ligne par élément rencontré. Or, quand CKEditor imbrique des blocs (`<div><p>…</p></div>`), `innerText` n'ajoute qu'un seul `\n` entre deux lignes adjacentes. Ce double comptage décalait la sélection d'un caractère par niveau de bloc imbriqué.
+
+### Correctif
+
+- Ajout d'une variable `lastNewlineOffset` dans le TreeWalker de `applyViaSelection` pour éviter de compter deux `\n` consécutifs au même offset (blocs imbriqués)
+
+### Fichiers modifiés
+
+- `sources/albert-apply.js` — correction du mapping TreeWalker pour blocs imbriqués
+- `sources/manifest.json` — version 0.2.5
+- `ROADMAP.md` — ajout de cette section
+
 ## v0.2.4 — Correction traduction de textes longs et techniques (terminé)
 
 **Statut** : livré — release v0.2.4
