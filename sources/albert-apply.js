@@ -45,6 +45,9 @@ Albert.applySuggestion = function (el, correction, suggestion) {
     const before = el.value.slice(0, realOffset);
     const after = el.value.slice(realOffset + correction.length);
     el.value = before + suggestion + after;
+    // Synchroniser checkedText pour que les corrections suivantes
+    // utilisent les bons offsets dans findRealOffset()
+    state.checkedText = el.value;
     el.dispatchEvent(new Event("input", { bubbles: true }));
   } else if (el.isContentEditable) {
     if (Albert.isRichEditor(el)) {

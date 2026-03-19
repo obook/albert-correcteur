@@ -1,5 +1,27 @@
 # Roadmap Albert Correcteur
 
+## v0.2.8 — Correction remplacement séquentiel dans les textarea (terminé)
+
+**Statut** : livré — release v0.2.8
+
+### Problème
+
+Sur EcoleDirecte (page Appréciations du Carnet de notes), lorsqu'un enseignant applique plusieurs corrections successives dans un même `<textarea>`, la deuxième correction (et les suivantes) produisait un remplacement corrompu : lettres dupliquées ou manquantes.
+
+### Cause
+
+Après l'application d'une correction, les offsets des corrections restantes sont ajustés par le delta (différence de longueur entre l'ancien et le nouveau mot). Cependant, `state.checkedText` conservait le texte **original** (celui envoyé à l'API). Quand `findRealOffset` cherchait le mot de la correction suivante, il utilisait l'offset **ajusté** pour lire dans le texte **non ajusté**, extrayant un mauvais fragment. `indexOf` retrouvait alors ce fragment au mauvais endroit, causant un remplacement décalé.
+
+### Correctif
+
+- Synchronisation de `state.checkedText` avec `el.value` immédiatement après chaque remplacement textarea, pour que `findRealOffset` travaille toujours avec le texte de référence correct.
+
+### Fichiers modifiés
+
+- `sources/albert-apply.js` — ajout de `state.checkedText = el.value` après remplacement
+- `sources/manifest.json` — version 0.2.8
+- `ROADMAP.md` — ajout de cette section
+
 ## v0.2.7 — Corrections UX et compatibilité EcoleDirecte (terminé)
 
 **Statut** : livré — release v0.2.7
