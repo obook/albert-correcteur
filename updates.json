@@ -3,8 +3,8 @@
     "albert-correcteur@ac-bordeaux.fr": {
       "updates": [
         {
-          "version": "0.2.5",
-          "update_link": "https://forge.apps.education.fr/booklageolivier/albert-ext/-/jobs/artifacts/v0.2.5/raw/albert-correcteur_0.2.5.xpi?job=sign"
+          "version": "0.2.6",
+          "update_link": "https://forge.apps.education.fr/booklageolivier/albert-ext/-/jobs/artifacts/v0.2.6/raw/albert-correcteur_0.2.6.xpi?job=sign"
         }
       ]
     }

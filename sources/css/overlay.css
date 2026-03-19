@@ -39,3 +39,8 @@
   background-repeat: repeat-x;
   background-position: bottom;
 }
+
+/* Masquer l'overlay quand une modale Bootstrap est ouverte (EcoleDirecte) */
+body.modal-open .albert-overlay {
+  display: none !important;
+}

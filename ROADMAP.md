@@ -1,5 +1,27 @@
 # Roadmap Albert Correcteur
 
+## v0.2.6 — Corrections UX et compatibilité EcoleDirecte (terminé)
+
+**Statut** : livré — release v0.2.6
+
+### Corrections
+
+1. **Remplacement de mots dans CKEditor (EcoleDirecte)** — le correctif v0.2.5 (déduplication `lastNewlineOffset`) était trop agressif : quand un `<br>` terminait un bloc suivi d'un nouveau `<p>`, le deuxième `\n` n'était pas compté. Remplacement par une vérification de parenté DOM (`lastNewlineNode.contains()`) qui ne déduplique que les blocs imbriqués, pas les blocs consécutifs.
+
+2. **Fermeture de la popup par Échap ou clic en dehors** — ajout de deux écouteurs globaux (`keydown` Escape, `mousedown` hors popup) dans `albert-popup-common.js`. Couvre les trois popups (correction, reformulation, traduction).
+
+3. **Icônes par-dessus les modales EcoleDirecte** — ajout de règles CSS `body.modal-open .albert-badge/overlay/popup { display: none !important }` pour masquer les éléments Albert quand une modale Bootstrap est ouverte.
+
+### Fichiers modifiés
+
+- `sources/albert-apply.js` — remplacement de `lastNewlineOffset` par `lastNewlineNode` + `contains()`
+- `sources/popup-contenu/albert-popup-common.js` — fermeture Échap + clic en dehors
+- `sources/css/badge.css` — masquage badge sous modale Bootstrap
+- `sources/css/overlay.css` — masquage overlay sous modale Bootstrap
+- `sources/css/popup-dark.css` — masquage popup sous modale Bootstrap
+- `sources/manifest.json` — version 0.2.6
+- `ROADMAP.md` — ajout de cette section
+
 ## v0.2.5 — Correction remplacement de mots dans CKEditor / EcoleDirecte (terminé)
 
 **Statut** : livré — release v0.2.5

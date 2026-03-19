@@ -38,6 +38,20 @@ Albert.closePopup = function () {
   }
 };
 
+// ── Fermeture par Échap ou clic en dehors ──
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && Albert.activePopup) {
+    Albert.closePopup();
+  }
+});
+
+document.addEventListener("mousedown", (e) => {
+  if (Albert.activePopup && !Albert.activePopup.contains(e.target)) {
+    Albert.closePopup();
+  }
+});
+
 // ── Drag (déplacement de la popup via la poignée) ──
 
 Albert.initPopupDrag = function (popup, handle) {

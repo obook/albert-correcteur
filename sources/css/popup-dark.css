@@ -280,3 +280,8 @@
   user-select: text;
   margin-bottom: 8px;
 }
+
+/* Masquer la popup quand une modale Bootstrap est ouverte (EcoleDirecte) */
+body.modal-open .albert-popup {
+  display: none !important;
+}

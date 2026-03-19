@@ -17,10 +17,11 @@
   - **Rouge** — orthographe
   - **Orange** — grammaire
   - **Bleu** — style
-- Popup de suggestion avec explication et correction en un clic
+- Popup de suggestion avec explication et correction en un clic (fermeture par Échap ou clic en dehors)
 - Animation de rotation du logo pendant la vérification
 - Fonctionne sur les `<textarea>`, `<input>` et les éléments `contenteditable`
 - Compatible avec les éditeurs riches (CKEditor, TinyMCE, Quill, ProseMirror, Draft.js, Lexical)
+- Masquage automatique des éléments Albert lors de l'ouverture d'une modale (Bootstrap)
 - Injection dans les iframes (éditeurs intégrés)
 - Détection automatique des nouveaux champs ajoutés dynamiquement (SPA, etc.)
 - Respect de la limite API (backoff automatique en cas de rate limit)
