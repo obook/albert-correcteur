@@ -1,8 +1,8 @@
 # Roadmap Albert Correcteur
 
-## v0.2.6 — Corrections UX et compatibilité EcoleDirecte (terminé)
+## v0.2.7 — Corrections UX et compatibilité EcoleDirecte (terminé)
 
-**Statut** : livré — release v0.2.6
+**Statut** : livré — release v0.2.7
 
 ### Corrections
 
@@ -19,7 +19,7 @@
 - `sources/css/badge.css` — masquage badge sous modale Bootstrap
 - `sources/css/overlay.css` — masquage overlay sous modale Bootstrap
 - `sources/css/popup-dark.css` — masquage popup sous modale Bootstrap
-- `sources/manifest.json` — version 0.2.6
+- `sources/manifest.json` — version 0.2.7
 - `ROADMAP.md` — ajout de cette section
 
 ## v0.2.5 — Correction remplacement de mots dans CKEditor / EcoleDirecte (terminé)
