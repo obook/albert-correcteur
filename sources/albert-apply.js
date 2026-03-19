@@ -96,6 +96,7 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
   const walker = document.createTreeWalker(el, NodeFilter.SHOW_ALL);
   const segments = []; // { node, start, end } pour chaque nœud texte
   let innerOffset = 0;
+  let lastNewlineOffset = -1; // éviter les doublons pour blocs imbriqués
   let current;
 
   while ((current = walker.nextNode())) {
@@ -106,10 +107,16 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
     } else if (current.nodeType === Node.ELEMENT_NODE) {
       const tag = current.tagName.toLowerCase();
       // innerText ajoute \n pour <br>, <p>, <div>, etc.
+      // Pour les blocs imbriqués (<div><p>…), innerText n'ajoute qu'un seul \n :
+      // on évite de compter deux fois au même offset.
       if (tag === "br") {
         innerOffset += 1;
+        lastNewlineOffset = innerOffset;
       } else if (["p", "div", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6"].includes(tag)) {
-        if (innerOffset > 0) innerOffset += 1;
+        if (innerOffset > 0 && lastNewlineOffset !== innerOffset) {
+          innerOffset += 1;
+          lastNewlineOffset = innerOffset;
+        }
       }
     }
   }
