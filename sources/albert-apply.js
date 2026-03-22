@@ -5,6 +5,8 @@
 
 Albert.applyingCorrection = false;
 
+const BLOCK_TAGS = ["p", "div", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6"];
+
 // Retrouve l'offset réel du mot erroné dans le texte actuel.
 // L'offset original peut être décalé si une correction précédente a changé la longueur du texte.
 Albert.findRealOffset = function (currentText, correction, checkedText) {
@@ -15,18 +17,18 @@ Albert.findRealOffset = function (currentText, correction, checkedText) {
     return correction.offset;
   }
 
-  // Sinon, chercher le mot dans le texte actuel (première occurrence)
-  const idx = currentText.indexOf(originalWord);
-  if (idx !== -1) return idx;
-
-  // Dernier recours : chercher autour de l'offset original (±50 chars)
-  const searchStart = Math.max(0, correction.offset - 50);
-  const searchEnd = Math.min(currentText.length, correction.offset + 50);
-  const region = currentText.slice(searchStart, searchEnd);
-  const localIdx = region.indexOf(originalWord);
-  if (localIdx !== -1) return searchStart + localIdx;
-
-  return -1; // mot introuvable
+  // Sinon, chercher le mot dans le texte actuel (occurrence la plus proche de l'offset original)
+  let bestIdx = -1;
+  let searchFrom = 0;
+  while (searchFrom < currentText.length) {
+    const idx = currentText.indexOf(originalWord, searchFrom);
+    if (idx === -1) break;
+    if (bestIdx === -1 || Math.abs(idx - correction.offset) < Math.abs(bestIdx - correction.offset)) {
+      bestIdx = idx;
+    }
+    searchFrom = idx + 1;
+  }
+  return bestIdx;
 };
 
 // Applique une suggestion de correction dans le champ.
@@ -56,6 +58,7 @@ Albert.applySuggestion = function (el, correction, suggestion) {
     const realOffset = Albert.findRealOffset(el.value, correction, state.checkedText || el.value);
     if (realOffset === -1) {
       Albert.applyingCorrection = false;
+      Albert.showToast("Correction impossible : le texte a changé.", 3);
       return;
     }
     const before = el.value.slice(0, realOffset);
@@ -68,7 +71,11 @@ Albert.applySuggestion = function (el, correction, suggestion) {
   } else if (el.isContentEditable) {
     if (Albert.isRichEditor(el)) {
       // Éditeur riche : remplacement via Selection + execCommand
-      Albert.applyViaSelection(el, correction, suggestion);
+      if (!Albert.applyViaSelection(el, correction, suggestion)) {
+        Albert.applyingCorrection = false;
+        Albert.showToast("Correction impossible : le texte a changé.", 3);
+        return;
+      }
     } else {
       // Contenteditable simple : remplacement direct du DOM
       const idx = correction.idx !== undefined ? correction.idx : state.corrections.indexOf(correction);
@@ -120,19 +127,18 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
   const currentText = el.innerText || "";
   const checkedText = state.checkedText || currentText;
   const realOffset = Albert.findRealOffset(currentText, correction, checkedText);
-  if (realOffset === -1) return;
+  if (realOffset === -1) return false;
 
   // Trouver le(s) nœud(s) texte couvrant l'erreur
-  const errStart = realOffset;
   const errEnd = realOffset + correction.length;
 
   let startNode = null, startOffset = 0;
   let endNode = null, endOffset = 0;
 
   for (const seg of segments) {
-    if (!startNode && errStart >= seg.start && errStart <= seg.end) {
+    if (!startNode && realOffset >= seg.start && realOffset <= seg.end) {
       startNode = seg.node;
-      startOffset = errStart - seg.start;
+      startOffset = realOffset - seg.start;
     }
     if (errEnd >= seg.start && errEnd <= seg.end) {
       endNode = seg.node;
@@ -141,7 +147,7 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
     }
   }
 
-  if (!startNode || !endNode) return;
+  if (!startNode || !endNode) return false;
 
   // Sélectionner le texte erroné et vérifier la correspondance
   const range = document.createRange();
@@ -149,7 +155,7 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
   range.setEnd(endNode, endOffset);
 
   const expectedWord = checkedText.slice(correction.offset, correction.offset + correction.length);
-  if (range.toString() !== expectedWord) return; // mapping incohérent, abandon
+  if (range.toString() !== expectedWord) return false; // mapping incohérent, abandon
 
   const sel = window.getSelection();
   sel.removeAllRanges();
@@ -158,7 +164,10 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
   // Petit délai pour que l'éditeur prenne en compte la sélection
   setTimeout(() => {
     document.execCommand("insertText", false, suggestion);
+    state.checkedText = el.innerText || "";
   }, 10);
+
+  return true;
 };
 
 // Construit le mapping innerText ↔ nœuds texte (segments).
@@ -183,7 +192,7 @@ Albert.buildInnerTextSegments = function (el) {
       if (tag === "br") {
         innerOffset += 1;
         lastNewlineNode = current;
-      } else if (["p", "div", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6"].includes(tag)) {
+      } else if (BLOCK_TAGS.includes(tag)) {
         if (innerOffset > 0 && (!lastNewlineNode || !lastNewlineNode.contains(current))) {
           innerOffset += 1;
         }
