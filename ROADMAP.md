@@ -1,5 +1,33 @@
 # Roadmap Albert Correcteur
 
+## v0.2.10 — Robustification du remplacement dans les éditeurs riches (terminé)
+
+**Statut** : livré — release v0.2.10
+
+### Problème
+
+Sur x.com (Draft.js), le remplacement d'un mot corrigé pouvait corrompre le texte : espaces perdus, lettres fusionnées ou dupliquées (ex. "d'enseignantagentsnt"). Deux causes identifiées : détection Draft.js fragile et absence de vérification dans `applyViaSelection`.
+
+### Causes
+
+1. **Détection Draft.js incomplète** — La classe directe du `contenteditable` sur x.com est `public-DraftEditor-content`, non couverte par les détecteurs existants (`DraftEditor-editorContainer`, `el.closest(".DraftEditor-root")`). Si la détection échouait, l'extension injectait des spans DOM au lieu d'utiliser l'overlay, ce que Draft.js détruisait au re-rendu.
+
+2. **Remplacement aveugle** — `applyViaSelection` faisait confiance à `correction.offset` sans vérifier que le texte sélectionné correspondait au mot erroné. Si l'offset était décalé (correction précédente, DOM modifié), le mauvais texte était écrasé par `execCommand`.
+
+### Correctifs
+
+- Ajout de `public-DraftEditor-content` dans `isRichEditor()` pour la détection directe de Draft.js sur x.com
+- `applyViaSelection` utilise désormais `findRealOffset` pour retrouver l'offset réel dans le texte actuel
+- Vérification de cohérence : `range.toString()` comparé au mot erroné attendu, abandon si incohérent
+- Extraction du TreeWalker dans `buildInnerTextSegments()` pour clarifier le code
+
+### Fichiers modifiés
+
+- `sources/albert-utils.js` — détection `public-DraftEditor-content`
+- `sources/albert-apply.js` — `findRealOffset` + vérification + refactoring `buildInnerTextSegments`
+- `sources/manifest.json` — version 0.2.10
+- `ROADMAP.md` — ajout de cette section
+
 ## v0.2.9 — Correction remplacement dans les contenteditable simples (terminé)
 
 **Statut** : livré — release v0.2.9

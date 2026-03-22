@@ -111,40 +111,20 @@ Albert.applySuggestion = function (el, correction, suggestion) {
 // Construit un mapping innerText ↔ nœuds texte pour gérer les <br> et blocs.
 Albert.applyViaSelection = function (el, correction, suggestion) {
   el.focus();
+  const state = Albert.getOrCreateState(el);
 
   // Construire le mapping entre les offsets innerText et les nœuds texte
-  const walker = document.createTreeWalker(el, NodeFilter.SHOW_ALL);
-  const segments = []; // { node, start, end } pour chaque nœud texte
-  let innerOffset = 0;
-  let lastNewlineNode = null; // nœud ayant causé le dernier saut de ligne
-  let current;
+  const segments = Albert.buildInnerTextSegments(el);
 
-  while ((current = walker.nextNode())) {
-    if (current.nodeType === Node.TEXT_NODE) {
-      const len = current.textContent.length;
-      segments.push({ node: current, start: innerOffset, end: innerOffset + len });
-      innerOffset += len;
-    } else if (current.nodeType === Node.ELEMENT_NODE) {
-      const tag = current.tagName.toLowerCase();
-      // innerText ajoute \n pour <br>, <p>, <div>, etc.
-      // Pour les blocs imbriqués (<div><p>…), innerText n'ajoute qu'un seul \n :
-      // on ne déduplique que si le bloc courant est DANS le nœud précédent (parenté DOM).
-      // Pour <br></p><p> (blocs consécutifs), les deux \n doivent être comptés.
-      if (tag === "br") {
-        innerOffset += 1;
-        lastNewlineNode = current;
-      } else if (["p", "div", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6"].includes(tag)) {
-        if (innerOffset > 0 && (!lastNewlineNode || !lastNewlineNode.contains(current))) {
-          innerOffset += 1;
-        }
-        lastNewlineNode = current;
-      }
-    }
-  }
+  // Déterminer l'offset réel (peut être décalé par une correction précédente)
+  const currentText = el.innerText || "";
+  const checkedText = state.checkedText || currentText;
+  const realOffset = Albert.findRealOffset(currentText, correction, checkedText);
+  if (realOffset === -1) return;
 
   // Trouver le(s) nœud(s) texte couvrant l'erreur
-  const errStart = correction.offset;
-  const errEnd = correction.offset + correction.length;
+  const errStart = realOffset;
+  const errEnd = realOffset + correction.length;
 
   let startNode = null, startOffset = 0;
   let endNode = null, endOffset = 0;
@@ -163,10 +143,13 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
 
   if (!startNode || !endNode) return;
 
-  // Sélectionner le texte erroné
+  // Sélectionner le texte erroné et vérifier la correspondance
   const range = document.createRange();
   range.setStart(startNode, startOffset);
   range.setEnd(endNode, endOffset);
+
+  const expectedWord = checkedText.slice(correction.offset, correction.offset + correction.length);
+  if (range.toString() !== expectedWord) return; // mapping incohérent, abandon
 
   const sel = window.getSelection();
   sel.removeAllRanges();
@@ -176,4 +159,38 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
   setTimeout(() => {
     document.execCommand("insertText", false, suggestion);
   }, 10);
+};
+
+// Construit le mapping innerText ↔ nœuds texte (segments).
+// Utilisé par applyViaSelection pour convertir un offset innerText en position DOM.
+Albert.buildInnerTextSegments = function (el) {
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_ALL);
+  const segments = []; // { node, start, end } pour chaque nœud texte
+  let innerOffset = 0;
+  let lastNewlineNode = null;
+  let current;
+
+  while ((current = walker.nextNode())) {
+    if (current.nodeType === Node.TEXT_NODE) {
+      const len = current.textContent.length;
+      segments.push({ node: current, start: innerOffset, end: innerOffset + len });
+      innerOffset += len;
+    } else if (current.nodeType === Node.ELEMENT_NODE) {
+      const tag = current.tagName.toLowerCase();
+      // innerText ajoute \n pour <br>, <p>, <div>, etc.
+      // Pour les blocs imbriqués (<div><p>…), innerText n'ajoute qu'un seul \n :
+      // on ne déduplique que si le bloc courant est DANS le nœud précédent (parenté DOM).
+      if (tag === "br") {
+        innerOffset += 1;
+        lastNewlineNode = current;
+      } else if (["p", "div", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6"].includes(tag)) {
+        if (innerOffset > 0 && (!lastNewlineNode || !lastNewlineNode.contains(current))) {
+          innerOffset += 1;
+        }
+        lastNewlineNode = current;
+      }
+    }
+  }
+
+  return segments;
 };
