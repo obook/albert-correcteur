@@ -207,6 +207,6 @@ Albert.navigateError = function (el, direction) {
   const mark = container.querySelector(`.albert-error[data-idx="${newIdx}"]`);
   if (mark) {
     mark.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    Albert.showPopup(el, { ...state.corrections[newIdx], idx: newIdx }, mark);
+    Albert.showPopup(el, state.corrections[newIdx], mark);
   }
 };

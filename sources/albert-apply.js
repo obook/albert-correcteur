@@ -35,6 +35,22 @@ Albert.applySuggestion = function (el, correction, suggestion) {
   const tag = el.tagName.toLowerCase();
   const state = Albert.getOrCreateState(el);
 
+  // Garde-fou : si la suggestion inclut du contexte avant l'erreur, le retirer.
+  // Ex. : erreur "ortographe" (offset 40), suggestion "d'orthographe" → trimmer le "d'" en trop.
+  if (suggestion.length > correction.length) {
+    const fullText = Albert.getTextContent(el);
+    const maxOverlap = suggestion.length - correction.length;
+    for (let len = maxOverlap; len > 0; len--) {
+      if (correction.offset >= len) {
+        const prefix = fullText.slice(correction.offset - len, correction.offset);
+        if (suggestion.startsWith(prefix)) {
+          suggestion = suggestion.slice(len);
+          break;
+        }
+      }
+    }
+  }
+
   if (tag === "textarea" || tag === "input") {
     // Retrouver l'offset réel dans le texte actuel
     const realOffset = Albert.findRealOffset(el.value, correction, state.checkedText || el.value);
@@ -55,7 +71,8 @@ Albert.applySuggestion = function (el, correction, suggestion) {
       Albert.applyViaSelection(el, correction, suggestion);
     } else {
       // Contenteditable simple : remplacement direct du DOM
-      const marks = el.querySelectorAll(`.albert-error[data-idx="${correction.idx}"]`);
+      const idx = correction.idx !== undefined ? correction.idx : state.corrections.indexOf(correction);
+      const marks = el.querySelectorAll(`.albert-error[data-idx="${idx}"]`);
       marks.forEach((mark) => {
         const textNode = document.createTextNode(suggestion);
         mark.parentNode.replaceChild(textNode, mark);

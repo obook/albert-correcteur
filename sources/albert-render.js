@@ -192,7 +192,7 @@ Albert.renderContentEditable = function (el, state) {
     mark.dataset.idx = c.idx;
     mark.addEventListener("click", (e) => {
       e.stopPropagation();
-      Albert.showPopup(el, c, mark);
+      Albert.showPopup(el, state.corrections[c.idx], mark);
     });
 
     range.surroundContents(mark);

@@ -11,5 +11,6 @@ Pour chaque erreur, indique :
 Règles :
 - Ne signale que les vraies erreurs, pas les variantes acceptables.
 - Les offsets doivent correspondre exactement au texte original.
+- Chaque suggestion doit contenir uniquement le remplacement exact du texte entre offset et offset+length. Ne jamais inclure de contexte environnant (lettres, apostrophes, mots adjacents) dans la suggestion.
 - Si aucune erreur, retourne {"corrections": []}.
 - Retourne uniquement le JSON, sans commentaire ni explication autour.

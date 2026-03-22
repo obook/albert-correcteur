@@ -1,5 +1,38 @@
 # Roadmap Albert Correcteur
 
+## v0.2.9 — Correction remplacement dans les contenteditable simples (terminé)
+
+**Statut** : livré — release v0.2.9
+
+### Problème
+
+Dans les éléments `contenteditable` simples (hors éditeurs riches), le remplacement d'un mot corrigé produisait un texte corrompu : espaces perdus, lettres dupliquées. Exemple : "Les fautes d'ortographe seront detectées" devenait "serontdétectéess" ou "d'd'orthographe".
+
+### Causes
+
+1. **Référence cassée** — `renderContentEditable` passait une copie spread (`{ ...c, idx: i }`) à `showPopup`. Ensuite, `applySuggestion` retirait la correction appliquée par comparaison de référence (`filter(c => c !== correction)`). Comme la copie n'est jamais `===` à l'original, la correction restait dans le tableau et était ré-rendue à un offset devenu faux.
+
+2. **Index manquant** — L'objet correction original (sans `idx`) était ensuite utilisé pour chercher le mark DOM (`data-idx="${correction.idx}"`), ce qui produisait `data-idx="undefined"` et ne trouvait rien.
+
+3. **Suggestion débordante** — L'API retournait parfois une suggestion incluant du contexte environnant (ex. : erreur "ortographe", suggestion "d'orthographe" avec le "d'" en trop), causant une duplication lors du remplacement.
+
+### Correctifs
+
+- `renderContentEditable` passe maintenant la référence originale (`state.corrections[c.idx]`) au lieu d'une copie
+- `navigateError` passe également la référence originale
+- `applySuggestion` retrouve l'index via `indexOf` quand `correction.idx` n'est pas défini
+- Garde-fou dans `applySuggestion` : détection et suppression du préfixe en double quand la suggestion inclut du contexte environnant
+- Prompt de correction renforcé : chaque suggestion doit couvrir exactement le texte entre offset et offset+length
+
+### Fichiers modifiés
+
+- `sources/albert-render.js` — passage de la référence originale dans le click handler
+- `sources/popup-contenu/albert-popup-correction.js` — passage de la référence originale dans `navigateError`
+- `sources/albert-apply.js` — résolution d'index par `indexOf`, garde-fou anti-duplication
+- `sources/prompts/correction.txt` — règle de précision sur les suggestions
+- `sources/manifest.json` — version 0.2.9
+- `ROADMAP.md` — ajout de cette section
+
 ## v0.2.8 — Correction remplacement séquentiel dans les textarea (terminé)
 
 **Statut** : livré — release v0.2.8
