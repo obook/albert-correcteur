@@ -52,7 +52,7 @@ albert-ext/
 │
 ├── tests/                            ← Tests unitaires (Node.js, sans dépendance)
 │   ├── run-all.sh                    ← Lance toutes les suites
-│   └── test-*.js                     ← 8 suites, 129 tests
+│   └── test-*.js                     ← 9 suites, 142 tests
 │
 ├── exemple/                          ← Pages de test
 │   ├── test.html                     ← Page de test multilingue + éditeurs React
