@@ -32,7 +32,6 @@ Albert.closePopup = function () {
   if (Albert.activePopup) {
     Albert.activePopup.remove();
     Albert.activePopup = null;
-    Albert.activePopupEl = null;
     Albert.activePopupIdx = -1;
     Albert.popupPosition = null;
   }
@@ -69,18 +68,32 @@ Albert.initPopupDrag = function (popup, handle) {
     handle.style.cursor = "grabbing";
   });
 
-  document.addEventListener("mousemove", (e) => {
+  // Stocker les références pour pouvoir les retirer à la fermeture du popup
+  const onMouseMove = (e) => {
     if (!isDragging) return;
     popup.style.left = (origLeft + e.clientX - startX) + "px";
     popup.style.top = (origTop + e.clientY - startY) + "px";
-  });
+  };
 
-  document.addEventListener("mouseup", () => {
+  const onMouseUp = () => {
     if (isDragging) {
       isDragging = false;
       handle.style.cursor = "grab";
     }
+  };
+
+  document.addEventListener("mousemove", onMouseMove);
+  document.addEventListener("mouseup", onMouseUp);
+
+  // Nettoyage automatique quand le popup est retiré du DOM
+  const observer = new MutationObserver(() => {
+    if (!popup.isConnected) {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      observer.disconnect();
+    }
   });
+  observer.observe(popup.parentNode || document.body, { childList: true });
 };
 
 // --- Positionnement près du clic droit ---

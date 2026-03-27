@@ -12,7 +12,6 @@ Albert.showPopup = function (el, correction, markEl) {
   Albert.closePopup();
 
   const state = Albert.getOrCreateState(el);
-  Albert.activePopupEl = el;
   Albert.activePopupIdx = correction.idx !== undefined ? correction.idx : state.corrections.indexOf(correction);
 
   const themeClass = Albert.getPopupThemeClass();

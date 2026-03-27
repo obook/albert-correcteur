@@ -54,7 +54,8 @@ Albert.getOrCreateState = function (el) {
   if (!Albert.fieldStates.has(el)) {
     Albert.fieldStates.set(el, {
       timer: null, corrections: [], overlay: null, badge: null,
-      attached: false, lastCheckedText: "", scrollHandler: null,
+      attached: false, focused: false, lastCheckedText: "",
+      checkedText: "", scrollHandler: null,
     });
   }
   return Albert.fieldStates.get(el);
@@ -63,15 +64,6 @@ Albert.getOrCreateState = function (el) {
 // Pause asynchrone (ms millisecondes).
 Albert.sleep = function (ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-};
-
-// Échappe les caractères HTML spéciaux.
-Albert.escapeHTML = function (str) {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 };
 
 // --- Dictionnaire personnel (mots ignorés) ---
@@ -88,6 +80,41 @@ Albert.saveIgnoredWords = async function () {
 Albert.ignoreWord = async function (word) {
   Albert.ignoredWords.add(word.toLowerCase());
   await Albert.saveIgnoredWords();
+};
+
+// Recale les offsets des corrections renvoyées par le LLM.
+// Le LLM se trompe souvent dans le comptage des caractères sur du texte long.
+// Si le champ "word" est présent, on recherche le mot dans le texte
+// pour trouver l'occurrence la plus proche de l'offset annoncé.
+Albert.recalibrateOffsets = function (corrections, text) {
+  return corrections.map((c) => {
+    const word = c.word || text.slice(c.offset, c.offset + c.length);
+    const atOffset = text.slice(c.offset, c.offset + word.length);
+
+    // L'offset est déjà correct
+    if (atOffset === word) {
+      return { ...c, offset: c.offset, length: word.length };
+    }
+
+    // Chercher l'occurrence la plus proche de l'offset du LLM
+    let bestIdx = -1;
+    let searchFrom = 0;
+    while (searchFrom < text.length) {
+      const idx = text.indexOf(word, searchFrom);
+      if (idx === -1) break;
+      if (bestIdx === -1 || Math.abs(idx - c.offset) < Math.abs(bestIdx - c.offset)) {
+        bestIdx = idx;
+      }
+      searchFrom = idx + 1;
+    }
+
+    if (bestIdx !== -1) {
+      return { ...c, offset: bestIdx, length: word.length };
+    }
+
+    // Mot introuvable : garder l'offset original
+    return c;
+  }).filter((c) => c.offset >= 0 && c.offset + c.length <= text.length);
 };
 
 // Filtre les corrections en excluant les mots du dictionnaire personnel.

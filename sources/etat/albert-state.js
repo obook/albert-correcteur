@@ -24,7 +24,6 @@ window.Albert = {
   fieldStates: new WeakMap(),
   trackedFields: new Set(),
   activePopup: null,
-  activePopupEl: null,       // champ associé au popup actif
   activePopupIdx: -1,        // index de la correction affichée dans le popup
   checkInProgress: false,
   rateLimited: false,

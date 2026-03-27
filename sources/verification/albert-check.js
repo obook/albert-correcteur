@@ -65,7 +65,8 @@ Albert.triggerCheck = async function (el) {
     if (currentText !== text) return;
 
     const raw = response.corrections || [];
-    state.corrections = Albert.filterIgnoredCorrections(raw, text);
+    const recalibrated = Albert.recalibrateOffsets(raw, text);
+    state.corrections = Albert.filterIgnoredCorrections(recalibrated, text);
     state.lang = response.lang || "fr";
     state.checkedText = text;
     state.lastCheckedText = text;
