@@ -8,6 +8,9 @@ Albert.showReformulationPopup = function (originalText, suggestions) {
   const themeClass = Albert.getPopupThemeClass();
   const popup = document.createElement("div");
   popup.className = "albert-popup" + (themeClass ? " " + themeClass : "");
+  popup.setAttribute("role", "dialog");
+  popup.setAttribute("aria-label", "Reformulation");
+  popup.setAttribute("aria-modal", "false");
 
   // Header
   const { headerLeft, handle } = Albert.createPopupHeader(popup);

@@ -68,9 +68,10 @@ test("manifest.json — a un ID gecko", () => {
   assert.ok(manifest.browser_specific_settings.gecko.id);
 });
 
-test("manifest.json — background script déclaré", () => {
+test("manifest.json — scripts de fond déclarés", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
-  assert.ok(manifest.background.scripts.includes("background.js"));
+  assert.ok(manifest.background.scripts.includes("service/service-config.js"));
+  assert.ok(manifest.background.scripts.includes("service/service-menus.js"));
 });
 
 test("manifest.json — content scripts déclarés", () => {
@@ -107,8 +108,18 @@ test("manifest.json — popup déclarée", () => {
 
 // ── Fichiers clés ──
 
-test("background.js existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "background.js")));
+test("service/ — tous les scripts de fond existent", () => {
+  const fichiers = [
+    "service-config.js", "service-langue.js", "service-prompts.js",
+    "service-limites.js", "service-api.js", "service-menus.js",
+  ];
+  for (const f of fichiers) {
+    assert.ok(fs.existsSync(path.join(FIREFOX, "service", f)), `Manquant : service/${f}`);
+  }
+});
+
+test("Ancien service.js monolithique supprimé", () => {
+  assert.ok(!fs.existsSync(path.join(FIREFOX, "service", "service.js")), "service/service.js ne devrait plus exister");
 });
 
 test("popup/popup.html existe", () => {
@@ -155,18 +166,42 @@ test("install-firefox-dev.sh existe et est exécutable", () => {
   assert.ok(stat.mode & 0o111, "install-firefox-dev.sh n'est pas exécutable");
 });
 
-// ── Dossier toast ──
+// ── Dossiers métier ──
 
-test("Dossier sources/toast/ existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "toast")));
+test("Dossier sources/etat/ existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "etat")));
 });
 
-test("toast/albert-toast.js existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "toast", "albert-toast.js")));
+test("Dossier sources/correction/ existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "correction")));
 });
 
-test("toast/toast.css existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "toast", "toast.css")));
+test("Dossier sources/verification/ existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "verification")));
+});
+
+test("Dossier sources/affichage/ existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "affichage")));
+});
+
+test("Dossier sources/notification/ existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "notification")));
+});
+
+test("Dossier sources/demarrage/ existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "demarrage")));
+});
+
+test("Dossier sources/service/ existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "service")));
+});
+
+test("css/toast.css existe", () => {
+  assert.ok(fs.existsSync(path.join(FIREFOX, "css", "toast.css")));
+});
+
+test("Ancien dossier toast/ supprimé", () => {
+  assert.ok(!fs.existsSync(path.join(FIREFOX, "toast")), "Le dossier toast/ ne devrait plus exister");
 });
 
 // ── Manifest : permissions ──

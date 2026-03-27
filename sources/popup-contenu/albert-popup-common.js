@@ -3,7 +3,7 @@
 
 "use strict";
 
-// ── Thème ──
+// --- Thème ---
 
 Albert.getPopupThemeClass = function () {
   const theme = Albert.popupTheme || "dark";
@@ -24,7 +24,7 @@ browser.storage.onChanged.addListener((changes) => {
   }
 });
 
-// ── Fermeture ──
+// --- Fermeture ---
 
 Albert.popupPosition = null;
 
@@ -38,7 +38,7 @@ Albert.closePopup = function () {
   }
 };
 
-// ── Fermeture par Échap ou clic en dehors ──
+// --- Fermeture par Échap ou clic en dehors ---
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && Albert.activePopup) {
@@ -52,7 +52,7 @@ document.addEventListener("mousedown", (e) => {
   }
 });
 
-// ── Drag (déplacement de la popup via la poignée) ──
+// --- Drag (déplacement de la popup via la poignée) ---
 
 Albert.initPopupDrag = function (popup, handle) {
   let isDragging = false;
@@ -83,7 +83,7 @@ Albert.initPopupDrag = function (popup, handle) {
   });
 };
 
-// ── Positionnement près du clic droit ──
+// --- Positionnement près du clic droit ---
 
 Albert.positionPopupAtClick = function (popup) {
   const saved = Albert.savedSelection;
@@ -106,7 +106,7 @@ Albert.positionPopupAtClick = function (popup) {
   }
 };
 
-// ── Création du header standard (icône + poignée + fermer) ──
+// --- Création du header standard (icône + poignée + fermer) ---
 
 Albert.createPopupHeader = function (popup) {
   const header = document.createElement("div");
@@ -130,11 +130,13 @@ Albert.createPopupHeader = function (popup) {
   handle.className = "albert-popup-handle";
   handle.textContent = "⠿";
   handle.title = "Déplacer";
+  handle.setAttribute("aria-hidden", "true");
   headerRight.appendChild(handle);
 
   const closeBtn = document.createElement("button");
   closeBtn.className = "albert-popup-close";
   closeBtn.textContent = "✕";
+  closeBtn.setAttribute("aria-label", "Fermer");
   closeBtn.addEventListener("click", () => Albert.closePopup());
   headerRight.appendChild(closeBtn);
 
@@ -144,7 +146,7 @@ Albert.createPopupHeader = function (popup) {
   return { header, headerLeft, headerRight, handle };
 };
 
-// ── Sauvegarde de la sélection avant le menu contextuel ──
+// --- Sauvegarde de la sélection avant le menu contextuel ---
 
 Albert.savedSelection = null;
 

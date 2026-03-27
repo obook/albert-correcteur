@@ -1,4 +1,4 @@
-/* ── Overlay de soulignement pour textareas ── */
+/* --- Overlay de soulignement pour textareas --- */
 .albert-overlay {
   position: absolute;
   pointer-events: none;
@@ -11,7 +11,7 @@
   border-color: transparent !important;
 }
 
-/* ── Marques d'erreur ── */
+/* --- Marques d'erreur --- */
 .albert-error {
   position: relative;
   pointer-events: auto;

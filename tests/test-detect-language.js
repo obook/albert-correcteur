@@ -2,7 +2,7 @@
 
 const assert = require("assert");
 
-// ── Copie des fonctions à tester (depuis background.js) ──
+// ── Copie des fonctions à tester (depuis service/service.js) ──
 
 const LANG_WORDS = {
   fr: ["le", "la", "les", "de", "des", "un", "une", "du", "est", "et", "en", "que", "qui", "dans", "pour", "pas", "sur", "avec", "ce", "sont", "nous", "vous", "ils", "mais", "plus", "être", "avoir", "cette", "tout", "aussi"],

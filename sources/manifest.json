@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Albert Correcteur",
-  "version": "0.2.12",
+  "version": "0.2.13",
   "description": "Extension expérimentale de correction orthographique, grammaticale et de traduction française propulsée par l'API Albert (DINUM).",
   "browser_specific_settings": {
     "gecko": {
@@ -34,32 +34,45 @@
     "open_in_tab": false
   },
   "background": {
-    "scripts": ["background.js"]
+    "scripts": [
+      "service/service-config.js",
+      "service/service-langue.js",
+      "service/service-prompts.js",
+      "service/service-limites.js",
+      "service/service-api.js",
+      "service/service-menus.js"
+    ]
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": [
-        "albert-state.js",
-        "albert-utils.js",
-        "albert-badge.js",
-        "albert-render.js",
+        "etat/albert-state.js",
+        "etat/albert-utils.js",
+        "affichage/albert-badge.js",
+        "affichage/albert-render-arialive.js",
+        "affichage/albert-render-overlay.js",
+        "affichage/albert-render.js",
         "popup-contenu/albert-popup-common.js",
         "popup-contenu/albert-popup-correction.js",
         "popup-contenu/albert-popup-reformulation.js",
         "popup-contenu/albert-popup-traduction.js",
         "popup-contenu/albert-popup-messages.js",
-        "albert-apply.js",
-        "toast/albert-toast.js",
-        "albert-check.js",
-        "albert-main.js"
+        "correction/albert-apply-segments.js",
+        "correction/albert-apply-rich.js",
+        "correction/albert-apply.js",
+        "notification/albert-toast.js",
+        "verification/albert-limites.js",
+        "verification/albert-debounce.js",
+        "verification/albert-check.js",
+        "demarrage/albert-main.js"
       ],
       "css": [
         "css/badge.css",
         "css/overlay.css",
         "css/popup-dark.css",
         "css/popup-light.css",
-        "toast/toast.css"
+        "css/toast.css"
       ],
       "run_at": "document_idle",
       "all_frames": true

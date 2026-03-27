@@ -4,71 +4,93 @@
 
 ```
 albert-ext/
-├── sources/                          ← Extension Firefox (contenu du .xpi)
-│   ├── manifest.json                 ← Manifeste Firefox (Manifest V2)
-│   ├── background.js                 ← Script d'arrière-plan (API, menus contextuels, limites)
-│   │
-│   ├── albert-state.js               ← État global partagé (namespace Albert)
-│   ├── albert-utils.js               ← Utilitaires (détection champs, dictionnaire)
-│   ├── albert-badge.js               ← Badge (icône dans le coin des champs)
-│   ├── albert-render.js              ← Rendu des soulignements d'erreurs
-│   ├── albert-check.js               ← Vérification API (debounce, limites)
-│   ├── albert-apply.js               ← Application des corrections dans le texte
-│   ├── albert-main.js                ← Point d'entrée (scan, observer, démarrage)
-│   │
-│   ├── popup-contenu/                ← Popups injectées dans les pages web
-│   │   ├── albert-popup-common.js    ← Thème, drag, close, positionnement
-│   │   ├── albert-popup-correction.js← Popup de correction (suggestions, navigation)
-│   │   ├── albert-popup-reformulation.js ← Popup de reformulation
-│   │   ├── albert-popup-traduction.js← Popup de traduction (sélecteur langue, copier)
-│   │   └── albert-popup-messages.js  ← Dispatch des messages du background
-│   │
-│   ├── popup-configuration/          ← Interface de configuration (barre d'outils)
-│   │   ├── popup.html / .css / .js   ← Formulaire (clé API, modèle, URL)
-│   │   ├── popup-status.js           ← Messages de statut
-│   │   ├── popup-models.js           ← Chargement des modèles
-│   │   ├── popup-limits.js           ← Limites du compte
-│   │   └── popup-settings.*          ← Page paramètres (thème, dictionnaire)
-│   │
-│   ├── css/                          ← Styles des content scripts
-│   │   ├── badge.css                 ← Badge (normal, loading, erreur, ok, rate-limited)
-│   │   ├── overlay.css               ← Soulignements (spelling, grammar, style)
-│   │   ├── popup-dark.css            ← Popup thème sombre
-│   │   └── popup-light.css           ← Popup thème clair
-│   │
-│   ├── toast/                        ← Notifications toast
-│   │   ├── albert-toast.js
-│   │   └── toast.css
-│   │
-│   ├── prompts/                      ← Prompts éditables (fichiers texte)
-│   │   ├── correction.txt            ← Prompt Correcteur (placeholder {{LANG}})
-│   │   ├── reformulation.txt         ← Prompt Reformuler (placeholder {{LANG}})
-│   │   └── traduction.txt            ← Prompt Traduire ({{LANG_SOURCE}}, {{LANG_CIBLE}})
-│   │
-│   └── icons/                        ← Icônes
-│       ├── icon.svg                  ← SVG normal (rouge/bleue) — badge OK
-│       ├── icon-error.svg            ← SVG erreurs (deux branches rouges)
-│       └── icon-48/96/128.png        ← PNG pour le manifest (AMO)
-│
-├── tests/                            ← Tests unitaires (Node.js, sans dépendance)
-│   ├── run-all.sh                    ← Lance toutes les suites
-│   └── test-*.js                     ← 9 suites, 142 tests
-│
-├── exemple/                          ← Pages de test
-│   ├── test.html                     ← Page de test multilingue + éditeurs React
-│   └── test-react-editors.js         ← Simulation re-rendu React (Draft.js/Lexical)
-├── media/                            ← Captures d'écran pour le README
-├── images/                           ← Logo PNG pour GitForge
-│
-├── README.md                         ← Documentation principale
-├── ARCHITECTURE.md                   ← Ce fichier
-├── ROADMAP.md                        ← Roadmap et sprints
-├── FIREFOX-DEV.md                    ← Installation Firefox Developer Edition
-├── LICENSE                           ← Licence MIT
-├── updates.json                      ← Manifeste de mise à jour Firefox (auto-update)
-├── .gitlab-ci.yml                    ← Pipeline CI/CD (tests, build, sign, release, mise à jour updates.json)
-├── firefox-build.sh                  ← Script de packaging (.xpi)
-└── install-firefox-dev.sh            ← Script d'installation Firefox Dev Edition
+  sources/                              <- Extension Firefox (contenu du .xpi)
+    manifest.json                       <- Manifeste Firefox (Manifest V2)
+
+    etat/                               <- État global et utilitaires
+      albert-state.js                   <- Constantes, configuration, variables globales
+      albert-utils.js                   <- Détection champs, éditeurs riches, dictionnaire
+
+    verification/                       <- Appel API et gestion du rythme
+      albert-limites.js                 <- Limites rpm/rpd, calcul debounce adaptatif
+      albert-debounce.js                <- Double debounce (timer court + timer max)
+      albert-check.js                   <- triggerCheck, cycleCheckAll
+
+    correction/                         <- Application des corrections dans le texte
+      albert-apply.js                   <- Orchestration, findRealOffset, dispatch par type
+      albert-apply-rich.js              <- Éditeurs riches : sélection, événements, fallback
+      albert-apply-segments.js          <- Mapping innerText <-> noeuds DOM
+
+    affichage/                          <- Rendu visuel
+      albert-badge.js                   <- Badge (icône dans le coin des champs, ARIA)
+      albert-render-arialive.js         <- Zone aria-live, annonces, clearCorrections
+      albert-render-overlay.js          <- Overlay transparent, scroll sync, soulignements
+      albert-render.js                  <- Orchestration rendu + contenteditable simple
+
+    notification/                       <- Messages utilisateur
+      albert-toast.js                   <- Notifications temporaires
+
+    demarrage/                          <- Initialisation
+      albert-main.js                    <- Scan des champs, MutationObserver, IME, paste
+
+    service/                            <- Script de fond (6 fichiers)
+      service-config.js                 <- Chargement de la configuration (clé, modèle, URL)
+      service-langue.js                 <- Détection de langue locale (RGPD)
+      service-prompts.js                <- Chargement et construction des prompts
+      service-limites.js                <- Cache et récupération des limites du compte
+      service-api.js                    <- Appels API (correction, reformulation, traduction)
+      service-menus.js                  <- Menus contextuels et dispatch des messages
+
+    popup-contenu/                      <- Popups injectées dans les pages web
+      albert-popup-common.js            <- Thème, drag, close, positionnement
+      albert-popup-correction.js        <- Popup de correction (suggestions, navigation)
+      albert-popup-reformulation.js     <- Popup de reformulation
+      albert-popup-traduction.js        <- Popup de traduction (sélecteur langue, copier)
+      albert-popup-messages.js          <- Dispatch des messages du script de fond
+
+    popup-configuration/                <- Interface de configuration (barre d'outils)
+      popup.html / .css / .js           <- Formulaire (clé API, modèle, URL)
+      popup-status.js                   <- Messages de statut
+      popup-models.js                   <- Chargement des modèles
+      popup-limits.js                   <- Limites du compte
+      popup-settings.*                  <- Page paramètres (thème, dictionnaire)
+
+    css/                                <- Tous les styles
+      badge.css                         <- Badge (normal, loading, erreur, ok, rate-limited)
+      overlay.css                       <- Soulignements (spelling, grammar, style)
+      popup-dark.css                    <- Popup thème sombre
+      popup-light.css                   <- Popup thème clair
+      toast.css                         <- Notification toast
+
+    prompts/                            <- Prompts éditables (fichiers texte)
+      correction.txt                    <- Prompt Correcteur (placeholder {{LANG}})
+      reformulation.txt                 <- Prompt Reformuler (placeholder {{LANG}})
+      traduction.txt                    <- Prompt Traduire ({{LANG_SOURCE}}, {{LANG_CIBLE}})
+
+    icons/                              <- Icônes
+      icon.svg                          <- SVG normal (rouge/bleue)
+      icon-error.svg                    <- SVG erreurs (deux branches rouges)
+      icon-48/96/128.png                <- PNG pour le manifest (AMO)
+
+  tests/                                <- Tests unitaires (Node.js, sans dépendance)
+    run-all.sh                          <- Lance toutes les suites
+    test-*.js                           <- 9 suites, 158 tests
+
+  exemple/                              <- Pages de test
+    test.html                           <- Page de test multilingue + éditeurs React
+    test-react-editors.js               <- Simulation re-rendu React (Draft.js/Lexical)
+  media/                                <- Captures d'écran pour le README
+  images/                               <- Logo PNG pour GitForge
+
+  README.md                             <- Documentation principale
+  ARCHITECTURE.md                       <- Ce fichier
+  ROADMAP.md                            <- Roadmap et sprints
+  FIREFOX-DEV.md                        <- Installation Firefox Developer Edition
+  LICENSE                               <- Licence MIT
+  updates.json                          <- Manifeste de mise à jour Firefox (auto-update)
+  .gitlab-ci.yml                        <- Pipeline CI/CD (tests, build, sign, release)
+  firefox-build.sh                      <- Script de packaging (.xpi)
+  install-firefox-dev.sh                <- Script d'installation Firefox Dev Edition
 ```
 
 ## Fonctionnement
@@ -77,167 +99,196 @@ albert-ext/
 
 L'extension se compose de deux parties :
 
-- **Background script** (`background.js`) — s'exécute en arrière-plan, communique avec l'API Albert, gère les menus contextuels (Reformuler, Traduire), la détection de langue et le cache des limites.
-- **Content scripts** (`albert-*.js` + `popup-contenu/`) — injectés dans chaque page, détectent les champs texte, affichent les corrections, la reformulation et la traduction.
+- **Script de fond** (`service/`) — s'exécute en arrière-plan, communique avec l'API Albert, gère les menus contextuels (Reformuler, Traduire), la détection de langue et le cache des limites.
+- **Content scripts** (`etat/`, `verification/`, `correction/`, `affichage/`, `notification/`, `demarrage/`, `popup-contenu/`) — injectés dans chaque page, détectent les champs texte, affichent les corrections, la reformulation et la traduction.
 
 ### Flux de correction
 
 ```
   Utilisateur tape du texte
-         │
-         ▼
-  albert-main.js (événement input)
-         │
-         ▼ debounce 3s
-  albert-check.js (triggerCheck)
-         │
-         ├── Vérifie les limites (rpm/rpd)
-         │
-         ▼
-  background.js (checkText)
-         │
-         ├── Détecte la langue (FR/EN/ES/DE)
-         ├── Charge le prompt depuis prompts/correction.txt
-         ├── Appelle l'API Albert /v1/chat/completions
-         │
-         ▼
+         |
+         v
+  demarrage/albert-main.js (événement input)
+         |
+         v debounce adaptatif (calculé depuis le rpm du compte)
+  verification/albert-debounce.js (scheduleCheck)
+         |
+         v
+  verification/albert-limites.js (checkRateLimit)
+         |
+         v
+  verification/albert-check.js (triggerCheck)
+         |
+         +-- Annule la requête précédente si le texte a changé
+         |
+         v
+  service/service-api.js (checkText)
+         |
+         +-- service-langue.js : détecte la langue (FR/EN/ES/DE)
+         +-- service-prompts.js : charge le prompt depuis prompts/correction.txt
+         +-- Appelle l'API Albert /v1/chat/completions
+         |
+         v
   Réponse JSON : { corrections: [...] }
-         │
-         ▼
-  albert-check.js
-         │
-         ├── Filtre les mots du dictionnaire personnel
-         │
-         ▼
-  albert-render.js (renderCorrections)
-         │
-         ├── textarea/input/éditeur riche → overlay transparent
-         ├── contenteditable simple → <span> dans le DOM
-         │
-         ▼
+         |
+         v
+  verification/albert-check.js
+         |
+         +-- Filtre les mots du dictionnaire personnel
+         |
+         v
+  affichage/albert-render.js (renderCorrections)
+         |
+         +-- textarea/input/éditeur riche -> albert-render-overlay.js
+         +-- contenteditable simple -> albert-render.js (renderContentEditable)
+         +-- albert-render-arialive.js : annonce pour les lecteurs d'écran
+         |
+         v
   Soulignements colorés (rouge/orange/bleu)
-         │
-         ▼ clic sur un mot souligné
-  albert-popup-correction.js (showPopup)
-         │
-         ├── Affiche la popup (suggestions, navigation, modes)
-         │
-         ▼ clic sur une suggestion
-  albert-apply.js (applySuggestion)
-         │
-         ├── Remplace le mot dans le champ
-         ├── Retire la correction de la liste, recalcule les offsets restants
-         └── Re-rend l'overlay immédiatement (suppression instantanée du soulignement)
+         |
+         v clic sur un mot souligné
+  popup-contenu/albert-popup-correction.js (showPopup)
+         |
+         +-- Affiche la popup (suggestions, navigation, modes)
+         |
+         v clic sur une suggestion
+  correction/albert-apply.js (applySuggestion)
+         |
+         +-- textarea/input : albert-apply.js (_applyInTextarea)
+         +-- éditeur riche : albert-apply-rich.js (applyViaSelection)
+         +-- contenteditable simple : albert-apply.js (_applyInContentEditable)
+         +-- Retire la correction, recalcule les offsets restants
+         +-- Re-rend l'overlay
 ```
 
 ### Flux de reformulation (menu contextuel)
 
 ```
-  Utilisateur sélectionne du texte dans un champ → clic droit → "Reformuler avec Albert"
-         │
-         ▼
-  albert-popup-common.js (sauvegarde la sélection sur contextmenu)
-         │
-         ▼
-  background.js (contextMenus.onClicked)
-         │
-         ├── Appelle checkText(text, "reformulation")
-         ├── Envoie le résultat au content script
-         │
-         ▼
-  albert-popup-messages.js → albert-popup-reformulation.js (showReformulationPopup)
-         │
-         ├── Popup positionnée au clic droit
-         │
-         ▼ clic sur une suggestion
+  Utilisateur sélectionne du texte dans un champ -> clic droit -> "Reformuler avec Albert"
+         |
+         v
+  popup-contenu/albert-popup-common.js (sauvegarde la sélection)
+         |
+         v
+  service/service-menus.js (contextMenus.onClicked)
+         |
+         +-- service-api.js : checkText(text, "reformulation")
+         +-- Envoie le résultat au content script
+         |
+         v
+  popup-contenu/albert-popup-messages.js -> albert-popup-reformulation.js
+         |
+         +-- Popup positionnée au clic droit
+         |
+         v clic sur une suggestion
   albert-popup-reformulation.js (applyReformulation)
-         │
-         └── Remplace la sélection dans le champ
+         |
+         +-- Remplace la sélection dans le champ
 ```
 
 ### Flux de traduction (menu contextuel)
 
 ```
-  Utilisateur sélectionne du texte (n'importe où) → clic droit → "Traduire avec Albert"
-         │
-         ▼
-  albert-popup-common.js (sauvegarde la sélection sur contextmenu)
-         │
-         ▼
-  background.js (contextMenus.onClicked)
-         │
-         └── Envoie "translateGetSelection" au content script
-                │
-                ▼
-  albert-popup-messages.js → albert-popup-traduction.js (showTranslationPopup)
-         │
-         ├── Popup avec sélecteur de langue + bouton Traduire
-         ├── Traduction automatique dans la dernière langue choisie
-         │
-         ▼
+  Utilisateur sélectionne du texte -> clic droit -> "Traduire avec Albert"
+         |
+         v
+  popup-contenu/albert-popup-common.js (sauvegarde la sélection)
+         |
+         v
+  service/service-menus.js (contextMenus.onClicked)
+         |
+         +-- Envoie "translateGetSelection" au content script
+                |
+                v
+  popup-contenu/albert-popup-messages.js -> albert-popup-traduction.js
+         |
+         +-- Popup avec sélecteur de langue + bouton Traduire
+         +-- Traduction automatique dans la dernière langue choisie
+         |
+         v
   albert-popup-traduction.js (doTranslate)
-         │
-         ├── Envoie { type: "translate", text, targetLang } au background
-         │
-         ▼
-  background.js (translateText)
-         │
-         ├── Détecte la langue source
-         ├── Charge le prompt depuis prompts/traduction.txt
-         ├── Appelle l'API Albert
-         │
-         ▼
+         |
+         +-- Envoie { type: "translate", text, targetLang }
+         |
+         v
+  service/service-api.js (translateText)
+         |
+         +-- service-langue.js : détecte la langue source
+         +-- service-prompts.js : charge le prompt traduction
+         +-- Appelle l'API Albert
+         |
+         v
   Réponse : { translation: "...", langSource }
-         │
-         ▼
-  Popup affiche le résultat + "Langue source → Langue cible"
-         │
-         └── Bouton "Copier" → presse-papiers
+         |
+         v
+  Popup affiche le résultat + "Langue source -> Langue cible"
+         |
+         +-- Bouton "Copier" -> presse-papiers
 ```
 
 ### Gestion des limites API
 
 ```
   Avant chaque requête
-         │
-         ▼
-  albert-check.js (checkRateLimit)
-         │
-         ├── rpm : compteur de requêtes dans les 60 dernières secondes
-         ├── rpd : compteur journalier
-         │
-         ▼ si limite atteinte
-         │
-         ├── Toast en haut à droite (message + durée)
-         ├── Badges grisés sur tous les champs
-         ├── Pause automatique
-         │
-         ▼ si l'API retourne 429
-         │
-         ├── Extraction du header Retry-After
-         ├── Toast avec le type de limite (rpm/rpd/tpm/tpd)
-         └── Pause selon Retry-After
+         |
+         v
+  verification/albert-limites.js (checkRateLimit)
+         |
+         +-- rpm : compteur de requêtes dans les 60 dernières secondes
+         +-- rpd : compteur journalier
+         +-- updateDebounceFromRpm : délais calculés depuis le rpm du compte
+         +-- Throttle : si >80 % du quota, les délais doublent
+         |
+         v si limite atteinte
+         |
+         +-- showRateLimitWarning : toast + badges grisés
+         +-- Pause automatique
+         |
+         v si l'API retourne 429
+         |
+         +-- Extraction du header Retry-After
+         +-- Toast avec le type de limite (rpm/rpd/tpm/tpd)
+         +-- Pause selon Retry-After
 ```
 
 ### Modules content script
 
-Les content scripts partagent le namespace `window.Albert` et sont chargés dans cet ordre par le manifest :
+Les content scripts partagent le namespace `window.Albert` et sont chargés dans cet ordre :
+
+| Ordre | Module | Dossier | Rôle |
+|-------|--------|---------|------|
+| 1 | `albert-state.js` | `etat/` | Constantes, état global, URLs des icônes |
+| 2 | `albert-utils.js` | `etat/` | Détection champs, éditeurs riches, dictionnaire |
+| 3 | `albert-badge.js` | `affichage/` | Création et positionnement du badge (ARIA) |
+| 4 | `albert-render-arialive.js` | `affichage/` | Zone aria-live, annonces, clearCorrections |
+| 5 | `albert-render-overlay.js` | `affichage/` | Overlay transparent, scroll sync, soulignements |
+| 6 | `albert-render.js` | `affichage/` | Orchestration rendu + contenteditable simple |
+| 7 | `albert-popup-common.js` | `popup-contenu/` | Thème, drag, close, positionnement, sélection |
+| 8 | `albert-popup-correction.js` | `popup-contenu/` | Popup de correction et navigation |
+| 9 | `albert-popup-reformulation.js` | `popup-contenu/` | Popup de reformulation |
+| 10 | `albert-popup-traduction.js` | `popup-contenu/` | Popup de traduction |
+| 11 | `albert-popup-messages.js` | `popup-contenu/` | Dispatch des messages du script de fond |
+| 12 | `albert-apply-segments.js` | `correction/` | Mapping innerText <-> noeuds DOM |
+| 13 | `albert-apply-rich.js` | `correction/` | Éditeurs riches : sélection, événements, fallback |
+| 14 | `albert-apply.js` | `correction/` | Orchestration des corrections |
+| 15 | `albert-toast.js` | `notification/` | Notification toast |
+| 16 | `albert-limites.js` | `verification/` | Limites rpm/rpd, calcul debounce adaptatif |
+| 17 | `albert-debounce.js` | `verification/` | Double debounce (timer court + timer max) |
+| 18 | `albert-check.js` | `verification/` | triggerCheck, cycleCheckAll |
+| 19 | `albert-main.js` | `demarrage/` | Scan des champs, MutationObserver, IME, paste |
+
+### Scripts de fond
+
+Chargés dans cet ordre par le manifest (scope global partagé) :
 
 | Ordre | Module | Rôle |
 |-------|--------|------|
-| 1 | `albert-state.js` | Constantes, état global, URLs des icônes |
-| 2 | `albert-utils.js` | Détection champs, éditeurs riches (CKEditor, TinyMCE, Quill, ProseMirror, Draft.js, Lexical), dictionnaire |
-| 3 | `albert-badge.js` | Création et positionnement du badge |
-| 4 | `albert-render.js` | Rendu des soulignements (overlay/contenteditable) |
-| 5 | `popup-contenu/albert-popup-common.js` | Thème, drag, close, positionnement, sélection |
-| 6 | `popup-contenu/albert-popup-correction.js` | Popup de correction et navigation |
-| 7 | `popup-contenu/albert-popup-reformulation.js` | Popup de reformulation |
-| 8 | `popup-contenu/albert-popup-traduction.js` | Popup de traduction |
-| 9 | `popup-contenu/albert-popup-messages.js` | Dispatch des messages du background |
-| 10 | `albert-apply.js` | Application des corrections dans le texte |
-| 11 | `toast/albert-toast.js` | Notification toast |
-| 12 | `albert-check.js` | Vérification API, limites, debounce |
-| 13 | `albert-main.js` | Scan des champs, MutationObserver, démarrage |
+| 1 | `service-config.js` | Chargement de la configuration |
+| 2 | `service-langue.js` | Détection de langue locale (RGPD) |
+| 3 | `service-prompts.js` | Chargement et construction des prompts |
+| 4 | `service-limites.js` | Cache et récupération des limites du compte |
+| 5 | `service-api.js` | Appels API (correction, reformulation, traduction) |
+| 6 | `service-menus.js` | Menus contextuels et dispatch des messages |
 
 ### États du badge
 

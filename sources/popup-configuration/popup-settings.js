@@ -9,7 +9,7 @@ const statusDiv = document.getElementById("status");
 const ignoredWordsDiv = document.getElementById("ignored-words");
 const noWordsMsg = document.getElementById("no-words");
 
-// ── Thème ──
+// --- Thème ---
 
 const themeRadios = document.querySelectorAll('input[name="theme"]');
 
@@ -26,7 +26,7 @@ themeRadios.forEach((radio) => {
   });
 });
 
-// ── Dictionnaire personnel ──
+// --- Dictionnaire personnel ---
 
 async function loadIgnoredWords() {
   const result = await browser.storage.local.get("ignoredWords");

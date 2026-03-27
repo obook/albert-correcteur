@@ -1,4 +1,4 @@
-# Albert Correcteur — Extension Firefox
+# Albert Correcteur - Extension Firefox
 
 **Extension expérimentale** de correction orthographique, grammaticale et de traduction pour Firefox, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web, propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné (français, anglais, espagnol, allemand).
 
@@ -10,28 +10,32 @@
 
 ## Fonctionnalités
 
-- Vérification automatique 3 secondes après l'arrêt de la saisie
-- Vérification du champs de saisie dès le focus
+- Vérification automatique adaptée au quota API (debounce calculé depuis le rpm du compte)
+- Vérification immédiate au collage de texte
+- Vérification du champ de saisie dès le focus
 - Vérification manuelle en cliquant sur le badge Albert dans le coin du champ
 - Soulignements colorés selon le type d'erreur :
-  - **Rouge** — orthographe
-  - **Orange** — grammaire
-  - **Bleu** — style
+ - **Rouge** - orthographe
+ - **Orange** - grammaire
+ - **Bleu** - style
 - Popup de suggestion avec explication et correction en un clic (fermeture par Échap ou clic en dehors)
 - Animation de rotation du logo pendant la vérification
 - Fonctionne sur les `<textarea>`, `<input>` et les éléments `contenteditable`
 - Compatible avec les éditeurs riches (CKEditor, TinyMCE, Quill, ProseMirror, Draft.js, Lexical)
+- Gestion des saisies IME (langues CJK) sans déclenchement intempestif
+- Désactivation automatique du correcteur natif du navigateur sur les champs suivis
 - Masquage automatique des éléments Albert lors de l'ouverture d'une modale (Bootstrap)
 - Injection dans les iframes (éditeurs intégrés)
 - Détection automatique des nouveaux champs ajoutés dynamiquement (SPA, etc.)
-- Respect de la limite API (backoff automatique en cas de rate limit)
+- Respect de la limite API (backoff adaptatif calculé depuis le rpm du compte)
+- Accessibilité (RGAA) : attributs ARIA sur le badge, les popups et annonces pour lecteurs d'écran
 - **Mises à jour automatiques** via `updates.json` (Firefox vérifie périodiquement les nouvelles versions)
 - **Reformulation** via le menu contextuel (clic droit dans un champ de saisie)
 - **Traduction** via le menu contextuel (clic droit sur n'importe quelle sélection de texte)
-  - Langues de traduction : français, anglais, espagnol, allemand
-  - Détection automatique de la langue source
-  - Traduction automatique à l'ouverture dans la dernière langue choisie
-  - Bouton "Copier" pour récupérer le résultat
+ - Langues de traduction : français, anglais, espagnol, allemand
+ - Détection automatique de la langue source
+ - Traduction automatique à l'ouverture dans la dernière langue choisie
+ - Bouton "Copier" pour récupérer le résultat
 
 ## Conformité RGPD
 
@@ -60,9 +64,9 @@ Pour le développement local avec Firefox Developer Edition, voir [FIREFOX-DEV.m
 
 1. Cliquer sur l'icône Albert dans la barre d'outils de Firefox
 2. Renseigner :
-   - **Clé API Albert** (obligatoire) — au format `sk-...`
-   - **Modèle** — menu déroulant chargé dynamiquement depuis l'API (modèles `text-generation`)
-   - **URL de l'API** (optionnel) — par défaut `https://albert.api.etalab.gouv.fr`
+  - **Clé API Albert** (obligatoire) - au format `sk-...`
+  - **Modèle** - menu déroulant chargé dynamiquement depuis l'API (modèles `text-generation`)
+  - **URL de l'API** (optionnel) - par défaut `https://albert.api.etalab.gouv.fr`
 3. Cliquer sur "Enregistrer"
 
 ## Fonctionnement

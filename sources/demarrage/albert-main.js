@@ -15,6 +15,33 @@ Albert.attachField = function (el) {
 
   Albert.trackedFields.add(el);
 
+  // Désactiver le correcteur natif du navigateur pour éviter les doubles soulignements
+  el.setAttribute("spellcheck", "false");
+
+  // Gestion IME : ne pas déclencher de vérification pendant la composition
+  el.addEventListener("compositionstart", () => {
+    const st = Albert.getOrCreateState(el);
+    st.isComposing = true;
+  });
+  el.addEventListener("compositionend", () => {
+    const st = Albert.getOrCreateState(el);
+    st.isComposing = false;
+    Albert.scheduleCheck(el);
+  });
+
+  // Vérification immédiate au paste (sans attendre le debounce complet)
+  el.addEventListener("paste", () => {
+    setTimeout(() => {
+      const st = Albert.getOrCreateState(el);
+      if (st.badge) Albert.updateBadgeVisibility(el, st.badge);
+      clearTimeout(st.timer);
+      clearTimeout(st.maxTimer);
+      st.timer = null;
+      st.maxTimer = null;
+      Albert.triggerCheck(el);
+    }, 50);
+  });
+
   el.addEventListener("input", () => {
     const st = Albert.getOrCreateState(el);
     if (st.badge) Albert.updateBadgeVisibility(el, st.badge);
@@ -22,7 +49,11 @@ Albert.attachField = function (el) {
     // Si c'est une correction appliquée par Albert, ne pas tout effacer
     if (Albert.applyingCorrection) return;
 
-    // Saisie utilisateur : revenir à l'état initial
+    // Ne pas réagir pendant la composition IME (saisie CJK en cours)
+    if (st.isComposing) return;
+
+    // Entrée en "typing mode" : masquer l'overlay et le popup
+    // mais conserver les corrections en mémoire (elles seront migrées ou revérifiées)
     if (st.badge) {
       st.badge.classList.remove("albert-has-errors", "albert-no-errors");
       const img = st.badge.querySelector("img");
@@ -34,6 +65,17 @@ Albert.attachField = function (el) {
       st.overlay = null;
     }
     Albert.closePopup();
+
+    // Timer "fin de frappe" : quand l'utilisateur arrête de taper,
+    // ré-afficher les corrections existantes (si le texte n'a pas changé)
+    // en attendant la revérification complète
+    clearTimeout(st.typingTimer);
+    st.typingTimer = setTimeout(() => {
+      if (st.corrections && st.corrections.length > 0 && st.lastCheckedText === Albert.getTextContent(el)) {
+        Albert.renderCorrections(el);
+      }
+    }, Albert.STOPPED_TYPING_MS);
+
     Albert.scheduleCheck(el);
   });
   el.addEventListener("focus", () => {
@@ -73,7 +115,7 @@ const observer = new MutationObserver((mutations) => {
   scanTimer = setTimeout(Albert.scanFields, Albert.SCAN_DEBOUNCE_MS);
 });
 
-// ── Démarrage ──
+// --- Démarrage ---
 Albert.scanFields();
 observer.observe(document.body, { childList: true, subtree: true });
 

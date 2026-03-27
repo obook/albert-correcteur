@@ -1,4 +1,4 @@
-// albert-popup-messages.js — Écoute des messages du background script.
+// albert-popup-messages.js — Écoute des messages du script de fond.
 // Dispatche vers la bonne popup selon le type de message.
 
 "use strict";

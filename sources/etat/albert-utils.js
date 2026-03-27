@@ -74,7 +74,7 @@ Albert.escapeHTML = function (str) {
     .replace(/"/g, "&quot;");
 };
 
-// ── Dictionnaire personnel (mots ignorés) ──
+// --- Dictionnaire personnel (mots ignorés) ---
 
 Albert.loadIgnoredWords = async function () {
   const result = await browser.storage.local.get("ignoredWords");

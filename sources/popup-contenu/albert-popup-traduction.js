@@ -55,8 +55,11 @@ Albert.showTranslationPopup = function (originalText) {
   const themeClass = Albert.getPopupThemeClass();
   const popup = document.createElement("div");
   popup.className = "albert-popup" + (themeClass ? " " + themeClass : "");
+  popup.setAttribute("role", "dialog");
+  popup.setAttribute("aria-label", "Traduction");
+  popup.setAttribute("aria-modal", "false");
 
-  // ── Header ──
+  // --- Header ---
   const { headerLeft, handle } = Albert.createPopupHeader(popup);
 
   // Sélecteur de langue
@@ -77,7 +80,7 @@ Albert.showTranslationPopup = function (originalText) {
   translateBtn.textContent = "Traduire";
   headerLeft.appendChild(translateBtn);
 
-  // ── Corps ──
+  // --- Corps ---
   const body = document.createElement("div");
   body.className = "albert-popup-body";
 
@@ -110,7 +113,7 @@ Albert.showTranslationPopup = function (originalText) {
   Albert.initPopupDrag(popup, handle);
   Albert.activePopup = popup;
 
-  // ── Actions ──
+  // --- Actions ---
 
   translateBtn.addEventListener("click", () => {
     Albert.doTranslate(originalText, langSelect.value, resultDiv, copyBtn, loadingMsg, langInfoEl);

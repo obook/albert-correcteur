@@ -1,4 +1,4 @@
-/* ── Thème clair ── */
+/* --- Thème clair --- */
 .albert-popup.albert-theme-light {
   background: #fff;
   border-color: #ddd;
@@ -82,7 +82,7 @@
   background: rgba(0, 0, 0, 0.04);
 }
 
-/* ── Traduction thème clair ── */
+/* --- Traduction thème clair --- */
 .albert-theme-light .albert-popup-lang-select {
   background: #fff;
   border-color: #ddd;

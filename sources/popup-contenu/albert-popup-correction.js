@@ -18,8 +18,11 @@ Albert.showPopup = function (el, correction, markEl) {
   const themeClass = Albert.getPopupThemeClass();
   const popup = document.createElement("div");
   popup.className = "albert-popup" + (themeClass ? " " + themeClass : "");
+  popup.setAttribute("role", "dialog");
+  popup.setAttribute("aria-label", "Correction orthographique");
+  popup.setAttribute("aria-modal", "false");
 
-  // ── Header ──
+  // --- Header ---
   const { headerLeft, handle } = Albert.createPopupHeader(popup);
 
   // Menu déroulant mode (Correcteur / Reformuler)
@@ -81,7 +84,7 @@ Albert.showPopup = function (el, correction, markEl) {
   modeWrap.appendChild(modeMenu);
   headerLeft.appendChild(modeWrap);
 
-  // ── Corps ──
+  // --- Corps ---
   const body = document.createElement("div");
   body.className = "albert-popup-body";
 
@@ -143,7 +146,7 @@ Albert.showPopup = function (el, correction, markEl) {
   body.appendChild(sugBox);
   popup.appendChild(body);
 
-  // ── Footer : navigation ──
+  // --- Footer : navigation ---
   if (state.corrections.length > 1) {
     const footer = document.createElement("div");
     footer.className = "albert-popup-footer";
@@ -171,7 +174,7 @@ Albert.showPopup = function (el, correction, markEl) {
 
   document.body.appendChild(popup);
 
-  // ── Positionnement ──
+  // --- Positionnement ---
   if (Albert.popupPosition) {
     popup.style.top = Albert.popupPosition.top + "px";
     popup.style.left = Albert.popupPosition.left + "px";

@@ -13,10 +13,14 @@ Albert.ensureBadge = function (el) {
   const badge = document.createElement("div");
   badge.className = "albert-badge";
   badge.title = "Albert Correcteur — Cliquez pour vérifier";
+  badge.setAttribute("role", "button");
+  badge.setAttribute("aria-label", "Albert Correcteur — Cliquez pour vérifier");
+  badge.setAttribute("tabindex", "0");
 
   const img = document.createElement("img");
   img.src = Albert.ICON_URL;
   img.alt = "Albert";
+  img.setAttribute("aria-hidden", "true");
   badge.appendChild(img);
 
   const parent = el.offsetParent || document.body;
@@ -31,6 +35,12 @@ Albert.ensureBadge = function (el) {
     e.preventDefault();
     e.stopPropagation();
     Albert.triggerCheck(el);
+  });
+  badge.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      Albert.triggerCheck(el);
+    }
   });
 
   state.badge = badge;

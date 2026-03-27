@@ -8,7 +8,7 @@ const form = document.getElementById("config-form");
 const apiKeyInput = document.getElementById("api-key");
 const apiBaseInput = document.getElementById("api-base");
 
-// ── Charger la config existante ──
+// --- Charger la config existante ---
 
 browser.storage.local.get(["apiKey", "apiBase", "model"]).then((result) => {
   if (result.apiKey) apiKeyInput.value = result.apiKey;
@@ -20,7 +20,7 @@ browser.storage.local.get(["apiKey", "apiBase", "model"]).then((result) => {
   }
 });
 
-// ── Enregistrer ──
+// --- Enregistrer ---
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -43,7 +43,7 @@ form.addEventListener("submit", async (e) => {
   fetchAndShowLimits();
 });
 
-// ── Paramètres ──
+// --- Paramètres ---
 
 document.getElementById("open-settings").addEventListener("click", (e) => {
   e.preventDefault();
