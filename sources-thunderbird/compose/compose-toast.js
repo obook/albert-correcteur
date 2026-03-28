@@ -2,23 +2,41 @@
 
 "use strict";
 
-Albert.showToast = function (message, duration) {
-  duration = duration || 3000;
-  let container = document.querySelector(".albert-toast-container");
-  if (!container) {
-    container = document.createElement("div");
-    container.className = "albert-toast-container";
-    document.body.appendChild(container);
-  }
+Albert.showToast = function (message, durationMs) {
+  // Supprimer un toast existant
+  const existing = document.querySelector(".albert-toast");
+  if (existing) existing.remove();
 
   const toast = document.createElement("div");
   toast.className = "albert-toast";
-  toast.textContent = message;
   toast.setAttribute("role", "alert");
-  container.appendChild(toast);
 
-  setTimeout(() => {
-    toast.classList.add("albert-toast-fade");
+  const msg = document.createElement("span");
+  msg.className = "albert-toast-message";
+  msg.textContent = message;
+  toast.appendChild(msg);
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "albert-toast-close";
+  closeBtn.textContent = "\u2715";
+  closeBtn.setAttribute("aria-label", "Fermer");
+  closeBtn.addEventListener("click", () => {
+    toast.classList.remove("albert-toast-visible");
     setTimeout(() => toast.remove(), 300);
-  }, duration);
+  });
+  toast.appendChild(closeBtn);
+
+  document.body.appendChild(toast);
+
+  // Animation d'entrée
+  requestAnimationFrame(() => toast.classList.add("albert-toast-visible"));
+
+  // Disparition automatique
+  const ms = durationMs || 10000;
+  setTimeout(() => {
+    if (document.contains(toast)) {
+      toast.classList.remove("albert-toast-visible");
+      setTimeout(() => toast.remove(), 300);
+    }
+  }, ms);
 };

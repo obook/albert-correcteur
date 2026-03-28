@@ -36,7 +36,7 @@ Albert.showCorrectionPopup = function (correction, markEl) {
     const nav = document.createElement("span");
     nav.className = "albert-popup-nav";
 
-    const idx = state.corrections.indexOf(correction);
+    const idx = correction.index != null ? correction.index : state.corrections.indexOf(correction);
     nav.textContent = (idx + 1) + " / " + state.corrections.length;
 
     const prevBtn = document.createElement("button");

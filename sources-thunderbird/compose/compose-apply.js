@@ -11,12 +11,22 @@ Albert.applySuggestion = function (correction, suggestion) {
 
     const mark = document.querySelector('[data-correction-index="' + correction.index + '"]');
     if (mark) {
+      // Redonner le focus au body éditable avant la manipulation
+      const body = Albert.getComposeBody();
+      body.focus();
+
       const range = document.createRange();
       range.selectNodeContents(mark);
       const sel = window.getSelection();
       sel.removeAllRanges();
       sel.addRange(range);
-      document.execCommand("insertText", false, suggestion);
+
+      // insertText peut échouer en designMode, fallback sur DOM direct
+      if (!document.execCommand("insertText", false, suggestion)) {
+        range.deleteContents();
+        range.insertNode(document.createTextNode(suggestion));
+        body.normalize();
+      }
     } else {
       const text = body.innerText;
       const realOffset = Albert.findRealOffset(text, correction.word, correction.offset);
@@ -45,13 +55,18 @@ Albert.applySuggestion = function (correction, suggestion) {
       }
 
       if (startNode && endNode) {
+        body.focus();
         const range = document.createRange();
         range.setStart(startNode, startOffset);
         range.setEnd(endNode, endOffset);
         const sel = window.getSelection();
         sel.removeAllRanges();
         sel.addRange(range);
-        document.execCommand("insertText", false, suggestion);
+        if (!document.execCommand("insertText", false, suggestion)) {
+          range.deleteContents();
+          range.insertNode(document.createTextNode(suggestion));
+          body.normalize();
+        }
       }
     }
 

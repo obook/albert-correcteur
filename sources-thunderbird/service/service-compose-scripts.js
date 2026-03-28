@@ -1,30 +1,78 @@
-// service-compose-scripts.js --- Enregistrement des scripts dans la fenêtre de composition Thunderbird.
+// service-compose-scripts.js --- Injection des scripts dans la fenêtre de composition Thunderbird.
 
 "use strict";
 
-browser.composeScripts.register({
-  js: [
-    { file: "compose/compose-state.js" },
-    { file: "compose/compose-utils.js" },
-    { file: "compose/compose-badge.js" },
-    { file: "compose/compose-overlay.js" },
-    { file: "compose/compose-render.js" },
-    { file: "compose/compose-popup-correction.js" },
-    { file: "compose/compose-popup-reformulation.js" },
-    { file: "compose/compose-popup-traduction.js" },
-    { file: "compose/compose-popup-messages.js" },
-    { file: "compose/compose-apply.js" },
-    { file: "compose/compose-toast.js" },
-    { file: "compose/compose-limites.js" },
-    { file: "compose/compose-debounce.js" },
-    { file: "compose/compose-check.js" },
-    { file: "compose/compose-main.js" },
-  ],
-  css: [
-    { file: "css/badge.css" },
-    { file: "css/overlay.css" },
-    { file: "css/popup-dark.css" },
-    { file: "css/popup-light.css" },
-    { file: "css/toast.css" },
-  ],
+const COMPOSE_JS = [
+  "compose/compose-state.js",
+  "compose/compose-utils.js",
+  "compose/compose-badge.js",
+  "compose/compose-overlay.js",
+  "compose/compose-render.js",
+  "compose/compose-popup-correction.js",
+  "compose/compose-popup-reformulation.js",
+  "compose/compose-popup-traduction.js",
+  "compose/compose-popup-messages.js",
+  "compose/compose-apply.js",
+  "compose/compose-toast.js",
+  "compose/compose-limites.js",
+  "compose/compose-debounce.js",
+  "compose/compose-check.js",
+  "compose/compose-main.js",
+];
+
+const COMPOSE_CSS = [
+  "css/badge.css",
+  "css/overlay.css",
+  "css/popup-dark.css",
+  "css/popup-light.css",
+  "css/toast.css",
+];
+
+const injectedTabs = new Set();
+
+async function injectComposeScripts(tabId) {
+  if (injectedTabs.has(tabId)) return;
+  injectedTabs.add(tabId);
+
+  console.log("[Albert] Injection des scripts dans le compose tab", tabId);
+
+  try {
+    for (const file of COMPOSE_CSS) {
+      await browser.tabs.insertCSS(tabId, { file });
+    }
+    for (const file of COMPOSE_JS) {
+      try {
+        await browser.tabs.executeScript(tabId, { file });
+      } catch (e) {
+        // executeScript retourne la dernière expression du script ;
+        // si c'est une fonction (non sérialisable), ignorer l'erreur.
+        if (!e.message.includes("non-structured-clonable")) throw e;
+      }
+    }
+    console.log("[Albert] Scripts injectés avec succès dans tab", tabId);
+  } catch (err) {
+    console.error("[Albert] Erreur injection compose scripts :", err);
+    injectedTabs.delete(tabId);
+  }
+}
+
+// Injection dans les nouveaux onglets de composition
+browser.tabs.onCreated.addListener((tab) => {
+  if (tab.type === "messageCompose") {
+    // Attendre que l'éditeur soit prêt
+    setTimeout(() => injectComposeScripts(tab.id), 500);
+  }
 });
+
+// Nettoyage quand un onglet est fermé
+browser.tabs.onRemoved.addListener((tabId) => {
+  injectedTabs.delete(tabId);
+});
+
+// Injection dans les onglets de composition déjà ouverts
+(async () => {
+  const tabs = await browser.tabs.query({ type: "messageCompose" });
+  for (const tab of tabs) {
+    await injectComposeScripts(tab.id);
+  }
+})();
