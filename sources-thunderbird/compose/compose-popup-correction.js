@@ -66,6 +66,10 @@ Albert.showCorrectionPopup = function (correction, markEl) {
   popup.setAttribute("role", "dialog");
   popup.setAttribute("aria-label", "Correction suggérée");
   popup.setAttribute("aria-modal", "true");
+  const h2 = document.createElement("h2");
+  h2.className = "albert-sr-only";
+  h2.textContent = "Correction suggérée";
+  popup.appendChild(h2);
 
   // --- Header (identique à Firefox) ---
   const header = document.createElement("div");

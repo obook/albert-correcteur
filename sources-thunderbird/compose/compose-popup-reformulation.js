@@ -26,6 +26,10 @@ Albert.showReformulationPopup = function (originalText, result) {
   popup.setAttribute("role", "dialog");
   popup.setAttribute("aria-label", "Reformulation");
   popup.setAttribute("aria-modal", "true");
+  const h2 = document.createElement("h2");
+  h2.className = "albert-sr-only";
+  h2.textContent = "Reformulation";
+  popup.appendChild(h2);
 
   const header = document.createElement("div");
   header.className = "albert-popup-header";

@@ -27,6 +27,10 @@ Albert.showTranslationPopup = function (text) {
   popup.setAttribute("role", "dialog");
   popup.setAttribute("aria-label", "Traduction");
   popup.setAttribute("aria-modal", "true");
+  const h2 = document.createElement("h2");
+  h2.className = "albert-sr-only";
+  h2.textContent = "Traduction";
+  popup.appendChild(h2);
 
   const header = document.createElement("div");
   header.className = "albert-popup-header";

@@ -20,6 +20,10 @@ Albert.showPopup = function (el, correction, markEl) {
   popup.setAttribute("role", "dialog");
   popup.setAttribute("aria-label", "Correction orthographique");
   popup.setAttribute("aria-modal", "true");
+  const h2 = document.createElement("h2");
+  h2.className = "albert-sr-only";
+  h2.textContent = "Correction orthographique";
+  popup.appendChild(h2);
 
   // --- Header ---
   const { headerLeft, handle } = Albert.createPopupHeader(popup);
