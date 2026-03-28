@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
-const SHARED = path.join(ROOT, "sources");
+const SHARED = path.join(ROOT, "sources-commun");
 const FIREFOX = path.join(ROOT, "sources-firefox");
 
 let passed = 0;
@@ -27,7 +27,7 @@ console.log("Structure du projet :");
 
 // ── Dossiers ──
 
-test("Dossier sources/ existe", () => {
+test("Dossier sources-commun/ existe", () => {
   assert.ok(fs.existsSync(SHARED));
 });
 
@@ -39,11 +39,11 @@ test("Dossier sources-firefox/css/ existe", () => {
   assert.ok(fs.existsSync(path.join(FIREFOX, "css")));
 });
 
-test("Dossier sources/icons/ existe", () => {
+test("Dossier sources-commun/icons/ existe", () => {
   assert.ok(fs.existsSync(path.join(SHARED, "icons")));
 });
 
-test("Dossier sources/popup-configuration/ existe (partagé)", () => {
+test("Dossier sources-commun/popup-configuration/ existe (partagé)", () => {
   assert.ok(fs.existsSync(path.join(SHARED, "popup-configuration")));
 });
 
@@ -51,7 +51,7 @@ test("Dossier sources-firefox/popup-contenu/ existe", () => {
   assert.ok(fs.existsSync(path.join(FIREFOX, "popup-contenu")));
 });
 
-test("Dossier sources/prompts/ existe", () => {
+test("Dossier sources-commun/prompts/ existe", () => {
   assert.ok(fs.existsSync(path.join(SHARED, "prompts")));
 });
 
@@ -123,7 +123,7 @@ test("service/ — tous les scripts partagés existent", () => {
     "service-limites.js", "service-api.js",
   ];
   for (const f of fichiers) {
-    assert.ok(fs.existsSync(path.join(SHARED, "service", f)), `Manquant : sources/service/${f}`);
+    assert.ok(fs.existsSync(path.join(SHARED, "service", f)), `Manquant : sources-commun/service/${f}`);
   }
 });
 
@@ -204,7 +204,7 @@ test("Dossier sources-firefox/demarrage/ existe", () => {
   assert.ok(fs.existsSync(path.join(FIREFOX, "demarrage")));
 });
 
-test("Dossier sources/service/ existe", () => {
+test("Dossier sources-commun/service/ existe", () => {
   assert.ok(fs.existsSync(path.join(SHARED, "service")));
 });
 
@@ -338,7 +338,7 @@ test("MOZILLA.md supprimé", () => {
 
 test("Ancien dossier popup/ supprimé", () => {
   assert.ok(!fs.existsSync(path.join(FIREFOX, "popup")), "Le dossier popup/ ne devrait plus exister dans sources-firefox/");
-  assert.ok(!fs.existsSync(path.join(SHARED, "popup")), "Le dossier popup/ ne devrait plus exister dans sources/");
+  assert.ok(!fs.existsSync(path.join(SHARED, "popup")), "Le dossier popup/ ne devrait plus exister dans sources-commun/");
 });
 
 console.log(`\n${passed} passé(s), ${failed} échoué(s)`);

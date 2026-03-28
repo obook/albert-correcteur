@@ -5,7 +5,7 @@ const fs = require("fs");
 const path = require("path");
 
 const LANG_NAMES = { fr: "français", en: "anglais", es: "espagnol", de: "allemand" };
-const PROMPTS_DIR = path.join(__dirname, "..", "sources", "prompts");
+const PROMPTS_DIR = path.join(__dirname, "..", "sources-commun", "prompts");
 
 function buildPrompt(template, lang) {
   const langName = LANG_NAMES[lang] || "français";

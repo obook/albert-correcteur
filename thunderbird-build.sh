@@ -1,10 +1,10 @@
 #!/bin/bash
 # Construit le fichier .xpi pour installation dans Thunderbird.
-# Assemble sources/ (code partagé) + sources-thunderbird/ (code spécifique).
+# Assemble sources-commun/ (code partagé) + sources-thunderbird/ (code spécifique).
 # Usage : ./thunderbird-build.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMMON_DIR="$SCRIPT_DIR/sources"
+COMMON_DIR="$SCRIPT_DIR/sources-commun"
 TB_DIR="$SCRIPT_DIR/sources-thunderbird"
 OUT_DIR="$SCRIPT_DIR/thunderbird-release"
 BUILD_DIR="$SCRIPT_DIR/.build-thunderbird"
@@ -12,7 +12,7 @@ OUT="$OUT_DIR/albert-correcteur-thunderbird.xpi"
 
 # Vérifier que les dossiers source existent
 if [ ! -d "$COMMON_DIR" ]; then
-    echo "Erreur : le dossier sources/ est introuvable."
+    echo "Erreur : le dossier sources-commun/ est introuvable."
     exit 1
 fi
 if [ ! -d "$TB_DIR" ]; then

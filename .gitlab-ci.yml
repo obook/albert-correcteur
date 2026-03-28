@@ -27,7 +27,7 @@ build:
     - VERSION="${CI_COMMIT_TAG#v}"
     - XPI_NAME="albert-correcteur_${VERSION}.xpi"
     - mkdir -p .build-firefox
-    - cp -r sources/* .build-firefox/
+    - cp -r sources-commun/* .build-firefox/
     - cp -r sources-firefox/* .build-firefox/
     - cd .build-firefox
     - zip -r "../${XPI_NAME}" . -x ".*"
@@ -56,7 +56,7 @@ build-thunderbird:
     - VERSION="${CI_COMMIT_TAG#v}"
     - TB_XPI_NAME="albert-correcteur-thunderbird_${VERSION}.xpi"
     - mkdir -p .build-thunderbird
-    - cp -r sources/* .build-thunderbird/
+    - cp -r sources-commun/* .build-thunderbird/
     - cp -r sources-thunderbird/* .build-thunderbird/
     - cd .build-thunderbird
     - zip -r "../${TB_XPI_NAME}" . -x ".*"
@@ -90,7 +90,7 @@ sign:
     - XPI_NAME="albert-correcteur_${VERSION}.xpi"
     - ADDON_ID="albert-correcteur@ac-bordeaux.fr"
     - mkdir -p .build-firefox
-    - cp -r sources/* .build-firefox/
+    - cp -r sources-commun/* .build-firefox/
     - cp -r sources-firefox/* .build-firefox/
     - web-ext sign --source-dir=.build-firefox/ --channel=unlisted --api-key="${WEB_EXT_API_KEY}" --api-secret="${WEB_EXT_API_SECRET}" || true
     - rm -rf .build-firefox

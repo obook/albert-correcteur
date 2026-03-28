@@ -1,10 +1,10 @@
 #!/bin/bash
 # Construit le fichier .xpi pour installation directe dans Firefox.
-# Assemble sources/ (code partagé) + sources-firefox/ (code spécifique).
+# Assemble sources-commun/ (code partagé) + sources-firefox/ (code spécifique).
 # Usage : ./firefox-build.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-COMMON_DIR="$SCRIPT_DIR/sources"
+COMMON_DIR="$SCRIPT_DIR/sources-commun"
 FIREFOX_DIR="$SCRIPT_DIR/sources-firefox"
 OUT_DIR="$SCRIPT_DIR/firefox-release"
 BUILD_DIR="$SCRIPT_DIR/.build-firefox"
@@ -12,7 +12,7 @@ OUT="$OUT_DIR/albert-correcteur.xpi"
 
 # Vérifier que les dossiers source existent
 if [ ! -d "$COMMON_DIR" ]; then
-    echo "Erreur : le dossier sources/ est introuvable."
+    echo "Erreur : le dossier sources-commun/ est introuvable."
     exit 1
 fi
 if [ ! -d "$FIREFOX_DIR" ]; then

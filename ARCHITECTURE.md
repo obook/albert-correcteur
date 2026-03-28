@@ -4,20 +4,20 @@
 
 Le projet est découpé en trois répertoires de sources et deux scripts de build :
 
-- **`sources/`** - Code partagé entre Firefox et Thunderbird (service API, prompts, icônes, CSS communs, popup de configuration)
+- **`sources-commun/`** - Code partagé entre Firefox et Thunderbird (service API, prompts, icônes, CSS communs, popup de configuration)
 - **`sources-firefox/`** - Code spécifique à Firefox (content scripts, overlays, popups, badge CSS, manifest)
 - **`sources-thunderbird/`** - Code spécifique à Thunderbird (compose scripts, badge CSS, popup traduction lecture, manifest)
 
 Chaque script de build assemble le code partagé avec le code spécifique pour produire un `.xpi` :
 
-- **`firefox-build.sh`** - Copie `sources/` + `sources-firefox/` dans un dossier temporaire, puis crée le `.xpi` Firefox
-- **`thunderbird-build.sh`** - Copie `sources/` + `sources-thunderbird/` dans un dossier temporaire, puis crée le `.xpi` Thunderbird
+- **`firefox-build.sh`** - Copie `sources-commun/` + `sources-firefox/` dans un dossier temporaire, puis crée le `.xpi` Firefox
+- **`thunderbird-build.sh`** - Copie `sources-commun/` + `sources-thunderbird/` dans un dossier temporaire, puis crée le `.xpi` Thunderbird
 
 ## Arborescence
 
 ```
 albert-ext/
-  sources/                                <- Code partagé (Firefox + Thunderbird)
+  sources-commun/                                <- Code partagé (Firefox + Thunderbird)
     service/                              <- Scripts de fond communs (5 fichiers)
       service-config.js                   <- Chargement de la configuration (clé, modèle, URL)
       service-langue.js                   <- Détection de langue locale (RGPD)
@@ -147,24 +147,24 @@ albert-ext/
 
 L'extension se compose de deux parties :
 
-- **Script de fond** (`sources/service/` + `sources-firefox/service/` ou `sources-thunderbird/service/`) - s'exécute en arrière-plan, communique avec l'API Albert, gère les menus contextuels (Reformuler, Traduire), la détection de langue et le cache des limites.
+- **Script de fond** (`sources-commun/service/` + `sources-firefox/service/` ou `sources-thunderbird/service/`) - s'exécute en arrière-plan, communique avec l'API Albert, gère les menus contextuels (Reformuler, Traduire), la détection de langue et le cache des limites.
 - **Content scripts Firefox** (`sources-firefox/` : `etat/`, `verification/`, `correction/`, `affichage/`, `notification/`, `demarrage/`, `popup-contenu/`) - injectés dans chaque page, détectent les champs texte, affichent les corrections, la reformulation et la traduction.
 - **Compose scripts Thunderbird** (`sources-thunderbird/compose/`) - injectés dans la fenêtre de composition de mail, détectent le body de l'éditeur, affichent les corrections, la reformulation et la traduction.
 
 ### Scripts de fond (partagés)
 
-Les 5 fichiers de `sources/service/` sont communs aux deux extensions. Chaque extension y ajoute ses propres fichiers `service/` :
+Les 5 fichiers de `sources-commun/service/` sont communs aux deux extensions. Chaque extension y ajoute ses propres fichiers `service/` :
 
 - Firefox : `service-menus.js` (menus contextuels page web)
 - Thunderbird : `service-menus.js` (menus contextuels compose) + `service-compose-scripts.js` (gestion des compose scripts)
 
 | Ordre | Module | Répertoire | Rôle |
 |-------|--------|------------|------|
-| 1 | `service-config.js` | `sources/service/` | Chargement de la configuration |
-| 2 | `service-langue.js` | `sources/service/` | Détection de langue locale (RGPD) |
-| 3 | `service-prompts.js` | `sources/service/` | Chargement et construction des prompts |
-| 4 | `service-limites.js` | `sources/service/` | Cache et récupération des limites du compte |
-| 5 | `service-api.js` | `sources/service/` | Appels API (correction, reformulation, traduction) |
+| 1 | `service-config.js` | `sources-commun/service/` | Chargement de la configuration |
+| 2 | `service-langue.js` | `sources-commun/service/` | Détection de langue locale (RGPD) |
+| 3 | `service-prompts.js` | `sources-commun/service/` | Chargement et construction des prompts |
+| 4 | `service-limites.js` | `sources-commun/service/` | Cache et récupération des limites du compte |
+| 5 | `service-api.js` | `sources-commun/service/` | Appels API (correction, reformulation, traduction) |
 | 6 | `service-menus.js` | Spécifique | Menus contextuels et dispatch des messages |
 | 7 | `service-compose-scripts.js` | Thunderbird seul | Gestion des compose scripts |
 
@@ -424,7 +424,7 @@ Le badge n'apparaît qu'au premier focus sur un champ.
 
 ### Prompts
 
-Les prompts sont des fichiers texte dans `sources/prompts/`, éditables à la main :
+Les prompts sont des fichiers texte dans `sources-commun/prompts/`, éditables à la main :
 
 | Fichier | Placeholders | Usage |
 |---------|-------------|-------|
@@ -437,7 +437,7 @@ Les prompts sont des fichiers texte dans `sources/prompts/`, éditables à la ma
 Les deux scripts de build suivent le même principe :
 
 1. Créer un dossier temporaire
-2. Copier le contenu de `sources/` (code partagé)
+2. Copier le contenu de `sources-commun/` (code partagé)
 3. Copier le contenu de `sources-firefox/` ou `sources-thunderbird/` par-dessus (code spécifique)
 4. Créer le fichier `.xpi` (archive ZIP)
 
