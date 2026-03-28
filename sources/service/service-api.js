@@ -27,6 +27,7 @@ async function checkText(text, mode) {
       headers: {
         Authorization: `Bearer ${config.apiKey}`,
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify(body),
     });
@@ -52,8 +53,19 @@ async function checkText(text, mode) {
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "{}";
-    const parsed = JSON.parse(content);
+    const rawContent = data.choices?.[0]?.message?.content;
+    if (typeof rawContent !== "string") {
+      return { error: "Réponse API invalide : contenu manquant." };
+    }
+    let parsed;
+    try {
+      parsed = JSON.parse(rawContent);
+    } catch {
+      return { error: "Réponse API invalide : JSON malformé." };
+    }
+    if (!Array.isArray(parsed.corrections)) {
+      return { error: "Réponse API invalide : corrections manquantes." };
+    }
     // Filtrer les suggestions incorrectes
     const corrections = (parsed.corrections || []).map((c) => {
       if (c.suggestions) {
@@ -99,6 +111,7 @@ async function translateText(text, targetLang) {
       headers: {
         Authorization: `Bearer ${config.apiKey}`,
         "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: JSON.stringify(body),
     });
@@ -113,9 +126,20 @@ async function translateText(text, targetLang) {
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "{}";
-    const parsed = JSON.parse(content);
-    return { translation: parsed.translation || "", langSource, langCible: targetLang };
+    const rawContent = data.choices?.[0]?.message?.content;
+    if (typeof rawContent !== "string") {
+      return { error: "Réponse API invalide : contenu manquant." };
+    }
+    let parsed;
+    try {
+      parsed = JSON.parse(rawContent);
+    } catch {
+      return { error: "Réponse API invalide : JSON malformé." };
+    }
+    if (typeof parsed.translation !== "string") {
+      return { error: "Réponse API invalide : traduction manquante." };
+    }
+    return { translation: parsed.translation, langSource, langCible: targetLang };
   } catch (err) {
     return { error: `Erreur réseau : ${err.message}` };
   }
