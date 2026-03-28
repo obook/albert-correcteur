@@ -122,6 +122,19 @@ Albert.syncOverlayStyle = function (el, overlay) {
     "fontVariant", "fontVariantCaps", "fontVariantLigatures", "fontVariantNumeric",
   ];
   props.forEach((p) => { overlay.style[p] = cs[p]; });
+
+  // Éditeurs riches (CKEditor, etc.) : le contenu est dans des éléments
+  // bloc (<p>, <div>) qui ont des marges verticales. L'overlay est du texte
+  // plat sans ces marges, donc il commence plus haut que le texte réel.
+  // On compense en ajoutant la marge du premier bloc comme padding-top.
+  if (Albert.isRichEditor(el)) {
+    const firstBlock = el.querySelector("p, div, h1, h2, h3, h4, h5, h6, li");
+    if (firstBlock) {
+      const blockCS = getComputedStyle(firstBlock);
+      const extraTop = parseFloat(blockCS.marginTop) || 0;
+      overlay.style.paddingTop = (parseFloat(cs.paddingTop) + extraTop) + "px";
+    }
+  }
 };
 
 // Construit le DOM de l'overlay : texte normal (invisible) + spans colorés
