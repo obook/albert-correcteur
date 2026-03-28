@@ -35,6 +35,45 @@ Albert.closePopup = function () {
     Albert.activePopupIdx = -1;
     Albert.popupPosition = null;
   }
+  if (Albert._previousFocus && Albert._previousFocus.focus) {
+    Albert._previousFocus.focus();
+    Albert._previousFocus = null;
+  }
+};
+
+// --- Focus trap (accessibilite RGAA) ---
+
+Albert._previousFocus = null;
+
+Albert.trapFocus = function (popup) {
+  Albert._previousFocus = document.activeElement;
+  const focusables = popup.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  if (focusables.length === 0) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  first.focus();
+  popup._focusTrapHandler = function (e) {
+    if (e.key !== "Tab") return;
+    const current = popup.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const f = current[0];
+    const l = current[current.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === f) {
+        e.preventDefault();
+        l.focus();
+      }
+    } else {
+      if (document.activeElement === l) {
+        e.preventDefault();
+        f.focus();
+      }
+    }
+  };
+  popup.addEventListener("keydown", popup._focusTrapHandler);
 };
 
 // --- Fermeture par Échap ou clic en dehors ---

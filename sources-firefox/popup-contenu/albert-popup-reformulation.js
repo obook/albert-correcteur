@@ -65,6 +65,7 @@ Albert.showReformulationPopup = function (originalText, suggestions) {
 
   Albert.positionPopupAtClick(popup);
   Albert.initPopupDrag(popup, handle);
+  Albert.trapFocus(popup);
   Albert.activePopup = popup;
 };
 

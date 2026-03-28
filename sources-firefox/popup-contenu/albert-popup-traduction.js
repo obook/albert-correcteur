@@ -111,6 +111,7 @@ Albert.showTranslationPopup = function (originalText) {
   // Positionnement
   Albert.positionPopupAtClick(popup);
   Albert.initPopupDrag(popup, handle);
+  Albert.trapFocus(popup);
   Albert.activePopup = popup;
 
   // --- Actions ---

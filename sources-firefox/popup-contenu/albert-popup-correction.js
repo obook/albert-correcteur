@@ -193,6 +193,7 @@ Albert.showPopup = function (el, correction, markEl) {
   }
 
   Albert.initPopupDrag(popup, handle);
+  Albert.trapFocus(popup);
   Albert.activePopup = popup;
 };
 
