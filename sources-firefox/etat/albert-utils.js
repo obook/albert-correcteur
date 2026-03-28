@@ -3,14 +3,27 @@
 
 "use strict";
 
+// Vérifie si un champ est un champ d'authentification (login, mot de passe).
+Albert.isLoginField = function (el) {
+  if (!el || !el.tagName || el.tagName.toLowerCase() !== "input") return false;
+  const type = (el.type || "text").toLowerCase();
+  if (type === "password") return true;
+  const ac = (el.autocomplete || "").toLowerCase();
+  if (["username", "current-password", "new-password"].includes(ac)) return true;
+  const id = ((el.id || "") + " " + (el.name || "")).toLowerCase();
+  if (/\b(login|username|userid|user[-_]?id|user[-_]?name|passwd|password)\b/.test(id)) return true;
+  return false;
+};
+
 // Vérifie si un élément est un champ de saisie texte.
 Albert.isTextField = function (el) {
   if (!el || !el.tagName) return false;
+  if (Albert.isLoginField(el)) return false;
   const tag = el.tagName.toLowerCase();
   if (tag === "textarea") return true;
   if (tag === "input") {
     const type = (el.type || "text").toLowerCase();
-    return ["text", "search", "url", "email"].includes(type);
+    return ["text", "search", "url"].includes(type);
   }
   if (el.isContentEditable) return true;
   return false;
