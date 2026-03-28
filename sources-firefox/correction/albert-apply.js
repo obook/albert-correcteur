@@ -91,7 +91,7 @@ Albert.applySuggestion = function (el, correction, suggestion) {
 
 // --- Stratégies par type de champ ---
 
-// Textarea / input : remplacement direct de .value
+// Textarea / input : remplacement via execCommand pour conserver l'undo natif (CTRL+Z).
 Albert._applyInTextarea = function (el, correction, suggestion, state) {
   const realOffset = Albert.findRealOffset(el.value, correction, state.checkedText || el.value);
   if (realOffset === -1) {
@@ -99,11 +99,17 @@ Albert._applyInTextarea = function (el, correction, suggestion, state) {
     Albert.showToast("Correction impossible : le texte a changé.", 3);
     return false;
   }
-  const before = el.value.slice(0, realOffset);
-  const after = el.value.slice(realOffset + correction.length);
-  el.value = before + suggestion + after;
+  el.focus();
+  el.setSelectionRange(realOffset, realOffset + correction.length);
+  const ok = document.execCommand("insertText", false, suggestion);
+  if (!ok) {
+    // Fallback si execCommand echoue (navigateurs anciens)
+    const before = el.value.slice(0, realOffset);
+    const after = el.value.slice(realOffset + correction.length);
+    el.value = before + suggestion + after;
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  }
   state.checkedText = el.value;
-  el.dispatchEvent(new Event("input", { bubbles: true }));
   return true;
 };
 
@@ -117,14 +123,17 @@ Albert._applyInContentEditable = function (el, correction, suggestion, state) {
       return false;
     }
   } else {
-    // Contenteditable simple : remplacement direct des marks DOM
-    const idx = correction.idx !== undefined ? correction.idx : state.corrections.indexOf(correction);
-    const marks = el.querySelectorAll(`.albert-error[data-idx="${idx}"]`);
-    marks.forEach((mark) => {
-      const textNode = document.createTextNode(suggestion);
-      mark.parentNode.replaceChild(textNode, mark);
-      textNode.parentNode.normalize();
-    });
+    // Contenteditable simple : via Selection + execCommand pour conserver l'undo natif (CTRL+Z)
+    if (!Albert.applyViaSelection(el, correction, suggestion)) {
+      // Fallback : remplacement direct des marks DOM (pas d'undo natif)
+      const idx = correction.idx !== undefined ? correction.idx : state.corrections.indexOf(correction);
+      const marks = el.querySelectorAll(`.albert-error[data-idx="${idx}"]`);
+      marks.forEach((mark) => {
+        const textNode = document.createTextNode(suggestion);
+        mark.parentNode.replaceChild(textNode, mark);
+        textNode.parentNode.normalize();
+      });
+    }
   }
   return true;
 };
