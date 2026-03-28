@@ -281,6 +281,19 @@
   margin-bottom: 8px;
 }
 
+/* --- Focus visible (RGAA) --- */
+.albert-popup button:focus-visible,
+.albert-popup select:focus-visible,
+.albert-popup [tabindex]:focus-visible {
+  outline: 2px solid #6cb6ff;
+  outline-offset: 1px;
+}
+
+.albert-popup-suggestion:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 1px;
+}
+
 /* Masquer la popup quand une modale Bootstrap est ouverte (EcoleDirecte) */
 body.modal-open .albert-popup {
   display: none !important;
