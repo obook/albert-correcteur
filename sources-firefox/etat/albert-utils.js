@@ -82,6 +82,34 @@ Albert.migrateCorrections = function (corrections, oldText, newText) {
   }).filter(Boolean);
 };
 
+// Decoupe un texte en paragraphes avec leurs offsets dans le texte complet.
+Albert.splitParagraphs = function (text) {
+  const paragraphs = [];
+  const lines = text.split("\n");
+  let offset = 0;
+  for (const line of lines) {
+    if (line.trim().length > 0) {
+      paragraphs.push({ text: line, offset: offset });
+    }
+    offset += line.length + 1; // +1 pour le \n
+  }
+  return paragraphs;
+};
+
+// Trouve le paragraphe modifie en comparant l'ancien et le nouveau texte.
+// Retourne l'index du paragraphe modifie ou -1 si plusieurs paragraphes ont change.
+Albert.findModifiedParagraph = function (oldParagraphs, newParagraphs) {
+  if (oldParagraphs.length !== newParagraphs.length) return -1;
+  let modifiedIdx = -1;
+  for (let i = 0; i < newParagraphs.length; i++) {
+    if (oldParagraphs[i].text !== newParagraphs[i].text) {
+      if (modifiedIdx !== -1) return -1; // plusieurs paragraphes modifies
+      modifiedIdx = i;
+    }
+  }
+  return modifiedIdx;
+};
+
 // Récupère le texte d'un champ de saisie.
 Albert.getTextContent = function (el) {
   const tag = el.tagName.toLowerCase();
