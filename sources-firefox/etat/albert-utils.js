@@ -56,14 +56,19 @@ Albert.isRichEditor = function (el) {
 };
 
 // Migre les offsets des corrections existantes apres une frappe utilisateur.
-// Compare l'ancien et le nouveau texte pour ajuster ou invalider les corrections.
-Albert.migrateCorrections = function (corrections, oldText, newText, cursorPos) {
+// Compare l'ancien et le nouveau texte pour trouver la zone editee,
+// puis ajuste ou invalide les corrections.
+Albert.migrateCorrections = function (corrections, oldText, newText) {
   const delta = newText.length - oldText.length;
   if (delta === 0 || !corrections || corrections.length === 0) return corrections;
 
-  // Position de debut de l'edition
-  const editStart = Math.max(0, cursorPos - Math.max(0, delta));
-  // Position de fin de l'edition (dans l'ancien texte)
+  // Trouver la position de divergence depuis le debut
+  let editStart = 0;
+  const minLen = Math.min(oldText.length, newText.length);
+  while (editStart < minLen && oldText[editStart] === newText[editStart]) {
+    editStart++;
+  }
+  // Fin de la zone editee dans l'ancien texte
   const editEndOld = editStart + Math.max(0, -delta);
 
   return corrections.map((c) => {

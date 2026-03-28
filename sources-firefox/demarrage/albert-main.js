@@ -58,9 +58,7 @@ Albert.attachField = function (el) {
     const newText = Albert.getTextContent(el);
     const oldText = st.lastCheckedText || "";
     if (st.corrections && st.corrections.length > 0 && oldText) {
-      const tag = el.tagName.toLowerCase();
-      const cursorPos = (tag === "textarea" || tag === "input") ? el.selectionStart : newText.length;
-      st.corrections = Albert.migrateCorrections(st.corrections, oldText, newText, cursorPos);
+      st.corrections = Albert.migrateCorrections(st.corrections, oldText, newText);
       st.checkedText = newText;
       st.lastCheckedText = newText;
       // Re-rendre avec les offsets migres
