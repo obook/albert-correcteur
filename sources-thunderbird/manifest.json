@@ -1,0 +1,43 @@
+{
+  "manifest_version": 2,
+  "name": "Albert Correcteur",
+  "version": "0.1.0",
+  "description": "Extension de correction orthographique, grammaticale et de traduction pour Thunderbird, propulsée par l'API Albert (DINUM).",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "albert-correcteur-thunderbird@ac-bordeaux.fr",
+      "strict_min_version": "128.0"
+    }
+  },
+  "permissions": [
+    "compose",
+    "storage",
+    "menus",
+    "https://albert.api.etalab.gouv.fr/*"
+  ],
+  "icons": {
+    "48": "icons/icon-48.png",
+    "96": "icons/icon-96.png",
+    "128": "icons/icon-128.png"
+  },
+  "compose_action": {
+    "default_icon": "icons/icon-48.png",
+    "default_popup": "popup-configuration/popup.html",
+    "default_title": "Albert Correcteur"
+  },
+  "options_ui": {
+    "page": "popup-configuration/popup-settings.html",
+    "open_in_tab": false
+  },
+  "background": {
+    "scripts": [
+      "service/service-config.js",
+      "service/service-langue.js",
+      "service/service-prompts.js",
+      "service/service-limites.js",
+      "service/service-api.js",
+      "service/service-menus.js",
+      "service/service-compose-scripts.js"
+    ]
+  }
+}
