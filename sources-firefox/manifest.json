@@ -13,6 +13,7 @@
       }
     }
   },
+  "content_security_policy": "script-src 'self'; object-src 'none'",
   "permissions": [
     "storage",
     "activeTab",
