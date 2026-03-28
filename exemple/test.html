@@ -103,6 +103,22 @@
     <div contenteditable="true">Je pence que sa va marcher. Les faute d'ortographe seront detectées.</div>
   </div>
 
+  <h1>Test champs d'authentification (ne doivent PAS être corrigés)</h1>
+
+  <div class="section" style="border: 2px dashed #e74c3c; padding: 20px; border-radius: 8px;">
+    <p style="font-size: 13px; color: #e74c3c; margin-top: 0;">Albert ne doit ni afficher le badge ni corriger ces champs.</p>
+    <form autocomplete="on">
+      <label for="login-user">Identifiant</label>
+      <input type="text" id="login-user" name="username" autocomplete="username" placeholder="nom.prenom@ac-bordeaux.fr" style="margin-bottom: 10px;">
+
+      <label for="login-email">Adresse courriel (login)</label>
+      <input type="email" id="login-email" name="email" autocomplete="email" placeholder="prenom.nom@education.gouv.fr" style="margin-bottom: 10px;">
+
+      <label for="login-pass">Mot de passe</label>
+      <input type="password" id="login-pass" name="password" autocomplete="current-password" placeholder="********">
+    </form>
+  </div>
+
   <h1>Test éditeurs React (bug x.com)</h1>
   <p style="font-size:13px;color:#666;">Ces champs simulent les éditeurs Draft.js et Lexical utilisés par x.com, Facebook, etc.
     L'extension doit les détecter comme éditeurs riches (overlay, pas de spans injectés dans le DOM).
