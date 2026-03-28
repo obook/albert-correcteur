@@ -4,9 +4,9 @@
 
 Le projet est découpé en trois répertoires de sources et deux scripts de build :
 
-- **`sources/`** - Code partagé entre Firefox et Thunderbird (service worker, prompts, icônes)
-- **`sources-firefox/`** - Code spécifique à Firefox (content scripts, overlays, popups, CSS, manifest)
-- **`sources-thunderbird/`** - Code spécifique à Thunderbird (compose scripts, CSS, popup-config, manifest)
+- **`sources/`** - Code partagé entre Firefox et Thunderbird (service API, prompts, icônes, CSS communs, popup de configuration)
+- **`sources-firefox/`** - Code spécifique à Firefox (content scripts, overlays, popups, badge CSS, manifest)
+- **`sources-thunderbird/`** - Code spécifique à Thunderbird (compose scripts, badge CSS, popup traduction lecture, manifest)
 
 Chaque script de build assemble le code partagé avec le code spécifique pour produire un `.xpi` :
 
@@ -34,6 +34,19 @@ albert-ext/
       icon.svg                            <- SVG normal (rouge/bleue)
       icon-error.svg                      <- SVG erreurs (deux branches rouges)
       icon-48/96/128.png                  <- PNG pour le manifest (AMO)
+
+    css/                                  <- Styles partagés
+      overlay.css                         <- Soulignements (spelling, grammar, style)
+      popup-dark.css                      <- Popup thème sombre
+      popup-light.css                     <- Popup thème clair
+      toast.css                           <- Notification toast
+
+    popup-configuration/                  <- Interface de configuration (partagée)
+      popup.html / .css / .js             <- Formulaire (clé API, modèle, URL)
+      popup-status.js                     <- Messages de statut
+      popup-models.js                     <- Chargement des modèles
+      popup-limits.js                     <- Limites du compte
+      popup-settings.*                    <- Page paramètres (thème, dictionnaire)
 
   sources-firefox/                        <- Code spécifique Firefox
     manifest.json                         <- Manifeste Firefox (Manifest V2)
@@ -74,19 +87,8 @@ albert-ext/
       albert-popup-traduction.js          <- Popup de traduction (sélecteur langue, copier)
       albert-popup-messages.js            <- Dispatch des messages du script de fond
 
-    popup-configuration/                  <- Interface de configuration (barre d'outils)
-      popup.html / .css / .js             <- Formulaire (clé API, modèle, URL)
-      popup-status.js                     <- Messages de statut
-      popup-models.js                     <- Chargement des modèles
-      popup-limits.js                     <- Limites du compte
-      popup-settings.*                    <- Page paramètres (thème, dictionnaire)
-
-    css/                                  <- Tous les styles Firefox
-      badge.css                           <- Badge (normal, loading, erreur, ok, rate-limited)
-      overlay.css                         <- Soulignements (spelling, grammar, style)
-      popup-dark.css                      <- Popup thème sombre
-      popup-light.css                     <- Popup thème clair
-      toast.css                           <- Notification toast
+    css/                                  <- Style spécifique Firefox
+      badge.css                           <- Badge (positionnement absolu, modale Bootstrap)
 
   sources-thunderbird/                    <- Code spécifique Thunderbird
     manifest.json                         <- Manifeste Thunderbird (Manifest V2, compose_scripts)
@@ -109,22 +111,15 @@ albert-ext/
       compose-main.js                     <- Initialisation, MutationObserver, événements
 
     service/                              <- Scripts de fond spécifiques Thunderbird
-      service-menus.js                    <- Menus contextuels et dispatch des messages
-      service-compose-scripts.js          <- Gestion des compose scripts Thunderbird
+      service-menus.js                    <- Menus contextuels (compose + lecture) et dispatch
+      service-compose-scripts.js          <- Injection des scripts dans les fenêtres de composition
 
-    popup-configuration/                  <- Interface de configuration Thunderbird
-      popup.html / .css / .js             <- Formulaire (clé API, modèle, URL)
-      popup-status.js                     <- Messages de statut
-      popup-models.js                     <- Chargement des modèles
-      popup-limits.js                     <- Limites du compte
-      popup-settings.*                    <- Page paramètres (thème, dictionnaire)
+    message/                              <- Popup de traduction pour la lecture de mail
+      message-traduction.html             <- Interface HTML de la popup de traduction
+      message-traduction-popup.js         <- Logique de la popup (appel API, affichage)
 
-    css/                                  <- Styles Thunderbird
-      badge.css                           <- Badge
-      overlay.css                         <- Soulignements
-      popup-dark.css                      <- Popup thème sombre
-      popup-light.css                     <- Popup thème clair
-      toast.css                           <- Notification toast
+    css/                                  <- Style spécifique Thunderbird
+      badge.css                           <- Badge (positionnement fixe)
 
   tests/                                  <- Tests unitaires (Node.js, sans dépendance)
     run-all.sh                            <- Lance toutes les suites
@@ -138,14 +133,12 @@ albert-ext/
 
   README.md                               <- Documentation principale
   ARCHITECTURE.md                         <- Ce fichier
-  ROADMAP.md                              <- Roadmap et sprints
-  FIREFOX-DEV.md                          <- Installation Firefox Developer Edition
+  THUNDERBIRD.md                          <- Notes et bugs Thunderbird
   LICENSE                                 <- Licence MIT
-  updates.json                            <- Manifeste de mise à jour Firefox (auto-update)
+  updates.json                            <- Manifeste de mise à jour Firefox + Thunderbird
   .gitlab-ci.yml                          <- Pipeline CI/CD (tests, build, sign, release)
   firefox-build.sh                        <- Script d'assemblage Firefox (.xpi)
   thunderbird-build.sh                    <- Script d'assemblage Thunderbird (.xpi)
-  install-firefox-dev.sh                  <- Script d'installation Firefox Dev Edition
 ```
 
 ## Fonctionnement
@@ -398,7 +391,7 @@ Les content scripts partagent le namespace `window.Albert` et sont chargés dans
 
 ### Compose scripts (Thunderbird)
 
-Thunderbird utilise l'API `compose_scripts` du manifest pour injecter les scripts dans la fenêtre de composition de mail. Les scripts partagent le namespace `window.Albert` et sont chargés dans cet ordre :
+Thunderbird injecte les scripts dans la fenêtre de composition via `tabs.executeScript` (géré par `service-compose-scripts.js`). Les scripts partagent le namespace `window.Albert` et sont chargés dans cet ordre :
 
 | Ordre | Module | Rôle |
 |-------|--------|------|
