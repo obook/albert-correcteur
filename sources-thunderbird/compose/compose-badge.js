@@ -14,10 +14,12 @@ Albert.createBadge = function () {
   badge.setAttribute("tabindex", "0");
   badge.title = "Albert Correcteur";
 
-  badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24">'
-    + '<circle cx="24" cy="24" r="20" fill="#1a73e8" opacity="0.9"/>'
-    + '<text x="24" y="31" text-anchor="middle" fill="white" font-size="22" font-weight="bold">A</text>'
-    + '</svg>';
+  // Utiliser la vraie icône du projet (identique à Firefox)
+  const img = document.createElement("img");
+  img.src = browser.runtime.getURL("icons/icon-48.png");
+  img.alt = "Albert";
+  img.setAttribute("aria-hidden", "true");
+  badge.appendChild(img);
 
   badge.addEventListener("click", () => {
     Albert.triggerManualCheck();

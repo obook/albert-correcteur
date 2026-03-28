@@ -11,8 +11,10 @@
   },
   "permissions": [
     "compose",
+    "messagesRead",
     "storage",
     "menus",
+    "activeTab",
     "https://albert.api.etalab.gouv.fr/*"
   ],
   "icons": {
