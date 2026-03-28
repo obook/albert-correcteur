@@ -1,96 +1,151 @@
 # Architecture du projet
 
+## Organisation générale
+
+Le projet est découpé en trois répertoires de sources et deux scripts de build :
+
+- **`sources/`** - Code partagé entre Firefox et Thunderbird (service worker, prompts, icônes)
+- **`sources-firefox/`** - Code spécifique à Firefox (content scripts, overlays, popups, CSS, manifest)
+- **`sources-thunderbird/`** - Code spécifique à Thunderbird (compose scripts, CSS, popup-config, manifest)
+
+Chaque script de build assemble le code partagé avec le code spécifique pour produire un `.xpi` :
+
+- **`firefox-build.sh`** - Copie `sources/` + `sources-firefox/` dans un dossier temporaire, puis crée le `.xpi` Firefox
+- **`thunderbird-build.sh`** - Copie `sources/` + `sources-thunderbird/` dans un dossier temporaire, puis crée le `.xpi` Thunderbird
+
 ## Arborescence
 
 ```
 albert-ext/
-  sources/                              <- Extension Firefox (contenu du .xpi)
-    manifest.json                       <- Manifeste Firefox (Manifest V2)
+  sources/                                <- Code partagé (Firefox + Thunderbird)
+    service/                              <- Scripts de fond communs (5 fichiers)
+      service-config.js                   <- Chargement de la configuration (clé, modèle, URL)
+      service-langue.js                   <- Détection de langue locale (RGPD)
+      service-prompts.js                  <- Chargement et construction des prompts
+      service-limites.js                  <- Cache et récupération des limites du compte
+      service-api.js                      <- Appels API (correction, reformulation, traduction)
 
-    etat/                               <- État global et utilitaires
-      albert-state.js                   <- Constantes, configuration, variables globales
-      albert-utils.js                   <- Détection champs, éditeurs riches, dictionnaire
+    prompts/                              <- Prompts éditables (fichiers texte)
+      correction.txt                      <- Prompt Correcteur (placeholder {{LANG}})
+      reformulation.txt                   <- Prompt Reformuler (placeholder {{LANG}})
+      traduction.txt                      <- Prompt Traduire ({{LANG_SOURCE}}, {{LANG_CIBLE}})
 
-    verification/                       <- Appel API et gestion du rythme
-      albert-limites.js                 <- Limites rpm/rpd, calcul debounce adaptatif
-      albert-debounce.js                <- Double debounce (timer court + timer max)
-      albert-check.js                   <- triggerCheck, cycleCheckAll
+    icons/                                <- Icônes
+      icon.svg                            <- SVG normal (rouge/bleue)
+      icon-error.svg                      <- SVG erreurs (deux branches rouges)
+      icon-48/96/128.png                  <- PNG pour le manifest (AMO)
 
-    correction/                         <- Application des corrections dans le texte
-      albert-apply.js                   <- Orchestration, findRealOffset, dispatch par type
-      albert-apply-rich.js              <- Éditeurs riches : sélection, événements, fallback
-      albert-apply-segments.js          <- Mapping innerText <-> noeuds DOM
+  sources-firefox/                        <- Code spécifique Firefox
+    manifest.json                         <- Manifeste Firefox (Manifest V2)
 
-    affichage/                          <- Rendu visuel
-      albert-badge.js                   <- Badge (icône dans le coin des champs, ARIA)
-      albert-render-arialive.js         <- Zone aria-live, annonces, clearCorrections
-      albert-render-overlay.js          <- Overlay transparent, scroll sync, soulignements
-      albert-render.js                  <- Orchestration rendu + contenteditable simple
+    etat/                                 <- État global et utilitaires
+      albert-state.js                     <- Constantes, configuration, variables globales
+      albert-utils.js                     <- Détection champs, éditeurs riches, dictionnaire
 
-    notification/                       <- Messages utilisateur
-      albert-toast.js                   <- Notifications temporaires
+    verification/                         <- Appel API et gestion du rythme
+      albert-limites.js                   <- Limites rpm/rpd, calcul debounce adaptatif
+      albert-debounce.js                  <- Double debounce (timer court + timer max)
+      albert-check.js                     <- triggerCheck, cycleCheckAll
 
-    demarrage/                          <- Initialisation
-      albert-main.js                    <- Scan des champs, MutationObserver, IME, paste
+    correction/                           <- Application des corrections dans le texte
+      albert-apply.js                     <- Orchestration, findRealOffset, dispatch par type
+      albert-apply-rich.js                <- Éditeurs riches : sélection, événements, fallback
+      albert-apply-segments.js            <- Mapping innerText <-> noeuds DOM
 
-    service/                            <- Script de fond (6 fichiers)
-      service-config.js                 <- Chargement de la configuration (clé, modèle, URL)
-      service-langue.js                 <- Détection de langue locale (RGPD)
-      service-prompts.js                <- Chargement et construction des prompts
-      service-limites.js                <- Cache et récupération des limites du compte
-      service-api.js                    <- Appels API (correction, reformulation, traduction)
-      service-menus.js                  <- Menus contextuels et dispatch des messages
+    affichage/                            <- Rendu visuel
+      albert-badge.js                     <- Badge (icône dans le coin des champs, ARIA)
+      albert-render-arialive.js           <- Zone aria-live, annonces, clearCorrections
+      albert-render-overlay.js            <- Overlay transparent, scroll sync, soulignements
+      albert-render.js                    <- Orchestration rendu + contenteditable simple
 
-    popup-contenu/                      <- Popups injectées dans les pages web
-      albert-popup-common.js            <- Thème, drag, close, positionnement
-      albert-popup-correction.js        <- Popup de correction (suggestions, navigation)
-      albert-popup-reformulation.js     <- Popup de reformulation
-      albert-popup-traduction.js        <- Popup de traduction (sélecteur langue, copier)
-      albert-popup-messages.js          <- Dispatch des messages du script de fond
+    notification/                         <- Messages utilisateur
+      albert-toast.js                     <- Notifications temporaires
 
-    popup-configuration/                <- Interface de configuration (barre d'outils)
-      popup.html / .css / .js           <- Formulaire (clé API, modèle, URL)
-      popup-status.js                   <- Messages de statut
-      popup-models.js                   <- Chargement des modèles
-      popup-limits.js                   <- Limites du compte
-      popup-settings.*                  <- Page paramètres (thème, dictionnaire)
+    demarrage/                            <- Initialisation
+      albert-main.js                      <- Scan des champs, MutationObserver, IME, paste
 
-    css/                                <- Tous les styles
-      badge.css                         <- Badge (normal, loading, erreur, ok, rate-limited)
-      overlay.css                       <- Soulignements (spelling, grammar, style)
-      popup-dark.css                    <- Popup thème sombre
-      popup-light.css                   <- Popup thème clair
-      toast.css                         <- Notification toast
+    service/                              <- Scripts de fond spécifiques Firefox
+      service-menus.js                    <- Menus contextuels et dispatch des messages
 
-    prompts/                            <- Prompts éditables (fichiers texte)
-      correction.txt                    <- Prompt Correcteur (placeholder {{LANG}})
-      reformulation.txt                 <- Prompt Reformuler (placeholder {{LANG}})
-      traduction.txt                    <- Prompt Traduire ({{LANG_SOURCE}}, {{LANG_CIBLE}})
+    popup-contenu/                        <- Popups injectées dans les pages web
+      albert-popup-common.js              <- Thème, drag, close, positionnement
+      albert-popup-correction.js          <- Popup de correction (suggestions, navigation)
+      albert-popup-reformulation.js       <- Popup de reformulation
+      albert-popup-traduction.js          <- Popup de traduction (sélecteur langue, copier)
+      albert-popup-messages.js            <- Dispatch des messages du script de fond
 
-    icons/                              <- Icônes
-      icon.svg                          <- SVG normal (rouge/bleue)
-      icon-error.svg                    <- SVG erreurs (deux branches rouges)
-      icon-48/96/128.png                <- PNG pour le manifest (AMO)
+    popup-configuration/                  <- Interface de configuration (barre d'outils)
+      popup.html / .css / .js             <- Formulaire (clé API, modèle, URL)
+      popup-status.js                     <- Messages de statut
+      popup-models.js                     <- Chargement des modèles
+      popup-limits.js                     <- Limites du compte
+      popup-settings.*                    <- Page paramètres (thème, dictionnaire)
 
-  tests/                                <- Tests unitaires (Node.js, sans dépendance)
-    run-all.sh                          <- Lance toutes les suites
-    test-*.js                           <- 9 suites, 158 tests
+    css/                                  <- Tous les styles Firefox
+      badge.css                           <- Badge (normal, loading, erreur, ok, rate-limited)
+      overlay.css                         <- Soulignements (spelling, grammar, style)
+      popup-dark.css                      <- Popup thème sombre
+      popup-light.css                     <- Popup thème clair
+      toast.css                           <- Notification toast
 
-  exemple/                              <- Pages de test
-    test.html                           <- Page de test multilingue + éditeurs React
-    test-react-editors.js               <- Simulation re-rendu React (Draft.js/Lexical)
-  media/                                <- Captures d'écran pour le README
-  images/                               <- Logo PNG pour GitForge
+  sources-thunderbird/                    <- Code spécifique Thunderbird
+    manifest.json                         <- Manifeste Thunderbird (Manifest V2, compose_scripts)
 
-  README.md                             <- Documentation principale
-  ARCHITECTURE.md                       <- Ce fichier
-  ROADMAP.md                            <- Roadmap et sprints
-  FIREFOX-DEV.md                        <- Installation Firefox Developer Edition
-  LICENSE                               <- Licence MIT
-  updates.json                          <- Manifeste de mise à jour Firefox (auto-update)
-  .gitlab-ci.yml                        <- Pipeline CI/CD (tests, build, sign, release)
-  firefox-build.sh                      <- Script de packaging (.xpi)
-  install-firefox-dev.sh                <- Script d'installation Firefox Dev Edition
+    compose/                              <- Scripts injectés dans la fenêtre de composition
+      compose-state.js                    <- Constantes, état global
+      compose-utils.js                    <- Utilitaires, détection du body compose
+      compose-badge.js                    <- Badge (icône dans le coin de l'éditeur)
+      compose-overlay.js                  <- Overlay transparent, soulignements
+      compose-render.js                   <- Orchestration du rendu des corrections
+      compose-popup-correction.js         <- Popup de correction (suggestions)
+      compose-popup-reformulation.js      <- Popup de reformulation
+      compose-popup-traduction.js         <- Popup de traduction
+      compose-popup-messages.js           <- Dispatch des messages du script de fond
+      compose-apply.js                    <- Application des corrections dans le texte
+      compose-toast.js                    <- Notifications temporaires
+      compose-limites.js                  <- Limites rpm/rpd, calcul debounce adaptatif
+      compose-debounce.js                 <- Double debounce (timer court + timer max)
+      compose-check.js                    <- triggerCheck
+      compose-main.js                     <- Initialisation, MutationObserver, événements
+
+    service/                              <- Scripts de fond spécifiques Thunderbird
+      service-menus.js                    <- Menus contextuels et dispatch des messages
+      service-compose-scripts.js          <- Gestion des compose scripts Thunderbird
+
+    popup-configuration/                  <- Interface de configuration Thunderbird
+      popup.html / .css / .js             <- Formulaire (clé API, modèle, URL)
+      popup-status.js                     <- Messages de statut
+      popup-models.js                     <- Chargement des modèles
+      popup-limits.js                     <- Limites du compte
+      popup-settings.*                    <- Page paramètres (thème, dictionnaire)
+
+    css/                                  <- Styles Thunderbird
+      badge.css                           <- Badge
+      overlay.css                         <- Soulignements
+      popup-dark.css                      <- Popup thème sombre
+      popup-light.css                     <- Popup thème clair
+      toast.css                           <- Notification toast
+
+  tests/                                  <- Tests unitaires (Node.js, sans dépendance)
+    run-all.sh                            <- Lance toutes les suites
+    test-*.js                             <- 9 suites, 158 tests
+
+  exemple/                                <- Pages de test
+    test.html                             <- Page de test multilingue + éditeurs React
+    test-react-editors.js                 <- Simulation re-rendu React (Draft.js/Lexical)
+  media/                                  <- Captures d'écran pour le README
+  images/                                 <- Logo PNG pour GitForge
+
+  README.md                               <- Documentation principale
+  ARCHITECTURE.md                         <- Ce fichier
+  ROADMAP.md                              <- Roadmap et sprints
+  FIREFOX-DEV.md                          <- Installation Firefox Developer Edition
+  LICENSE                                 <- Licence MIT
+  updates.json                            <- Manifeste de mise à jour Firefox (auto-update)
+  .gitlab-ci.yml                          <- Pipeline CI/CD (tests, build, sign, release)
+  firefox-build.sh                        <- Script d'assemblage Firefox (.xpi)
+  thunderbird-build.sh                    <- Script d'assemblage Thunderbird (.xpi)
+  install-firefox-dev.sh                  <- Script d'installation Firefox Dev Edition
 ```
 
 ## Fonctionnement
@@ -99,10 +154,28 @@ albert-ext/
 
 L'extension se compose de deux parties :
 
-- **Script de fond** (`service/`) — s'exécute en arrière-plan, communique avec l'API Albert, gère les menus contextuels (Reformuler, Traduire), la détection de langue et le cache des limites.
-- **Content scripts** (`etat/`, `verification/`, `correction/`, `affichage/`, `notification/`, `demarrage/`, `popup-contenu/`) — injectés dans chaque page, détectent les champs texte, affichent les corrections, la reformulation et la traduction.
+- **Script de fond** (`sources/service/` + `sources-firefox/service/` ou `sources-thunderbird/service/`) - s'exécute en arrière-plan, communique avec l'API Albert, gère les menus contextuels (Reformuler, Traduire), la détection de langue et le cache des limites.
+- **Content scripts Firefox** (`sources-firefox/` : `etat/`, `verification/`, `correction/`, `affichage/`, `notification/`, `demarrage/`, `popup-contenu/`) - injectés dans chaque page, détectent les champs texte, affichent les corrections, la reformulation et la traduction.
+- **Compose scripts Thunderbird** (`sources-thunderbird/compose/`) - injectés dans la fenêtre de composition de mail, détectent le body de l'éditeur, affichent les corrections, la reformulation et la traduction.
 
-### Flux de correction
+### Scripts de fond (partagés)
+
+Les 5 fichiers de `sources/service/` sont communs aux deux extensions. Chaque extension y ajoute ses propres fichiers `service/` :
+
+- Firefox : `service-menus.js` (menus contextuels page web)
+- Thunderbird : `service-menus.js` (menus contextuels compose) + `service-compose-scripts.js` (gestion des compose scripts)
+
+| Ordre | Module | Répertoire | Rôle |
+|-------|--------|------------|------|
+| 1 | `service-config.js` | `sources/service/` | Chargement de la configuration |
+| 2 | `service-langue.js` | `sources/service/` | Détection de langue locale (RGPD) |
+| 3 | `service-prompts.js` | `sources/service/` | Chargement et construction des prompts |
+| 4 | `service-limites.js` | `sources/service/` | Cache et récupération des limites du compte |
+| 5 | `service-api.js` | `sources/service/` | Appels API (correction, reformulation, traduction) |
+| 6 | `service-menus.js` | Spécifique | Menus contextuels et dispatch des messages |
+| 7 | `service-compose-scripts.js` | Thunderbird seul | Gestion des compose scripts |
+
+### Flux de correction (Firefox)
 
 ```
   Utilisateur tape du texte
@@ -159,6 +232,52 @@ L'extension se compose de deux parties :
          +-- contenteditable simple : albert-apply.js (_applyInContentEditable)
          +-- Retire la correction, recalcule les offsets restants
          +-- Re-rend l'overlay
+```
+
+### Flux de correction (Thunderbird)
+
+```
+  Utilisateur tape du texte dans la fenêtre de composition
+         |
+         v
+  compose/compose-main.js (événement input sur le body compose)
+         |
+         v debounce adaptatif (calculé depuis le rpm du compte)
+  compose/compose-debounce.js (scheduleCheck)
+         |
+         v
+  compose/compose-limites.js (checkRateLimit)
+         |
+         v
+  compose/compose-check.js (triggerCheck)
+         |
+         +-- Annule la requête précédente si le texte a changé
+         |
+         v
+  service/service-api.js (checkText) [code partagé]
+         |
+         +-- service-langue.js : détecte la langue
+         +-- service-prompts.js : charge le prompt
+         +-- Appelle l'API Albert /v1/chat/completions
+         |
+         v
+  Réponse JSON : { corrections: [...] }
+         |
+         v
+  compose/compose-render.js (renderCorrections)
+         |
+         +-- compose-overlay.js : overlay transparent sur le body compose
+         |
+         v
+  Soulignements colorés (rouge/orange/bleu)
+         |
+         v clic sur un mot souligné
+  compose/compose-popup-correction.js (showPopup)
+         |
+         v clic sur une suggestion
+  compose/compose-apply.js (applySuggestion)
+         |
+         +-- Remplace le texte dans le body compose (contenteditable)
 ```
 
 ### Flux de reformulation (menu contextuel)
@@ -251,7 +370,7 @@ L'extension se compose de deux parties :
          +-- Pause selon Retry-After
 ```
 
-### Modules content script
+### Modules content script (Firefox)
 
 Les content scripts partagent le namespace `window.Albert` et sont chargés dans cet ordre :
 
@@ -277,18 +396,27 @@ Les content scripts partagent le namespace `window.Albert` et sont chargés dans
 | 18 | `albert-check.js` | `verification/` | triggerCheck, cycleCheckAll |
 | 19 | `albert-main.js` | `demarrage/` | Scan des champs, MutationObserver, IME, paste |
 
-### Scripts de fond
+### Compose scripts (Thunderbird)
 
-Chargés dans cet ordre par le manifest (scope global partagé) :
+Thunderbird utilise l'API `compose_scripts` du manifest pour injecter les scripts dans la fenêtre de composition de mail. Les scripts partagent le namespace `window.Albert` et sont chargés dans cet ordre :
 
 | Ordre | Module | Rôle |
 |-------|--------|------|
-| 1 | `service-config.js` | Chargement de la configuration |
-| 2 | `service-langue.js` | Détection de langue locale (RGPD) |
-| 3 | `service-prompts.js` | Chargement et construction des prompts |
-| 4 | `service-limites.js` | Cache et récupération des limites du compte |
-| 5 | `service-api.js` | Appels API (correction, reformulation, traduction) |
-| 6 | `service-menus.js` | Menus contextuels et dispatch des messages |
+| 1 | `compose-state.js` | Constantes, état global |
+| 2 | `compose-utils.js` | Utilitaires, détection du body compose |
+| 3 | `compose-badge.js` | Badge (icône dans le coin de l'éditeur) |
+| 4 | `compose-overlay.js` | Overlay transparent, soulignements |
+| 5 | `compose-render.js` | Orchestration du rendu des corrections |
+| 6 | `compose-popup-correction.js` | Popup de correction (suggestions) |
+| 7 | `compose-popup-reformulation.js` | Popup de reformulation |
+| 8 | `compose-popup-traduction.js` | Popup de traduction |
+| 9 | `compose-popup-messages.js` | Dispatch des messages du script de fond |
+| 10 | `compose-apply.js` | Application des corrections |
+| 11 | `compose-toast.js` | Notifications temporaires |
+| 12 | `compose-limites.js` | Limites rpm/rpd, calcul debounce adaptatif |
+| 13 | `compose-debounce.js` | Double debounce (timer court + timer max) |
+| 14 | `compose-check.js` | triggerCheck |
+| 15 | `compose-main.js` | Initialisation, MutationObserver, événements |
 
 ### États du badge
 
@@ -310,3 +438,14 @@ Les prompts sont des fichiers texte dans `sources/prompts/`, éditables à la ma
 | `correction.txt` | `{{LANG}}` | Mode Correcteur |
 | `reformulation.txt` | `{{LANG}}` | Mode Reformuler |
 | `traduction.txt` | `{{LANG_SOURCE}}`, `{{LANG_CIBLE}}` | Traduction |
+
+### Assemblage des extensions
+
+Les deux scripts de build suivent le même principe :
+
+1. Créer un dossier temporaire
+2. Copier le contenu de `sources/` (code partagé)
+3. Copier le contenu de `sources-firefox/` ou `sources-thunderbird/` par-dessus (code spécifique)
+4. Créer le fichier `.xpi` (archive ZIP)
+
+Les fichiers spécifiques peuvent surcharger les fichiers partagés si nécessaire (par exemple, chaque extension a son propre `service-menus.js`).
