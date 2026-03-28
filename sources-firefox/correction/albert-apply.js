@@ -7,6 +7,40 @@
 
 Albert.applyingCorrection = false;
 
+// --- Pile undo pour textarea/input (CTRL+Z) ---
+
+Albert._undoStacks = new WeakMap();
+
+Albert._pushUndo = function (el) {
+  if (!Albert._undoStacks.has(el)) {
+    Albert._undoStacks.set(el, []);
+    el.addEventListener("keydown", Albert._handleUndo);
+  }
+  Albert._undoStacks.get(el).push({
+    value: el.value,
+    selStart: el.selectionStart,
+    selEnd: el.selectionEnd,
+  });
+};
+
+Albert._handleUndo = function (e) {
+  if (!(e.ctrlKey || e.metaKey) || e.key !== "z" || e.shiftKey) return;
+  const stack = Albert._undoStacks.get(e.target);
+  if (!stack || stack.length === 0) return;
+  e.preventDefault();
+  const prev = stack.pop();
+  Albert.applyingCorrection = true;
+  e.target.value = prev.value;
+  e.target.setSelectionRange(prev.selStart, prev.selEnd);
+  e.target.dispatchEvent(new Event("input", { bubbles: true }));
+  const state = Albert.getOrCreateState(e.target);
+  state.checkedText = prev.value;
+  state.lastCheckedText = "";
+  Albert.renderCorrections(e.target);
+  setTimeout(() => { Albert.applyingCorrection = false; }, 120);
+  Albert.scheduleCheck(e.target);
+};
+
 // --- Recherche d'offset ---
 
 // Retrouve l'offset réel du mot erroné dans le texte actuel.
@@ -91,7 +125,7 @@ Albert.applySuggestion = function (el, correction, suggestion) {
 
 // --- Stratégies par type de champ ---
 
-// Textarea / input : remplacement via execCommand pour conserver l'undo natif (CTRL+Z).
+// Textarea / input : remplacement de .value avec pile undo manuelle (CTRL+Z).
 Albert._applyInTextarea = function (el, correction, suggestion, state) {
   const realOffset = Albert.findRealOffset(el.value, correction, state.checkedText || el.value);
   if (realOffset === -1) {
@@ -99,17 +133,13 @@ Albert._applyInTextarea = function (el, correction, suggestion, state) {
     Albert.showToast("Correction impossible : le texte a changé.", 3);
     return false;
   }
-  el.focus();
-  el.setSelectionRange(realOffset, realOffset + correction.length);
-  const ok = document.execCommand("insertText", false, suggestion);
-  if (!ok) {
-    // Fallback si execCommand echoue (navigateurs anciens)
-    const before = el.value.slice(0, realOffset);
-    const after = el.value.slice(realOffset + correction.length);
-    el.value = before + suggestion + after;
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-  }
+  Albert._pushUndo(el);
+  const before = el.value.slice(0, realOffset);
+  const after = el.value.slice(realOffset + correction.length);
+  el.value = before + suggestion + after;
+  el.setSelectionRange(realOffset + suggestion.length, realOffset + suggestion.length);
   state.checkedText = el.value;
+  el.dispatchEvent(new Event("input", { bubbles: true }));
   return true;
 };
 
