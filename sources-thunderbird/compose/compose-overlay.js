@@ -2,9 +2,10 @@
 
 "use strict";
 
+// Clés identiques à celles retournées par l'API (champ "type" du JSON)
 Albert.UNDERLINE_CLASSES = {
-  orthographe: "albert-error-spelling",
-  grammaire: "albert-error-grammar",
+  spelling: "albert-error-spelling",
+  grammar: "albert-error-grammar",
   style: "albert-error-style",
 };
 

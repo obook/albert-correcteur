@@ -43,8 +43,8 @@ test("Dossier sources/icons/ existe", () => {
   assert.ok(fs.existsSync(path.join(SHARED, "icons")));
 });
 
-test("Dossier sources-firefox/popup-configuration/ existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "popup-configuration")));
+test("Dossier sources/popup-configuration/ existe (partagé)", () => {
+  assert.ok(fs.existsSync(path.join(SHARED, "popup-configuration")));
 });
 
 test("Dossier sources-firefox/popup-contenu/ existe", () => {
@@ -89,14 +89,18 @@ test("manifest.json — content scripts déclarés", () => {
 test("manifest.json — tous les JS content scripts existent", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
   for (const jsFile of manifest.content_scripts[0].js) {
-    assert.ok(fs.existsSync(path.join(FIREFOX, jsFile)), `Manquant : ${jsFile}`);
+    const inFirefox = fs.existsSync(path.join(FIREFOX, jsFile));
+    const inShared = fs.existsSync(path.join(SHARED, jsFile));
+    assert.ok(inFirefox || inShared, `Manquant : ${jsFile}`);
   }
 });
 
 test("manifest.json — tous les CSS content scripts existent", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
   for (const cssFile of manifest.content_scripts[0].css) {
-    assert.ok(fs.existsSync(path.join(FIREFOX, cssFile)), `Manquant : ${cssFile}`);
+    const inFirefox = fs.existsSync(path.join(FIREFOX, cssFile));
+    const inShared = fs.existsSync(path.join(SHARED, cssFile));
+    assert.ok(inFirefox || inShared, `Manquant : ${cssFile}`);
   }
 });
 
@@ -131,12 +135,12 @@ test("Ancien service.js monolithique supprimé", () => {
   assert.ok(!fs.existsSync(path.join(SHARED, "service", "service.js")), "service/service.js ne devrait plus exister");
 });
 
-test("popup/popup.html existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "popup-configuration", "popup.html")));
+test("popup/popup.html existe (partagé)", () => {
+  assert.ok(fs.existsSync(path.join(SHARED, "popup-configuration", "popup.html")));
 });
 
-test("popup/popup-settings.html existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "popup-configuration", "popup-settings.html")));
+test("popup/popup-settings.html existe (partagé)", () => {
+  assert.ok(fs.existsSync(path.join(SHARED, "popup-configuration", "popup-settings.html")));
 });
 
 test("icons/icon.svg existe", () => {
@@ -170,9 +174,8 @@ test("firefox-publish.sh supprimé", () => {
   assert.ok(!fs.existsSync(path.join(ROOT, "firefox-publish.sh")), "firefox-publish.sh ne devrait plus exister");
 });
 
-test("install-firefox-dev.sh existe et est exécutable", () => {
-  const stat = fs.statSync(path.join(ROOT, "install-firefox-dev.sh"));
-  assert.ok(stat.mode & 0o111, "install-firefox-dev.sh n'est pas exécutable");
+test("install-firefox-dev.sh supprimé", () => {
+  assert.ok(!fs.existsSync(path.join(ROOT, "install-firefox-dev.sh")), "install-firefox-dev.sh ne devrait plus exister");
 });
 
 // ── Dossiers métier ──
@@ -209,8 +212,8 @@ test("Dossier sources-firefox/service/ existe", () => {
   assert.ok(fs.existsSync(path.join(FIREFOX, "service")));
 });
 
-test("css/toast.css existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "css", "toast.css")));
+test("css/toast.css existe (partagé)", () => {
+  assert.ok(fs.existsSync(path.join(SHARED, "css", "toast.css")));
 });
 
 test("Ancien dossier toast/ supprimé", () => {

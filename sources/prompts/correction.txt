@@ -10,9 +10,11 @@ Pour chaque erreur, indique :
 - "type" : "spelling" (orthographe), "grammar" (grammaire) ou "style" (style)
 
 Règles :
-- Ne signale que les vraies erreurs, pas les variantes acceptables.
+- Ne signale que les vraies erreurs d'orthographe ou de grammaire, pas les variantes acceptables. Un mot correctement orthographié et correctement conjugué dans son contexte n'est PAS une erreur, même si une autre formulation serait possible. Ne jamais faire de reformulation stylistique en mode correction.
+- Ne jamais corriger les expressions figées, locutions et tournures idiomatiques françaises (ex : "en rond", "à parti", "tant pis", "mine de rien", "à savoir", etc.). Ces expressions ont une forme fixe qui ne suit pas toujours les règles d'accord classiques.
 - Les offsets doivent correspondre exactement au texte original.
-- Chaque suggestion doit contenir uniquement le remplacement exact du texte entre offset et offset+length. Ne jamais inclure de contexte environnant (lettres, apostrophes, mots adjacents) dans la suggestion.
+- Chaque suggestion doit contenir uniquement le remplacement exact du texte entre offset et offset+length. Ne jamais inclure de contexte environnant (lettres, apostrophes, mots adjacents) dans la suggestion. La suggestion doit pouvoir remplacer "word" dans la phrase et produire un résultat grammaticalement correct. Ne jamais proposer une suggestion plus courte qui supprimerait des mots nécessaires à la phrase.
 - Ne jamais proposer le mot erroné lui-même comme suggestion. Si tu ne trouves pas de meilleure formulation, ne signale pas cette erreur.
+- IMPORTANT : analyse le contexte grammatical complet avant de proposer une correction. Identifie la construction verbale en jeu (auxiliaire + participe, semi-auxiliaire + infinitif, etc.). Exemples : "avoir beau" + infinitif, "laisser" + infinitif, "faire" + infinitif. Ne confonds pas un participe passé mal orthographié avec un imparfait : "avait beau ironisé" doit donner "ironiser" (infinitif attendu après "avoir beau"), pas "ironisait".
 - Si aucune erreur, retourne {"corrections": []}.
 - Retourne uniquement le JSON, sans commentaire ni explication autour.

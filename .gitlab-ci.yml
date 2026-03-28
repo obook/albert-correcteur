@@ -16,7 +16,7 @@ tests:
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v/'
 
-# ── Build du .xpi (uniquement sur les tags v*) ──
+# ── Build du .xpi Firefox (uniquement sur les tags v*) ──
 
 build:
   stage: build
@@ -35,7 +35,7 @@ build:
     - rm -rf .build-firefox
     - echo "XPI_NAME=${XPI_NAME}" > build.env
     - echo "VERSION=${VERSION}" >> build.env
-    - echo "Extension packagée -> ${XPI_NAME}"
+    - echo "Extension Firefox packagée -> ${XPI_NAME}"
   artifacts:
     paths:
       - "albert-correcteur_*.xpi"
@@ -45,7 +45,35 @@ build:
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v/'
 
-# ── Signature Mozilla (uniquement sur les tags v*) ──
+# ── Build du .xpi Thunderbird (uniquement sur les tags v*) ──
+
+build-thunderbird:
+  stage: build
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache zip
+  script:
+    - VERSION="${CI_COMMIT_TAG#v}"
+    - TB_XPI_NAME="albert-correcteur-thunderbird_${VERSION}.xpi"
+    - mkdir -p .build-thunderbird
+    - cp -r sources/* .build-thunderbird/
+    - cp -r sources-thunderbird/* .build-thunderbird/
+    - cd .build-thunderbird
+    - zip -r "../${TB_XPI_NAME}" . -x ".*"
+    - cd ..
+    - rm -rf .build-thunderbird
+    - echo "TB_XPI_NAME=${TB_XPI_NAME}" > build-thunderbird.env
+    - echo "Extension Thunderbird packagée -> ${TB_XPI_NAME}"
+  artifacts:
+    paths:
+      - "albert-correcteur-thunderbird_*.xpi"
+    reports:
+      dotenv: build-thunderbird.env
+    expire_in: never
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v/'
+
+# ── Signature Mozilla pour Firefox (uniquement sur les tags v*) ──
 # Nécessite les variables CI/CD WEB_EXT_API_KEY et WEB_EXT_API_SECRET (identifiants AMO)
 # Si la version existe déjà sur AMO (erreur 409), le .xpi signé est récupéré via l'API.
 
@@ -111,12 +139,15 @@ sign:
     - if: '$CI_COMMIT_TAG =~ /^v/'
 
 # ── Release GitForge (uniquement sur les tags v*) ──
+# Publie les deux extensions (Firefox signée + Thunderbird)
 
 release:
   stage: release
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   needs:
     - job: sign
+      artifacts: true
+    - job: build-thunderbird
       artifacts: true
   before_script:
     - apk add --no-cache curl >/dev/null 2>&1 || true
@@ -138,20 +169,25 @@ release:
         cat /tmp/resp.json 2>/dev/null; echo
       fi
   script:
-    - echo "Création de la release ${CI_COMMIT_TAG} — ${XPI_NAME}"
+    - VERSION="${CI_COMMIT_TAG#v}"
+    - echo "Création de la release ${CI_COMMIT_TAG}"
   release:
     tag_name: $CI_COMMIT_TAG
     name: "Albert Correcteur ${CI_COMMIT_TAG}"
-    description: "Release ${CI_COMMIT_TAG} — Extension Firefox Albert Correcteur (signée Mozilla)"
+    description: "Release ${CI_COMMIT_TAG} — Extensions Albert Correcteur (Firefox signée Mozilla + Thunderbird)"
     assets:
       links:
         - name: "${XPI_NAME}"
           url: "${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/${XPI_NAME}?job=sign"
           link_type: package
+        - name: "albert-correcteur-thunderbird_${VERSION}.xpi"
+          url: "${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/albert-correcteur-thunderbird_${VERSION}.xpi?job=build-thunderbird"
+          link_type: package
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v/'
 
-# ── Mise à jour de updates.json pour les mises à jour automatiques Firefox ──
+# ── Mise à jour de updates.json pour les mises à jour automatiques ──
+# Met à jour les liens pour Firefox ET Thunderbird.
 # Nécessite la variable CI/CD CI_PUSH_TOKEN (token d'accès projet avec scope write_repository)
 
 update-manifest:
@@ -163,7 +199,8 @@ update-manifest:
     - apk add --no-cache git
   script:
     - VERSION="${CI_COMMIT_TAG#v}"
-    - XPI_URL="${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/albert-correcteur_${VERSION}.xpi?job=sign"
+    - FIREFOX_XPI_URL="${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/albert-correcteur_${VERSION}.xpi?job=sign"
+    - TB_XPI_URL="${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/albert-correcteur-thunderbird_${VERSION}.xpi?job=build-thunderbird"
     - git clone "https://oauth2:${CI_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" /tmp/repo
     - cd /tmp/repo
     - |
@@ -174,7 +211,15 @@ update-manifest:
             "updates": [
               {
                 "version": "${VERSION}",
-                "update_link": "${XPI_URL}"
+                "update_link": "${FIREFOX_XPI_URL}"
+              }
+            ]
+          },
+          "albert-correcteur-thunderbird@ac-bordeaux.fr": {
+            "updates": [
+              {
+                "version": "${VERSION}",
+                "update_link": "${TB_XPI_URL}"
               }
             ]
           }

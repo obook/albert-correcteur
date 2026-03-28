@@ -54,10 +54,16 @@ async function checkText(text, mode) {
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "{}";
     const parsed = JSON.parse(content);
-    // Filtrer les suggestions identiques au mot erroné
+    // Filtrer les suggestions incorrectes
     const corrections = (parsed.corrections || []).map((c) => {
       if (c.suggestions) {
-        c.suggestions = c.suggestions.filter((s) => s !== c.word);
+        c.suggestions = c.suggestions.filter((s) => {
+          // Supprimer les suggestions identiques au mot erroné
+          if (s === c.word) return false;
+          // Si le mot erroné finit par "s" (pluriel), la suggestion doit aussi finir par "s"
+          if (c.word.endsWith("s") && !s.endsWith("s")) return false;
+          return true;
+        });
       }
       return c;
     }).filter((c) => !c.suggestions || c.suggestions.length > 0);

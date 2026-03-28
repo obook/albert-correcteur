@@ -36,26 +36,13 @@ browser.menus.onClicked.addListener(async (info, tab) => {
       // Dans le compose : envoyer au compose script
       browser.tabs.sendMessage(tab.id, { type: "translateGetSelection" });
     } else {
-      // Dans la lecture de mail : injecter le script de traduction et les CSS
-      const cssFiles = [
-        "css/popup-dark.css",
-        "css/popup-light.css",
-        "css/toast.css",
-      ];
-      for (const file of cssFiles) {
-        try { await browser.tabs.insertCSS(tab.id, { file }); } catch (e) { /* déjà injecté */ }
-      }
-      try {
-        await browser.tabs.executeScript(tab.id, { file: "message/message-traduction.js" });
-      } catch (e) {
-        if (!e.message.includes("non-structured-clonable")) {
-          console.error("[Albert] Erreur injection traduction lecture :", e);
-        }
-      }
-      // Envoyer la sélection et lancer la traduction
-      browser.tabs.sendMessage(tab.id, {
-        type: "translateInMessage",
-        text: text,
+      // Dans la lecture de mail : ouvrir une fenêtre popup de traduction
+      const encodedText = encodeURIComponent(text);
+      browser.windows.create({
+        url: "message/message-traduction.html?text=" + encodedText,
+        type: "popup",
+        width: 480,
+        height: 320,
       });
     }
   }

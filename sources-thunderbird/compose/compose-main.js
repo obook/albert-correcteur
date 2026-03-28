@@ -17,13 +17,23 @@
 
   body.addEventListener("input", (e) => {
     if (Albert.applyingCorrection) return;
+    if (composing) return; // IME en cours, ignorer
 
     Albert.closeCorrectionPopup();
     Albert.clearUnderlines();
+
+    // Recréer le badge s'il a été supprimé (select all + delete efface tout le body)
+    if (!document.contains(Albert.badge)) {
+      Albert.badge = null;
+      Albert.createBadge();
+    }
+
     Albert.setBadgeState(null);
     Albert.scheduleCheck();
   });
 
+  // Gestion IME/composition (langues CJK) : ignorer les événements input
+  // pendant la composition pour éviter les vérifications sur du texte partiel
   let composing = false;
   body.addEventListener("compositionstart", () => { composing = true; });
   body.addEventListener("compositionend", () => {
