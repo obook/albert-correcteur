@@ -10,6 +10,12 @@
       margin: 40px auto;
       padding: 0 20px;
       color: #333;
+      background: #fff;
+      transition: background 0.2s, color 0.2s;
+    }
+    body.dark {
+      background: #1e1e1e;
+      color: #ddd;
     }
     h1 { font-size: 20px; }
     label { display: block; margin: 20px 0 6px; font-weight: 600; }
@@ -21,11 +27,17 @@
       border: 1px solid #ccc;
       border-radius: 6px;
       box-sizing: border-box;
+      background: #fff;
+      color: #333;
+    }
+    body.dark textarea, body.dark input[type="text"], body.dark [contenteditable] {
+      background: #2d2d2d;
+      color: #ddd;
+      border-color: #555;
     }
     textarea { height: 120px; resize: vertical; }
     [contenteditable] {
       min-height: 80px;
-      background: #fff;
     }
     .section { margin-bottom: 30px; }
     .DraftEditor-root, .lexical-editor {
@@ -36,14 +48,39 @@
       font-size: 14px;
       background: #fff;
     }
+    body.dark .DraftEditor-root, body.dark .lexical-editor {
+      background: #2d2d2d;
+      border-color: #555;
+    }
     .DraftEditor-root { border-color: #1da1f2; }
     .lexical-editor { border-color: #6c5ce7; }
+    body.dark .DraftEditor-root { border-color: #1da1f2; }
+    body.dark .lexical-editor { border-color: #6c5ce7; }
     .draft-editor { outline: none; min-height: 60px; }
     .react-rerender-flash { animation: flash 0.3s; }
     @keyframes flash { 0% { background: #fff3cd; } 100% { background: transparent; } }
+    #theme-toggle {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      padding: 6px 14px;
+      font-size: 13px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #f5f5f5;
+      color: #333;
+      z-index: 9999;
+    }
+    body.dark #theme-toggle {
+      background: #444;
+      color: #ddd;
+      border-color: #666;
+    }
   </style>
 </head>
 <body>
+  <button id="theme-toggle" onclick="document.body.classList.toggle('dark'); this.textContent = document.body.classList.contains('dark') ? 'Clair' : 'Sombre';">Sombre</button>
   <h1>Test Albert Correcteur</h1>
 
   <div class="section">
