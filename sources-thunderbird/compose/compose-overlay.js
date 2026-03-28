@@ -31,6 +31,36 @@ Albert.createUnderlineSpan = function (correction, index) {
   return span;
 };
 
+// Construit une map des text nodes avec un offset "innerText-compatible"
+// en ajoutant les \n que innerText insère pour les éléments block (<p>, <div>, <br>).
+Albert.buildTextNodeMap = function (body) {
+  const BLOCK_TAGS = new Set(["P", "DIV", "BR", "LI", "TR", "BLOCKQUOTE", "H1", "H2", "H3", "H4", "H5", "H6", "PRE", "HR", "UL", "OL"]);
+  const map = [];
+  let innerOffset = 0;
+  let prevNode = null;
+
+  const walker = document.createTreeWalker(body, NodeFilter.SHOW_ALL, null);
+  let current;
+  while ((current = walker.nextNode())) {
+    // Quand on rencontre un élément block ou <br>, innerText ajoute un \n
+    if (current.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has(current.tagName)) {
+      // <br> ajoute un \n, les blocs ouvrants aussi (sauf le premier enfant du body)
+      if (current.tagName === "BR") {
+        innerOffset += 1;
+      } else if (prevNode) {
+        // Un bloc ajoute un \n si ce n'est pas le tout premier contenu
+        innerOffset += 1;
+      }
+    }
+    if (current.nodeType === Node.TEXT_NODE && current.textContent.length > 0) {
+      map.push({ node: current, start: innerOffset, end: innerOffset + current.textContent.length });
+      innerOffset += current.textContent.length;
+      prevNode = current;
+    }
+  }
+  return map;
+};
+
 Albert.applyUnderlines = function (corrections) {
   Albert.clearUnderlines();
   if (!corrections || !corrections.length) return;
@@ -38,21 +68,15 @@ Albert.applyUnderlines = function (corrections) {
   const body = Albert.getComposeBody();
   if (!body) return;
 
-  const textNodes = [];
-  const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, null);
-  let node;
-  let offset = 0;
-  while ((node = walker.nextNode())) {
-    textNodes.push({ node, start: offset, end: offset + node.textContent.length });
-    offset += node.textContent.length;
-  }
+  const innerText = body.innerText;
+  const textNodes = Albert.buildTextNodeMap(body);
 
   const sorted = corrections
     .map((c, i) => ({ ...c, index: i }))
     .sort((a, b) => b.offset - a.offset);
 
   for (const correction of sorted) {
-    const realOffset = Albert.findRealOffset(body.innerText, correction.word, correction.offset);
+    const realOffset = Albert.findRealOffset(innerText, correction.word, correction.offset);
     if (realOffset === -1) continue;
 
     const startInfo = textNodes.find((n) => n.start <= realOffset && n.end > realOffset);

@@ -6,3 +6,23 @@ Quel pied, ces oignons qu'a créé il y a peu une entreprise alimentaire japonna
 
 Source : http://www.parmotsetparvaux.fr
 
+Voici des phrases de test qui couvrent les cas problématiques :
+
+  Pluriels :
+  - "Les enfant joue dans la cours de récréation." (enfant→enfants, joue→jouent, cours→cour)
+  - "Ces nouvelle mesure sont très efficace." (nouvelle→nouvelles, mesure→mesures, efficace→efficaces)
+  - "Les rapport trimestriel ont été envoyé aux parent." (rapport→rapports, trimestriel→trimestriels, envoyé→envoyés, parent→parents)
+
+  Genre :
+  - "Une excellent résultat a été obtenu par cette étudiant." (excellent→excellente, cette→cet ou étudiant→étudiante selon le sens)
+  - "La nouveau directeur est très compétent." (nouveau→nouvelle, directeur→directrice, compétent→compétente)
+  - "Ce décision importante a été pris rapidement." (Ce→Cette, pris→prise)
+
+  Cohérence contextuelle :
+  - "Les élève motivé ont réussi leur examen final." (élève→élèves, motivé→motivés, final→finals ou examen→examens finals)
+  - "Elle a mangé les pomme verte que j'avais acheté." (pomme→pommes, verte→vertes, acheté→achetées)
+  - "Le petit filles jouait tranquillement dans le jardin." (Le→La ou Les, petit→petite/petites, jouait→jouaient si pluriel)
+
+  Constructions verbales (déjà couvertes mais à vérifier) :
+  - "Il avait beau essayé, rien ne marchait." (essayé→essayer)
+  - "Elle s'est laissée emportée par la musique." (emportée→emporter)
