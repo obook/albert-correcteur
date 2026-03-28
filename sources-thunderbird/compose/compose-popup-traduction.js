@@ -107,6 +107,7 @@ Albert.showTranslationPopup = function (text) {
       resultDiv.textContent = result.error;
     } else {
       resultDiv.textContent = result.translation;
+      resultDiv.setAttribute("lang", targetLang);
       const langNames = { fr: "français", en: "anglais", es: "espagnol", de: "allemand" };
       langInfo.textContent = "Langue détectée : " + (langNames[result.langSource] || result.langSource);
       copyBtn.style.display = "";

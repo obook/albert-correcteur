@@ -45,6 +45,7 @@ Albert.doTranslate = async function (originalText, targetLang, resultDiv, copyBt
     langInfoEl.textContent = (LANG_LABELS[response.langSource] || response.langSource) + " → " + (LANG_LABELS[targetLang] || targetLang);
   }
   resultDiv.textContent = response.translation;
+  resultDiv.setAttribute("lang", targetLang);
   resultDiv.style.display = "block";
   copyBtn.style.display = "inline-block";
 };
