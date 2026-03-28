@@ -55,6 +55,28 @@ Albert.isRichEditor = function (el) {
   return false;
 };
 
+// Migre les offsets des corrections existantes apres une frappe utilisateur.
+// Compare l'ancien et le nouveau texte pour ajuster ou invalider les corrections.
+Albert.migrateCorrections = function (corrections, oldText, newText, cursorPos) {
+  const delta = newText.length - oldText.length;
+  if (delta === 0 || !corrections || corrections.length === 0) return corrections;
+
+  // Position de debut de l'edition
+  const editStart = Math.max(0, cursorPos - Math.max(0, delta));
+  // Position de fin de l'edition (dans l'ancien texte)
+  const editEndOld = editStart + Math.max(0, -delta);
+
+  return corrections.map((c) => {
+    const cEnd = c.offset + c.length;
+    // Correction entierement avant l'edition : inchangee
+    if (cEnd <= editStart) return c;
+    // Correction chevauche la zone editee : invalider
+    if (c.offset < editEndOld + Math.max(0, delta) && cEnd > editStart) return null;
+    // Correction entierement apres l'edition : decaler
+    return Object.assign({}, c, { offset: c.offset + delta });
+  }).filter(Boolean);
+};
+
 // Récupère le texte d'un champ de saisie.
 Albert.getTextContent = function (el) {
   const tag = el.tagName.toLowerCase();

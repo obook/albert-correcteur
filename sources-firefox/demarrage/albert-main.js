@@ -52,29 +52,38 @@ Albert.attachField = function (el) {
     // Ne pas réagir pendant la composition IME (saisie CJK en cours)
     if (st.isComposing) return;
 
-    // Entrée en "typing mode" : masquer l'overlay et le popup
-    // mais conserver les corrections en mémoire (elles seront migrées ou revérifiées)
-    if (st.badge) {
-      st.badge.classList.remove("albert-has-errors", "albert-no-errors");
-      const img = st.badge.querySelector("img");
-      if (img) img.src = Albert.ICON_URL;
-      st.badge.title = "Albert Correcteur";
-    }
-    if (st.overlay) {
-      st.overlay.remove();
-      st.overlay = null;
-    }
     Albert.closePopup();
 
-    // Timer "fin de frappe" : quand l'utilisateur arrête de taper,
-    // ré-afficher les corrections existantes (si le texte n'a pas changé)
-    // en attendant la revérification complète
-    clearTimeout(st.typingTimer);
-    st.typingTimer = setTimeout(() => {
-      if (st.corrections && st.corrections.length > 0 && st.lastCheckedText === Albert.getTextContent(el)) {
+    // Migration des offsets : ajuster les corrections existantes au lieu de tout effacer
+    const newText = Albert.getTextContent(el);
+    const oldText = st.lastCheckedText || "";
+    if (st.corrections && st.corrections.length > 0 && oldText) {
+      const tag = el.tagName.toLowerCase();
+      const cursorPos = (tag === "textarea" || tag === "input") ? el.selectionStart : newText.length;
+      st.corrections = Albert.migrateCorrections(st.corrections, oldText, newText, cursorPos);
+      st.checkedText = newText;
+      st.lastCheckedText = newText;
+      // Re-rendre avec les offsets migres
+      if (st.corrections.length > 0) {
         Albert.renderCorrections(el);
+      } else {
+        if (st.overlay) { st.overlay.remove(); st.overlay = null; }
+        if (st.badge) {
+          st.badge.classList.remove("albert-has-errors");
+          st.badge.classList.add("albert-no-errors");
+          const img = st.badge.querySelector("img");
+          if (img) img.src = Albert.ICON_URL;
+        }
       }
-    }, Albert.STOPPED_TYPING_MS);
+    } else {
+      if (st.overlay) { st.overlay.remove(); st.overlay = null; }
+      if (st.badge) {
+        st.badge.classList.remove("albert-has-errors", "albert-no-errors");
+        const img = st.badge.querySelector("img");
+        if (img) img.src = Albert.ICON_URL;
+        st.badge.title = "Albert Correcteur";
+      }
+    }
 
     Albert.scheduleCheck(el);
   });
