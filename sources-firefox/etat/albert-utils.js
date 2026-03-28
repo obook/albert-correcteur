@@ -52,6 +52,8 @@ Albert.isRichEditor = function (el) {
   // Lexical (successeur de Draft.js, utilisé par Meta)
   if (el.hasAttribute("data-lexical-editor")) return true;
   if (el.closest("[data-lexical-editor]")) return true;
+  // Element/Matrix (Tchap, Element Web)
+  if (el.classList.contains("mx_BasicMessageComposer_input")) return true;
   return false;
 };
 
