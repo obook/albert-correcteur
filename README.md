@@ -78,6 +78,11 @@ Voir [ARCHITECTURE.md](ARCHITECTURE.md) pour l'arborescence, les flux et les dé
 - Polices système uniquement (`-apple-system`, `Segoe UI`, etc.)
 - Les données saisies ne transitent que vers le serveur API Albert choisi
 
+## Accessibilité et sécurité
+
+- **Accessibilité (RGAA)** : déclaration de conformité dans [ACCESSIBILITE.md](ACCESSIBILITE.md)
+- **Sécurité (ANSSI)** : fiche de sécurité dans [SECURITE.md](SECURITE.md)
+
 ## Licences
 
 - **Code source** : [licence MIT](LICENSE)
