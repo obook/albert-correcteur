@@ -54,7 +54,14 @@ async function checkText(text, mode) {
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "{}";
     const parsed = JSON.parse(content);
-    return { corrections: parsed.corrections || [], lang };
+    // Filtrer les suggestions identiques au mot erroné
+    const corrections = (parsed.corrections || []).map((c) => {
+      if (c.suggestions) {
+        c.suggestions = c.suggestions.filter((s) => s !== c.word);
+      }
+      return c;
+    }).filter((c) => !c.suggestions || c.suggestions.length > 0);
+    return { corrections, lang };
   } catch (err) {
     return { error: `Erreur réseau : ${err.message}` };
   }
