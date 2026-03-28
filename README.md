@@ -2,7 +2,7 @@
 
 **Extension expérimentale** de correction orthographique, grammaticale et de traduction pour Firefox et Thunderbird, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web (Firefox) et dans la fenêtre de composition de mail (Thunderbird), propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné (français, anglais, espagnol, allemand).
 
-**Téléchargement** : [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases)
+**Téléchargement** : [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases) | **Accessibilité** : [RGAA](ACCESSIBILITE.md)
 
 | Correction et reformulation | Traduction multi-langues |
 |:---:|:---:|
@@ -78,10 +78,9 @@ Voir [ARCHITECTURE.md](ARCHITECTURE.md) pour l'arborescence, les flux et les dé
 - Polices système uniquement (`-apple-system`, `Segoe UI`, etc.)
 - Les données saisies ne transitent que vers le serveur API Albert choisi
 
-## Accessibilité et sécurité
+## Sécurité
 
-- **Accessibilité (RGAA)** : déclaration de conformité dans [ACCESSIBILITE.md](ACCESSIBILITE.md)
-- **Sécurité (ANSSI)** : fiche de sécurité dans [SECURITE.md](SECURITE.md)
+Fiche de sécurité conforme aux recommandations ANSSI : [SECURITE.md](SECURITE.md)
 
 ## Licences
 
