@@ -6,9 +6,14 @@ Albert.reformulationPopup = null;
 
 Albert.closeReformulationPopup = function () {
   if (Albert.reformulationPopup) {
+    if (Albert.reformulationPopup._focusTrapHandler) {
+      Albert.reformulationPopup.removeEventListener("keydown", Albert.reformulationPopup._focusTrapHandler);
+      Albert.reformulationPopup._focusTrapHandler = null;
+    }
     Albert.reformulationPopup.remove();
     Albert.reformulationPopup = null;
   }
+  Albert.restoreFocus();
 };
 
 Albert.showReformulationPopup = function (originalText, result) {
@@ -20,6 +25,7 @@ Albert.showReformulationPopup = function (originalText, result) {
   popup.className = "albert-popup " + Albert.getPopupThemeClass();
   popup.setAttribute("role", "dialog");
   popup.setAttribute("aria-label", "Reformulation");
+  popup.setAttribute("aria-modal", "true");
 
   const header = document.createElement("div");
   header.className = "albert-popup-header";
@@ -76,6 +82,7 @@ Albert.showReformulationPopup = function (originalText, result) {
   popup.style.transform = "translate(-50%, -50%)";
   popup.style.zIndex = "2147483647";
 
+  Albert.trapFocus(popup);
   Albert.reformulationPopup = popup;
 };
 

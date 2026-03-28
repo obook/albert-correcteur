@@ -7,9 +7,14 @@ Albert.lastTranslationLang = "en";
 
 Albert.closeTranslationPopup = function () {
   if (Albert.translationPopup) {
+    if (Albert.translationPopup._focusTrapHandler) {
+      Albert.translationPopup.removeEventListener("keydown", Albert.translationPopup._focusTrapHandler);
+      Albert.translationPopup._focusTrapHandler = null;
+    }
     Albert.translationPopup.remove();
     Albert.translationPopup = null;
   }
+  Albert.restoreFocus();
 };
 
 Albert.showTranslationPopup = function (text) {
@@ -21,6 +26,7 @@ Albert.showTranslationPopup = function (text) {
   popup.className = "albert-popup " + Albert.getPopupThemeClass();
   popup.setAttribute("role", "dialog");
   popup.setAttribute("aria-label", "Traduction");
+  popup.setAttribute("aria-modal", "true");
 
   const header = document.createElement("div");
   header.className = "albert-popup-header";
@@ -81,6 +87,7 @@ Albert.showTranslationPopup = function (text) {
   popup.style.transform = "translate(-50%, -50%)";
   popup.style.zIndex = "2147483647";
 
+  Albert.trapFocus(popup);
   Albert.translationPopup = popup;
 
   const doTranslate = async (targetLang) => {
