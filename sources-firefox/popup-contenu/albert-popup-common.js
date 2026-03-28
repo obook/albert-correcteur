@@ -1,5 +1,5 @@
 // albert-popup-common.js — Fonctions partagées par toutes les popups.
-// Thème, drag, fermeture, positionnement, sauvegarde de sélection.
+// Thème, drag, fermeture, positionnement, sauvegarde de sélection, piège de focus.
 
 "use strict";
 
@@ -27,9 +27,14 @@ browser.storage.onChanged.addListener((changes) => {
 // --- Fermeture ---
 
 Albert.popupPosition = null;
+Albert._previousFocus = null;
 
 Albert.closePopup = function () {
   if (Albert.activePopup) {
+    if (Albert.activePopup._focusTrapHandler) {
+      Albert.activePopup.removeEventListener("keydown", Albert.activePopup._focusTrapHandler);
+      Albert.activePopup._focusTrapHandler = null;
+    }
     Albert.activePopup.remove();
     Albert.activePopup = null;
     Albert.activePopupIdx = -1;
@@ -43,10 +48,11 @@ Albert.closePopup = function () {
 
 // --- Focus trap (accessibilite RGAA) ---
 
-Albert._previousFocus = null;
-
 Albert.trapFocus = function (popup) {
-  Albert._previousFocus = document.activeElement;
+  if (!Albert._previousFocus) {
+    const prev = document.activeElement;
+    Albert._previousFocus = (prev && prev !== document.body) ? prev : null;
+  }
   const focusables = popup.querySelectorAll(
     'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
   );

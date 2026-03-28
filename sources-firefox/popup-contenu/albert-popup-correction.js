@@ -19,7 +19,7 @@ Albert.showPopup = function (el, correction, markEl) {
   popup.className = "albert-popup" + (themeClass ? " " + themeClass : "");
   popup.setAttribute("role", "dialog");
   popup.setAttribute("aria-label", "Correction orthographique");
-  popup.setAttribute("aria-modal", "false");
+  popup.setAttribute("aria-modal", "true");
 
   // --- Header ---
   const { headerLeft, handle } = Albert.createPopupHeader(popup);
