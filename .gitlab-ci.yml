@@ -26,12 +26,16 @@ build:
   script:
     - VERSION="${CI_COMMIT_TAG#v}"
     - XPI_NAME="albert-correcteur_${VERSION}.xpi"
-    - cd sources
+    - mkdir -p .build-firefox
+    - cp -r sources/* .build-firefox/
+    - cp -r sources-firefox/* .build-firefox/
+    - cd .build-firefox
     - zip -r "../${XPI_NAME}" . -x ".*"
     - cd ..
+    - rm -rf .build-firefox
     - echo "XPI_NAME=${XPI_NAME}" > build.env
     - echo "VERSION=${VERSION}" >> build.env
-    - echo "Extension packagée → ${XPI_NAME}"
+    - echo "Extension packagée -> ${XPI_NAME}"
   artifacts:
     paths:
       - "albert-correcteur_*.xpi"
@@ -57,7 +61,11 @@ sign:
     - VERSION="${CI_COMMIT_TAG#v}"
     - XPI_NAME="albert-correcteur_${VERSION}.xpi"
     - ADDON_ID="albert-correcteur@ac-bordeaux.fr"
-    - web-ext sign --source-dir=sources/ --channel=unlisted --api-key="${WEB_EXT_API_KEY}" --api-secret="${WEB_EXT_API_SECRET}" || true
+    - mkdir -p .build-firefox
+    - cp -r sources/* .build-firefox/
+    - cp -r sources-firefox/* .build-firefox/
+    - web-ext sign --source-dir=.build-firefox/ --channel=unlisted --api-key="${WEB_EXT_API_KEY}" --api-secret="${WEB_EXT_API_SECRET}" || true
+    - rm -rf .build-firefox
     - SIGNED_XPI=$(ls web-ext-artifacts/*.xpi 2>/dev/null || true)
     - |
       if [ -n "$SIGNED_XPI" ]; then
