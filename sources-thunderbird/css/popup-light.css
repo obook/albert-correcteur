@@ -1,0 +1,95 @@
+/* --- Thème clair --- */
+.albert-popup.albert-theme-light {
+  background: #fff;
+  border-color: #ddd;
+  color: #333;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.albert-theme-light .albert-popup-header {
+  background: #f6f6f6;
+  border-bottom-color: #e0e0e0;
+}
+
+.albert-theme-light .albert-popup-mode-btn {
+  color: #333;
+}
+
+.albert-theme-light .albert-popup-mode-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.albert-theme-light .albert-popup-mode-menu {
+  background: #fff;
+  border-color: #ddd;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.albert-theme-light .albert-popup-mode-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.albert-theme-light .albert-popup-mode-item.active {
+  color: #333;
+}
+
+.albert-theme-light .albert-popup-check {
+  color: #000091;
+}
+
+.albert-theme-light .albert-popup-handle:hover {
+  color: #555;
+}
+
+.albert-theme-light .albert-popup-close:hover {
+  color: #333;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.albert-theme-light .albert-popup-message {
+  color: #555;
+}
+
+.albert-theme-light .albert-popup-ignore-rule:hover {
+  color: #333;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.albert-theme-light .albert-popup-extract {
+  color: #777;
+}
+
+.albert-theme-light .albert-popup-dismiss {
+  color: #999;
+  border-color: #ddd;
+}
+
+.albert-theme-light .albert-popup-dismiss:hover {
+  background: #f5f5f5;
+  color: #555;
+}
+
+.albert-theme-light .albert-popup-footer {
+  background: #f6f6f6;
+  border-top-color: #e0e0e0;
+}
+
+.albert-theme-light .albert-popup-nav {
+  color: #000091;
+}
+
+.albert-theme-light .albert-popup-nav:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* --- Traduction thème clair --- */
+.albert-theme-light .albert-popup-lang-select {
+  background: #fff;
+  border-color: #ddd;
+  color: #333;
+}
+
+.albert-theme-light .albert-popup-translation-result {
+  background: #f6f6f6;
+  color: #333;
+}

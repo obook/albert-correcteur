@@ -1,0 +1,48 @@
+#!/bin/bash
+# Construit le fichier .xpi pour installation dans Thunderbird.
+# Assemble sources/ (code partagé) + sources-thunderbird/ (code spécifique).
+# Usage : ./thunderbird-build.sh
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+COMMON_DIR="$SCRIPT_DIR/sources"
+TB_DIR="$SCRIPT_DIR/sources-thunderbird"
+OUT_DIR="$SCRIPT_DIR/thunderbird-release"
+BUILD_DIR="$SCRIPT_DIR/.build-thunderbird"
+OUT="$OUT_DIR/albert-correcteur-thunderbird.xpi"
+
+# Vérifier que les dossiers source existent
+if [ ! -d "$COMMON_DIR" ]; then
+    echo "Erreur : le dossier sources/ est introuvable."
+    exit 1
+fi
+if [ ! -d "$TB_DIR" ]; then
+    echo "Erreur : le dossier sources-thunderbird/ est introuvable."
+    exit 1
+fi
+
+# Nettoyer et préparer le dossier d'assemblage
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
+
+# Copier le code partagé puis le code spécifique Thunderbird (écrase si conflit)
+cp -r "$COMMON_DIR"/* "$BUILD_DIR"/
+cp -r "$TB_DIR"/* "$BUILD_DIR"/
+
+# Créer le dossier de release et supprimer l'ancien .xpi
+mkdir -p "$OUT_DIR"
+rm -f "$OUT"
+
+# Créer le .xpi (c'est un simple fichier ZIP)
+cd "$BUILD_DIR"
+zip -r "$OUT" . -x ".*"
+
+# Nettoyer
+rm -rf "$BUILD_DIR"
+
+echo ""
+echo "Extension packagée : $OUT"
+echo ""
+echo "Pour installer dans Thunderbird :"
+echo "  1. Ouvrir le gestionnaire de modules (Menu > Modules complémentaires)"
+echo "  2. Roue dentée -> Installer un module depuis un fichier..."
+echo "  3. Sélectionner albert-correcteur-thunderbird.xpi"

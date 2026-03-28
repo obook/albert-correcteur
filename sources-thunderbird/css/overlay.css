@@ -1,0 +1,41 @@
+/* --- Overlay de soulignement pour textareas --- */
+.albert-overlay {
+  position: absolute;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2147483645;
+  color: transparent !important;
+  white-space: pre-wrap;    /* valeur par défaut, écrasée par syncOverlayStyle */
+  word-wrap: break-word;    /* valeur par défaut, écrasée par syncOverlayStyle */
+  background: transparent !important;
+  border: none !important;
+}
+
+/* --- Marques d'erreur --- */
+.albert-error {
+  position: relative;
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 1px;
+  background-size: 4px 2px;
+  background-repeat: repeat-x;
+  background-position: bottom;
+}
+
+/* Couleurs par type : rouge (orthographe), orange (grammaire), bleu (style) */
+.albert-error-spelling {
+  background-image: linear-gradient(to right, #e3342f 50%, transparent 50%);
+}
+
+.albert-error-grammar {
+  background-image: linear-gradient(to right, #f6993f 50%, transparent 50%);
+}
+
+.albert-error-style {
+  background-image: linear-gradient(to right, #3490dc 50%, transparent 50%);
+}
+
+/* Masquer l'overlay quand une modale Bootstrap est ouverte (EcoleDirecte) */
+body.modal-open .albert-overlay {
+  display: none !important;
+}
