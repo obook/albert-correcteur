@@ -1,4 +1,4 @@
-// compose-check.js --- Déclenchement de la vérification dans le compose Thunderbird.
+/* compose-check.js --- Déclenchement de la vérification dans le compose Thunderbird. */
 
 "use strict";
 
@@ -15,9 +15,9 @@ Albert.requestCheck = function (text) {
     return;
   }
 
-  // On ne peut pas annuler le sendMessage en cours, mais on marque
-  // le contrôleur précédent comme "aborted" pour ignorer son résultat
-  // quand il arrivera (pattern "discard stale result").
+  /* On ne peut pas annuler le sendMessage en cours, mais on marque
+   * le contrôleur précédent comme "aborted" pour ignorer son résultat
+   * quand il arrivera (pattern "discard stale result"). */
   if (Albert.pendingAbort) Albert.pendingAbort.abort();
   const controller = new AbortController();
   Albert.pendingAbort = controller;

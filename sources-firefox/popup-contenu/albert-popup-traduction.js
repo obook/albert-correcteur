@@ -1,5 +1,5 @@
-// albert-popup-traduction.js — Popup de traduction via le menu contextuel.
-// Sélecteur de langue dans le header, traduction automatique, bouton copier.
+/* albert-popup-traduction.js - Popup de traduction via le menu contextuel.
+   Sélecteur de langue dans le header, traduction automatique, bouton copier. */
 
 "use strict";
 
@@ -12,13 +12,13 @@ const TRANSLATE_LANGS = [
 
 const LANG_LABELS = { fr: "Français", en: "Anglais", es: "Espagnol", de: "Allemand" };
 
-// Dernière langue sélectionnée (persistée dans storage).
+/* Dernière langue sélectionnée (persistée dans storage). */
 Albert.lastTranslateLang = "en";
 browser.storage.local.get("lastTranslateLang").then((r) => {
   if (r.lastTranslateLang) Albert.lastTranslateLang = r.lastTranslateLang;
 });
 
-// Lance la traduction et met à jour la popup.
+/* Lance la traduction et met à jour la popup. */
 Albert.doTranslate = async function (originalText, targetLang, resultDiv, copyBtn, loadingMsg, langInfoEl) {
   if (loadingMsg) loadingMsg.textContent = "Traduction en cours…";
   if (langInfoEl) langInfoEl.textContent = "";
@@ -42,7 +42,9 @@ Albert.doTranslate = async function (originalText, targetLang, resultDiv, copyBt
 
   if (loadingMsg) loadingMsg.textContent = "";
   if (langInfoEl && response.langSource) {
-    langInfoEl.textContent = (LANG_LABELS[response.langSource] || response.langSource) + " → " + (LANG_LABELS[targetLang] || targetLang);
+    const srcLabel = LANG_LABELS[response.langSource] || response.langSource;
+    const tgtLabel = LANG_LABELS[targetLang] || targetLang;
+    langInfoEl.textContent = srcLabel + " → " + tgtLabel;
   }
   resultDiv.textContent = response.translation;
   resultDiv.setAttribute("lang", targetLang);
@@ -64,10 +66,10 @@ Albert.showTranslationPopup = function (originalText) {
   h2.textContent = "Traduction";
   popup.appendChild(h2);
 
-  // --- Header ---
+  /* --- Header --- */
   const { headerLeft, handle } = Albert.createPopupHeader(popup);
 
-  // Sélecteur de langue
+  /* Sélecteur de langue */
   const langSelect = document.createElement("select");
   langSelect.className = "albert-popup-lang-select";
   TRANSLATE_LANGS.forEach((l) => {
@@ -79,13 +81,13 @@ Albert.showTranslationPopup = function (originalText) {
   });
   headerLeft.appendChild(langSelect);
 
-  // Bouton traduire
+  /* Bouton traduire */
   const translateBtn = document.createElement("button");
   translateBtn.className = "albert-popup-translate-btn";
   translateBtn.textContent = "Traduire";
   headerLeft.appendChild(translateBtn);
 
-  // --- Corps ---
+  /* --- Corps --- */
   const body = document.createElement("div");
   body.className = "albert-popup-body";
 
@@ -113,13 +115,13 @@ Albert.showTranslationPopup = function (originalText) {
   popup.appendChild(body);
   document.body.appendChild(popup);
 
-  // Positionnement
+  /* Positionnement */
   Albert.positionPopupAtClick(popup);
   Albert.initPopupDrag(popup, handle);
   Albert.trapFocus(popup);
   Albert.activePopup = popup;
 
-  // --- Actions ---
+  /* --- Actions --- */
 
   translateBtn.addEventListener("click", () => {
     Albert.doTranslate(originalText, langSelect.value, resultDiv, copyBtn, loadingMsg, langInfoEl);
@@ -141,6 +143,6 @@ Albert.showTranslationPopup = function (originalText) {
     });
   });
 
-  // Traduction automatique à l'ouverture
+  /* Traduction automatique à l'ouverture */
   Albert.doTranslate(originalText, Albert.lastTranslateLang, resultDiv, copyBtn, loadingMsg, langInfoEl);
 };

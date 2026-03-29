@@ -1,11 +1,14 @@
-// service-api.js --- Appels à l'API Albert (correction, reformulation, traduction).
+/* service-api.js --- Appels à l'API Albert (correction, reformulation, traduction). */
 
 "use strict";
 
 async function checkText(text, mode) {
   const config = await loadConfig();
   if (!config.apiKey) {
-    return { error: "Clé API non configurée. Cliquez sur l'icône Albert pour la configurer." };
+    return {
+      error: "Clé API non configurée. "
+        + "Cliquez sur l'icône Albert pour la configurer."
+    };
   }
 
   const lang = detectLanguage(text);
@@ -35,19 +38,34 @@ async function checkText(text, mode) {
     if (!response.ok) {
       const detail = await response.text();
       if (response.status === 429) {
-        const retryAfter = parseInt(response.headers.get("Retry-After"), 10) || 30;
-        // Extraire le type de limite depuis la réponse API si disponible
+        const retryAfter =
+          parseInt(response.headers.get("Retry-After"), 10) || 30;
+        /* Extraire le type de limite depuis la réponse API si disponible */
         let limitType = "";
         try {
           const err = JSON.parse(detail);
           const msg = (err.detail || err.message || "").toLowerCase();
-          if (msg.includes("rpm") || msg.includes("requests per minute")) limitType = "requêtes/minute (rpm)";
-          else if (msg.includes("rpd") || msg.includes("requests per day")) limitType = "requêtes/jour (rpd)";
-          else if (msg.includes("tpm") || msg.includes("tokens per minute")) limitType = "tokens/minute (tpm)";
-          else if (msg.includes("tpd") || msg.includes("tokens per day")) limitType = "tokens/jour (tpd)";
+          if (msg.includes("rpm")
+            || msg.includes("requests per minute")) {
+            limitType = "requêtes/minute (rpm)";
+          } else if (msg.includes("rpd")
+            || msg.includes("requests per day")) {
+            limitType = "requêtes/jour (rpd)";
+          } else if (msg.includes("tpm")
+            || msg.includes("tokens per minute")) {
+            limitType = "tokens/minute (tpm)";
+          } else if (msg.includes("tpd")
+            || msg.includes("tokens per day")) {
+            limitType = "tokens/jour (tpd)";
+          }
         } catch { /* réponse non-JSON */ }
-        const desc = limitType ? `Limite ${limitType} dépassée.` : "Limite de débit dépassée.";
-        return { error: `${desc} Pause de ${retryAfter}s.`, retryAfter };
+        const desc = limitType
+          ? `Limite ${limitType} dépassée.`
+          : "Limite de débit dépassée.";
+        return {
+          error: `${desc} Pause de ${retryAfter}s.`,
+          retryAfter
+        };
       }
       return { error: `Erreur API (${response.status}) : ${detail}` };
     }
@@ -66,13 +84,16 @@ async function checkText(text, mode) {
     if (!Array.isArray(parsed.corrections)) {
       return { error: "Réponse API invalide : corrections manquantes." };
     }
-    // Filtrer les suggestions incorrectes
+    /* Filtrer les suggestions incorrectes */
     const corrections = (parsed.corrections || []).map((c) => {
-      if (c.suggestions) {
+      if (c.suggestions && c.word) {
         c.suggestions = c.suggestions.filter((s) => {
-          // Supprimer les suggestions identiques au mot erroné
+          /* Supprimer les suggestions identiques au mot erroné */
           if (s === c.word) return false;
-          // Si le mot erroné finit par "s" (pluriel), la suggestion doit aussi finir par "s"
+          /*
+           * Si le mot erroné finit par "s" (pluriel),
+           * la suggestion doit aussi finir par "s"
+           */
           if (c.word.endsWith("s") && !s.endsWith("s")) return false;
           return true;
         });
@@ -92,7 +113,8 @@ async function translateText(text, targetLang) {
   }
 
   const langSource = detectLanguage(text);
-  const systemPrompt = await buildTranslationPrompt(langSource, targetLang);
+  const systemPrompt =
+    await buildTranslationPrompt(langSource, targetLang);
 
   try {
     const body = {
@@ -119,8 +141,12 @@ async function translateText(text, targetLang) {
     if (!response.ok) {
       const detail = await response.text();
       if (response.status === 429) {
-        const retryAfter = parseInt(response.headers.get("Retry-After"), 10) || 30;
-        return { error: `Limite de débit dépassée. Pause de ${retryAfter}s.`, retryAfter };
+        const retryAfter =
+          parseInt(response.headers.get("Retry-After"), 10) || 30;
+        return {
+          error: `Limite de débit dépassée. Pause de ${retryAfter}s.`,
+          retryAfter
+        };
       }
       return { error: `Erreur API (${response.status}) : ${detail}` };
     }
@@ -139,7 +165,11 @@ async function translateText(text, targetLang) {
     if (typeof parsed.translation !== "string") {
       return { error: "Réponse API invalide : traduction manquante." };
     }
-    return { translation: parsed.translation, langSource, langCible: targetLang };
+    return {
+      translation: parsed.translation,
+      langSource,
+      langCible: targetLang
+    };
   } catch (err) {
     return { error: `Erreur réseau : ${err.message}` };
   }

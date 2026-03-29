@@ -1,8 +1,8 @@
-// Tests — Détection automatique de la langue.
+/* Tests -- Détection automatique de la langue. */
 
 const assert = require("assert");
 
-// ── Copie des fonctions à tester (depuis service/service.js) ──
+/* -- Copie des fonctions à tester (depuis service/service.js) -- */
 
 const LANG_WORDS = {
   fr: ["le", "la", "les", "de", "des", "un", "une", "du", "est", "et", "en", "que", "qui", "dans", "pour", "pas", "sur", "avec", "ce", "sont", "nous", "vous", "ils", "mais", "plus", "être", "avoir", "cette", "tout", "aussi"],
@@ -22,7 +22,7 @@ function detectLanguage(text) {
   return best[0];
 }
 
-// ── Tests ──
+/* -- Tests -- */
 
 let passed = 0;
 let failed = 0;

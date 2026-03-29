@@ -1,4 +1,4 @@
-// compose-limites.js --- Vérification des limites API côté client dans le compose.
+/* compose-limites.js --- Vérification des limites API côté client dans le compose. */
 
 "use strict";
 

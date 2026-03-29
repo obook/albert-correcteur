@@ -1,4 +1,4 @@
-// compose-badge.js --- Badge Albert dans la fenêtre de composition Thunderbird.
+/* compose-badge.js --- Badge Albert dans la fenêtre de composition Thunderbird. */
 
 "use strict";
 
@@ -14,7 +14,7 @@ Albert.createBadge = function () {
   badge.setAttribute("tabindex", "0");
   badge.title = "Albert Correcteur";
 
-  // Utiliser la vraie icône du projet (identique à Firefox)
+  /* Utiliser la vraie icône du projet (identique à Firefox) */
   const img = document.createElement("img");
   img.src = browser.runtime.getURL("icons/icon-48.png");
   img.alt = "Albert";

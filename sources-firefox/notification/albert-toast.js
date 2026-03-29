@@ -1,10 +1,10 @@
-// albert-toast.js — Toast de notification (en haut à droite).
+/* albert-toast.js - Toast de notification (en haut à droite). */
 
 "use strict";
 
-// Affiche un toast en haut à droite de la fenêtre.
+/* Affiche un toast en haut à droite de la fenêtre. */
 Albert.showToast = function (message, durationSec) {
-  // Supprimer un toast existant
+  /* Supprimer un toast existant */
   const existing = document.querySelector(".albert-toast");
   if (existing) existing.remove();
 
@@ -33,10 +33,10 @@ Albert.showToast = function (message, durationSec) {
 
   document.body.appendChild(toast);
 
-  // Animation d'entrée
+  /* Animation d'entrée */
   requestAnimationFrame(() => toast.classList.add("albert-toast-visible"));
 
-  // Disparition automatique
+  /* Disparition automatique */
   const ms = (durationSec || 10) * 1000;
   setTimeout(() => {
     if (document.contains(toast)) {

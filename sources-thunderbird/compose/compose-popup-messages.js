@@ -1,4 +1,4 @@
-// compose-popup-messages.js --- Réception des messages du background script dans le compose.
+/* compose-popup-messages.js --- Réception des messages du background script dans le compose. */
 
 "use strict";
 

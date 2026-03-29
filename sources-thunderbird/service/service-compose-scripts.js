@@ -1,4 +1,4 @@
-// service-compose-scripts.js --- Injection des scripts dans la fenêtre de composition Thunderbird.
+/* service-compose-scripts.js --- Injection des scripts dans la fenêtre de composition Thunderbird. */
 
 "use strict";
 
@@ -8,6 +8,7 @@ const COMPOSE_JS = [
   "compose/compose-badge.js",
   "compose/compose-overlay.js",
   "compose/compose-render.js",
+  "compose/compose-popup-utils.js",
   "compose/compose-popup-correction.js",
   "compose/compose-popup-reformulation.js",
   "compose/compose-popup-traduction.js",
@@ -44,8 +45,8 @@ async function injectComposeScripts(tabId) {
       try {
         await browser.tabs.executeScript(tabId, { file });
       } catch (e) {
-        // executeScript retourne la dernière expression du script ;
-        // si c'est une fonction (non sérialisable), ignorer l'erreur.
+        /* executeScript retourne la dernière expression du script ;
+         * si c'est une fonction (non sérialisable), ignorer l'erreur. */
         if (!e.message.includes("non-structured-clonable")) throw e;
       }
     }
@@ -56,20 +57,20 @@ async function injectComposeScripts(tabId) {
   }
 }
 
-// Injection dans les nouveaux onglets de composition
+/* Injection dans les nouveaux onglets de composition */
 browser.tabs.onCreated.addListener((tab) => {
   if (tab.type === "messageCompose") {
-    // Attendre que l'éditeur soit prêt
+    /* Attendre que l'éditeur soit prêt */
     setTimeout(() => injectComposeScripts(tab.id), 500);
   }
 });
 
-// Nettoyage quand un onglet est fermé
+/* Nettoyage quand un onglet est fermé */
 browser.tabs.onRemoved.addListener((tabId) => {
   injectedTabs.delete(tabId);
 });
 
-// Injection dans les onglets de composition déjà ouverts
+/* Injection dans les onglets de composition déjà ouverts */
 (async () => {
   const tabs = await browser.tabs.query({ type: "messageCompose" });
   for (const tab of tabs) {

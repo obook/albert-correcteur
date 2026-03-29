@@ -1,4 +1,4 @@
-// compose-utils.js --- Utilitaires pour la fenêtre de composition Thunderbird.
+/* compose-utils.js --- Utilitaires pour la fenêtre de composition Thunderbird. */
 
 "use strict";
 

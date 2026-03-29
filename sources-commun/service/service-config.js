@@ -1,4 +1,4 @@
-// service-config.js --- Configuration (clé API, modèle, URL).
+/* service-config.js --- Configuration (clé API, modèle, URL). */
 
 "use strict";
 

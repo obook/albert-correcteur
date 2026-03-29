@@ -1,4 +1,4 @@
-// service-prompts.js --- Chargement et construction des prompts.
+/* service-prompts.js --- Chargement et construction des prompts. */
 
 "use strict";
 
@@ -24,5 +24,7 @@ async function buildTranslationPrompt(langSource, langCible) {
   const template = await loadPromptTemplate("traduction");
   const srcName = LANG_NAMES[langSource] || "français";
   const tgtName = LANG_NAMES[langCible] || "français";
-  return template.replace(/\{\{LANG_SOURCE\}\}/g, srcName).replace(/\{\{LANG_CIBLE\}\}/g, tgtName);
+  return template
+    .replace(/\{\{LANG_SOURCE\}\}/g, srcName)
+    .replace(/\{\{LANG_CIBLE\}\}/g, tgtName);
 }

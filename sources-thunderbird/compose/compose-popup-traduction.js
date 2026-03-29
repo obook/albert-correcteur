@@ -1,4 +1,4 @@
-// compose-popup-traduction.js --- Popup de traduction dans le compose Thunderbird.
+/* compose-popup-traduction.js --- Popup de traduction dans le compose Thunderbird. */
 
 "use strict";
 

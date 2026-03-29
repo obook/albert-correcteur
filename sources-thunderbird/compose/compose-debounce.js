@@ -1,4 +1,4 @@
-// compose-debounce.js --- Double debounce adaptatif pour le compose Thunderbird.
+/* compose-debounce.js --- Double debounce adaptatif pour le compose Thunderbird. */
 
 "use strict";
 

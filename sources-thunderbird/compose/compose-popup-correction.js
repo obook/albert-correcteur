@@ -1,56 +1,7 @@
-// compose-popup-correction.js --- Popup de correction dans le compose Thunderbird.
-// Structure DOM identique au popup Firefox pour partager les CSS.
+/* compose-popup-correction.js - Popup de correction dans le compose Thunderbird.
+ * Structure DOM identique au popup Firefox pour partager les CSS. */
 
 "use strict";
-
-Albert.correctionPopup = null;
-Albert.activePopupIdx = 0;
-Albert._previousFocus = null;
-
-Albert.trapFocus = function (popup) {
-  if (!Albert._previousFocus) {
-    const prev = document.activeElement;
-    Albert._previousFocus = (prev && prev !== document.body) ? prev : null;
-  }
-  const focusables = popup.querySelectorAll(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-  );
-  if (focusables.length === 0) return;
-  focusables[0].focus();
-  popup._focusTrapHandler = function (e) {
-    if (e.key !== "Tab") return;
-    const current = popup.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    const f = current[0];
-    const l = current[current.length - 1];
-    if (e.shiftKey) {
-      if (document.activeElement === f) { e.preventDefault(); l.focus(); }
-    } else {
-      if (document.activeElement === l) { e.preventDefault(); f.focus(); }
-    }
-  };
-  popup.addEventListener("keydown", popup._focusTrapHandler);
-};
-
-Albert.restoreFocus = function () {
-  if (Albert._previousFocus && Albert._previousFocus.focus) {
-    Albert._previousFocus.focus();
-    Albert._previousFocus = null;
-  }
-};
-
-Albert.closeCorrectionPopup = function () {
-  if (Albert.correctionPopup) {
-    if (Albert.correctionPopup._focusTrapHandler) {
-      Albert.correctionPopup.removeEventListener("keydown", Albert.correctionPopup._focusTrapHandler);
-      Albert.correctionPopup._focusTrapHandler = null;
-    }
-    Albert.correctionPopup.remove();
-    Albert.correctionPopup = null;
-  }
-  Albert.restoreFocus();
-};
 
 Albert.showCorrectionPopup = function (correction, markEl) {
   Albert.closeCorrectionPopup();
@@ -71,7 +22,7 @@ Albert.showCorrectionPopup = function (correction, markEl) {
   h2.textContent = "Correction suggérée";
   popup.appendChild(h2);
 
-  // --- Header (identique à Firefox) ---
+  /* --- Header (identique à Firefox) --- */
   const header = document.createElement("div");
   header.className = "albert-popup-header";
 
@@ -80,8 +31,14 @@ Albert.showCorrectionPopup = function (correction, markEl) {
 
   const typeLabel = document.createElement("span");
   typeLabel.className = "albert-popup-type";
-  const typeNames = { spelling: "Orthographe", grammar: "Grammaire", style: "Style" };
-  typeLabel.textContent = typeNames[correction.type] || correction.type || "Orthographe";
+  const typeNames = {
+    spelling: "Orthographe",
+    grammar: "Grammaire",
+    style: "Style",
+  };
+  typeLabel.textContent = typeNames[correction.type]
+    || correction.type
+    || "Orthographe";
   headerLeft.appendChild(typeLabel);
 
   header.appendChild(headerLeft);
@@ -102,11 +59,11 @@ Albert.showCorrectionPopup = function (correction, markEl) {
   header.appendChild(headerRight);
   popup.appendChild(header);
 
-  // --- Body (identique à Firefox) ---
+  /* --- Body (identique à Firefox) --- */
   const body = document.createElement("div");
   body.className = "albert-popup-body";
 
-  // Message + bouton ignorer
+  /* Message + bouton ignorer */
   const msgRow = document.createElement("div");
   msgRow.className = "albert-popup-msg-row";
 
@@ -133,7 +90,7 @@ Albert.showCorrectionPopup = function (correction, markEl) {
   msgRow.appendChild(ignoreBtn);
   body.appendChild(msgRow);
 
-  // Extrait "Essayez..."
+  /* Extrait "Essayez..." */
   if (correction.suggestions && correction.suggestions.length) {
     const extract = document.createElement("div");
     extract.className = "albert-popup-extract";
@@ -141,7 +98,7 @@ Albert.showCorrectionPopup = function (correction, markEl) {
     body.appendChild(extract);
   }
 
-  // Suggestions
+  /* Suggestions */
   if (correction.suggestions && correction.suggestions.length) {
     const sugDiv = document.createElement("div");
     sugDiv.className = "albert-popup-suggestions";
@@ -168,7 +125,7 @@ Albert.showCorrectionPopup = function (correction, markEl) {
 
   popup.appendChild(body);
 
-  // --- Footer : navigation (identique à Firefox) ---
+  /* --- Footer : navigation (identique à Firefox) --- */
   if (state && state.corrections && state.corrections.length > 1) {
     const footer = document.createElement("div");
     footer.className = "albert-popup-footer";
@@ -194,13 +151,13 @@ Albert.showCorrectionPopup = function (correction, markEl) {
     popup.appendChild(footer);
   }
 
-  // --- Positionnement sous le mot ---
+  /* --- Positionnement sous le mot --- */
   document.body.appendChild(popup);
   const rect = markEl.getBoundingClientRect();
   popup.style.top = (rect.bottom + 4) + "px";
   popup.style.left = rect.left + "px";
 
-  // Éviter le débordement à droite ou en bas
+  /* Éviter le débordement à droite ou en bas */
   requestAnimationFrame(() => {
     const popupRect = popup.getBoundingClientRect();
     if (popupRect.right > window.innerWidth - 10) {
@@ -215,7 +172,7 @@ Albert.showCorrectionPopup = function (correction, markEl) {
   Albert.correctionPopup = popup;
 };
 
-// Navigation entre erreurs
+/* Navigation entre erreurs */
 Albert.navigateError = function (direction) {
   const state = Albert.composeState;
   if (!state || !state.corrections || state.corrections.length === 0) return;
@@ -224,19 +181,11 @@ Albert.navigateError = function (direction) {
   if (newIdx < 0) newIdx = state.corrections.length - 1;
   if (newIdx >= state.corrections.length) newIdx = 0;
 
-  const mark = document.querySelector('[data-correction-index="' + newIdx + '"]');
+  const mark = document.querySelector(
+    '[data-correction-index="' + newIdx + '"]'
+  );
   if (mark) {
     mark.scrollIntoView({ block: "nearest", behavior: "smooth" });
     Albert.showCorrectionPopup(state.corrections[newIdx], mark);
   }
 };
-
-// Fermeture par Escape ou clic en dehors
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") Albert.closeCorrectionPopup();
-});
-document.addEventListener("mousedown", (e) => {
-  if (Albert.correctionPopup && !Albert.correctionPopup.contains(e.target) && !e.target.closest(".albert-error")) {
-    Albert.closeCorrectionPopup();
-  }
-});

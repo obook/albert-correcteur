@@ -1,4 +1,4 @@
-// compose-render.js --- Orchestration du rendu des corrections dans le compose Thunderbird.
+/* compose-render.js --- Orchestration du rendu des corrections dans le compose Thunderbird. */
 
 "use strict";
 

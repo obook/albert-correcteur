@@ -1,4 +1,4 @@
-// Tests — Filtrage des mots ignorés (dictionnaire personnel).
+/* Tests -- Filtrage des mots ignorés (dictionnaire personnel). */
 
 const assert = require("assert");
 

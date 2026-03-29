@@ -1,4 +1,4 @@
-// Tests — Fusion des limites API (regroupement par type, valeur minimale).
+/* Tests -- Fusion des limites API (regroupement par type, valeur minimale). */
 
 const assert = require("assert");
 
@@ -8,7 +8,7 @@ function mergeLimits(rawLimits) {
     if (!(l.type in merged)) {
       merged[l.type] = l.value;
     } else if (l.value === null) {
-      // null = illimité, on garde la valeur existante (plus restrictive)
+      /* null = illimité, on garde la valeur existante (plus restrictive) */
     } else if (merged[l.type] === null) {
       merged[l.type] = l.value;
     } else {

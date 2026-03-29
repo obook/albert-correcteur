@@ -1,33 +1,33 @@
-// compose-state.js --- Constantes et état global pour la fenêtre de composition Thunderbird.
+/* compose-state.js --- Constantes et état global pour la fenêtre de composition Thunderbird. */
 
 "use strict";
 
 const Albert = {
-  // Drapeaux
+  /* Drapeaux */
   applyingCorrection: false,
 
-  // État du champ de composition (un seul champ par fenêtre)
+  /* État du champ de composition (un seul champ par fenêtre) */
   composeState: null,
 
-  // Mots ignorés (dictionnaire personnel)
+  /* Mots ignorés (dictionnaire personnel) */
   ignoredWords: new Set(),
 
-  // Thème courant
+  /* Thème courant */
   popupTheme: "dark",
 
-  // Limites API côté client
+  /* Limites API côté client */
   limits: null,
   requestTimestamps: [],
 
-  // Debounce
+  /* Debounce */
   DEBOUNCE_SHORT: 1500,
   DEBOUNCE_MAX: 4000,
 
-  // Seuils badge
+  /* Seuils badge */
   BADGE_MIN_LENGTH: 3,
 };
 
-// Charger les mots ignorés et le thème au démarrage
+/* Charger les mots ignorés et le thème au démarrage */
 (async () => {
   const data = await browser.storage.local.get(["ignoredWords", "popupTheme"]);
   if (data.ignoredWords) {
@@ -36,7 +36,7 @@ const Albert = {
   Albert.popupTheme = data.popupTheme || "dark";
 })();
 
-// Synchroniser les changements de storage
+/* Synchroniser les changements de storage */
 browser.storage.onChanged.addListener((changes) => {
   if (changes.ignoredWords) {
     Albert.ignoredWords = new Set(changes.ignoredWords.newValue || []);

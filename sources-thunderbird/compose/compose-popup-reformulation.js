@@ -1,4 +1,4 @@
-// compose-popup-reformulation.js --- Popup de reformulation dans le compose Thunderbird.
+/* compose-popup-reformulation.js --- Popup de reformulation dans le compose Thunderbird. */
 
 "use strict";
 

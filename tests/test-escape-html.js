@@ -1,4 +1,4 @@
-// Tests — Échappement HTML.
+/* Tests -- Échappement HTML. */
 
 const assert = require("assert");
 

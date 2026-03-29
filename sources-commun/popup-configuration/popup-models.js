@@ -1,4 +1,4 @@
-// popup-models.js — Chargement des modèles depuis l'API.
+/* popup-models.js - Chargement des modèles depuis l'API. */
 
 "use strict";
 
@@ -7,7 +7,8 @@ const refreshBtn = document.getElementById("refresh-models");
 
 async function fetchModels() {
   const apiKey = document.getElementById("api-key").value.trim();
-  const apiBase = (document.getElementById("api-base").value.trim() || DEFAULT_API_BASE).replace(/\/+$/, "");
+  const apiBase = (document.getElementById("api-base").value.trim()
+    || DEFAULT_API_BASE).replace(/\/+$/, "");
 
   if (!apiKey) {
     showStatus("Entrez d'abord la clé API.", "err");
@@ -34,7 +35,8 @@ async function fetchModels() {
       .sort();
 
     if (models.length === 0) {
-      modelSelect.innerHTML = '<option value="">Aucun modèle text-generation</option>';
+      modelSelect.innerHTML =
+        '<option value="">Aucun modèle text-generation</option>';
       return;
     }
 
@@ -49,7 +51,11 @@ async function fetchModels() {
       modelSelect.appendChild(opt);
     }
 
-    showStatus(`${models.length} modèle${models.length > 1 ? "s" : ""} disponible${models.length > 1 ? "s" : ""}`, "ok");
+    const plural = models.length > 1 ? "s" : "";
+    showStatus(
+      `${models.length} modèle${plural} disponible${plural}`,
+      "ok"
+    );
   } catch (err) {
     showStatus(`Erreur réseau : ${err.message}`, "err");
     modelSelect.innerHTML = '<option value="">Erreur réseau</option>';

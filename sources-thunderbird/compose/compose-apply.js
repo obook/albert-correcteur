@@ -1,4 +1,4 @@
-// compose-apply.js --- Application des corrections dans le compose Thunderbird.
+/* compose-apply.js --- Application des corrections dans le compose Thunderbird. */
 
 "use strict";
 
@@ -11,7 +11,7 @@ Albert.applySuggestion = function (correction, suggestion) {
 
     const mark = document.querySelector('[data-correction-index="' + correction.index + '"]');
     if (mark) {
-      // Redonner le focus au body éditable avant la manipulation
+      /* Redonner le focus au body éditable avant la manipulation */
       const body = Albert.getComposeBody();
       body.focus();
 
@@ -21,7 +21,7 @@ Albert.applySuggestion = function (correction, suggestion) {
       sel.removeAllRanges();
       sel.addRange(range);
 
-      // insertText peut échouer en designMode, fallback sur DOM direct
+      /* insertText peut échouer en designMode, fallback sur DOM direct */
       if (!document.execCommand("insertText", false, suggestion)) {
         range.deleteContents();
         range.insertNode(document.createTextNode(suggestion));

@@ -1,8 +1,8 @@
-// Tests — Vérification des limites de débit (rate limiting).
+/* Tests -- Vérification des limites de débit (rate limiting). */
 
 const assert = require("assert");
 
-// ── Simulation de l'état Albert ──
+/* -- Simulation de l'état Albert -- */
 
 function createState() {
   return {
@@ -106,7 +106,7 @@ test("rpd non atteint — OK", () => {
 test("Timestamps expirés (>60s) — nettoyés", () => {
   const state = createState();
   state.limits = { rpm: 3, rpd: 100 };
-  // Ajouter des timestamps de plus d'une minute
+  /* Ajouter des timestamps de plus d'une minute */
   const old = Date.now() - 70000;
   state.requestTimestamps = [old, old, old];
   assert.strictEqual(checkRateLimit(state), null);
@@ -116,7 +116,7 @@ test("Timestamps expirés (>60s) — nettoyés", () => {
 test("Changement de jour — compteur réinitialisé", () => {
   const state = createState();
   state.limits = { rpm: 1000, rpd: 5 };
-  state.requestDayStart = new Date().setHours(0, 0, 0, 0) - 86400000; // hier
+  state.requestDayStart = new Date().setHours(0, 0, 0, 0) - 86400000; /* hier */
   state.requestCountToday = 100;
   assert.strictEqual(checkRateLimit(state), null);
   assert.strictEqual(state.requestCountToday, 0);
@@ -136,7 +136,7 @@ test("rpm vérifié avant rpd", () => {
   state.requestDayStart = new Date().setHours(0, 0, 0, 0);
   recordRequest(state);
   recordRequest(state);
-  // rpm et rpd atteints, rpm vérifié en premier
+  /* rpm et rpd atteints, rpm vérifié en premier */
   assert.strictEqual(checkRateLimit(state), "rpm");
 });
 

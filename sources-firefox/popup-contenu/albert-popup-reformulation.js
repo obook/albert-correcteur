@@ -1,4 +1,4 @@
-// albert-popup-reformulation.js — Popup de reformulation via le menu contextuel.
+/* albert-popup-reformulation.js - Popup de reformulation via le menu contextuel. */
 
 "use strict";
 
@@ -16,7 +16,7 @@ Albert.showReformulationPopup = function (originalText, suggestions) {
   h2.textContent = "Reformulation";
   popup.appendChild(h2);
 
-  // Header
+  /* Header */
   const { headerLeft, handle } = Albert.createPopupHeader(popup);
 
   const title = document.createElement("span");
@@ -25,7 +25,7 @@ Albert.showReformulationPopup = function (originalText, suggestions) {
   title.style.cursor = "default";
   headerLeft.appendChild(title);
 
-  // Corps
+  /* Corps */
   const body = document.createElement("div");
   body.className = "albert-popup-body";
 
@@ -73,11 +73,11 @@ Albert.showReformulationPopup = function (originalText, suggestions) {
   Albert.activePopup = popup;
 };
 
-// Applique la reformulation en utilisant la sélection sauvegardée.
+/* Applique la reformulation en utilisant la sélection sauvegardée. */
 Albert.applyReformulation = function (originalText, replacement) {
   const saved = Albert.savedSelection;
 
-  // Éviter le double point final
+  /* Éviter le double point final */
   const punctuation = [".", "!", "?", ";", ":"];
   const origEnds = punctuation.includes(originalText.trim().slice(-1));
   const replEnds = punctuation.includes(replacement.trim().slice(-1));

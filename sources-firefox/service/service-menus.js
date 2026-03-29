@@ -1,8 +1,8 @@
-// service-menus.js --- Menus contextuels et dispatch des messages.
+/* service-menus.js - Menus contextuels et dispatch des messages. */
 
 "use strict";
 
-// --- Menus contextuels ---
+/* --- Menus contextuels --- */
 
 browser.contextMenus.create({
   id: "albert-reformulate",
@@ -34,7 +34,7 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 });
 
-// --- Dispatch des messages du content script ---
+/* --- Dispatch des messages du content script --- */
 
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "check") {

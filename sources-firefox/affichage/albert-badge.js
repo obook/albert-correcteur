@@ -1,8 +1,8 @@
-// albert-badge.js — Gestion du badge (icône Albert dans le coin du champ).
+/* albert-badge.js - Gestion du badge (icone Albert dans le coin du champ). */
 
 "use strict";
 
-// Crée ou récupère le badge pour un champ de saisie.
+/* Cree ou recupere le badge pour un champ de saisie. */
 Albert.ensureBadge = function (el) {
   const state = Albert.getOrCreateState(el);
   if (state.badge && document.contains(state.badge)) {
@@ -12,9 +12,9 @@ Albert.ensureBadge = function (el) {
 
   const badge = document.createElement("div");
   badge.className = "albert-badge";
-  badge.title = "Albert Correcteur — Cliquez pour vérifier";
+  badge.title = "Albert Correcteur - Cliquez pour verifier";
   badge.setAttribute("role", "button");
-  badge.setAttribute("aria-label", "Albert Correcteur — Cliquez pour vérifier");
+  badge.setAttribute("aria-label", "Albert Correcteur - Cliquez pour verifier");
   badge.setAttribute("tabindex", "0");
 
   const img = document.createElement("img");
@@ -47,13 +47,13 @@ Albert.ensureBadge = function (el) {
   return badge;
 };
 
-// Affiche ou masque le badge selon que le champ est vide ou non.
+/* Affiche ou masque le badge selon que le champ est vide ou non. */
 Albert.updateBadgeVisibility = function (el, badge) {
   const text = Albert.getTextContent(el);
   badge.style.display = text.trim().length > 0 ? "flex" : "none";
 };
 
-// Positionne le badge dans le coin inférieur droit du champ.
+/* Positionne le badge dans le coin inferieur droit du champ. */
 Albert.positionBadge = function (el, badge) {
   const rect = el.getBoundingClientRect();
   const parentRect = (el.offsetParent || document.body).getBoundingClientRect();
@@ -62,6 +62,8 @@ Albert.positionBadge = function (el, badge) {
   const borderRight = parseFloat(cs.borderRightWidth) || 0;
   const paddingRight = parseFloat(cs.paddingRight) || 0;
   const paddingBottom = parseFloat(cs.paddingBottom) || 0;
-  badge.style.top = (rect.bottom - parentRect.top - borderBottom - paddingBottom - 16) + "px";
-  badge.style.left = (rect.right - parentRect.left - borderRight - paddingRight - 16) + "px";
+  badge.style.top =
+    (rect.bottom - parentRect.top - borderBottom - paddingBottom - 16) + "px";
+  badge.style.left =
+    (rect.right - parentRect.left - borderRight - paddingRight - 16) + "px";
 };

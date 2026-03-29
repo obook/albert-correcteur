@@ -1,8 +1,8 @@
-// albert-render.js --- Orchestration du rendu et contenteditable simple.
+/* albert-render.js - Orchestration du rendu et contenteditable simple. */
 
 "use strict";
 
-// Affiche les corrections sur un champ (choisit la bonne méthode).
+/* Affiche les corrections sur un champ (choisit la bonne methode). */
 Albert.renderCorrections = function (el) {
   const state = Albert.getOrCreateState(el);
   const tag = el.tagName.toLowerCase();
@@ -22,18 +22,19 @@ Albert.renderCorrections = function (el) {
     const img = state.badge.querySelector("img");
     if (img) img.src = hasErrors ? Albert.ICON_ERROR_URL : Albert.ICON_URL;
     const title = hasErrors
-      ? `${state.corrections.length} erreur${state.corrections.length > 1 ? "s" : ""} trouvée${state.corrections.length > 1 ? "s" : ""}${langSuffix}`
-      : `Albert Correcteur — Aucune erreur${langSuffix}`;
+      ? `${state.corrections.length} erreur${state.corrections.length > 1 ? "s" : ""}`
+        + ` trouvee${state.corrections.length > 1 ? "s" : ""}${langSuffix}`
+      : `Albert Correcteur - Aucune erreur${langSuffix}`;
     state.badge.title = title;
     state.badge.setAttribute("aria-label", title);
   }
 
-  // Annoncer aux lecteurs d'écran (RGAA)
+  /* Annoncer aux lecteurs d'ecran (RGAA) */
   Albert._announceErrors(state.corrections.length, state.lang);
 };
 
-// Rendu pour les contenteditable simples (pas d'éditeur riche).
-// Entoure les mots erronés de <span> cliquables directement dans le DOM.
+/* Rendu pour les contenteditable simples (pas d'editeur riche).
+   Entoure les mots errones de <span> cliquables directement dans le DOM. */
 Albert.renderContentEditable = function (el, state) {
   el.querySelectorAll(".albert-error").forEach((mark) => {
     const parent = mark.parentNode;

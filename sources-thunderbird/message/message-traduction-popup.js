@@ -1,4 +1,4 @@
-// message-traduction-popup.js --- Logique de la popup de traduction (lecture de mail).
+/* message-traduction-popup.js --- Logique de la popup de traduction (lecture de mail). */
 
 "use strict";
 
@@ -12,7 +12,7 @@
   const copyBtn = document.getElementById("copy");
   const closeBtn = document.getElementById("close");
 
-  // Langue par défaut depuis le storage
+  /* Langue par défaut depuis le storage */
   const stored = await browser.storage.local.get("lastTranslationLang");
   if (stored.lastTranslationLang) {
     langSelect.value = stored.lastTranslationLang;
@@ -52,6 +52,6 @@
 
   closeBtn.addEventListener("click", () => window.close());
 
-  // Traduction automatique au lancement
+  /* Traduction automatique au lancement */
   doTranslate(langSelect.value);
 })();

@@ -1,4 +1,4 @@
-// Tests — Vérification de la structure du projet.
+/* Tests -- Vérification de la structure du projet. */
 
 const assert = require("assert");
 const fs = require("fs");
@@ -25,7 +25,7 @@ function test(name, fn) {
 
 console.log("Structure du projet :");
 
-// ── Dossiers ──
+/* -- Dossiers -- */
 
 test("Dossier sources-commun/ existe", () => {
   assert.ok(fs.existsSync(SHARED));
@@ -55,7 +55,7 @@ test("Dossier sources-commun/prompts/ existe", () => {
   assert.ok(fs.existsSync(path.join(SHARED, "prompts")));
 });
 
-// ── Manifest ──
+/* -- Manifest -- */
 
 test("manifest.json existe et est du JSON valide", () => {
   const content = fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8");
@@ -115,7 +115,7 @@ test("manifest.json — popup déclarée", () => {
   assert.ok(manifest.browser_action.default_popup);
 });
 
-// ── Fichiers clés ──
+/* -- Fichiers clés -- */
 
 test("service/ — tous les scripts partagés existent", () => {
   const fichiers = [
@@ -163,7 +163,7 @@ test("icons/icon-128.png existe", () => {
   assert.ok(fs.existsSync(path.join(SHARED, "icons", "icon-128.png")));
 });
 
-// ── Scripts ──
+/* -- Scripts -- */
 
 test("firefox-build.sh existe et est exécutable", () => {
   const stat = fs.statSync(path.join(ROOT, "firefox-build.sh"));
@@ -178,7 +178,7 @@ test("install-firefox-dev.sh supprimé", () => {
   assert.ok(!fs.existsSync(path.join(ROOT, "install-firefox-dev.sh")), "install-firefox-dev.sh ne devrait plus exister");
 });
 
-// ── Dossiers métier ──
+/* -- Dossiers métier -- */
 
 test("Dossier sources-firefox/etat/ existe", () => {
   assert.ok(fs.existsSync(path.join(FIREFOX, "etat")));
@@ -220,7 +220,7 @@ test("Ancien dossier toast/ supprimé", () => {
   assert.ok(!fs.existsSync(path.join(FIREFOX, "toast")), "Le dossier toast/ ne devrait plus exister");
 });
 
-// ── Manifest : permissions ──
+/* -- Manifest : permissions -- */
 
 test("manifest.json — permission contextMenus", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
@@ -232,7 +232,7 @@ test("manifest.json — permission storage", () => {
   assert.ok(manifest.permissions.includes("storage"), "Permission storage manquante");
 });
 
-// ── Manifest : icônes SVG uniquement ──
+/* -- Manifest : icônes SVG uniquement -- */
 
 test("manifest.json — icônes pointent vers des PNG", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
@@ -242,7 +242,7 @@ test("manifest.json — icônes pointent vers des PNG", () => {
   assert.ok(manifest.browser_action.default_icon.endsWith(".png"), "default_icon n'est pas un PNG");
 });
 
-// ── Fichiers résiduels ──
+/* -- Fichiers résiduels -- */
 
 test("content.css absent (découpé en css/)", () => {
   assert.ok(!fs.existsSync(path.join(FIREFOX, "content.css")), "content.css ne devrait plus exister");
@@ -252,7 +252,7 @@ test("Pas de fichier popup.js résiduel dans firefox/", () => {
   assert.ok(!fs.existsSync(path.join(ROOT, "firefox")), "Le dossier firefox/ ne devrait plus exister");
 });
 
-// ── Page de test ──
+/* -- Page de test -- */
 
 test("Dossier exemple/ existe", () => {
   assert.ok(fs.existsSync(path.join(ROOT, "exemple")));
@@ -262,7 +262,7 @@ test("exemple/test.html existe", () => {
   assert.ok(fs.existsSync(path.join(ROOT, "exemple", "test.html")));
 });
 
-// ── Tests ──
+/* -- Tests -- */
 
 test("Dossier tests/ existe", () => {
   assert.ok(fs.existsSync(path.join(ROOT, "tests")));
@@ -273,7 +273,7 @@ test("tests/run-all.sh existe et est exécutable", () => {
   assert.ok(stat.mode & 0o111, "run-all.sh n'est pas exécutable");
 });
 
-// ── Popup contenu ──
+/* -- Popup contenu -- */
 
 test("popup-contenu/albert-popup-common.js existe", () => {
   assert.ok(fs.existsSync(path.join(FIREFOX, "popup-contenu", "albert-popup-common.js")));
@@ -299,7 +299,7 @@ test("Ancien albert-popup.js supprimé", () => {
   assert.ok(!fs.existsSync(path.join(FIREFOX, "albert-popup.js")), "albert-popup.js ne devrait plus exister");
 });
 
-// ── Prompts ──
+/* -- Prompts -- */
 
 test("prompts/traduction.txt existe", () => {
   assert.ok(fs.existsSync(path.join(SHARED, "prompts", "traduction.txt")));
@@ -311,7 +311,7 @@ test("prompts/traduction.txt contient {{LANG_SOURCE}} et {{LANG_CIBLE}}", () => 
   assert.ok(content.includes("{{LANG_CIBLE}}"), "{{LANG_CIBLE}} manquant");
 });
 
-// ── Licence ──
+/* -- Licence -- */
 
 test("LICENSE existe", () => {
   assert.ok(fs.existsSync(path.join(ROOT, "LICENSE")));
@@ -322,7 +322,7 @@ test("LICENSE contient MIT", () => {
   assert.ok(content.includes("MIT License"));
 });
 
-// ── Fichiers supprimés ──
+/* -- Fichiers supprimés -- */
 
 test("updates.json existe et est du JSON valide", () => {
   const p = path.join(ROOT, "updates.json");

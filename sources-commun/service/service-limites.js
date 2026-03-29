@@ -1,4 +1,4 @@
-// service-limites.js --- Cache et récupération des limites du compte API.
+/* service-limites.js --- Cache et récupération des limites du compte API. */
 
 "use strict";
 
@@ -34,7 +34,7 @@ async function fetchLimits() {
   }
 }
 
-// Invalider le cache quand la config change (clé API, modèle, URL)
+/* Invalider le cache quand la config change (clé API, modèle, URL) */
 browser.storage.onChanged.addListener((changes) => {
   if (changes.apiKey || changes.model || changes.apiBase) {
     cachedLimits = null;

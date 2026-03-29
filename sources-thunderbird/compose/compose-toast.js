@@ -1,9 +1,9 @@
-// compose-toast.js --- Notifications toast dans le compose Thunderbird.
+/* compose-toast.js --- Notifications toast dans le compose Thunderbird. */
 
 "use strict";
 
 Albert.showToast = function (message, durationMs) {
-  // Supprimer un toast existant
+  /* Supprimer un toast existant */
   const existing = document.querySelector(".albert-toast");
   if (existing) existing.remove();
 
@@ -28,10 +28,10 @@ Albert.showToast = function (message, durationMs) {
 
   document.body.appendChild(toast);
 
-  // Animation d'entrée
+  /* Animation d'entrée */
   requestAnimationFrame(() => toast.classList.add("albert-toast-visible"));
 
-  // Disparition automatique
+  /* Disparition automatique */
   const ms = durationMs || 10000;
   setTimeout(() => {
     if (document.contains(toast)) {

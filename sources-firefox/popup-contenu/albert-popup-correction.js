@@ -1,10 +1,10 @@
-// albert-popup-correction.js — Popup de correction orthographique et grammaticale.
-// Affiche les suggestions, la navigation entre erreurs et le dictionnaire personnel.
+/* albert-popup-correction.js - Popup de correction orthographique et grammaticale.
+   Affiche les suggestions, la navigation entre erreurs et le dictionnaire personnel. */
 
 "use strict";
 
 Albert.showPopup = function (el, correction, markEl) {
-  // Sauvegarder la position si le popup existe (navigation entre erreurs)
+  /* Sauvegarder la position si le popup existe (navigation entre erreurs) */
   if (Albert.activePopup) {
     const rect = Albert.activePopup.getBoundingClientRect();
     Albert.popupPosition = { top: rect.top, left: rect.left };
@@ -25,10 +25,10 @@ Albert.showPopup = function (el, correction, markEl) {
   h2.textContent = "Correction orthographique";
   popup.appendChild(h2);
 
-  // --- Header ---
+  /* --- Header --- */
   const { headerLeft, handle } = Albert.createPopupHeader(popup);
 
-  // Menu déroulant mode (Correcteur / Reformuler)
+  /* Menu déroulant mode (Correcteur / Reformuler) */
   const modeWrap = document.createElement("div");
   modeWrap.className = "albert-popup-mode-wrap";
 
@@ -87,11 +87,11 @@ Albert.showPopup = function (el, correction, markEl) {
   modeWrap.appendChild(modeMenu);
   headerLeft.appendChild(modeWrap);
 
-  // --- Corps ---
+  /* --- Corps --- */
   const body = document.createElement("div");
   body.className = "albert-popup-body";
 
-  // Message + bouton ignorer
+  /* Message + bouton ignorer */
   const msgRow = document.createElement("div");
   msgRow.className = "albert-popup-msg-row";
 
@@ -117,7 +117,7 @@ Albert.showPopup = function (el, correction, markEl) {
   msgRow.appendChild(ignoreBtn);
   body.appendChild(msgRow);
 
-  // Extrait
+  /* Extrait */
   const text = Albert.getTextContent(el);
   const original = text.slice(correction.offset, correction.offset + correction.length);
   const extract = document.createElement("div");
@@ -125,7 +125,7 @@ Albert.showPopup = function (el, correction, markEl) {
   extract.textContent = `Essayez « ${(correction.suggestions && correction.suggestions[0]) || original} »`;
   body.appendChild(extract);
 
-  // Boutons de suggestion
+  /* Boutons de suggestion */
   const sugBox = document.createElement("div");
   sugBox.className = "albert-popup-suggestions";
 
@@ -149,7 +149,7 @@ Albert.showPopup = function (el, correction, markEl) {
   body.appendChild(sugBox);
   popup.appendChild(body);
 
-  // --- Footer : navigation ---
+  /* --- Footer : navigation --- */
   if (state.corrections.length > 1) {
     const footer = document.createElement("div");
     footer.className = "albert-popup-footer";
@@ -177,7 +177,7 @@ Albert.showPopup = function (el, correction, markEl) {
 
   document.body.appendChild(popup);
 
-  // --- Positionnement ---
+  /* --- Positionnement --- */
   if (Albert.popupPosition) {
     popup.style.top = Albert.popupPosition.top + "px";
     popup.style.left = Albert.popupPosition.left + "px";
@@ -201,7 +201,7 @@ Albert.showPopup = function (el, correction, markEl) {
   Albert.activePopup = popup;
 };
 
-// Navigation entre erreurs.
+/* Navigation entre erreurs. */
 Albert.navigateError = function (el, direction) {
   const state = Albert.getOrCreateState(el);
   if (state.corrections.length === 0) return;

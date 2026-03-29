@@ -1,4 +1,4 @@
-// popup-status.js — Affichage des messages de statut.
+/* popup-status.js - Affichage des messages de statut. */
 
 "use strict";
 

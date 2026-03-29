@@ -1,4 +1,4 @@
-// Tests — Construction du HTML souligné (buildHighlightedHTML).
+/* Tests -- Construction du HTML souligné (buildHighlightedHTML). */
 
 const assert = require("assert");
 
@@ -96,7 +96,7 @@ test("Corrections désordonnées — triées par offset", () => {
     { offset: 9, length: 1, type: "grammar", message: "", suggestions: [] },
     { offset: 0, length: 8, type: "spelling", message: "", suggestions: [] },
   ]);
-  // L'index original est préservé
+  /* L'index original est préservé */
   assert.ok(result.indexOf('data-idx="1"') < result.indexOf('data-idx="0"'));
 });
 
@@ -105,7 +105,7 @@ test("Corrections chevauchantes — la seconde est ignorée", () => {
     { offset: 0, length: 5, type: "spelling", message: "", suggestions: [] },
     { offset: 3, length: 5, type: "grammar", message: "", suggestions: [] },
   ]);
-  // Seule la première correction est appliquée
+  /* Seule la première correction est appliquée */
   assert.ok(result.includes('data-idx="0"'));
   assert.ok(!result.includes('data-idx="1"'));
 });

@@ -1,16 +1,16 @@
-// albert-check.js --- Envoi du texte au script de fond et cycle de vérification.
+/* albert-check.js - Envoi du texte au script de fond et cycle de vérification. */
 
 "use strict";
 
-// Envoie le texte au script de fond pour correction.
-// Utilise un AbortController pour pouvoir annuler la requête si le texte change.
-// Verification incrementale : si un seul paragraphe a change, n'envoie que
-// ce paragraphe (+ contexte adjacent) et fusionne avec les corrections existantes.
+/* Envoie le texte au script de fond pour correction.
+   Utilise un AbortController pour pouvoir annuler la requête si le texte change.
+   Verification incrementale : si un seul paragraphe a change, n'envoie que
+   ce paragraphe (+ contexte adjacent) et fusionne avec les corrections existantes. */
 Albert.triggerCheck = async function (el) {
   const text = Albert.getTextContent(el);
   const state = Albert.getOrCreateState(el);
 
-  // Réinitialiser les timers (la vérification se lance)
+  /* Réinitialiser les timers (la vérification se lance) */
   clearTimeout(state.timer);
   clearTimeout(state.maxTimer);
   state.timer = null;
@@ -23,10 +23,10 @@ Albert.triggerCheck = async function (el) {
 
   if (state.lastCheckedText === text) return;
 
-  // Charger les limites si pas encore fait
+  /* Charger les limites si pas encore fait */
   await Albert.loadLimits();
 
-  // Vérifier qu'on ne dépasse pas les limites
+  /* Vérifier qu'on ne dépasse pas les limites */
   const limitMsg = Albert.checkRateLimit();
   if (limitMsg) {
     console.warn("[Albert]", limitMsg);
@@ -37,7 +37,7 @@ Albert.triggerCheck = async function (el) {
     return;
   }
 
-  // Detecter si un seul paragraphe a change (verification incrementale)
+  /* Detecter si un seul paragraphe a change (verification incrementale) */
   let incremental = null;
   const oldChecked = state.lastCheckedText || "";
   if (oldChecked && state.corrections) {
@@ -45,14 +45,14 @@ Albert.triggerCheck = async function (el) {
     const newParas = Albert.splitParagraphs(text);
     const modIdx = Albert.findModifiedParagraph(oldParas, newParas);
     if (modIdx !== -1) {
-      // Construire le texte a envoyer : paragraphe modifie + contexte adjacent
+      /* Construire le texte a envoyer : paragraphe modifie + contexte adjacent */
       const ctxStart = Math.max(0, modIdx - 1);
       const ctxEnd = Math.min(newParas.length - 1, modIdx + 1);
       const contextParas = newParas.slice(ctxStart, ctxEnd + 1);
       const sendText = contextParas.map((p) => p.text).join("\n");
-      // Offset du premier paragraphe du contexte dans le texte complet
+      /* Offset du premier paragraphe du contexte dans le texte complet */
       const baseOffset = contextParas[0].offset;
-      // Offset du paragraphe modifie dans le texte envoye
+      /* Offset du paragraphe modifie dans le texte envoye */
       const modOffsetInSend = newParas[modIdx].offset - baseOffset;
       incremental = {
         sendText,
@@ -65,7 +65,7 @@ Albert.triggerCheck = async function (el) {
 
   if (state.badge) state.badge.classList.add("albert-loading");
 
-  // Créer un AbortController pour cette requête
+  /* Créer un AbortController pour cette requête */
   const controller = new AbortController();
   state.abortController = controller;
 
@@ -74,7 +74,7 @@ Albert.triggerCheck = async function (el) {
     const checkText = incremental ? incremental.sendText : text;
     const response = await browser.runtime.sendMessage({ type: "check", text: checkText, mode: Albert.mode });
 
-    // Vérifier si la requête a été annulée pendant l'attente
+    /* Vérifier si la requête a été annulée pendant l'attente */
     if (controller.signal.aborted) return;
 
     if (response.error) {
@@ -88,7 +88,7 @@ Albert.triggerCheck = async function (el) {
       return;
     }
 
-    // Vérifier que le texte n'a pas changé pendant l'appel API
+    /* Vérifier que le texte n'a pas changé pendant l'appel API */
     if (controller.signal.aborted) return;
     const currentText = Albert.getTextContent(el);
     if (currentText !== text) return;
@@ -96,14 +96,14 @@ Albert.triggerCheck = async function (el) {
     const raw = response.corrections || [];
 
     if (incremental) {
-      // Recalibrer les offsets dans le texte envoye
+      /* Recalibrer les offsets dans le texte envoye */
       const recalibrated = Albert.recalibrateOffsets(raw, incremental.sendText);
-      // Decaler les offsets vers le texte complet
+      /* Decaler les offsets vers le texte complet */
       const shifted = recalibrated.map((c) =>
         Object.assign({}, c, { offset: c.offset + incremental.baseOffset })
       );
       const filtered = Albert.filterIgnoredCorrections(shifted, text);
-      // Fusionner : garder les corrections hors du paragraphe modifie + nouvelles
+      /* Fusionner : garder les corrections hors du paragraphe modifie + nouvelles */
       const modStart = incremental.modPara.offset;
       const modEnd = modStart + incremental.modPara.text.length;
       const kept = (state.corrections || []).filter((c) =>
@@ -133,21 +133,21 @@ Albert.triggerCheck = async function (el) {
   }
 };
 
-// Vérifie tous les champs de la page, un par un (séquentiel).
-// Le champ actif est vérifié en premier.
+/* Vérifie tous les champs de la page, un par un (séquentiel).
+   Le champ actif est vérifié en premier. */
 Albert.cycleCheckAll = async function () {
   if (Albert.checkInProgress || Albert.rateLimited) return;
   Albert.checkInProgress = true;
 
   try {
-    // Nettoyer les champs retirés du DOM
+    /* Nettoyer les champs retirés du DOM */
     for (const el of Albert.trackedFields) {
       if (!document.contains(el)) {
         Albert.trackedFields.delete(el);
       }
     }
 
-    // Le champ actif en premier
+    /* Le champ actif en premier */
     const active = document.activeElement;
     const sorted = [...Albert.trackedFields].sort((a, b) => {
       if (a === active) return -1;

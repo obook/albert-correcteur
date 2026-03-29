@@ -1,8 +1,8 @@
-// service-menus.js --- Menus contextuels Thunderbird et dispatch des messages.
+/* service-menus.js --- Menus contextuels Thunderbird et dispatch des messages. */
 
 "use strict";
 
-// --- Menus contextuels ---
+/* --- Menus contextuels --- */
 
 browser.menus.create({
   id: "albert-reformulate",
@@ -30,13 +30,13 @@ browser.menus.onClicked.addListener(async (info, tab) => {
   }
 
   if (info.menuItemId === "albert-translate") {
-    // Déterminer si on est dans un compose ou dans un affichage de message
+    /* Déterminer si on est dans un compose ou dans un affichage de message */
     const tabInfo = await browser.tabs.get(tab.id);
     if (tabInfo.type === "messageCompose") {
-      // Dans le compose : envoyer au compose script
+      /* Dans le compose : envoyer au compose script */
       browser.tabs.sendMessage(tab.id, { type: "translateGetSelection" });
     } else {
-      // Dans la lecture de mail : ouvrir une fenêtre popup de traduction
+      /* Dans la lecture de mail : ouvrir une fenêtre popup de traduction */
       const encodedText = encodeURIComponent(text);
       browser.windows.create({
         url: "message/message-traduction.html?text=" + encodedText,
@@ -48,7 +48,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
   }
 });
 
-// --- Dispatch des messages du compose script ---
+/* --- Dispatch des messages du compose script --- */
 
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "check") {

@@ -1,4 +1,4 @@
-// Tests --- Calcul du debounce adaptatif depuis le rpm du compte.
+/* Tests --- Calcul du debounce adaptatif depuis le rpm du compte. */
 
 const assert = require("assert");
 
@@ -17,7 +17,7 @@ function test(name, fn) {
   }
 }
 
-// --- Simulation minimale de l'objet Albert ---
+/* --- Simulation minimale de l'objet Albert --- */
 
 function createAlbert() {
   return {
@@ -41,7 +41,7 @@ function createAlbert() {
 
 console.log("Calcul du debounce adaptatif (updateDebounceFromRpm) :");
 
-// --- Sans limites ---
+/* --- Sans limites --- */
 
 test("Pas de limites --- valeurs par défaut inchangées", () => {
   const A = createAlbert();
@@ -57,7 +57,7 @@ test("Limites sans rpm --- valeurs par défaut inchangées", () => {
   assert.strictEqual(A.DEBOUNCE_MS, 3000);
 });
 
-// --- rpm 10 (compte limité) ---
+/* --- rpm 10 (compte limité) --- */
 
 test("rpm 10 --- debounce >= 3000ms", () => {
   const A = createAlbert();
@@ -81,7 +81,7 @@ test("rpm 10 --- throttle debounce >= 6000ms", () => {
   assert.ok(A.THROTTLE_DEBOUNCE_MS >= 6000);
 });
 
-// --- rpm 30 ---
+/* --- rpm 30 --- */
 
 test("rpm 30 --- debounce = 5000ms", () => {
   const A = createAlbert();
@@ -90,7 +90,7 @@ test("rpm 30 --- debounce = 5000ms", () => {
   assert.strictEqual(A.DEBOUNCE_MS, 5000);
 });
 
-// --- rpm 60 ---
+/* --- rpm 60 --- */
 
 test("rpm 60 --- debounce = 2500ms", () => {
   const A = createAlbert();
@@ -106,7 +106,7 @@ test("rpm 60 --- max debounce = 7500ms", () => {
   assert.strictEqual(A.MAX_DEBOUNCE_MS, 7500);
 });
 
-// --- rpm 100+ (compte premium) ---
+/* --- rpm 100+ (compte premium) --- */
 
 test("rpm 100 --- debounce plafonné à 1500ms", () => {
   const A = createAlbert();
@@ -129,7 +129,7 @@ test("rpm 200 --- debounce toujours 1500ms (plancher)", () => {
   assert.strictEqual(A.DEBOUNCE_MS, 1500);
 });
 
-// --- Throttle ---
+/* --- Throttle --- */
 
 test("rpm 100 --- throttle debounce >= 2x debounce", () => {
   const A = createAlbert();

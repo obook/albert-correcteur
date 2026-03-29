@@ -1,8 +1,8 @@
-// compose-overlay.js --- Soulignements d'erreurs dans le compose Thunderbird.
+/* compose-overlay.js --- Soulignements d'erreurs dans le compose Thunderbird. */
 
 "use strict";
 
-// Clés identiques à celles retournées par l'API (champ "type" du JSON)
+/* Clés identiques à celles retournées par l'API (champ "type" du JSON) */
 Albert.UNDERLINE_CLASSES = {
   spelling: "albert-error-spelling",
   grammar: "albert-error-grammar",
@@ -31,10 +31,13 @@ Albert.createUnderlineSpan = function (correction, index) {
   return span;
 };
 
-// Construit une map des text nodes avec un offset "innerText-compatible"
-// en ajoutant les \n que innerText insère pour les éléments block (<p>, <div>, <br>).
+/* Construit une map des text nodes avec un offset "innerText-compatible"
+ * en ajoutant les \n que innerText insère pour les éléments block (<p>, <div>, <br>). */
 Albert.buildTextNodeMap = function (body) {
-  const BLOCK_TAGS = new Set(["P", "DIV", "BR", "LI", "TR", "BLOCKQUOTE", "H1", "H2", "H3", "H4", "H5", "H6", "PRE", "HR", "UL", "OL"]);
+  const BLOCK_TAGS = new Set([
+    "P", "DIV", "BR", "LI", "TR", "BLOCKQUOTE",
+    "H1", "H2", "H3", "H4", "H5", "H6", "PRE", "HR", "UL", "OL",
+  ]);
   const map = [];
   let innerOffset = 0;
   let prevNode = null;
@@ -42,13 +45,13 @@ Albert.buildTextNodeMap = function (body) {
   const walker = document.createTreeWalker(body, NodeFilter.SHOW_ALL, null);
   let current;
   while ((current = walker.nextNode())) {
-    // Quand on rencontre un élément block ou <br>, innerText ajoute un \n
+    /* Quand on rencontre un élément block ou <br>, innerText ajoute un \n */
     if (current.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has(current.tagName)) {
-      // <br> ajoute un \n, les blocs ouvrants aussi (sauf le premier enfant du body)
+      /* <br> ajoute un \n, les blocs ouvrants aussi (sauf le premier enfant du body) */
       if (current.tagName === "BR") {
         innerOffset += 1;
       } else if (prevNode) {
-        // Un bloc ajoute un \n si ce n'est pas le tout premier contenu
+        /* Un bloc ajoute un \n si ce n'est pas le tout premier contenu */
         innerOffset += 1;
       }
     }

@@ -1,4 +1,4 @@
-// Tests — Templates de prompts (chargement et substitution).
+/* Tests -- Templates de prompts (chargement et substitution). */
 
 const assert = require("assert");
 const fs = require("fs");
@@ -112,7 +112,7 @@ test("Toutes les occurrences de {{LANG}} sont remplacées", () => {
   assert.strictEqual((result.match(/\{\{LANG\}\}/g) || []).length, 0);
 });
 
-// ── Traduction ──
+/* -- Traduction -- */
 
 test("traduction.txt existe", () => {
   assert.ok(fs.existsSync(path.join(PROMPTS_DIR, "traduction.txt")));

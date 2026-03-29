@@ -1,4 +1,4 @@
-// popup-limits.js — Affichage des limites du compte.
+/* popup-limits.js - Affichage des limites du compte. */
 
 "use strict";
 
@@ -14,7 +14,8 @@ const LIMIT_LABELS = {
 
 async function fetchAndShowLimits() {
   const apiKey = document.getElementById("api-key").value.trim();
-  const apiBase = (document.getElementById("api-base").value.trim() || DEFAULT_API_BASE).replace(/\/+$/, "");
+  const apiBase = (document.getElementById("api-base").value.trim()
+    || DEFAULT_API_BASE).replace(/\/+$/, "");
   if (!apiKey) return;
 
   try {
@@ -27,13 +28,16 @@ async function fetchAndShowLimits() {
     const rawLimits = data.limits || [];
     if (rawLimits.length === 0) return;
 
-    // Regrouper par type et garder la valeur la plus restrictive (minimum)
+    /*
+     * Regrouper par type et garder la valeur
+     * la plus restrictive (minimum)
+     */
     const merged = {};
     for (const l of rawLimits) {
       if (!(l.type in merged)) {
         merged[l.type] = l.value;
       } else if (l.value === null) {
-        // null = illimité, on garde la valeur existante (plus restrictive)
+        /* null = illimité, on garde la valeur existante (plus restrictive) */
       } else if (merged[l.type] === null) {
         merged[l.type] = l.value;
       } else {
@@ -44,8 +48,10 @@ async function fetchAndShowLimits() {
     limitsInfo.textContent = "";
     for (const [type, value] of Object.entries(merged)) {
       const label = LIMIT_LABELS[type] || type;
-      const display = value === null ? "illimité" : value.toLocaleString("fr-FR");
-      const cls = value === null ? "limit-value unlimited" : "limit-value";
+      const display = value === null
+        ? "illimité" : value.toLocaleString("fr-FR");
+      const cls = value === null
+        ? "limit-value unlimited" : "limit-value";
       const row = document.createElement("div");
       row.className = "limit-row";
       const labelSpan = document.createElement("span");
@@ -59,6 +65,6 @@ async function fetchAndShowLimits() {
     }
     limitsSection.style.display = "block";
   } catch {
-    // Silencieux si l'endpoint n'est pas disponible
+    /* Silencieux si l'endpoint n'est pas disponible */
   }
 }
