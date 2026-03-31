@@ -165,9 +165,9 @@ test("icons/icon-128.png existe", () => {
 
 /* -- Scripts -- */
 
-test("firefox-build.sh existe et est exécutable", () => {
-  const stat = fs.statSync(path.join(ROOT, "firefox-build.sh"));
-  assert.ok(stat.mode & 0o111, "firefox-build.sh n'est pas exécutable");
+test("build-firefox.sh existe et est exécutable", () => {
+  const stat = fs.statSync(path.join(ROOT, "build-firefox.sh"));
+  assert.ok(stat.mode & 0o111, "build-firefox.sh n'est pas exécutable");
 });
 
 test("firefox-publish.sh supprimé", () => {

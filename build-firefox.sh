@@ -1,7 +1,7 @@
 #!/bin/bash
 # Construit le fichier .xpi pour installation directe dans Firefox.
 # Assemble sources-commun/ (code partagé) + sources-firefox/ (code spécifique).
-# Usage : ./firefox-build.sh
+# Usage : ./build-firefox.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMMON_DIR="$SCRIPT_DIR/sources-commun"
