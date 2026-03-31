@@ -1,7 +1,7 @@
 #!/bin/bash
 # Construit le fichier .xpi pour installation dans Thunderbird.
 # Assemble sources-commun/ (code partagé) + sources-thunderbird/ (code spécifique).
-# Usage : ./thunderbird-build.sh
+# Usage : ./build-thunderbird.sh
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMMON_DIR="$SCRIPT_DIR/sources-commun"

@@ -11,7 +11,7 @@ Le projet est découpé en trois répertoires de sources et deux scripts de buil
 Chaque script de build assemble le code partagé avec le code spécifique pour produire un `.xpi` :
 
 - **`firefox-build.sh`** - Copie `sources-commun/` + `sources-firefox/` dans un dossier temporaire, puis crée le `.xpi` Firefox
-- **`thunderbird-build.sh`** - Copie `sources-commun/` + `sources-thunderbird/` dans un dossier temporaire, puis crée le `.xpi` Thunderbird
+- **`build-thunderbird.sh`** - Copie `sources-commun/` + `sources-thunderbird/` dans un dossier temporaire, puis crée le `.xpi` Thunderbird
 
 ## Arborescence
 
@@ -138,7 +138,7 @@ albert-ext/
   updates.json                            <- Manifeste de mise à jour Firefox + Thunderbird
   .gitlab-ci.yml                          <- Pipeline CI/CD (tests, build, sign, release)
   firefox-build.sh                        <- Script d'assemblage Firefox (.xpi)
-  thunderbird-build.sh                    <- Script d'assemblage Thunderbird (.xpi)
+  build-thunderbird.sh                    <- Script d'assemblage Thunderbird (.xpi)
 ```
 
 ## Fonctionnement
