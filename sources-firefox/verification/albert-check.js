@@ -63,7 +63,11 @@ Albert.triggerCheck = async function (el) {
     }
   }
 
-  if (state.badge) state.badge.classList.add("albert-loading");
+  if (state.badge) {
+    state.badge.classList.add("albert-loading");
+    const img = state.badge.querySelector("img");
+    if (img) img.src = Albert.ICON_URL;
+  }
 
   /* Créer un AbortController pour cette requête */
   const controller = new AbortController();
@@ -129,7 +133,12 @@ Albert.triggerCheck = async function (el) {
     if (state.abortController === controller) {
       state.abortController = null;
     }
-    if (state.badge) state.badge.classList.remove("albert-loading");
+    if (state.badge) {
+      state.badge.classList.remove("albert-loading");
+      const img = state.badge.querySelector("img");
+      const hasErrors = state.corrections && state.corrections.length > 0;
+      if (img) img.src = hasErrors ? Albert.ICON_ERROR_URL : Albert.ICON_URL;
+    }
   }
 };
 

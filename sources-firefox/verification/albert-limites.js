@@ -34,8 +34,8 @@ Albert.updateDebounceFromRpm = function () {
   /* Intervalle minimal entre requêtes pour utiliser ~40 % du quota */
   const interval = Math.ceil(60000 / (rpm * 0.4));
 
-  /* Bornes : 1500ms minimum (confort), 6000ms maximum (pas trop lent) */
-  Albert.DEBOUNCE_MS = Math.max(1500, Math.min(interval, 6000));
+  /* Bornes : 1500ms minimum (confort), 4000ms maximum (pas trop lent) */
+  Albert.DEBOUNCE_MS = Math.max(1500, Math.min(interval, 4000));
   /* Le max debounce = 3x le debounce (frappe continue sans pause) */
   Albert.MAX_DEBOUNCE_MS = Math.max(4000, Albert.DEBOUNCE_MS * 3);
 

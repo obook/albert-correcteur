@@ -41,6 +41,12 @@ Albert.setBadgeState = function (state) {
   if (!badge) return;
   badge.className = "albert-badge";
   if (state) badge.classList.add("albert-" + state);
+  const img = badge.querySelector("img");
+  if (img) {
+    img.src = browser.runtime.getURL(
+      state === "loading" || state === "ok" ? "icons/icon.svg" : "icons/icon-error.svg"
+    );
+  }
 };
 
 Albert.removeBadge = function () {
