@@ -11,14 +11,14 @@ Albert.ensureBadge = function (el) {
   }
 
   const badge = document.createElement("div");
-  badge.className = "albert-badge";
+  badge.className = "albert-badge albert-has-errors";
   badge.title = "Albert Correcteur - Cliquez pour verifier";
   badge.setAttribute("role", "button");
   badge.setAttribute("aria-label", "Albert Correcteur - Cliquez pour verifier");
   badge.setAttribute("tabindex", "0");
 
   const img = document.createElement("img");
-  img.src = Albert.ICON_URL;
+  img.src = Albert.ICON_ERROR_URL;
   img.alt = "Albert";
   img.setAttribute("aria-hidden", "true");
   badge.appendChild(img);

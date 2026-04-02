@@ -84,6 +84,34 @@ async function checkText(text, mode) {
     if (!Array.isArray(parsed.corrections)) {
       return { error: "Réponse API invalide : corrections manquantes." };
     }
+    /* Recalibrer les offsets : certains modèles retournent un offset
+       ou un length qui ne correspond pas exactement au champ "word". */
+    for (const c of parsed.corrections) {
+      if (!c.word || typeof c.offset !== "number") continue;
+      const atOffset = text.slice(c.offset, c.offset + c.word.length);
+      if (atOffset === c.word) {
+        /* Le word est bien à l'offset indiqué : fiabiliser le length */
+        c.length = c.word.length;
+      } else {
+        /* Chercher le word dans le texte, occurrence la plus proche */
+        let bestIdx = -1;
+        let from = 0;
+        while (from < text.length) {
+          const idx = text.indexOf(c.word, from);
+          if (idx === -1) break;
+          if (bestIdx === -1
+            || Math.abs(idx - c.offset) < Math.abs(bestIdx - c.offset)) {
+            bestIdx = idx;
+          }
+          from = idx + 1;
+        }
+        if (bestIdx !== -1) {
+          c.offset = bestIdx;
+          c.length = c.word.length;
+        }
+      }
+    }
+
     /* Filtrer les suggestions incorrectes */
     const corrections = (parsed.corrections || []).map((c) => {
       if (c.suggestions && c.word) {

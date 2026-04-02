@@ -8,7 +8,7 @@ Albert.createBadge = function () {
   if (Albert.badge) return Albert.badge;
 
   const badge = document.createElement("div");
-  badge.className = "albert-badge";
+  badge.className = "albert-badge albert-has-errors";
   badge.setAttribute("role", "button");
   badge.setAttribute("aria-label", "Albert Correcteur - cliquer pour vérifier");
   badge.setAttribute("tabindex", "0");
@@ -16,7 +16,7 @@ Albert.createBadge = function () {
 
   /* Utiliser la vraie icône du projet (identique à Firefox) */
   const img = document.createElement("img");
-  img.src = browser.runtime.getURL("icons/icon-48.png");
+  img.src = browser.runtime.getURL("icons/icon-error.svg");
   img.alt = "Albert";
   img.setAttribute("aria-hidden", "true");
   badge.appendChild(img);

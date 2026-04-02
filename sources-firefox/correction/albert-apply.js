@@ -163,18 +163,53 @@ Albert._applyInContentEditable = function (el, correction, suggestion, state) {
       return false;
     }
   } else {
-    /* Contenteditable simple : via Selection + execCommand pour conserver l'undo natif (CTRL+Z) */
-    if (!Albert.applyViaSelection(el, correction, suggestion)) {
-      /* Fallback : remplacement direct des marks DOM (pas d'undo natif) */
-      const idx = correction.idx !== undefined ? correction.idx : state.corrections.indexOf(correction);
-      const marks = el.querySelectorAll(`.albert-error[data-idx="${idx}"]`);
-      marks.forEach((mark) => {
-        const textNode = document.createTextNode(suggestion);
-        mark.parentNode.replaceChild(textNode, mark);
-        textNode.parentNode.normalize();
-      });
+    /* Contenteditable simple : Range + execCommand immédiat (pas de setTimeout) */
+    if (!Albert._applyInSimpleContentEditable(el, correction, suggestion, state)) {
+      Albert.applyingCorrection = false;
+      Albert.showToast("Correction impossible : le texte a changé.", 3);
+      return false;
     }
   }
+  return true;
+};
+
+/* Contenteditable simple : sélection via Range puis execCommand immédiat. */
+Albert._applyInSimpleContentEditable = function (el, correction, suggestion, state) {
+  el.focus();
+
+  const segments = Albert.buildInnerTextSegments(el);
+  const currentText = el.innerText || "";
+  const checkedText = state.checkedText || currentText;
+  const realOffset = Albert.findRealOffset(currentText, correction, checkedText);
+  if (realOffset === -1) return false;
+
+  const errEnd = realOffset + correction.length;
+  const startPos = Albert.findSegmentAt(segments, realOffset);
+  const endPos = Albert.findSegmentAt(segments, errEnd);
+  if (!startPos || !endPos) return false;
+
+  const range = document.createRange();
+  range.setStart(startPos.node, startPos.offset);
+  range.setEnd(endPos.node, endPos.offset);
+
+  /* Vérifier que le Range couvre le mot attendu */
+  const expectedWord = checkedText.slice(correction.offset, correction.offset + correction.length);
+  if (range.toString() !== expectedWord) return false;
+
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+
+  /* Remplacement immédiat via execCommand (conserve l'undo natif CTRL+Z) */
+  const ok = document.execCommand("insertText", false, suggestion);
+  if (!ok) {
+    /* Fallback : remplacement DOM direct */
+    range.deleteContents();
+    range.insertNode(document.createTextNode(suggestion));
+    el.normalize();
+  }
+
+  state.checkedText = el.innerText || "";
   return true;
 };
 

@@ -7,10 +7,8 @@ Albert.renderCorrections = function (el) {
   const state = Albert.getOrCreateState(el);
   const tag = el.tagName.toLowerCase();
 
-  if (tag === "textarea" || tag === "input" || Albert.isRichEditor(el)) {
+  if (tag === "textarea" || tag === "input" || el.isContentEditable) {
     Albert.renderOverlay(el, state);
-  } else if (el.isContentEditable) {
-    Albert.renderContentEditable(el, state);
   }
 
   if (state.badge) {
