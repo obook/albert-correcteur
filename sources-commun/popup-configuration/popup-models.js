@@ -58,9 +58,8 @@ async function fetchModels() {
     }
 
     const data = await response.json();
-    const CHAT_TYPES = ["text-generation", "image-text-to-text"];
     const rawModels = (data.data || [])
-      .filter((m) => CHAT_TYPES.includes(m.type));
+      .filter((m) => m.type === "text-generation");
 
     /* Construire une table alias -> id pour enrichir les descriptions. */
     const aliasToId = {};
