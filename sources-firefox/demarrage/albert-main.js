@@ -61,7 +61,7 @@ Albert.attachField = function (el) {
       st.corrections = Albert.migrateCorrections(st.corrections, oldText, newText);
       st.checkedText = newText;
       st.lastCheckedText = newText;
-      /* Re-rendre avec les offsets migres */
+      /* Re-rendre avec les offsets migrés */
       if (st.corrections.length > 0) {
         Albert.renderCorrections(el);
       } else {

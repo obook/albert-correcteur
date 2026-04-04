@@ -204,7 +204,9 @@ Albert.showPopup = function (el, correction, markEl) {
 /* Navigation entre erreurs. */
 Albert.navigateError = function (el, direction) {
   const state = Albert.getOrCreateState(el);
-  if (state.corrections.length === 0) return;
+  if (state.corrections.length === 0) {
+    return;
+  }
 
   let newIdx = Albert.activePopupIdx + direction;
   if (newIdx < 0) newIdx = state.corrections.length - 1;

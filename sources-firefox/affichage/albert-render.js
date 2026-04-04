@@ -2,7 +2,7 @@
 
 "use strict";
 
-/* Affiche les corrections sur un champ (choisit la bonne methode). */
+/* Affiche les corrections sur un champ (choisit la bonne méthode). */
 Albert.renderCorrections = function (el) {
   const state = Albert.getOrCreateState(el);
   const tag = el.tagName.toLowerCase();
@@ -18,21 +18,23 @@ Albert.renderCorrections = function (el) {
     state.badge.classList.toggle("albert-has-errors", hasErrors);
     state.badge.classList.toggle("albert-no-errors", !hasErrors);
     const img = state.badge.querySelector("img");
-    if (img) img.src = hasErrors ? Albert.ICON_ERROR_URL : Albert.ICON_URL;
+    if (img) {
+      img.src = hasErrors ? Albert.ICON_ERROR_URL : Albert.ICON_URL;
+    }
     const title = hasErrors
       ? `${state.corrections.length} erreur${state.corrections.length > 1 ? "s" : ""}`
-        + ` trouvee${state.corrections.length > 1 ? "s" : ""}${langSuffix}`
+        + ` trouvée${state.corrections.length > 1 ? "s" : ""}${langSuffix}`
       : `Albert Correcteur - Aucune erreur${langSuffix}`;
     state.badge.title = title;
     state.badge.setAttribute("aria-label", title);
   }
 
-  /* Annoncer aux lecteurs d'ecran (RGAA) */
+  /* Annoncer aux lecteurs d'écran (RGAA) */
   Albert._announceErrors(state.corrections.length, state.lang);
 };
 
-/* Rendu pour les contenteditable simples (pas d'editeur riche).
-   Entoure les mots errones de <span> cliquables directement dans le DOM. */
+/* Rendu pour les contenteditable simples (pas d'éditeur riche).
+   Entoure les mots erronés de <span> cliquables directement dans le DOM. */
 Albert.renderContentEditable = function (el, state) {
   el.querySelectorAll(".albert-error").forEach((mark) => {
     const parent = mark.parentNode;
@@ -40,12 +42,16 @@ Albert.renderContentEditable = function (el, state) {
     parent.normalize();
   });
 
-  if (state.corrections.length === 0) return;
+  if (state.corrections.length === 0) {
+    return;
+  }
 
   const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
   const textNodes = [];
   let node;
-  while ((node = walker.nextNode())) textNodes.push(node);
+  while ((node = walker.nextNode())) {
+    textNodes.push(node);
+  }
 
   let globalOffset = 0;
   const nodeRanges = textNodes.map((n) => {

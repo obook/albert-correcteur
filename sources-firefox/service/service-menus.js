@@ -18,7 +18,9 @@ browser.contextMenus.create({
 
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
   const text = info.selectionText;
-  if (!text || text.trim().length < 3) return;
+  if (!text || text.trim().length < 3) {
+    return;
+  }
 
   if (info.menuItemId === "albert-reformulate") {
     const result = await checkText(text, "reformulation");

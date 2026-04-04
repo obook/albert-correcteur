@@ -54,37 +54,41 @@ Albert.isRichEditor = function (el) {
   if (el.closest("[data-lexical-editor]")) return true;
   /* Element/Matrix (Tchap, Element Web) */
   if (el.classList.contains("mx_BasicMessageComposer_input")) return true;
+  /* Éditeur avec role="textbox" (WhatsApp Web, Slack, etc.) :
+     un contenteditable natif n'a pas besoin de role="textbox",
+     sa présence indique un éditeur géré par un framework. */
+  if (el.getAttribute("role") === "textbox") return true;
   return false;
 };
 
-/* Migre les offsets des corrections existantes apres une frappe utilisateur.
-   Compare l'ancien et le nouveau texte pour trouver la zone editee,
+/* Migre les offsets des corrections existantes après une frappe utilisateur.
+   Compare l'ancien et le nouveau texte pour trouver la zone éditée,
    puis ajuste ou invalide les corrections. */
 Albert.migrateCorrections = function (corrections, oldText, newText) {
   const delta = newText.length - oldText.length;
   if (delta === 0 || !corrections || corrections.length === 0) return corrections;
 
-  /* Trouver la position de divergence depuis le debut */
+  /* Trouver la position de divergence depuis le début */
   let editStart = 0;
   const minLen = Math.min(oldText.length, newText.length);
   while (editStart < minLen && oldText[editStart] === newText[editStart]) {
     editStart++;
   }
-  /* Fin de la zone editee dans l'ancien texte */
+  /* Fin de la zone éditée dans l'ancien texte */
   const editEndOld = editStart + Math.max(0, -delta);
 
   return corrections.map((c) => {
     const cEnd = c.offset + c.length;
-    /* Correction entierement avant l'edition : inchangee */
+    /* Correction entièrement avant l'édition : inchangée */
     if (cEnd <= editStart) return c;
-    /* Correction chevauche la zone editee : invalider */
+    /* Correction chevauche la zone éditée : invalider */
     if (c.offset < editEndOld + Math.max(0, delta) && cEnd > editStart) return null;
-    /* Correction entierement apres l'edition : decaler */
+    /* Correction entièrement après l'édition : décaler */
     return Object.assign({}, c, { offset: c.offset + delta });
   }).filter(Boolean);
 };
 
-/* Decoupe un texte en paragraphes avec leurs offsets dans le texte complet. */
+/* Découpe un texte en paragraphes avec leurs offsets dans le texte complet. */
 Albert.splitParagraphs = function (text) {
   const paragraphs = [];
   const lines = text.split("\n");
@@ -98,14 +102,14 @@ Albert.splitParagraphs = function (text) {
   return paragraphs;
 };
 
-/* Trouve le paragraphe modifie en comparant l'ancien et le nouveau texte.
-   Retourne l'index du paragraphe modifie ou -1 si plusieurs paragraphes ont change. */
+/* Trouve le paragraphe modifié en comparant l'ancien et le nouveau texte.
+   Retourne l'index du paragraphe modifié ou -1 si plusieurs paragraphes ont changé. */
 Albert.findModifiedParagraph = function (oldParagraphs, newParagraphs) {
   if (oldParagraphs.length !== newParagraphs.length) return -1;
   let modifiedIdx = -1;
   for (let i = 0; i < newParagraphs.length; i++) {
     if (oldParagraphs[i].text !== newParagraphs[i].text) {
-      if (modifiedIdx !== -1) return -1; /* plusieurs paragraphes modifies */
+      if (modifiedIdx !== -1) return -1; /* plusieurs paragraphes modifiés */
       modifiedIdx = i;
     }
   }

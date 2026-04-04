@@ -4,7 +4,7 @@
 
 /* Envoie le texte au script de fond pour correction.
    Utilise un AbortController pour pouvoir annuler la requête si le texte change.
-   Verification incrementale : si un seul paragraphe a change, n'envoie que
+   Vérification incrémentale : si un seul paragraphe a changé, n'envoie que
    ce paragraphe (+ contexte adjacent) et fusionne avec les corrections existantes. */
 Albert.triggerCheck = async function (el) {
   const text = Albert.getTextContent(el);
@@ -37,7 +37,7 @@ Albert.triggerCheck = async function (el) {
     return;
   }
 
-  /* Detecter si un seul paragraphe a change (verification incrementale) */
+  /* Détecter si un seul paragraphe a changé (vérification incrémentale) */
   let incremental = null;
   const oldChecked = state.lastCheckedText || "";
   if (oldChecked && state.corrections) {
@@ -45,14 +45,14 @@ Albert.triggerCheck = async function (el) {
     const newParas = Albert.splitParagraphs(text);
     const modIdx = Albert.findModifiedParagraph(oldParas, newParas);
     if (modIdx !== -1) {
-      /* Construire le texte a envoyer : paragraphe modifie + contexte adjacent */
+      /* Construire le texte à envoyer : paragraphe modifié + contexte adjacent */
       const ctxStart = Math.max(0, modIdx - 1);
       const ctxEnd = Math.min(newParas.length - 1, modIdx + 1);
       const contextParas = newParas.slice(ctxStart, ctxEnd + 1);
       const sendText = contextParas.map((p) => p.text).join("\n");
       /* Offset du premier paragraphe du contexte dans le texte complet */
       const baseOffset = contextParas[0].offset;
-      /* Offset du paragraphe modifie dans le texte envoye */
+      /* Offset du paragraphe modifié dans le texte envoyé */
       const modOffsetInSend = newParas[modIdx].offset - baseOffset;
       incremental = {
         sendText,
@@ -100,14 +100,14 @@ Albert.triggerCheck = async function (el) {
     const raw = response.corrections || [];
 
     if (incremental) {
-      /* Recalibrer les offsets dans le texte envoye */
+      /* Recalibrer les offsets dans le texte envoyé */
       const recalibrated = Albert.recalibrateOffsets(raw, incremental.sendText);
-      /* Decaler les offsets vers le texte complet */
+      /* Décaler les offsets vers le texte complet */
       const shifted = recalibrated.map((c) =>
         Object.assign({}, c, { offset: c.offset + incremental.baseOffset })
       );
       const filtered = Albert.filterIgnoredCorrections(shifted, text);
-      /* Fusionner : garder les corrections hors du paragraphe modifie + nouvelles */
+      /* Fusionner : garder les corrections hors du paragraphe modifié + nouvelles */
       const modStart = incremental.modPara.offset;
       const modEnd = modStart + incremental.modPara.text.length;
       const kept = (state.corrections || []).filter((c) =>

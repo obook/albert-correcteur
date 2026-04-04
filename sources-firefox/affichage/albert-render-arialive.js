@@ -1,12 +1,14 @@
-/* albert-render-arialive.js - Accessibilite : zone aria-live et nettoyage.
-   Annonce le nombre d'erreurs aux lecteurs d'ecran (RGAA). */
+/* albert-render-arialive.js - Accessibilité : zone aria-live et nettoyage.
+   Annonce le nombre d'erreurs aux lecteurs d'écran (RGAA). */
 
 "use strict";
 
 Albert._ariaLive = null;
 
 Albert._ensureAriaLive = function () {
-  if (Albert._ariaLive && document.contains(Albert._ariaLive)) return;
+  if (Albert._ariaLive && document.contains(Albert._ariaLive)) {
+    return;
+  }
   const el = document.createElement("div");
   el.setAttribute("aria-live", "polite");
   el.setAttribute("aria-atomic", "true");
@@ -22,14 +24,14 @@ Albert._ensureAriaLive = function () {
 Albert._announceErrors = function (count, lang) {
   Albert._ensureAriaLive();
   const langLabel =
-    { fr: "francais", en: "anglais", es: "espagnol", de: "allemand" }[lang] || "";
+    { fr: "français", en: "anglais", es: "espagnol", de: "allemand" }[lang] || "";
   if (count === 0) {
     Albert._ariaLive.textContent =
-      "Albert : aucune erreur detectee" + (langLabel ? ` (${langLabel})` : "");
+      "Albert : aucune erreur détectée" + (langLabel ? ` (${langLabel})` : "");
   } else {
     Albert._ariaLive.textContent =
       `Albert : ${count} erreur${count > 1 ? "s" : ""}`
-      + ` detectee${count > 1 ? "s" : ""}` + (langLabel ? ` (${langLabel})` : "");
+      + ` détectée${count > 1 ? "s" : ""}` + (langLabel ? ` (${langLabel})` : "");
   }
 };
 

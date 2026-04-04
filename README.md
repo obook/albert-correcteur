@@ -21,7 +21,7 @@
 - Popup de suggestion avec explication et correction en un clic (fermeture par Échap ou clic en dehors)
 - Animation de rotation du logo pendant la vérification
 - Fonctionne sur les `<textarea>`, `<input>` et les éléments `contenteditable` (Firefox)
-- Compatible avec les éditeurs riches : CKEditor, TinyMCE, Quill, ProseMirror, Draft.js, Lexical (Firefox)
+- Compatible avec les éditeurs riches : CKEditor, TinyMCE, Quill, ProseMirror, Draft.js, Lexical, WhatsApp Web, Slack (Firefox)
 - Gestion des saisies IME (langues CJK) sans déclenchement intempestif
 - Désactivation automatique du correcteur natif du navigateur sur les champs suivis (Firefox)
 - Masquage automatique des éléments Albert lors de l'ouverture d'une modale Bootstrap (Firefox)

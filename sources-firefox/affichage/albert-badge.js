@@ -2,7 +2,7 @@
 
 "use strict";
 
-/* Cree ou recupere le badge pour un champ de saisie. */
+/* Crée ou récupère le badge pour un champ de saisie. */
 Albert.ensureBadge = function (el) {
   const state = Albert.getOrCreateState(el);
   if (state.badge && document.contains(state.badge)) {
@@ -12,9 +12,9 @@ Albert.ensureBadge = function (el) {
 
   const badge = document.createElement("div");
   badge.className = "albert-badge albert-has-errors";
-  badge.title = "Albert Correcteur - Cliquez pour verifier";
+  badge.title = "Albert Correcteur - Cliquez pour vérifier";
   badge.setAttribute("role", "button");
-  badge.setAttribute("aria-label", "Albert Correcteur - Cliquez pour verifier");
+  badge.setAttribute("aria-label", "Albert Correcteur - Cliquez pour vérifier");
   badge.setAttribute("tabindex", "0");
 
   const img = document.createElement("img");
@@ -53,7 +53,7 @@ Albert.updateBadgeVisibility = function (el, badge) {
   badge.style.display = text.trim().length > 0 ? "flex" : "none";
 };
 
-/* Positionne le badge dans le coin inferieur droit du champ. */
+/* Positionne le badge dans le coin inférieur droit du champ. */
 Albert.positionBadge = function (el, badge) {
   const rect = el.getBoundingClientRect();
   const parentRect = (el.offsetParent || document.body).getBoundingClientRect();
