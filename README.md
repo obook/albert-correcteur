@@ -82,6 +82,27 @@ Voir [ARCHITECTURE.md](ARCHITECTURE.md) pour l'arborescence, les flux et les dé
 
 Fiche de sécurité conforme aux recommandations ANSSI : [SECURITE.md](SECURITE.md)
 
+## Développement
+
+### Tester l'extension non signée avec Firefox Developer Edition
+
+Le fichier `.xpi` distribué est signé par Mozilla, mais pendant le développement, il est nécessaire de charger une version non signée. Firefox standard refuse les extensions non signées ; il faut utiliser **Firefox Developer Edition** (ou Nightly).
+
+1. **Installer Firefox Developer Edition** depuis le [site officiel de Mozilla](https://www.mozilla.org/fr/firefox/developer/)
+2. **Désactiver la vérification des signatures** :
+   - Ouvrir `about:config` dans la barre d'adresse
+   - Accepter l'avertissement
+   - Rechercher `xpinstall.signatures.required` et passer la valeur à `false`
+
+   > Cette option n'est disponible que sur Developer Edition, Nightly et ESR — elle n'existe pas sur Firefox standard.
+
+3. **Charger l'extension** via `about:addons` → roue dentée → « Installer un module depuis un fichier… » et sélectionner le `.xpi` non signé
+
+**Alternative : chargement temporaire** (ne persiste pas après redémarrage) :
+- Ouvrir `about:debugging#/runtime/this-firefox`
+- Cliquer sur « Charger un module complémentaire temporaire… »
+- Sélectionner le fichier `manifest.json` à la racine du répertoire source
+
 ## Licences
 
 - **Code source** : [licence MIT](LICENSE)
