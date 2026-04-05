@@ -33,7 +33,10 @@ Albert.attachField = function (el) {
   el.addEventListener("paste", () => {
     setTimeout(() => {
       const st = Albert.getOrCreateState(el);
-      if (st.badge) Albert.updateBadgeVisibility(el, st.badge);
+      if (st.badge) {
+        Albert.updateBadgeVisibility(el, st.badge);
+        Albert.positionBadge(el, st.badge);
+      }
       clearTimeout(st.timer);
       clearTimeout(st.maxTimer);
       st.timer = null;
@@ -44,7 +47,10 @@ Albert.attachField = function (el) {
 
   el.addEventListener("input", () => {
     const st = Albert.getOrCreateState(el);
-    if (st.badge) Albert.updateBadgeVisibility(el, st.badge);
+    if (st.badge) {
+      Albert.updateBadgeVisibility(el, st.badge);
+      Albert.positionBadge(el, st.badge);
+    }
 
     /* Si c'est une correction appliquée par Albert, ne pas tout effacer */
     if (Albert.applyingCorrection) return;

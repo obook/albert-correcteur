@@ -50,10 +50,17 @@ Albert._handleUndo = function (e) {
  * L'offset original peut être décalé si une correction précédente a changé la longueur du texte.
  */
 Albert.findRealOffset = function (currentText, correction, checkedText) {
-  const originalWord = checkedText.slice(correction.offset, correction.offset + correction.length);
+  /*
+   * Utiliser correction.word (mot signalé par l'API) en priorité.
+   * Fallback sur le slice de checkedText si word est absent.
+   * Cela évite les décalages quand l'offset a été ajusté par
+   * _updateRemainingCorrections mais ne pointe plus exactement sur le mot.
+   */
+  const originalWord = correction.word
+    || checkedText.slice(correction.offset, correction.offset + correction.length);
 
   /* Vérifier d'abord à l'offset original */
-  if (currentText.slice(correction.offset, correction.offset + correction.length) === originalWord) {
+  if (currentText.slice(correction.offset, correction.offset + originalWord.length) === originalWord) {
     return correction.offset;
   }
 
@@ -143,9 +150,10 @@ Albert._applyInTextarea = function (el, correction, suggestion, state) {
     Albert.showToast("Correction impossible : le texte a changé.", 3);
     return false;
   }
+  const wordLen = (correction.word || "").length || correction.length;
   Albert._pushUndo(el);
   const before = el.value.slice(0, realOffset);
-  const after = el.value.slice(realOffset + correction.length);
+  const after = el.value.slice(realOffset + wordLen);
   el.value = before + suggestion + after;
   el.setSelectionRange(realOffset + suggestion.length, realOffset + suggestion.length);
   state.checkedText = el.value;
@@ -180,10 +188,13 @@ Albert._applyInSimpleContentEditable = function (el, correction, suggestion, sta
   const segments = Albert.buildInnerTextSegments(el);
   const currentText = el.innerText || "";
   const checkedText = state.checkedText || currentText;
+  const expectedWord = correction.word
+    || checkedText.slice(correction.offset, correction.offset + correction.length);
+
   const realOffset = Albert.findRealOffset(currentText, correction, checkedText);
   if (realOffset === -1) return false;
 
-  const errEnd = realOffset + correction.length;
+  const errEnd = realOffset + expectedWord.length;
   const startPos = Albert.findSegmentAt(segments, realOffset);
   const endPos = Albert.findSegmentAt(segments, errEnd);
   if (!startPos || !endPos) return false;
@@ -191,9 +202,6 @@ Albert._applyInSimpleContentEditable = function (el, correction, suggestion, sta
   const range = document.createRange();
   range.setStart(startPos.node, startPos.offset);
   range.setEnd(endPos.node, endPos.offset);
-
-  /* Vérifier que le Range couvre le mot attendu */
-  const expectedWord = checkedText.slice(correction.offset, correction.offset + correction.length);
   if (range.toString() !== expectedWord) return false;
 
   const sel = window.getSelection();

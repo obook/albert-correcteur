@@ -7,6 +7,36 @@
 
 "use strict";
 
+/* --- Muting des événements parasites --- */
+
+/*
+ * Pendant le remplacement, les éditeurs riches (Lexical/WhatsApp, CKEditor, etc.)
+ * peuvent réagir aux événements souris/pointer/sélection et déplacer leur curseur
+ * interne. On mute ces événements en phase de capture au niveau du document
+ * pour éviter toute interférence.
+ * Inspiré de l'EventMuter de LanguageTool.
+ */
+const _MUTED_EVENTS = [
+  "mousedown", "mouseup", "mousemove", "mouseover", "mouseout",
+  "pointerdown", "pointerup", "pointermove", "pointerover", "pointerout",
+  "click", "dblclick", "selectionchange"
+];
+
+Albert._muteEvents = function (el) {
+  const handler = (e) => { e.stopImmediatePropagation(); };
+  const entries = [];
+  const root = el.ownerDocument || document;
+  for (const type of _MUTED_EVENTS) {
+    root.addEventListener(type, handler, true);
+    entries.push({ type, handler });
+  }
+  return function unmute() {
+    for (const { type, handler } of entries) {
+      root.removeEventListener(type, handler, true);
+    }
+  };
+};
+
 /*
  * Applique une correction dans un éditeur riche (CKEditor, TinyMCE, etc.)
  * via Selection + chaîne d'événements complète.
@@ -20,10 +50,18 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
 
   const currentText = el.innerText || "";
   const checkedText = state.checkedText || currentText;
+  /*
+   * Utiliser correction.word en priorité pour le mot attendu.
+   * Après _updateRemainingCorrections, l'offset peut être décalé
+   * d'un caractère ; correction.word reste fiable.
+   */
+  const expectedWord = correction.word
+    || checkedText.slice(correction.offset, correction.offset + correction.length);
+
   const realOffset = Albert.findRealOffset(currentText, correction, checkedText);
   if (realOffset === -1) return false;
 
-  const errEnd = realOffset + correction.length;
+  const errEnd = realOffset + expectedWord.length;
 
   /* Localiser les nœuds texte de début et fin */
   const startPos = Albert.findSegmentAt(segments, realOffset);
@@ -35,32 +73,88 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
   range.setStart(startPos.node, startPos.offset);
   range.setEnd(endPos.node, endPos.offset);
 
-  /* Vérifier que le Range couvre bien le mot attendu */
-  const expectedWord = checkedText.slice(correction.offset, correction.offset + correction.length);
+  /* --- Diagnostic (temporaire, à retirer après validation) --- */
+  const segText = segments.map((s) => s.node.textContent).join("");
+  if (segText.length !== currentText.length) {
+    console.warn("[Albert] Segment/innerText mismatch!",
+      "segments.len=" + segText.length, "innerText.len=" + currentText.length);
+    /* Chercher le premier caractère divergent */
+    for (let i = 0; i < Math.max(segText.length, currentText.length); i++) {
+      if (segText[i] !== currentText[i]) {
+        console.warn("[Albert]   divergence at", i,
+          "seg=" + JSON.stringify(segText.slice(Math.max(0, i - 5), i + 5)),
+          "inner=" + JSON.stringify(currentText.slice(Math.max(0, i - 5), i + 5)));
+        break;
+      }
+    }
+  }
+  console.log("[Albert] applyViaSelection:",
+    "word=" + JSON.stringify(correction.word),
+    "offset=" + correction.offset, "length=" + correction.length,
+    "realOffset=" + realOffset, "errEnd=" + errEnd,
+    "range=" + JSON.stringify(range.toString()),
+    "expected=" + JSON.stringify(expectedWord),
+    "match=" + (range.toString() === expectedWord));
+  /* --- Fin diagnostic (temporaire) --- */
+
   if (range.toString() !== expectedWord) return false;
 
   /*
-   * Simuler mousedown (certains éditeurs riches n'acceptent les sélections
-   * que via des interactions souris)
+   * Coordonnées séparées pour début et fin :
+   * certains éditeurs (Lexical/WhatsApp) utilisent les coordonnées souris
+   * pour déterminer la position du curseur dans leur modèle interne.
    */
-  const startRect = range.getBoundingClientRect();
+  const startRange = document.createRange();
+  startRange.setStart(startPos.node, startPos.offset);
+  startRange.collapse(true);
+  const startRect = startRange.getBoundingClientRect();
+
+  const endRange = document.createRange();
+  endRange.setStart(endPos.node, endPos.offset);
+  endRange.collapse(true);
+  const endRect = endRange.getBoundingClientRect();
+
+  /*
+   * Simuler mousedown → mousemove → sélection → mousemove → mouseup
+   * (séquence complète, comme LanguageTool)
+   */
   Albert._simulateMouseEvent(startPos.node.parentElement || el, "mousedown", startRect);
+  Albert._simulateMouseEvent(el, "mousemove", startRect);
 
   /* Appliquer la sélection */
   const sel = window.getSelection();
   sel.removeAllRanges();
   sel.addRange(range);
 
-  /* Simuler mouseup pour finaliser la sélection côté éditeur */
-  Albert._simulateMouseEvent(endPos.node.parentElement || el, "mouseup", startRect);
+  /* Simuler mousemove + mouseup sur le nœud de fin */
+  Albert._simulateMouseEvent(endPos.node.parentElement || el, "mousemove", endRect);
+  Albert._simulateMouseEvent(endPos.node.parentElement || el, "mouseup", endRect);
+
+  /*
+   * Muter les événements au niveau document pour empêcher l'éditeur
+   * de modifier sa sélection interne pendant la phase d'insertion.
+   */
+  const unmute = Albert._muteEvents(el);
 
   /*
    * Délai pour que l'éditeur enregistre la sélection,
    * puis insertion via chaîne d'événements complète
    */
   setTimeout(() => {
-    Albert._insertTextInEditor(el, suggestion);
-    state.checkedText = el.innerText || "";
+    try {
+      /* Vérifier que la sélection n'a pas bougé pendant le délai (temporaire, à retirer) */
+      const curSel = window.getSelection();
+      if (curSel && curSel.rangeCount > 0) {
+        const curRange = curSel.getRangeAt(0);
+        console.log("[Albert] selection before insert:",
+          JSON.stringify(curRange.toString()),
+          "expected:", JSON.stringify(expectedWord));
+      }
+      Albert._insertTextInEditor(el, suggestion);
+      state.checkedText = el.innerText || "";
+    } finally {
+      unmute();
+    }
   }, 30);
 
   return true;
