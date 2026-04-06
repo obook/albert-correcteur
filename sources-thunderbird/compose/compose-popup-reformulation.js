@@ -35,6 +35,7 @@ Albert.showReformulationPopup = function (originalText, result) {
 
   const header = document.createElement("div");
   header.className = "albert-popup-header";
+  header.style.cursor = "grab";
 
   const title = document.createElement("span");
   title.className = "albert-popup-type";
@@ -57,10 +58,22 @@ Albert.showReformulationPopup = function (originalText, result) {
   origDiv.textContent = "Original : " + originalText;
   popup.appendChild(origDiv);
 
-  if (result && result.corrections && result.corrections.length) {
-    const sugDiv = document.createElement("div");
-    sugDiv.className = "albert-popup-suggestions";
-    for (const c of result.corrections) {
+  const corrections = (result && result.corrections) || [];
+
+  if (corrections.length) {
+    for (const c of corrections) {
+      const block = document.createElement("div");
+      block.style.marginBottom = "8px";
+
+      if (c.message) {
+        const msg = document.createElement("div");
+        msg.className = "albert-popup-message";
+        msg.textContent = c.message;
+        block.appendChild(msg);
+      }
+
+      const sugDiv = document.createElement("div");
+      sugDiv.className = "albert-popup-suggestions";
       for (const sug of (c.suggestions || [])) {
         const btn = document.createElement("button");
         btn.className = "albert-popup-suggestion";
@@ -72,8 +85,9 @@ Albert.showReformulationPopup = function (originalText, result) {
         });
         sugDiv.appendChild(btn);
       }
+      block.appendChild(sugDiv);
+      popup.appendChild(block);
     }
-    popup.appendChild(sugDiv);
   } else if (result && result.error) {
     const errDiv = document.createElement("div");
     errDiv.className = "albert-popup-message";
@@ -84,9 +98,40 @@ Albert.showReformulationPopup = function (originalText, result) {
   document.body.appendChild(popup);
   popup.style.position = "fixed";
   popup.style.left = "50%";
-  popup.style.top = "30%";
+  popup.style.top = "50%";
   popup.style.transform = "translate(-50%, -50%)";
+  popup.style.maxHeight = "80vh";
+  popup.style.overflowY = "auto";
   popup.style.zIndex = "2147483647";
+
+  /* Drag via le header */
+  let isDragging = false;
+  let startX, startY, origLeft, origTop;
+  header.addEventListener("mousedown", (e) => {
+    if (e.target === closeBtn) return;
+    e.preventDefault();
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    const rect = popup.getBoundingClientRect();
+    origLeft = rect.left;
+    origTop = rect.top;
+    popup.style.transform = "none";
+    popup.style.left = rect.left + "px";
+    popup.style.top = rect.top + "px";
+    header.style.cursor = "grabbing";
+  });
+  document.addEventListener("mousemove", (e) => {
+    if (!isDragging) return;
+    popup.style.left = (origLeft + e.clientX - startX) + "px";
+    popup.style.top = (origTop + e.clientY - startY) + "px";
+  });
+  document.addEventListener("mouseup", () => {
+    if (isDragging) {
+      isDragging = false;
+      header.style.cursor = "grab";
+    }
+  });
 
   Albert.trapFocus(popup);
   Albert.reformulationPopup = popup;
