@@ -3,6 +3,11 @@
 "use strict";
 
 browser.runtime.onMessage.addListener((message) => {
+  if (message.type === "reformulateLoading") {
+    Albert.showToast("Reformulation en cours\u2026", 30000);
+    return;
+  }
+
   if (message.type === "reformulateResult") {
     Albert.showReformulationPopup(message.originalText, message.result);
   }

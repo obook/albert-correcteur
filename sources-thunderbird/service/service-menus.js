@@ -21,6 +21,7 @@ browser.menus.onClicked.addListener(async (info, tab) => {
   if (!text || text.trim().length < 3) return;
 
   if (info.menuItemId === "albert-reformulate") {
+    browser.tabs.sendMessage(tab.id, { type: "reformulateLoading" });
     const result = await checkText(text, "reformulation");
     browser.tabs.sendMessage(tab.id, {
       type: "reformulateResult",

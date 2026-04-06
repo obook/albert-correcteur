@@ -4,6 +4,8 @@
 
 Albert.showReformulationPopup = function (originalText, suggestions) {
   Albert.closePopup();
+  const loadingToast = document.querySelector(".albert-toast");
+  if (loadingToast) loadingToast.remove();
 
   const themeClass = Albert.getPopupThemeClass();
   const popup = document.createElement("div");

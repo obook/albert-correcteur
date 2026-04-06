@@ -20,6 +20,8 @@ Albert.showReformulationPopup = function (originalText, result) {
   Albert.closeReformulationPopup();
   Albert.closeCorrectionPopup();
   Albert.closeTranslationPopup();
+  const loadingToast = document.querySelector(".albert-toast");
+  if (loadingToast) loadingToast.remove();
 
   const popup = document.createElement("div");
   popup.className = "albert-popup " + Albert.getPopupThemeClass();

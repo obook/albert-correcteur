@@ -4,6 +4,11 @@
 "use strict";
 
 browser.runtime.onMessage.addListener((message) => {
+  if (message.type === "reformulateLoading") {
+    Albert.showToast("Reformulation en cours\u2026", 30);
+    return;
+  }
+
   if (message.type === "reformulateResult") {
     if (message.result.error) {
       Albert.showToast(message.result.error, 5);
