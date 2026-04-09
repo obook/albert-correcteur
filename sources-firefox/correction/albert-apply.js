@@ -26,7 +26,7 @@
  *
  * Auteur : O. Booklage
  * Date : Avril 2026
- * Licence : EUPL-1.2
+ * Licence : MIT
  */
 
 "use strict";
