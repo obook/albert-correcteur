@@ -1,4 +1,14 @@
-/* compose-toast.js --- Notifications toast dans le compose Thunderbird. */
+/*
+ * compose-toast.js - Notifications toast dans le compose Thunderbird.
+ *
+ * Affiche des messages temporaires dans le corps du message de
+ * composition. Même principe que albert-toast.js (Firefox) avec
+ * une animation d'entrée/sortie CSS et un bouton de fermeture.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

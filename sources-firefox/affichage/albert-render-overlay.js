@@ -1,5 +1,31 @@
-/* albert-render-overlay.js - Overlay transparent pour textarea, input et éditeurs riches.
-   Positionne par-dessus le champ, affiche les soulignements sans modifier le contenu. */
+/*
+ * albert-render-overlay.js - Overlay transparent pour les soulignements.
+ *
+ * Crée un div transparent positionné exactement par-dessus le champ
+ * de saisie (textarea, input ou contenteditable riche). L'overlay
+ * reproduit le même texte en invisible, avec des <span> colorés aux
+ * positions des erreurs pour afficher les soulignements.
+ *
+ * Principe de fonctionnement :
+ *   1. Copier tous les styles du champ (police, padding, interligne…)
+ *      sur l'overlay pour un alignement pixel-perfect.
+ *   2. Découper le texte en segments : texte normal (invisible) et
+ *      erreurs (spans colorés cliquables).
+ *   3. Synchroniser le défilement de l'overlay avec celui du champ.
+ *
+ * Cette approche évite de modifier le contenu du champ, ce qui est
+ * indispensable pour les textarea/input (pas de DOM interne) et les
+ * éditeurs riches (modèle de document interne fragile).
+ *
+ * Dépendances :
+ *   - albert-state.js  (getOrCreateState, isRichEditor)
+ *   - albert-utils.js  (getTextContent)
+ *   - albert-popup-correction.js (showPopup, au clic sur un span)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

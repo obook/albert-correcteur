@@ -1,4 +1,25 @@
-/* albert-limites.js - Gestion des limites API (rpm/rpd), calcul du debounce adaptatif. */
+/*
+ * albert-limites.js - Gestion des limites API et debounce adaptatif.
+ *
+ * Ce module gère trois aspects liés aux limites de l'API Albert :
+ *
+ * 1. Chargement des limites :
+ *    Récupère les quotas du compte (rpm, rpd, tpm, tpd) depuis le
+ *    service worker et les met en cache côté content script.
+ *
+ * 2. Calcul du debounce adaptatif :
+ *    Ajuste les délais de debounce en fonction du rpm du compte.
+ *    On réserve ~40 % du quota pour les vérifications automatiques
+ *    (le reste pour les clics manuels, le cycle de fond, le paste).
+ *
+ * 3. Vérification avant envoi :
+ *    Contrôle que la prochaine requête ne dépasse pas les limites
+ *    rpm et rpd, et affiche un avertissement visuel si nécessaire.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

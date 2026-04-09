@@ -1,4 +1,17 @@
-/* compose-badge.js --- Badge Albert dans la fenêtre de composition Thunderbird. */
+/*
+ * compose-badge.js - Badge Albert dans le compose Thunderbird.
+ *
+ * Crée et gère le badge (icône flottante) dans le corps du message.
+ * Le badge indique l'état de la vérification :
+ *   - has-errors : des corrections sont disponibles (icône rouge).
+ *   - ok         : aucune erreur (icône normale).
+ *   - loading    : vérification en cours (icône normale).
+ *   - error      : erreur API (icône rouge).
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

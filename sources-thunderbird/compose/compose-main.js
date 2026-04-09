@@ -1,4 +1,27 @@
-/* compose-main.js --- Point d'entrée du compose script Thunderbird. */
+/*
+ * compose-main.js - Point d'entrée du compose script Thunderbird.
+ *
+ * Ce script est injecté dans chaque fenêtre de composition via
+ * service-compose-scripts.js. Il initialise l'extension Albert :
+ * 1. Crée l'état de composition (composeState).
+ * 2. Charge les limites API.
+ * 3. Crée le badge Albert dans le corps du message.
+ * 4. Attache les écouteurs d'événements (input, paste, IME).
+ * 5. Lance une vérification initiale si le corps contient du texte.
+ *
+ * Dépendances (injectées avant ce fichier) :
+ *   - compose-state.js     (objet global Albert, constantes)
+ *   - compose-utils.js     (getComposeBody, getBodyText)
+ *   - compose-badge.js     (createBadge, setBadgeState)
+ *   - compose-debounce.js  (scheduleCheck)
+ *   - compose-check.js     (requestCheck)
+ *   - compose-overlay.js   (clearUnderlines)
+ *   - compose-limites.js   (loadLimits)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

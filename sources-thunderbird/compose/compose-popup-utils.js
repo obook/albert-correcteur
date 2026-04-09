@@ -1,5 +1,17 @@
-/* compose-popup-utils.js - Utilitaires partagés par les popups Thunderbird.
-   Piège de focus, restauration du focus, fermeture et écouteurs globaux. */
+/*
+ * compose-popup-utils.js - Utilitaires partagés par les popups Thunderbird.
+ *
+ * Fournit les fonctions communes aux popups de correction,
+ * reformulation et traduction dans la fenêtre de composition :
+ *   - trapFocus()            : piège de focus RGAA (Tab reste dans la popup).
+ *   - restoreFocus()         : restaure le focus à la fermeture.
+ *   - closeCorrectionPopup() : ferme la popup de correction.
+ *   - Écouteurs globaux      : fermeture par Escape ou clic en dehors.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

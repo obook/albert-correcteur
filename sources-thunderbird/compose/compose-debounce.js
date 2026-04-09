@@ -1,4 +1,16 @@
-/* compose-debounce.js --- Double debounce adaptatif pour le compose Thunderbird. */
+/*
+ * compose-debounce.js - Double debounce adaptatif (Thunderbird).
+ *
+ * Même principe que le debounce Firefox (albert-debounce.js) :
+ * timer court réinitialisé à chaque frappe + timer long qui garantit
+ * une vérification même en frappe continue.
+ *
+ * Les délais sont ajustés par compose-limites.js en fonction du rpm.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

@@ -1,4 +1,19 @@
-/* compose-popup-reformulation.js --- Popup de reformulation dans le compose Thunderbird. */
+/*
+ * compose-popup-reformulation.js - Popup de reformulation (Thunderbird).
+ *
+ * Affiche les propositions de reformulation renvoyées par l'API
+ * après un clic sur "Reformuler avec Albert" dans le menu
+ * contextuel du compose. La popup est déplaçable (drag via le
+ * header), centrée à l'ouverture, et fermable par Escape ou
+ * clic en dehors.
+ *
+ * Le remplacement du texte sélectionné utilise
+ * document.execCommand("insertText") pour préserver l'undo natif.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

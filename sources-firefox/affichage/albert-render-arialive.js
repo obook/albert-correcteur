@@ -1,10 +1,33 @@
-/* albert-render-arialive.js - Accessibilité : zone aria-live et nettoyage.
-   Annonce le nombre d'erreurs aux lecteurs d'écran (RGAA). */
+/*
+ * albert-render-arialive.js - Accessibilité RGAA : zone ARIA live.
+ *
+ * Gère l'annonce vocale des résultats de correction aux lecteurs
+ * d'écran (NVDA, JAWS, VoiceOver). Utilise une zone aria-live=polite
+ * cachée visuellement mais lue par les technologies d'assistance.
+ *
+ * Contient également la fonction clearCorrections() qui supprime
+ * toutes les corrections visuelles d'un champ (overlay, badge, spans).
+ *
+ * Conformité RGAA :
+ *   - Critère 7.4 : changements de contenu annoncés via aria-live.
+ *   - La zone utilise role="status" et aria-atomic="true".
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 
+/** Référence vers l'élément DOM de la zone aria-live (singleton). */
 Albert._ariaLive = null;
 
+/**
+ * Crée la zone aria-live si elle n'existe pas encore.
+ *
+ * L'élément est masqué visuellement (technique "sr-only") mais
+ * reste lisible par les lecteurs d'écran.
+ */
 Albert._ensureAriaLive = function () {
   if (Albert._ariaLive && document.contains(Albert._ariaLive)) {
     return;
@@ -21,6 +44,12 @@ Albert._ensureAriaLive = function () {
   Albert._ariaLive = el;
 };
 
+/**
+ * Annonce le nombre d'erreurs détectées via la zone aria-live.
+ *
+ * @param {number} count - Nombre d'erreurs détectées.
+ * @param {string} lang  - Code langue du texte vérifié (fr, en, es, de).
+ */
 Albert._announceErrors = function (count, lang) {
   Albert._ensureAriaLive();
   const langLabel =
@@ -35,7 +64,14 @@ Albert._announceErrors = function (count, lang) {
   }
 };
 
-/* Supprime toutes les corrections visuelles d'un champ. */
+/**
+ * Supprime toutes les corrections visuelles d'un champ.
+ *
+ * Nettoie : l'overlay, le scroll handler, les classes du badge,
+ * et les spans albert-error dans les contenteditable simples.
+ *
+ * @param {HTMLElement} el - Champ de saisie à nettoyer.
+ */
 Albert.clearCorrections = function (el) {
   const state = Albert.getOrCreateState(el);
   state.corrections = [];

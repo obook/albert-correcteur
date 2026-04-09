@@ -1,4 +1,18 @@
-/* compose-state.js --- Constantes et état global pour la fenêtre de composition Thunderbird. */
+/*
+ * compose-state.js - État partagé et constantes pour le compose Thunderbird.
+ *
+ * Déclare l'objet global "Albert" pour la fenêtre de composition.
+ * Contrairement à Firefox (où Albert est attaché à window et partagé
+ * entre tous les champs d'une page), Thunderbird n'a qu'un seul
+ * champ éditable par fenêtre de composition.
+ *
+ * Ce module charge également le dictionnaire personnel et le thème
+ * depuis browser.storage.local, et synchronise les changements.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

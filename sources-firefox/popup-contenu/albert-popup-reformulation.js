@@ -1,4 +1,24 @@
-/* albert-popup-reformulation.js - Popup de reformulation via le menu contextuel. */
+/*
+ * albert-popup-reformulation.js - Popup de reformulation.
+ *
+ * Affiche les propositions de reformulation renvoyées par l'API
+ * après un clic sur "Reformuler avec Albert" dans le menu
+ * contextuel. Chaque suggestion est un bouton cliquable qui
+ * remplace le texte sélectionné dans le champ d'origine.
+ *
+ * Le remplacement utilise la sélection sauvegardée par
+ * albert-popup-common.js (événement contextmenu) pour retrouver
+ * la position exacte du texte à remplacer.
+ *
+ * Dépendances :
+ *   - albert-popup-common.js  (savedSelection, closePopup, trapFocus)
+ *   - albert-popup-layout.js  (positionPopupAtClick, initPopupDrag,
+ *                               createPopupHeader)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

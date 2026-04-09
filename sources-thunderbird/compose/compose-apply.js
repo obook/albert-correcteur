@@ -1,4 +1,19 @@
-/* compose-apply.js --- Application des corrections dans le compose Thunderbird. */
+/*
+ * compose-apply.js - Application des corrections dans le compose Thunderbird.
+ *
+ * Applique une suggestion de correction dans le corps du message.
+ * Deux stratégies :
+ * 1. Via le span souligné (data-correction-index) : sélectionne le
+ *    contenu du span et remplace via execCommand("insertText").
+ * 2. Fallback par offset : parcourt les nœuds texte du body pour
+ *    localiser le mot erroné et le remplacer.
+ *
+ * Contient également triggerManualCheck() pour le clic sur le badge.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

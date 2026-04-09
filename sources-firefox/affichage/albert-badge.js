@@ -1,8 +1,38 @@
-/* albert-badge.js - Gestion du badge (icone Albert dans le coin du champ). */
+/*
+ * albert-badge.js - Gestion du badge Albert (icône dans le coin du champ).
+ *
+ * Le badge est un petit bouton flottant positionné dans le coin
+ * inférieur droit de chaque champ texte. Il indique visuellement
+ * l'état de la correction :
+ *   - Icône normale       : aucune erreur détectée.
+ *   - Icône erreur (rouge) : des corrections sont disponibles.
+ *   - Masqué              : le champ est vide.
+ *
+ * Le badge est cliquable (et accessible au clavier) pour déclencher
+ * une vérification manuelle immédiate.
+ *
+ * Dépendances :
+ *   - albert-state.js  (ICON_URL, ICON_ERROR_URL, getOrCreateState)
+ *   - albert-utils.js  (getTextContent)
+ *   - albert-check.js  (triggerCheck)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 
-/* Crée ou récupère le badge pour un champ de saisie. */
+/**
+ * Crée ou récupère le badge pour un champ de saisie.
+ *
+ * Si le badge existe déjà et est toujours dans le DOM, met à jour
+ * sa visibilité. Sinon, crée un nouveau badge, le positionne et
+ * l'insère dans le parent positionné du champ.
+ *
+ * @param {HTMLElement} el - Champ de saisie cible.
+ * @returns {HTMLElement} Élément DOM du badge.
+ */
 Albert.ensureBadge = function (el) {
   const state = Albert.getOrCreateState(el);
   if (state.badge && document.contains(state.badge)) {
@@ -47,13 +77,26 @@ Albert.ensureBadge = function (el) {
   return badge;
 };
 
-/* Affiche ou masque le badge selon que le champ est vide ou non. */
+/**
+ * Affiche ou masque le badge selon que le champ contient du texte.
+ *
+ * @param {HTMLElement} el    - Champ de saisie.
+ * @param {HTMLElement} badge - Élément DOM du badge.
+ */
 Albert.updateBadgeVisibility = function (el, badge) {
   const text = Albert.getTextContent(el);
   badge.style.display = text.trim().length > 0 ? "flex" : "none";
 };
 
-/* Positionne le badge dans le coin inférieur droit du champ. */
+/**
+ * Positionne le badge dans le coin inférieur droit du champ.
+ *
+ * Utilise getBoundingClientRect() pour un positionnement précis
+ * relatif au parent positionné (offsetParent).
+ *
+ * @param {HTMLElement} el    - Champ de saisie.
+ * @param {HTMLElement} badge - Élément DOM du badge.
+ */
 Albert.positionBadge = function (el, badge) {
   const rect = el.getBoundingClientRect();
   const parentRect = (el.offsetParent || document.body).getBoundingClientRect();

@@ -1,4 +1,16 @@
-/* compose-render.js --- Orchestration du rendu des corrections dans le compose Thunderbird. */
+/*
+ * compose-render.js - Orchestration du rendu des corrections (Thunderbird).
+ *
+ * Coordonne l'affichage des corrections dans la fenêtre de composition :
+ * 1. Stocke les corrections dans composeState.
+ * 2. Délègue l'insertion des soulignements à compose-overlay.js.
+ * 3. Met à jour le badge (état ok / has-errors).
+ * 4. Annonce le résultat aux lecteurs d'écran via aria-live.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

@@ -1,4 +1,14 @@
-/* popup-limits.js - Affichage des limites du compte. */
+/*
+ * popup-limits.js - Affichage des limites du compte API.
+ *
+ * Interroge l'endpoint /v1/me/info et affiche les quotas sous forme
+ * de lignes "Requêtes / minute : 30". Si plusieurs limites du
+ * même type existent, la valeur la plus restrictive est affichée.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 
@@ -12,6 +22,12 @@ const LIMIT_LABELS = {
   tpd: "Tokens / jour",
 };
 
+/**
+ * Récupère et affiche les limites du compte dans la section dédiée.
+ *
+ * Appelle /v1/me/info, regroupe les limites par type (rpm, rpd…),
+ * garde la valeur la plus restrictive et crée les lignes d'affichage.
+ */
 async function fetchAndShowLimits() {
   const apiKey = document.getElementById("api-key").value.trim();
   const apiBase = (document.getElementById("api-base").value.trim()

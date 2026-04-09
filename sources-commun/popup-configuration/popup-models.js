@@ -1,4 +1,19 @@
-/* popup-models.js - Chargement des modèles depuis l'API. */
+/*
+ * popup-models.js - Chargement et sélection des modèles depuis l'API.
+ *
+ * Interroge l'endpoint /v1/models pour lister les modèles de type
+ * "text-generation" disponibles sur le compte. Enrichit les
+ * libellés avec des descriptions connues et marque le modèle
+ * recommandé (openweight-large par défaut).
+ *
+ * Gère également la résolution des alias : si le modèle recommandé
+ * n'existe pas en tant qu'id direct, il est cherché via les alias
+ * déclarés dans la réponse API.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 
@@ -14,9 +29,16 @@ const modelSelect = document.getElementById("model");
 const refreshBtn = document.getElementById("refresh-models");
 
 /**
- * Construit le libellé affiché pour un modèle.
+ * Construit le libellé affiché pour un modèle dans le <select>.
+ *
  * Cherche une description connue par id direct ou par alias.
- * recommendedId est l'id résolu du modèle recommandé.
+ * Ajoute "(recommandé)" si le modèle correspond au modèle
+ * recommandé résolu.
+ *
+ * @param {string} id            - Identifiant du modèle.
+ * @param {Object} aliasToId     - Table alias → id résolu.
+ * @param {string} recommendedId - Id résolu du modèle recommandé.
+ * @returns {string} Libellé formaté (ex. : "openweight-large - Complexe (120B) (recommandé)").
  */
 function modelLabel(id, aliasToId, recommendedId) {
   let desc = MODEL_DESCRIPTIONS[id];
@@ -34,6 +56,12 @@ function modelLabel(id, aliasToId, recommendedId) {
   return parts.join(" ");
 }
 
+/**
+ * Charge les modèles disponibles depuis l'API et remplit le <select>.
+ *
+ * Filtre les modèles de type "text-generation", résout les alias,
+ * et présélectionne le modèle sauvegardé ou le modèle recommandé.
+ */
 async function fetchModels() {
   const apiKey = document.getElementById("api-key").value.trim();
   const apiBase = (document.getElementById("api-base").value.trim()

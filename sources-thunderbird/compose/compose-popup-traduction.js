@@ -1,4 +1,17 @@
-/* compose-popup-traduction.js --- Popup de traduction dans le compose Thunderbird. */
+/*
+ * compose-popup-traduction.js - Popup de traduction (Thunderbird compose).
+ *
+ * Affiche une popup de traduction dans la fenêtre de composition.
+ * Sélecteur de langue cible (fr, en, es, de), traduction automatique
+ * à l'ouverture, bouton "Copier".
+ *
+ * La dernière langue utilisée est mémorisée dans
+ * Albert.lastTranslationLang (non persistée entre sessions).
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

@@ -1,15 +1,39 @@
 /*
  * albert-apply-segments.js - Mapping innerText ↔ nœuds texte DOM.
- * Convertit un offset de caractère (tel que vu dans innerText) en position
- * { nœud texte, offset local } dans l'arbre DOM. Gère les <br> et blocs
- * imbriqués qui ajoutent des \n implicites dans innerText.
+ *
+ * Convertit un offset de caractère (tel que vu dans innerText) en
+ * position { nœud texte, offset local } dans l'arbre DOM.
+ *
+ * Problème résolu :
+ *   innerText et le DOM n'ont pas la même structure. Un <br> ou un
+ *   élément bloc (<p>, <div>) ajoute un \n implicite dans innerText
+ *   qui n'existe pas en tant que nœud texte. Ce module reconstruit
+ *   la correspondance en parcourant l'arbre DOM et en comptant les
+ *   \n implicites ajoutés par les éléments bloc.
+ *
+ * Utilisé par :
+ *   - albert-apply.js      (_applyInSimpleContentEditable)
+ *   - albert-apply-rich.js (applyViaSelection)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
  */
 
 "use strict";
 
 const BLOCK_TAGS = ["p", "div", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6"];
 
-/* Construit un tableau de segments { node, start, end } pour chaque nœud texte. */
+/**
+ * Construit un tableau de segments { node, start, end } pour chaque nœud texte.
+ *
+ * Parcourt l'arbre DOM via un TreeWalker et associe chaque nœud texte
+ * à sa plage d'offsets dans innerText. Les éléments <br> et les blocs
+ * ajoutent des \n implicites pris en compte dans le comptage.
+ *
+ * @param {HTMLElement} el - Élément contenteditable racine.
+ * @returns {Array<{node: Text, start: number, end: number}>} Segments ordonnés.
+ */
 Albert.buildInnerTextSegments = function (el) {
   const walker = document.createTreeWalker(el, NodeFilter.SHOW_ALL);
   const segments = [];

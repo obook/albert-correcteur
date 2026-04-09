@@ -1,4 +1,19 @@
-/* message-traduction-popup.js --- Logique de la popup de traduction (lecture de mail). */
+/*
+ * message-traduction-popup.js - Popup de traduction (lecture de mail).
+ *
+ * Ce script gère la fenêtre popup de traduction ouverte depuis le
+ * menu contextuel "Traduire avec Albert" lors de la lecture d'un
+ * message (pas dans le compose). La fenêtre est créée par
+ * browser.windows.create() dans service-menus.js.
+ *
+ * Le texte à traduire est passé en paramètre d'URL (?text=...).
+ * La langue par défaut est chargée depuis browser.storage.local.
+ * La traduction est lancée automatiquement à l'ouverture.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

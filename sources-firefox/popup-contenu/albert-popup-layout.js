@@ -1,5 +1,21 @@
-/* albert-popup-layout.js - Drag, positionnement et header des popups.
-   Fonctions utilitaires de mise en page extraites de albert-popup-common.js. */
+/*
+ * albert-popup-layout.js - Mise en page des popups (drag, position, header).
+ *
+ * Fonctions utilitaires de présentation extraites de
+ * albert-popup-common.js pour alléger ce dernier :
+ *   - initPopupDrag   : déplacement de la popup via la poignée (⠿).
+ *   - positionPopupAtClick : positionnement près du clic droit
+ *     (pour les popups de reformulation et traduction).
+ *   - createPopupHeader : création du header standard (icône Albert,
+ *     poignée de déplacement, bouton fermer).
+ *
+ * Nettoyage automatique : les écouteurs mousemove/mouseup sont retirés
+ * via MutationObserver quand la popup est supprimée du DOM.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

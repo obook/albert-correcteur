@@ -1,5 +1,20 @@
-/* albert-popup-common.js - Fonctions partagées par toutes les popups.
-   Thème, fermeture, piège de focus, sauvegarde de sélection. */
+/*
+ * albert-popup-common.js - Fonctions partagées par toutes les popups.
+ *
+ * Ce module fournit les services communs aux popups de correction,
+ * reformulation et traduction :
+ *   - Thème : détection du thème (sombre, clair, système).
+ *   - Fermeture : closePopup() avec restauration du focus.
+ *   - Piège de focus : trapFocus() pour l'accessibilité RGAA
+ *     (la navigation Tab reste dans la popup).
+ *   - Fermeture par Échap ou clic en dehors de la popup.
+ *   - Sauvegarde de la sélection avant le menu contextuel
+ *     (nécessaire pour la reformulation et la traduction).
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

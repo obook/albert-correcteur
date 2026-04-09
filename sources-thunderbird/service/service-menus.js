@@ -1,4 +1,26 @@
-/* service-menus.js --- Menus contextuels Thunderbird et dispatch des messages. */
+/*
+ * service-menus.js - Menus contextuels et dispatch des messages (Thunderbird).
+ *
+ * Ce script s'exécute dans le service worker (background script).
+ * Il gère deux responsabilités :
+ *
+ * 1. Menus contextuels (browser.menus) :
+ *    - "Reformuler avec Albert" (contexte : compose_body).
+ *    - "Traduire avec Albert" (contexte : compose_body + selection).
+ *      Dans le compose → envoie au compose script.
+ *      En lecture de mail → ouvre une fenêtre popup de traduction.
+ *
+ * 2. Dispatch des messages du compose script :
+ *    Route les requêtes vers les fonctions du service worker :
+ *    - "check"     → checkText()      (service-api.js)
+ *    - "getConfig" → loadConfig()     (service-config.js)
+ *    - "getLimits" → fetchLimits()    (service-limites.js)
+ *    - "translate" → translateText()  (service-api.js)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

@@ -1,4 +1,15 @@
-/* compose-check.js --- Déclenchement de la vérification dans le compose Thunderbird. */
+/*
+ * compose-check.js - Envoi de la vérification au service worker (Thunderbird).
+ *
+ * Envoie le texte du corps du message au service worker pour
+ * correction via browser.runtime.sendMessage. Utilise un pattern
+ * "discard stale result" : si une nouvelle requête est lancée
+ * avant que la précédente ne revienne, le résultat périmé est ignoré.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

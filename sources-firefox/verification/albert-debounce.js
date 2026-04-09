@@ -1,9 +1,33 @@
-/* albert-debounce.js - Double debounce adaptatif pour la vérification.
-   Timer court (réinitialisé à chaque frappe) + timer long (garantie de vérification).
-   Bascule automatiquement sur des délais plus longs si on approche de la limite rpm. */
+/*
+ * albert-debounce.js - Double debounce adaptatif pour la vérification.
+ *
+ * Mécanisme de temporisation à deux niveaux :
+ *   - Timer court : réinitialisé à chaque frappe. Déclenche la
+ *     vérification quand l'utilisateur arrête de taper.
+ *   - Timer long : lancé une seule fois à la première frappe.
+ *     Garantit une vérification même si l'utilisateur tape sans
+ *     pause (frappe continue).
+ *
+ * Adaptation automatique :
+ *   Si le nombre de requêtes récentes atteint 80 % du quota rpm,
+ *   les délais sont allongés pour éviter de dépasser la limite.
+ *
+ * Annulation :
+ *   Si une requête API est déjà en cours (AbortController), elle
+ *   est annulée avant de programmer la suivante.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 
+/**
+ * Programme une vérification différée pour un champ.
+ *
+ * @param {HTMLElement} el - Champ de saisie à vérifier.
+ */
 Albert.scheduleCheck = function (el) {
   const state = Albert.getOrCreateState(el);
 

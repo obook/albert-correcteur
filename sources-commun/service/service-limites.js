@@ -1,10 +1,31 @@
-/* service-limites.js --- Cache et récupération des limites du compte API. */
+/*
+ * service-limites.js - Cache et récupération des limites du compte API.
+ *
+ * Interroge l'endpoint /v1/me/info pour obtenir les quotas du compte
+ * (rpm, rpd, tpm, tpd). Les résultats sont mis en cache pendant
+ * 10 minutes pour éviter les appels répétés.
+ *
+ * Si plusieurs limites du même type existent (cas multi-modèle),
+ * la valeur la plus restrictive (minimum) est conservée.
+ *
+ * Le cache est invalidé automatiquement quand la configuration
+ * change (clé API, modèle, URL de base).
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 
 let cachedLimits = null;
 let limitsExpiry = 0;
 
+/**
+ * Récupère les limites du compte API (avec cache de 10 minutes).
+ *
+ * @returns {Promise<Object|null>} Objet { rpm, rpd, tpm, tpd } ou null.
+ */
 async function fetchLimits() {
   const now = Date.now();
   if (cachedLimits && now < limitsExpiry) return cachedLimits;

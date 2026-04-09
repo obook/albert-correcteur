@@ -1,5 +1,28 @@
-/* albert-popup-traduction.js - Popup de traduction via le menu contextuel.
-   Sélecteur de langue dans le header, traduction automatique, bouton copier. */
+/*
+ * albert-popup-traduction.js - Popup de traduction.
+ *
+ * Affiche une popup de traduction après un clic sur "Traduire avec
+ * Albert" dans le menu contextuel. Fonctionnalités :
+ *   - Sélecteur de langue cible (français, anglais, espagnol, allemand).
+ *   - Traduction automatique à l'ouverture (dernière langue utilisée).
+ *   - Bouton "Traduire" pour changer de langue sans rouvrir la popup.
+ *   - Affichage de la direction (ex. : "Français -> Anglais").
+ *   - Bouton "Copier" avec fallback execCommand pour les navigateurs
+ *     qui ne supportent pas navigator.clipboard.
+ *   - Persistance de la dernière langue dans browser.storage.local.
+ *
+ * Langues supportées : fr, en, es, de.
+ *
+ * Dépendances :
+ *   - albert-popup-common.js  (closePopup, trapFocus)
+ *   - albert-popup-layout.js  (positionPopupAtClick, initPopupDrag,
+ *                               createPopupHeader)
+ *   - albert-toast.js         (showToast, pour les erreurs)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

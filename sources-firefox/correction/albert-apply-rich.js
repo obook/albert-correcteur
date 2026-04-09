@@ -1,8 +1,31 @@
 /*
  * albert-apply-rich.js - Remplacement de texte dans les éditeurs riches.
- * Gère la sélection via Range + simulation souris, l'insertion via la chaîne
- * d'événements complète (beforeinput → textInput → execCommand) et le
- * fallback paste pour les éditeurs qui n'acceptent pas execCommand.
+ *
+ * Les éditeurs riches (CKEditor, TinyMCE, Quill, ProseMirror, Lexical,
+ * Draft.js…) maintiennent un modèle de document interne. Modifier le
+ * DOM directement casse leur état. Ce module contourne le problème en
+ * simulant une interaction utilisateur complète :
+ *
+ * Stratégie d'insertion :
+ * 1. Localiser le mot erroné dans l'arbre DOM via les segments
+ *    (albert-apply-segments.js).
+ * 2. Simuler une séquence mousedown → mousemove → sélection →
+ *    mouseup pour que l'éditeur enregistre la sélection.
+ * 3. Muter les événements parasites (mouse, pointer, selectionchange)
+ *    pendant la phase d'insertion.
+ * 4. Insérer le texte via la chaîne d'événements complète :
+ *    beforeinput → textInput → execCommand("insertText").
+ * 5. Fallback paste si execCommand échoue.
+ *
+ * Inspiré de la technique d'EventMuter de LanguageTool.
+ *
+ * Dépendances :
+ *   - albert-apply-segments.js (buildInnerTextSegments, findSegmentAt)
+ *   - albert-apply.js          (findRealOffset)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
  */
 
 "use strict";

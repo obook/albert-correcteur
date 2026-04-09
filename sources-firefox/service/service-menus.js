@@ -1,4 +1,25 @@
-/* service-menus.js - Menus contextuels et dispatch des messages. */
+/*
+ * service-menus.js - Menus contextuels et dispatch des messages (Firefox).
+ *
+ * Ce script s'exécute dans le service worker (background script).
+ * Il gère deux responsabilités :
+ *
+ * 1. Menus contextuels :
+ *    - "Reformuler avec Albert" (contexte : champ éditable).
+ *    - "Traduire avec Albert" (contexte : texte sélectionné).
+ *
+ * 2. Dispatch des messages du content script :
+ *    Écoute browser.runtime.onMessage et route les requêtes vers
+ *    les fonctions du service worker :
+ *    - "check"      → checkText()      (service-api.js)
+ *    - "getConfig"  → loadConfig()     (service-config.js)
+ *    - "getLimits"  → fetchLimits()    (service-limites.js)
+ *    - "translate"  → translateText()  (service-api.js)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

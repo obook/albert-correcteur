@@ -1,4 +1,18 @@
-/* compose-utils.js --- Utilitaires pour la fenêtre de composition Thunderbird. */
+/*
+ * compose-utils.js - Fonctions utilitaires pour le compose Thunderbird.
+ *
+ * Fonctions courantes utilisées par les autres modules compose :
+ *   - getComposeBody()          : accès au body éditable.
+ *   - getBodyText()             : texte brut du corps.
+ *   - filterIgnoredCorrections() : filtre par dictionnaire personnel.
+ *   - getPopupThemeClass()      : classe CSS du thème actif.
+ *   - escapeHtml()              : échappement HTML.
+ *   - findRealOffset()          : recherche d'un mot dans le texte.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

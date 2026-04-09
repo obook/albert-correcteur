@@ -1,7 +1,49 @@
-/* service-api.js --- Appels à l'API Albert (correction, reformulation, traduction). */
+/*
+ * service-api.js - Appels à l'API Albert (correction, reformulation, traduction).
+ *
+ * Ce script s'exécute dans le service worker (background script) et
+ * contient les deux fonctions d'appel à l'API :
+ *
+ * 1. checkText(text, mode) :
+ *    Envoie le texte à l'API /v1/chat/completions avec un prompt
+ *    système adapté au mode (correction ou reformulation).
+ *    Retourne un tableau de corrections avec offsets recalibrés.
+ *
+ * 2. translateText(text, targetLang) :
+ *    Envoie le texte à l'API avec un prompt de traduction.
+ *    Retourne la traduction et les langues source/cible.
+ *
+ * Gestion des erreurs :
+ *   - 429 (rate limit) : extraction du type de limite (rpm, rpd, tpm,
+ *     tpd) depuis la réponse, retour du délai Retry-After.
+ *   - Réponse invalide : message d'erreur explicite.
+ *   - Erreur réseau : message avec err.message.
+ *
+ * Post-traitement des corrections :
+ *   - Recalibrage des offsets (le LLM se trompe souvent).
+ *   - Filtrage des suggestions identiques au mot erroné.
+ *   - Filtrage des suggestions qui ne respectent pas le nombre
+ *     (pluriel "s" manquant).
+ *
+ * Dépendances (chargées dans le même service worker) :
+ *   - service-config.js   (loadConfig)
+ *   - service-langue.js   (detectLanguage)
+ *   - service-prompts.js  (buildPrompt, buildTranslationPrompt)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 
+/**
+ * Envoie un texte à l'API Albert pour correction ou reformulation.
+ *
+ * @param {string} text - Texte à vérifier.
+ * @param {string} mode - Mode : "correction" ou "reformulation".
+ * @returns {Promise<{corrections?: Array, lang?: string, error?: string}>}
+ */
 async function checkText(text, mode) {
   const config = await loadConfig();
   if (!config.apiKey) {
@@ -134,6 +176,13 @@ async function checkText(text, mode) {
   }
 }
 
+/**
+ * Traduit un texte via l'API Albert.
+ *
+ * @param {string} text       - Texte à traduire.
+ * @param {string} targetLang - Code langue cible (fr, en, es, de).
+ * @returns {Promise<{translation?: string, langSource?: string, error?: string}>}
+ */
 async function translateText(text, targetLang) {
   const config = await loadConfig();
   if (!config.apiKey) {

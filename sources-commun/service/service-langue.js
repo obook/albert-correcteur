@@ -1,4 +1,17 @@
-/* service-langue.js --- Détection de langue locale (sans appel externe, RGPD). */
+/*
+ * service-langue.js - Détection de langue locale (sans appel externe).
+ *
+ * Détecte la langue d'un texte en comptant les mots-marqueurs
+ * fréquents de chaque langue supportée. Fonctionne entièrement
+ * en local (pas d'appel réseau), ce qui respecte le RGPD.
+ *
+ * Langues supportées : français, anglais, espagnol, allemand.
+ * Seuil minimum : au moins 2 mots reconnus, sinon défaut "fr".
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 
@@ -36,6 +49,12 @@ const LANG_NAMES = {
   de: "allemand"
 };
 
+/**
+ * Détecte la langue d'un texte par comptage de mots-marqueurs.
+ *
+ * @param {string} text - Texte à analyser.
+ * @returns {string} Code langue détecté (fr, en, es, de).
+ */
 function detectLanguage(text) {
   const words = text
     .toLowerCase()

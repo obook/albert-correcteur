@@ -1,5 +1,30 @@
-/* albert-popup-correction.js - Popup de correction orthographique et grammaticale.
-   Affiche les suggestions, la navigation entre erreurs et le dictionnaire personnel. */
+/*
+ * albert-popup-correction.js - Popup de correction orthographique.
+ *
+ * Affiche une popup flottante au clic sur une erreur soulignée.
+ * La popup contient :
+ *   - Un sélecteur de mode (Correcteur / Reformuler).
+ *   - Le message d'explication de l'erreur.
+ *   - Un bouton pour ajouter le mot au dictionnaire personnel.
+ *   - L'extrait avec la suggestion principale.
+ *   - Les boutons de suggestion (clic → applySuggestion).
+ *   - Un bouton "Ignorer".
+ *   - Une barre de navigation Précédent / Suivant.
+ *
+ * La popup est déplaçable (drag via la poignée), accessible
+ * (piège de focus, aria-modal) et positionnée automatiquement
+ * pour rester visible dans la fenêtre.
+ *
+ * Dépendances :
+ *   - albert-popup-common.js  (closePopup, trapFocus, getPopupThemeClass)
+ *   - albert-popup-layout.js  (initPopupDrag, createPopupHeader)
+ *   - albert-apply.js         (applySuggestion)
+ *   - albert-utils.js         (ignoreWord, filterIgnoredCorrections)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 
@@ -122,7 +147,7 @@ Albert.showPopup = function (el, correction, markEl) {
   const original = text.slice(correction.offset, correction.offset + correction.length);
   const extract = document.createElement("div");
   extract.className = "albert-popup-extract";
-  extract.textContent = `Essayez « ${(correction.suggestions && correction.suggestions[0]) || original} »`;
+  extract.textContent = `Essayez "${(correction.suggestions && correction.suggestions[0]) || original}"`;
   body.appendChild(extract);
 
   /* Boutons de suggestion */

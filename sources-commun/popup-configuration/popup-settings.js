@@ -1,4 +1,16 @@
-/* Popup Paramètres - thème et dictionnaire personnel. */
+/*
+ * popup-settings.js - Page des paramètres (thème et dictionnaire personnel).
+ *
+ * Cette page est accessible depuis le lien "Paramètres" de la popup
+ * de configuration principale (popup.html). Elle permet :
+ *   - De choisir le thème des popups (sombre, clair, système).
+ *   - De consulter et gérer le dictionnaire personnel (mots ignorés
+ *     par le correcteur).
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 document.getElementById("back-btn").addEventListener("click", (e) => {
   e.preventDefault();
@@ -51,7 +63,7 @@ async function loadIgnoredWords() {
       const updated = words.filter((w) => w !== word);
       await browser.storage.local.set({ ignoredWords: updated });
       loadIgnoredWords();
-      showStatus(`« ${word} » retiré du dictionnaire.`);
+      showStatus(`"${word}" retiré du dictionnaire.`);
     });
     tag.appendChild(removeBtn);
     ignoredWordsDiv.appendChild(tag);

@@ -1,4 +1,23 @@
-/* service-compose-scripts.js --- Injection des scripts dans la fenêtre de composition Thunderbird. */
+/*
+ * service-compose-scripts.js - Injection des scripts dans le compose Thunderbird.
+ *
+ * Thunderbird ne supporte pas les content_scripts pour les fenêtres
+ * de composition (compose). Ce module contourne cette limitation en
+ * injectant manuellement les scripts et feuilles de style via
+ * browser.tabs.executeScript() et browser.tabs.insertCSS().
+ *
+ * L'injection est déclenchée :
+ *   - À la création d'un nouvel onglet de type "messageCompose".
+ *   - Au démarrage de l'extension, pour les onglets déjà ouverts.
+ *
+ * L'ordre d'injection des scripts est important : compose-state.js
+ * (objet global) doit être chargé en premier, et compose-main.js
+ * (point d'entrée) en dernier.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

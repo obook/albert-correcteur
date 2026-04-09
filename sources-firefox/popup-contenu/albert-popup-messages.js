@@ -1,5 +1,19 @@
-/* albert-popup-messages.js - Écoute des messages du script de fond.
-   Dispatche vers la bonne popup selon le type de message. */
+/*
+ * albert-popup-messages.js - Réception des messages du service worker.
+ *
+ * Écoute les messages envoyés par le service worker (service-menus.js)
+ * via browser.runtime.onMessage et les dispatche vers la bonne popup :
+ *   - reformulateLoading  → toast "Reformulation en cours..."
+ *   - reformulateResult   → showReformulationPopup()
+ *   - translateGetSelection → showTranslationPopup()
+ *
+ * Ces messages sont déclenchés par les menus contextuels
+ * "Reformuler avec Albert" et "Traduire avec Albert".
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

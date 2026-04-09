@@ -1,4 +1,21 @@
-/* compose-overlay.js --- Soulignements d'erreurs dans le compose Thunderbird. */
+/*
+ * compose-overlay.js - Soulignements d'erreurs dans le compose Thunderbird.
+ *
+ * Contrairement à Firefox (overlay transparent par-dessus le champ),
+ * Thunderbird permet de modifier directement le DOM du corps du
+ * message (designMode). Ce module insère des <span> colorés autour
+ * des mots erronés, directement dans le DOM du body éditable.
+ *
+ * Fonctions principales :
+ *   - clearUnderlines()     : supprime tous les spans albert-error.
+ *   - createUnderlineSpan() : crée un span accessible pour une erreur.
+ *   - buildTextNodeMap()    : construit la correspondance offset ↔ nœud.
+ *   - applyUnderlines()     : insère les spans dans le DOM.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

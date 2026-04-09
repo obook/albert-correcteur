@@ -1,5 +1,21 @@
-/* compose-popup-correction.js - Popup de correction dans le compose Thunderbird.
- * Structure DOM identique au popup Firefox pour partager les CSS. */
+/*
+ * compose-popup-correction.js - Popup de correction (Thunderbird).
+ *
+ * Affiche une popup de correction au clic sur un mot souligné dans
+ * la fenêtre de composition. Structure DOM identique au popup Firefox
+ * pour partager les feuilles de style CSS.
+ *
+ * Contenu de la popup :
+ *   - Type d'erreur (Orthographe, Grammaire, Style).
+ *   - Message d'explication.
+ *   - Bouton "Ignorer partout" (dictionnaire personnel).
+ *   - Suggestions cliquables.
+ *   - Navigation Précédent / Suivant entre les erreurs.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

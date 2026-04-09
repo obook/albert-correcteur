@@ -1,4 +1,16 @@
-/* compose-limites.js --- Vérification des limites API côté client dans le compose. */
+/*
+ * compose-limites.js - Limites API et debounce adaptatif (Thunderbird).
+ *
+ * Gère le suivi des limites côté client dans la fenêtre de composition :
+ *   - checkRateLimit()  : vérifie qu'on n'atteint pas 80 % du rpm.
+ *   - recordRequest()   : enregistre l'horodatage d'une requête.
+ *   - loadLimits()      : charge les limites depuis le service worker
+ *     et ajuste les délais de debounce en fonction du rpm.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

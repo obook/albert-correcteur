@@ -1,8 +1,34 @@
-/* albert-render.js - Orchestration du rendu et contenteditable simple. */
+/*
+ * albert-render.js - Orchestration du rendu des corrections.
+ *
+ * Point central de l'affichage des corrections. Ce module :
+ * 1. Choisit la méthode de rendu selon le type de champ :
+ *    - Overlay transparent (textarea, input, contenteditable riche).
+ *    - Spans cliquables dans le DOM (contenteditable simple).
+ * 2. Met à jour le badge (icône, titre, compteur d'erreurs).
+ * 3. Annonce les erreurs aux lecteurs d'écran via ARIA live.
+ *
+ * Dépendances :
+ *   - albert-render-overlay.js  (renderOverlay)
+ *   - albert-render-arialive.js (_announceErrors)
+ *   - albert-badge.js           (mise à jour des classes du badge)
+ *   - albert-state.js           (ICON_URL, ICON_ERROR_URL)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 
-/* Affiche les corrections sur un champ (choisit la bonne méthode). */
+/**
+ * Affiche les corrections sur un champ (orchestrateur principal).
+ *
+ * Délègue le rendu visuel à renderOverlay, met à jour le badge
+ * (icône, compteur, titre) et annonce le résultat via ARIA live.
+ *
+ * @param {HTMLElement} el - Champ de saisie à décorer.
+ */
 Albert.renderCorrections = function (el) {
   const state = Albert.getOrCreateState(el);
   const tag = el.tagName.toLowerCase();
@@ -33,8 +59,19 @@ Albert.renderCorrections = function (el) {
   Albert._announceErrors(state.corrections.length, state.lang);
 };
 
-/* Rendu pour les contenteditable simples (pas d'éditeur riche).
-   Entoure les mots erronés de <span> cliquables directement dans le DOM. */
+/**
+ * Rendu pour les contenteditable simples (pas d'éditeur riche).
+ *
+ * Entoure les mots erronés de <span> cliquables directement dans le
+ * DOM du champ. Chaque span reçoit la classe albert-error et un
+ * data-idx pour retrouver la correction au clic.
+ *
+ * Cette méthode n'est PAS utilisée pour les éditeurs riches : ceux-ci
+ * ne tolèrent pas la modification directe du DOM (voir renderOverlay).
+ *
+ * @param {HTMLElement} el    - Élément contenteditable.
+ * @param {Object}      state - État du champ (corrections, etc.).
+ */
 Albert.renderContentEditable = function (el, state) {
   el.querySelectorAll(".albert-error").forEach((mark) => {
     const parent = mark.parentNode;

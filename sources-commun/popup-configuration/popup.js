@@ -1,4 +1,25 @@
-/* popup.js - Initialisation, chargement de la config et enregistrement. */
+/*
+ * popup.js - Page de configuration principale de l'extension.
+ *
+ * Ce script gère la popup de configuration accessible depuis
+ * l'icône Albert dans la barre d'outils du navigateur.
+ *
+ * Fonctionnalités :
+ *   - Chargement de la configuration existante (clé API, URL, modèle).
+ *   - Validation et enregistrement dans browser.storage.local.
+ *   - Chargement de la liste des modèles disponibles.
+ *   - Affichage des limites du compte.
+ *   - Lien vers la page des paramètres (thème, dictionnaire).
+ *
+ * Dépendances (scripts chargés dans popup.html) :
+ *   - popup-status.js  (showStatus)
+ *   - popup-models.js  (fetchModels, modelSelect)
+ *   - popup-limits.js  (fetchAndShowLimits)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 

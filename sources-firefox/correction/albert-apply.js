@@ -1,8 +1,32 @@
 /*
  * albert-apply.js - Orchestration de l'application des corrections.
- * Délègue aux modules spécialisés :
- *   - albert-apply-segments.js : mapping innerText ↔ DOM
- *   - albert-apply-rich.js    : remplacement dans les éditeurs riches
+ *
+ * Point d'entrée pour appliquer une suggestion de correction dans un
+ * champ texte. Ce module :
+ * 1. Nettoie la suggestion (suppression du contexte en trop).
+ * 2. Choisit la stratégie selon le type de champ :
+ *    - Textarea/input : remplacement de .value + pile undo manuelle.
+ *    - Contenteditable simple : Range + execCommand immédiat.
+ *    - Éditeur riche : délégation à albert-apply-rich.js.
+ * 3. Met à jour les offsets des corrections restantes.
+ * 4. Relance le rendu et programme une revérification.
+ *
+ * Flux d'application :
+ *   Clic sur suggestion → applySuggestion()
+ *     → _trimSuggestion() → findRealOffset()
+ *     → _applyInTextarea() ou _applyInContentEditable()
+ *     → _updateRemainingCorrections() → renderCorrections()
+ *
+ * Dépendances :
+ *   - albert-apply-segments.js (buildInnerTextSegments, findSegmentAt)
+ *   - albert-apply-rich.js     (applyViaSelection)
+ *   - albert-render.js         (renderCorrections)
+ *   - albert-check.js          (scheduleCheck)
+ *   - albert-toast.js          (showToast)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
  */
 
 "use strict";

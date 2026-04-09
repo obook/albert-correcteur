@@ -1,8 +1,28 @@
-/* albert-toast.js - Toast de notification (en haut à droite). */
+/*
+ * albert-toast.js - Notifications toast (coin supérieur droit).
+ *
+ * Affiche des messages temporaires à l'utilisateur : erreurs API,
+ * limites de débit atteintes, confirmation de reformulation, etc.
+ * Le toast apparaît avec une animation CSS et disparaît
+ * automatiquement après la durée indiquée.
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 
-/* Affiche un toast en haut à droite de la fenêtre. */
+/**
+ * Affiche un toast en haut à droite de la fenêtre.
+ *
+ * Un seul toast est visible à la fois : l'ancien est supprimé
+ * avant d'afficher le nouveau. Le toast comporte une icône Albert,
+ * le message et un bouton de fermeture.
+ *
+ * @param {string} message     - Texte à afficher.
+ * @param {number} durationSec - Durée d'affichage en secondes (défaut : 10).
+ */
 Albert.showToast = function (message, durationSec) {
   /* Supprimer un toast existant */
   const existing = document.querySelector(".albert-toast");

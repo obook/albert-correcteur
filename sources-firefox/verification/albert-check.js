@@ -1,4 +1,32 @@
-/* albert-check.js - Envoi du texte au script de fond et cycle de vérification. */
+/*
+ * albert-check.js - Envoi du texte au service worker et cycle de vérification.
+ *
+ * Ce module contient la logique centrale de vérification :
+ *
+ * 1. triggerCheck(el) - Vérifie un champ unique :
+ *    - Charge les limites API si nécessaire.
+ *    - Vérifie qu'on ne dépasse pas le quota (rpm/rpd).
+ *    - Détecte si un seul paragraphe a changé → vérification
+ *      incrémentale (n'envoie que le paragraphe + contexte adjacent).
+ *    - Envoie le texte au service worker via browser.runtime.sendMessage.
+ *    - Recalibre les offsets, filtre les mots ignorés, fusionne
+ *      les corrections et lance le rendu.
+ *
+ * 2. cycleCheckAll() - Vérifie tous les champs de la page :
+ *    - Parcourt séquentiellement les champs suivis (le champ actif
+ *      en premier) avec une pause de 7 s entre chaque.
+ *    - Appelé périodiquement par setInterval (albert-main.js).
+ *
+ * Dépendances :
+ *   - albert-utils.js    (splitParagraphs, findModifiedParagraph,
+ *                          recalibrateOffsets, filterIgnoredCorrections)
+ *   - albert-limites.js  (loadLimits, checkRateLimit, recordRequest)
+ *   - albert-render.js   (renderCorrections, clearCorrections)
+ *
+ * Auteur : O. Booklage
+ * Date : Avril 2026
+ * Licence : EUPL-1.2
+ */
 
 "use strict";
 
