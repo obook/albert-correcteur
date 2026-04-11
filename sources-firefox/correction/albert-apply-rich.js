@@ -165,14 +165,29 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
    */
   setTimeout(() => {
     try {
-      /* Vérifier que la sélection n'a pas bougé pendant le délai (temporaire, à retirer) */
-      const curSel = window.getSelection();
-      if (curSel && curSel.rangeCount > 0) {
-        const curRange = curSel.getRangeAt(0);
-        console.log("[Albert] selection before insert:",
-          JSON.stringify(curRange.toString()),
+      /*
+       * Certains éditeurs (Lexical/WhatsApp) effacent la sélection pendant
+       * le délai. On la reconstruit depuis les segments actuels du DOM
+       * (qui ont pu être modifiés par l'éditeur).
+       */
+      const freshSegments = Albert.buildInnerTextSegments(el);
+      const freshStart = Albert.findSegmentAt(freshSegments, realOffset);
+      const freshEnd = Albert.findSegmentAt(freshSegments, errEnd);
+      if (freshStart && freshEnd) {
+        const freshRange = document.createRange();
+        freshRange.setStart(freshStart.node, freshStart.offset);
+        freshRange.setEnd(freshEnd.node, freshEnd.offset);
+
+        /* Diagnostic (temporaire, à retirer) */
+        console.log("[Albert] re-selection before insert:",
+          JSON.stringify(freshRange.toString()),
           "expected:", JSON.stringify(expectedWord));
+
+        const freshSel = window.getSelection();
+        freshSel.removeAllRanges();
+        freshSel.addRange(freshRange);
       }
+
       Albert._insertTextInEditor(el, suggestion);
       state.checkedText = el.innerText || "";
     } finally {
