@@ -1,9 +1,9 @@
 # Albert Correcteur - Extension Firefox et Thunderbird
 
-![Version](media/badge-version.svg)
 ![Licence](media/badge-licence.svg)
 ![Firefox](media/badge-firefox.svg)
 ![Thunderbird](media/badge-thunderbird.svg)
+![IA](badges/ia.svg)
 
 **Extension expérimentale** de correction orthographique, grammaticale et de traduction pour Firefox et Thunderbird, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web (Firefox) et dans la fenêtre de composition de mail (Thunderbird), propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné (français, anglais, espagnol, allemand).
 
