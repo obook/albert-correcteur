@@ -25,6 +25,7 @@
  - **Bleu** - style
 - Popup de suggestion avec explication et correction en un clic (fermeture par Échap ou clic en dehors)
 - Animation de rotation du logo pendant la vérification
+- Indication visuelle d'une panne API (badge ambre cliquable pour relancer la vérification, message explicite en bulle d'aide)
 - Fonctionne sur les `<textarea>`, `<input>` et les éléments `contenteditable` (Firefox)
 - Compatible avec les éditeurs riches : CKEditor, TinyMCE, Quill, ProseMirror, Draft.js, Lexical, WhatsApp Web, Slack (Firefox)
 - Gestion des saisies IME (langues CJK) sans déclenchement intempestif

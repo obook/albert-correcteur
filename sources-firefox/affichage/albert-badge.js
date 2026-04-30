@@ -5,11 +5,17 @@
  * inférieur droit de chaque champ texte. Il indique visuellement
  * l'état de la correction :
  *   - Icône normale       : aucune erreur détectée.
- *   - Icône erreur (rouge) : des corrections sont disponibles.
+ *   - Icône erreur (rouge): des corrections sont disponibles.
+ *   - Animation radar     : vérification en cours (albert-loading).
+ *   - Encart ambre        : panne API persistante (albert-api-error).
+ *                           Le tooltip indique la cause et invite
+ *                           à cliquer pour réessayer.
+ *   - Grisé               : limite de débit atteinte (rate-limited).
  *   - Masqué              : le champ est vide.
  *
  * Le badge est cliquable (et accessible au clavier) pour déclencher
- * une vérification manuelle immédiate.
+ * une vérification manuelle immédiate. En état de panne, le clic
+ * force une nouvelle requête (ignore le cache du dernier texte vérifié).
  *
  * Dépendances :
  *   - albert-state.js  (ICON_URL, ICON_ERROR_URL, getOrCreateState)
@@ -61,15 +67,21 @@ Albert.ensureBadge = function (el) {
   Albert.positionBadge(el, badge);
   Albert.updateBadgeVisibility(el, badge);
 
+  /* Si le badge est en état de panne API, forcer la re-vérification
+     (sinon le cache lastCheckedText empêcherait la relance). */
+  const handleActivate = () => {
+    const force = badge.classList.contains("albert-api-error");
+    Albert.triggerCheck(el, force);
+  };
   badge.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
-    Albert.triggerCheck(el);
+    handleActivate();
   });
   badge.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
-      Albert.triggerCheck(el);
+      handleActivate();
     }
   });
 

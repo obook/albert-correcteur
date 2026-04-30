@@ -67,6 +67,8 @@ window.Albert = {
   rateLimited: false,
   mode: "correction",        /* "correction" ou "reformulation" */
   ignoredWords: new Set(),   /* dictionnaire personnel (mots à ignorer) */
+  lastApiError: null,        /* { message, type, at } - dernière erreur API,
+                                 affichée dans le tooltip du badge en panne */
 
   // ===============================================================
   //  LIMITES API

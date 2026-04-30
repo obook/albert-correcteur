@@ -30,11 +30,41 @@
 
 "use strict";
 
+/* Marque le badge d'un champ en état de panne API (clé invalide, 5xx,
+   réseau coupé, etc.) avec un tooltip explicite et autorise la relance
+   manuelle au clic. */
+Albert.markBadgeApiError = function (el, message) {
+  const state = Albert.getOrCreateState(el);
+  state.lastError = { message, at: Date.now() };
+  Albert.lastApiError = { message, at: Date.now() };
+  if (!state.badge) return;
+  state.badge.classList.remove("albert-loading", "albert-rate-limited");
+  state.badge.classList.add("albert-api-error");
+  state.badge.title = `Albert indisponible : ${message}\nCliquez pour réessayer.`;
+  state.badge.setAttribute("aria-label", state.badge.title);
+  const img = state.badge.querySelector("img");
+  if (img) img.src = Albert.ICON_URL;
+};
+
+/* Efface l'état de panne d'un champ (appelé après une vérification
+   réussie ou avant une relance manuelle). */
+Albert.clearBadgeApiError = function (el) {
+  const state = Albert.getOrCreateState(el);
+  state.lastError = null;
+  if (!state.badge) return;
+  state.badge.classList.remove("albert-api-error");
+  state.badge.title = "Albert Correcteur - Cliquez pour vérifier";
+  state.badge.setAttribute(
+    "aria-label", "Albert Correcteur - Cliquez pour vérifier"
+  );
+};
+
 /* Envoie le texte au script de fond pour correction.
    Utilise un AbortController pour pouvoir annuler la requête si le texte change.
    Vérification incrémentale : si un seul paragraphe a changé, n'envoie que
-   ce paragraphe (+ contexte adjacent) et fusionne avec les corrections existantes. */
-Albert.triggerCheck = async function (el) {
+   ce paragraphe (+ contexte adjacent) et fusionne avec les corrections existantes.
+   Si force = true, ignore le cache lastCheckedText (relance manuelle après panne). */
+Albert.triggerCheck = async function (el, force) {
   const text = Albert.getTextContent(el);
   const state = Albert.getOrCreateState(el);
 
@@ -46,7 +76,15 @@ Albert.triggerCheck = async function (el) {
 
   if (text.trim().length < Albert.MIN_TEXT_LENGTH) {
     Albert.clearCorrections(el);
+    Albert.clearBadgeApiError(el);
     return;
+  }
+
+  /* Une relance manuelle (clic sur badge en erreur) doit forcer la requête
+     même si le texte est identique au dernier vérifié. */
+  if (force) {
+    state.lastCheckedText = null;
+    Albert.clearBadgeApiError(el);
   }
 
   if (state.lastCheckedText === text) return;
@@ -116,9 +154,18 @@ Albert.triggerCheck = async function (el) {
         Albert.rateLimited = true;
         Albert.showRateLimitWarning(el, response.error);
         setTimeout(() => { Albert.rateLimited = false; }, delay);
+      } else {
+        /* Panne API persistante (clé invalide, 5xx, réseau, modèle introuvable...) :
+           afficher un état d'erreur explicite sur le badge et un toast. */
+        Albert.markBadgeApiError(el, response.error);
+        Albert.showToast(`Albert : ${response.error}`, 15);
       }
       return;
     }
+
+    /* Vérification réussie : effacer un éventuel état de panne précédent */
+    Albert.clearBadgeApiError(el);
+    Albert.lastApiError = null;
 
     /* Vérifier que le texte n'a pas changé pendant l'appel API */
     if (controller.signal.aborted) return;
@@ -156,12 +203,14 @@ Albert.triggerCheck = async function (el) {
   } catch (err) {
     if (err.name !== "AbortError") {
       console.error("[Albert]", err);
+      Albert.markBadgeApiError(el, err.message || "Erreur interne");
+      Albert.showToast(`Albert : ${err.message || "Erreur interne"}`, 15);
     }
   } finally {
     if (state.abortController === controller) {
       state.abortController = null;
     }
-    if (state.badge) {
+    if (state.badge && !state.badge.classList.contains("albert-api-error")) {
       state.badge.classList.remove("albert-loading");
       const img = state.badge.querySelector("img");
       const hasErrors = state.corrections && state.corrections.length > 0;
