@@ -18,7 +18,7 @@ tests:
 
 # ── Build du .xpi Firefox (uniquement sur les tags v*) ──
 
-build:
+build-firefox:
   stage: build
   image: alpine:latest
   before_script:
@@ -81,7 +81,7 @@ sign:
   stage: sign
   image: node:20-alpine
   needs:
-    - job: build
+    - job: build-firefox
       artifacts: true
   script:
     - apk add --no-cache curl jq
