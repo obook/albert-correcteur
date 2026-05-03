@@ -12,10 +12,12 @@
  *
  * 2. Dispatch des messages du compose script :
  *    Route les requêtes vers les fonctions du service worker :
- *    - "check"     → checkText()      (service-api.js)
- *    - "getConfig" → loadConfig()     (service-config.js)
- *    - "getLimits" → fetchLimits()    (service-limites.js)
- *    - "translate" → translateText()  (service-api.js)
+ *    - "check"          → checkText()       (service-api.js)
+ *    - "getConfig"      → loadConfig()      (service-config.js)
+ *    - "getLimits"      → fetchLimits()     (service-limites.js)
+ *    - "getAliases"     → fetchAliases()    (service-limites.js)
+ *    - "getDailyUsage"  → fetchDailyUsage() (service-limites.js)
+ *    - "translate"      → translateText()   (service-api.js)
  *
  * Auteur : O. Booklage
  * Date : Avril 2026
@@ -84,6 +86,14 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   if (message.type === "getLimits") {
     fetchLimits().then(sendResponse);
+    return true;
+  }
+  if (message.type === "getAliases") {
+    fetchAliases().then(sendResponse);
+    return true;
+  }
+  if (message.type === "getDailyUsage") {
+    fetchDailyUsage(message.model).then(sendResponse);
     return true;
   }
   if (message.type === "translate") {

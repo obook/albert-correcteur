@@ -161,6 +161,45 @@ button:hover {
   color: #27ae60;
 }
 
+.limits-info .tier-section-title {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed #ddd;
+  font-weight: 600;
+  font-size: 11px;
+  color: #555;
+}
+
+.limits-info .tier-row {
+  margin-top: 4px;
+}
+
+.limits-info .tier-title {
+  font-size: 11px;
+  color: #777;
+  font-weight: 500;
+}
+
+.limits-info .tier-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 10px;
+  font-size: 11px;
+  color: #444;
+  margin-left: 6px;
+}
+
+.limits-info .tier-cell {
+  font-variant-numeric: tabular-nums;
+}
+
+.limits-info .usage-grid {
+  margin-left: 0;
+  margin-top: 4px;
+  font-weight: 600;
+  color: #000091;
+}
+
 .footer {
   margin-top: 16px;
   padding-top: 10px;

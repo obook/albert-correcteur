@@ -64,6 +64,12 @@ form.addEventListener("submit", async (e) => {
   fetchAndShowLimits();
 });
 
+/* Rafraîchir les paliers documentés quand l'utilisateur change de modèle. */
+
+modelSelect.addEventListener("change", () => {
+  if (apiKeyInput.value.trim()) fetchAndShowLimits();
+});
+
 /* --- Paramètres --- */
 
 document.getElementById("open-settings").addEventListener("click", (e) => {

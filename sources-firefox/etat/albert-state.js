@@ -75,7 +75,9 @@ window.Albert = {
   // ===============================================================
 
   limits: null,            /* { rpm, rpd, tpm, tpd } depuis /v1/me/info */
-  requestTimestamps: [],   /* timestamps des requêtes récentes (pour compter rpm) */
   requestCountToday: 0,    /* compteur de requêtes du jour */
   requestDayStart: 0,      /* début de la journée courante (timestamp ms) */
 };
+/* requestWindow (Albert.RollingWindow, fenêtre 60s) est créé dans
+   verification/albert-limites.js, après le chargement de
+   verification/rolling-window.js. */

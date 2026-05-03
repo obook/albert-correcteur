@@ -1,9 +1,22 @@
 /*
  * popup-limits.js - Affichage des limites du compte API.
  *
- * Interroge l'endpoint /v1/me/info et affiche les quotas sous forme
- * de lignes "Requêtes / minute : 30". Si plusieurs limites du
- * même type existent, la valeur la plus restrictive est affichée.
+ * Trois sections affichées dans le bloc "Limites du compte" :
+ *
+ *   1. Limites du compte (depuis /v1/me/info)
+ *      Quotas rpm/rpd/tpm/tpd. Si plusieurs limites du même type
+ *      existent, la valeur la plus restrictive est affichée.
+ *
+ *   2. Usage journalier réel (depuis /v1/me/usage)
+ *      Compte les requêtes et tokens consommés depuis minuit UTC
+ *      pour le modèle sélectionné. La résolution d'alias en id
+ *      canonique est faite via /v1/models pour matcher les
+ *      évènements d'usage qui portent toujours l'id canonique.
+ *
+ *   3. Paliers documentés EXP/PROD pour le modèle sélectionné
+ *      Lus dans la table DOCUMENTED_MODEL_LIMITS. Permet de
+ *      repérer si le compte est sur le palier expérimental ou
+ *      production.
  *
  * Auteur : O. Booklage
  * Date : Avril 2026
@@ -22,11 +35,177 @@ const LIMIT_LABELS = {
   tpd: "Tokens / jour",
 };
 
+/*
+ * Paliers documentés Albert par modèle (source : page tarifs publique
+ * https://albert.sites.beta.gouv.fr/prices/).
+ *
+ * Indexés à la fois par alias serveur (openweight-large, ...) et par
+ * id canonique (openai/gpt-oss-120b, ...) pour résister aux deux
+ * façons dont le modèle peut apparaître dans la configuration.
+ *
+ * Une valeur null représente un quota "illimité" selon la documentation.
+ */
+const DOCUMENTED_MODEL_LIMITS = {
+  "openai/gpt-oss-120b": {
+    exp:  { rpm: 10, rpd: 1000,   tpm: 128000, tpd: 1280000 },
+    prod: { rpm: 50, rpd: 5000,   tpm: 246000, tpd: null },
+  },
+  "openweight-large": {
+    exp:  { rpm: 10, rpd: 1000,   tpm: 128000, tpd: 1280000 },
+    prod: { rpm: 50, rpd: 5000,   tpm: 246000, tpd: null },
+  },
+  "mistralai/mistral-small-3.2-24b-instruct-2506": {
+    exp:  { rpm: 50,  rpd: 1000,  tpm: 128000, tpd: 2460000 },
+    prod: { rpm: 100, rpd: 50000, tpm: 246000, tpd: null },
+  },
+  "openweight-medium": {
+    exp:  { rpm: 50,  rpd: 1000,  tpm: 128000, tpd: 2460000 },
+    prod: { rpm: 100, rpd: 50000, tpm: 246000, tpd: null },
+  },
+  "mistralai/ministral-3-8b-instruct-2512": {
+    exp:  { rpm: 50,  rpd: 1000,  tpm: 128000, tpd: 2460000 },
+    prod: { rpm: 100, rpd: 50000, tpm: 246000, tpd: null },
+  },
+  "openweight-small": {
+    exp:  { rpm: 50,  rpd: 1000,  tpm: 128000, tpd: 2460000 },
+    prod: { rpm: 100, rpd: 50000, tpm: 246000, tpd: null },
+  },
+};
+
+/**
+ * Cherche les paliers documentés pour un identifiant de modèle.
+ * Tolère casse différente (openweight-LARGE vs openweight-large).
+ *
+ * @param {string} modelId - Alias ou id canonique du modèle.
+ * @returns {{exp: Object, prod: Object} | null}
+ */
+function documentedLimitsFor(modelId) {
+  if (!modelId) return null;
+  if (modelId in DOCUMENTED_MODEL_LIMITS) {
+    return DOCUMENTED_MODEL_LIMITS[modelId];
+  }
+  const lower = modelId.toLowerCase();
+  for (const [key, value] of Object.entries(DOCUMENTED_MODEL_LIMITS)) {
+    if (key.toLowerCase() === lower) return value;
+  }
+  return null;
+}
+
+/**
+ * Formate une valeur de quota pour l'affichage.
+ *
+ * @param {number|null} value - Valeur brute (null = illimité).
+ * @returns {string}
+ */
+function formatLimitValue(value) {
+  if (value === null || value === undefined) return "illimité";
+  return value.toLocaleString("fr-FR");
+}
+
+/**
+ * Construit la ligne d'un palier documenté (EXP ou PROD).
+ *
+ * @param {string} title  - Libellé du palier.
+ * @param {Object} tier   - {rpm, rpd, tpm, tpd}.
+ * @returns {HTMLElement}
+ */
+function buildTierRow(title, tier) {
+  const row = document.createElement("div");
+  row.className = "tier-row";
+
+  const titleEl = document.createElement("div");
+  titleEl.className = "tier-title";
+  titleEl.textContent = title;
+  row.appendChild(titleEl);
+
+  const grid = document.createElement("div");
+  grid.className = "tier-grid";
+  for (const key of ["rpm", "rpd", "tpm", "tpd"]) {
+    const cell = document.createElement("span");
+    cell.className = "tier-cell";
+    cell.textContent = `${key} ${formatLimitValue(tier[key])}`;
+    grid.appendChild(cell);
+  }
+  row.appendChild(grid);
+  return row;
+}
+
+/**
+ * Récupère la map { alias serveur -> id canonique } via l'API.
+ * Utilisée pour résoudre l'identifiant sélectionné dans le <select>
+ * en celui qui apparaît dans /v1/me/usage.
+ *
+ * @param {string} apiBase - URL de base de l'API.
+ * @param {string} apiKey  - Clé API.
+ * @returns {Promise<Object>}
+ */
+async function fetchModelAliases(apiBase, apiKey) {
+  try {
+    const response = await fetch(`${apiBase}/v1/models`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+    if (!response.ok) return {};
+    const data = await response.json();
+    const aliases = {};
+    for (const m of data.data || []) {
+      if (!m.id || !Array.isArray(m.aliases)) continue;
+      for (const a of m.aliases) {
+        if (typeof a === "string" && a) aliases[a] = m.id;
+      }
+    }
+    return aliases;
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Calcule l'usage journalier (rpd, tpd) pour un modèle depuis /v1/me/usage.
+ * Renvoie null si l'endpoint n'est pas disponible.
+ *
+ * @param {string} apiBase    - URL de base de l'API.
+ * @param {string} apiKey     - Clé API.
+ * @param {string} canonicalId - Id canonique du modèle.
+ * @returns {Promise<{rpdUsed: number, tpdUsed: number} | null>}
+ */
+async function fetchDailyUsageForModel(apiBase, apiKey, canonicalId) {
+  if (!canonicalId) return null;
+  try {
+    const response = await fetch(`${apiBase}/v1/me/usage`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    const events = Array.isArray(data.data) ? data.data : [];
+    const utcMidnight = Math.floor(
+      Date.UTC(
+        new Date().getUTCFullYear(),
+        new Date().getUTCMonth(),
+        new Date().getUTCDate()
+      ) / 1000
+    );
+
+    let rpdUsed = 0;
+    let tpdUsed = 0;
+    for (const ev of events) {
+      if (!ev || ev.model !== canonicalId) continue;
+      if (typeof ev.created !== "number" || ev.created < utcMidnight) continue;
+      rpdUsed += 1;
+      const tokens = (ev.usage || {}).prompt_tokens;
+      if (typeof tokens === "number") tpdUsed += tokens;
+    }
+    return { rpdUsed, tpdUsed };
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Récupère et affiche les limites du compte dans la section dédiée.
  *
- * Appelle /v1/me/info, regroupe les limites par type (rpm, rpd…),
- * garde la valeur la plus restrictive et crée les lignes d'affichage.
+ * Trois sections : limites du compte, usage journalier réel pour le
+ * modèle sélectionné, paliers documentés EXP/PROD.
  */
 async function fetchAndShowLimits() {
   const apiKey = document.getElementById("api-key").value.trim();
@@ -64,8 +243,7 @@ async function fetchAndShowLimits() {
     limitsInfo.textContent = "";
     for (const [type, value] of Object.entries(merged)) {
       const label = LIMIT_LABELS[type] || type;
-      const display = value === null
-        ? "illimité" : value.toLocaleString("fr-FR");
+      const display = formatLimitValue(value);
       const cls = value === null
         ? "limit-value unlimited" : "limit-value";
       const row = document.createElement("div");
@@ -79,6 +257,56 @@ async function fetchAndShowLimits() {
       row.appendChild(valueSpan);
       limitsInfo.appendChild(row);
     }
+
+    const modelSelect = document.getElementById("model");
+    const selectedModel = modelSelect ? modelSelect.value : "";
+
+    /*
+     * Section "Usage du jour" : interroger /v1/me/usage avec
+     * résolution d'alias -> id canonique, car les évènements
+     * d'usage sont indexés par id canonique.
+     */
+    if (selectedModel) {
+      const aliases = await fetchModelAliases(apiBase, apiKey);
+      const canonical = aliases[selectedModel] || selectedModel;
+      const usage = await fetchDailyUsageForModel(apiBase, apiKey, canonical);
+      if (usage) {
+        const usageTitle = document.createElement("div");
+        usageTitle.className = "tier-section-title";
+        usageTitle.textContent = "Usage du jour pour ce modèle";
+        limitsInfo.appendChild(usageTitle);
+
+        const usageRow = document.createElement("div");
+        usageRow.className = "tier-grid usage-grid";
+        const rpdLimit = merged.rpd;
+        const tpdLimit = merged.tpd;
+        const rpdText = rpdLimit
+          ? `rpd ${formatLimitValue(usage.rpdUsed)} / ${formatLimitValue(rpdLimit)}`
+          : `rpd ${formatLimitValue(usage.rpdUsed)}`;
+        const tpdText = tpdLimit
+          ? `tpd ${formatLimitValue(usage.tpdUsed)} / ${formatLimitValue(tpdLimit)}`
+          : `tpd ${formatLimitValue(usage.tpdUsed)}`;
+        for (const text of [rpdText, tpdText]) {
+          const cell = document.createElement("span");
+          cell.className = "tier-cell";
+          cell.textContent = text;
+          usageRow.appendChild(cell);
+        }
+        limitsInfo.appendChild(usageRow);
+      }
+    }
+
+    /* Paliers documentés (EXP/PROD) si connus pour le modèle. */
+    const tiers = documentedLimitsFor(selectedModel);
+    if (tiers) {
+      const sep = document.createElement("div");
+      sep.className = "tier-section-title";
+      sep.textContent = "Paliers documentés pour ce modèle";
+      limitsInfo.appendChild(sep);
+      limitsInfo.appendChild(buildTierRow("Expérimental", tiers.exp));
+      limitsInfo.appendChild(buildTierRow("Production", tiers.prod));
+    }
+
     limitsSection.style.display = "block";
   } catch {
     /* Silencieux si l'endpoint n'est pas disponible */

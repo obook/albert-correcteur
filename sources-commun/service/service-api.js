@@ -15,7 +15,12 @@
  *
  * Gestion des erreurs :
  *   - 429 (rate limit) : extraction du type de limite (rpm, rpd, tpm,
- *     tpd) depuis la réponse, retour du délai Retry-After.
+ *     tpd) depuis la réponse, lecture du Retry-After dans l'en-tête
+ *     puis dans le corps (message Albert "Limit exceeded: 50 requests
+ *     per minute") avec calcul d'un délai sûr en cas d'absence.
+ *   - Auto-fallback de modèle : deux 429 consécutifs sur le modèle
+ *     principal basculent automatiquement vers un modèle plus petit
+ *     (large -> medium -> small) pendant 60 s.
  *   - Réponse invalide : message d'erreur explicite.
  *   - Erreur réseau : message avec err.message.
  *
@@ -37,6 +42,149 @@
 
 "use strict";
 
+/*
+ * --- Auto-fallback de modèle après 429 répétés ---
+ *
+ * Si le modèle principal renvoie deux 429 d'affilée, on bascule
+ * automatiquement vers un modèle plus petit pendant 60 s avant de
+ * retenter le principal. Inspiré de la stratégie d'AlbertCode, ça
+ * évite à l'utilisateur de subir des erreurs en chaîne quand le
+ * modèle large est saturé.
+ */
+
+const FALLBACK_TRIGGER_429 = 2;       // 429 consécutifs déclenchant le fallback
+const FALLBACK_DURATION_MS = 60000;   // durée pendant laquelle le fallback reste actif
+
+const FALLBACK_CHAIN = {
+  "openweight-large": "openweight-medium",
+  "openweight-medium": "openweight-small",
+  "openai/gpt-oss-120b": "openweight-medium",
+  "mistralai/mistral-small-3.2-24b-instruct-2506": "openweight-small",
+};
+
+const consecutive429 = new Map();
+const fallbackUntil = new Map();
+
+/**
+ * Renvoie le modèle effectif à utiliser pour un appel.
+ * Si le primaire est en fallback actif, retourne son fallback.
+ *
+ * @param {string} primary - Modèle configuré par l'utilisateur.
+ * @returns {string}
+ */
+function selectEffectiveModel(primary) {
+  const until = fallbackUntil.get(primary);
+  if (until && until > Date.now()) {
+    return FALLBACK_CHAIN[primary] || primary;
+  }
+  return primary;
+}
+
+/**
+ * À appeler après un 429. Incrémente le compteur consécutif et,
+ * si le seuil est atteint et qu'un fallback est connu, ouvre la
+ * fenêtre de bascule.
+ *
+ * @param {string} primary - Modèle qui a échoué.
+ */
+function record429(primary) {
+  if (!primary) return;
+  const next = (consecutive429.get(primary) || 0) + 1;
+  consecutive429.set(primary, next);
+  const fallback = FALLBACK_CHAIN[primary];
+  if (next >= FALLBACK_TRIGGER_429 && fallback) {
+    fallbackUntil.set(primary, Date.now() + FALLBACK_DURATION_MS);
+    consecutive429.set(primary, 0);
+    console.info(
+      `[Albert] Fallback ${primary} -> ${fallback} pendant `
+      + `${FALLBACK_DURATION_MS / 1000}s (deux 429 consécutifs)`
+    );
+  }
+}
+
+/**
+ * À appeler après un succès. Reset le compteur consécutif pour
+ * que la prochaine série de 429 reparte de zéro.
+ *
+ * @param {string} primary - Modèle qui a réussi.
+ */
+function recordSuccess(primary) {
+  if (!primary) return;
+  consecutive429.delete(primary);
+}
+
+/**
+ * Analyse une réponse 429 d'Albert et en extrait un délai de retry
+ * exploitable.
+ *
+ * Trois sources, dans l'ordre de priorité :
+ *   1. En-tête HTTP Retry-After (en secondes).
+ *   2. Champ retry_after du corps JSON s'il existe (variantes Albert).
+ *   3. Calcul depuis le message texte du type "Limit exceeded:
+ *      50 requests per minute". Si on connaît la limite par minute,
+ *      un délai sûr de 60 / N secondes (au moins 2 s) est calculé.
+ *
+ * Renvoie aussi le type de limite (rpm, rpd, tpm, tpd) repéré dans
+ * le message, pour un libellé d'erreur plus précis.
+ *
+ * @param {Response} response - Réponse fetch ayant le statut 429.
+ * @param {string}   detail   - Corps de la réponse, déjà lu en texte.
+ * @returns {{retryAfter: number, limitType: string}}
+ */
+function parseRateLimit429(response, detail) {
+  /* 1. Source la plus fiable : l'en-tête HTTP. */
+  const headerValue = parseInt(response.headers.get("Retry-After"), 10);
+  let retryAfter = headerValue > 0 ? headerValue : 0;
+
+  /* 2/3. Parsing du corps JSON ou texte. */
+  let limitType = "";
+  let bodyMessage = "";
+  try {
+    const err = JSON.parse(detail);
+    bodyMessage = (err.detail || err.message || "").toString();
+    /* Albert peut renvoyer un retry_after explicite dans certaines variantes */
+    if (!retryAfter && typeof err.retry_after === "number"
+      && err.retry_after > 0) {
+      retryAfter = Math.ceil(err.retry_after);
+    }
+  } catch {
+    /* Réponse non-JSON : on garde le texte brut */
+    bodyMessage = detail || "";
+  }
+
+  const lower = bodyMessage.toLowerCase();
+  if (lower.includes("rpm") || lower.includes("requests per minute")) {
+    limitType = "requêtes/minute (rpm)";
+  } else if (lower.includes("rpd") || lower.includes("requests per day")) {
+    limitType = "requêtes/jour (rpd)";
+  } else if (lower.includes("tpm") || lower.includes("tokens per minute")) {
+    limitType = "tokens/minute (tpm)";
+  } else if (lower.includes("tpd") || lower.includes("tokens per day")) {
+    limitType = "tokens/jour (tpd)";
+  }
+
+  /* 3. Pas d'en-tête : tenter d'extraire la limite documentée du message
+        ("50 requests per minute") pour calculer un délai raisonnable. */
+  if (!retryAfter) {
+    const match = lower.match(
+      /(\d+)\s+(?:requests|tokens)\s+per\s+(minute|day)/
+    );
+    if (match) {
+      const limit = parseInt(match[1], 10);
+      const window = match[2] === "minute" ? 60 : 86400;
+      /* Délai sûr : un slot complet de la fenêtre, borné à [2s, fenêtre] */
+      if (limit > 0) {
+        retryAfter = Math.min(window, Math.max(2, Math.ceil(window / limit)));
+      }
+    }
+  }
+
+  /* Filet de sécurité : 30 s si rien n'a marché. */
+  if (!retryAfter) retryAfter = 30;
+
+  return { retryAfter, limitType };
+}
+
 /**
  * Envoie un texte à l'API Albert pour correction ou reformulation.
  *
@@ -57,8 +205,9 @@ async function checkText(text, mode) {
   const systemPrompt = await buildPrompt(mode, lang);
 
   try {
+    const effectiveModel = selectEffectiveModel(config.model);
     const body = {
-      model: config.model,
+      model: effectiveModel,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: text },
@@ -80,27 +229,8 @@ async function checkText(text, mode) {
     if (!response.ok) {
       const detail = await response.text();
       if (response.status === 429) {
-        const retryAfter =
-          parseInt(response.headers.get("Retry-After"), 10) || 30;
-        /* Extraire le type de limite depuis la réponse API si disponible */
-        let limitType = "";
-        try {
-          const err = JSON.parse(detail);
-          const msg = (err.detail || err.message || "").toLowerCase();
-          if (msg.includes("rpm")
-            || msg.includes("requests per minute")) {
-            limitType = "requêtes/minute (rpm)";
-          } else if (msg.includes("rpd")
-            || msg.includes("requests per day")) {
-            limitType = "requêtes/jour (rpd)";
-          } else if (msg.includes("tpm")
-            || msg.includes("tokens per minute")) {
-            limitType = "tokens/minute (tpm)";
-          } else if (msg.includes("tpd")
-            || msg.includes("tokens per day")) {
-            limitType = "tokens/jour (tpd)";
-          }
-        } catch { /* réponse non-JSON */ }
+        record429(config.model);
+        const { retryAfter, limitType } = parseRateLimit429(response, detail);
         const desc = limitType
           ? `Limite ${limitType} dépassée.`
           : "Limite de débit dépassée.";
@@ -112,6 +242,7 @@ async function checkText(text, mode) {
       return { error: `Erreur API (${response.status}) : ${detail}` };
     }
 
+    recordSuccess(config.model);
     const data = await response.json();
     const rawContent = data.choices?.[0]?.message?.content;
     if (typeof rawContent !== "string") {
@@ -194,8 +325,9 @@ async function translateText(text, targetLang) {
     await buildTranslationPrompt(langSource, targetLang);
 
   try {
+    const effectiveModel = selectEffectiveModel(config.model);
     const body = {
-      model: config.model,
+      model: effectiveModel,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: text },
@@ -218,16 +350,20 @@ async function translateText(text, targetLang) {
     if (!response.ok) {
       const detail = await response.text();
       if (response.status === 429) {
-        const retryAfter =
-          parseInt(response.headers.get("Retry-After"), 10) || 30;
+        record429(config.model);
+        const { retryAfter, limitType } = parseRateLimit429(response, detail);
+        const desc = limitType
+          ? `Limite ${limitType} dépassée.`
+          : "Limite de débit dépassée.";
         return {
-          error: `Limite de débit dépassée. Pause de ${retryAfter}s.`,
+          error: `${desc} Pause de ${retryAfter}s.`,
           retryAfter
         };
       }
       return { error: `Erreur API (${response.status}) : ${detail}` };
     }
 
+    recordSuccess(config.model);
     const data = await response.json();
     const rawContent = data.choices?.[0]?.message?.content;
     if (typeof rawContent !== "string") {

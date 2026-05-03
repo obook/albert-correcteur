@@ -15,6 +15,9 @@
  * 3. Vérification avant envoi :
  *    Contrôle que la prochaine requête ne dépasse pas les limites
  *    rpm et rpd, et affiche un avertissement visuel si nécessaire.
+ *    Le compteur rpm utilise une fenêtre glissante propre
+ *    (Albert.RollingWindow) pour calculer précisément le temps
+ *    d'attente avant le prochain slot disponible.
  *
  * Auteur : O. Booklage
  * Date : Avril 2026
@@ -22,6 +25,11 @@
  */
 
 "use strict";
+
+/* Fenêtre glissante de 60 s pour suivre les requêtes (rpm).
+   Mutualise le code avec compose-limites.js (Thunderbird) via
+   sources-commun/verification/rolling-window.js. */
+Albert.requestWindow = new Albert.RollingWindow(60000);
 
 /* Charge les limites depuis le script de fond (cache 10 min côté service). */
 Albert.loadLimits = async function () {
@@ -37,6 +45,7 @@ Albert.loadLimits = async function () {
 browser.storage.onChanged.addListener((changes) => {
   if (changes.apiKey || changes.model || changes.apiBase) {
     Albert.limits = null;
+    Albert.requestWindow.reset();
   }
 });
 
@@ -73,8 +82,6 @@ Albert.checkRateLimit = function () {
   const limits = Albert.limits;
   if (!limits) return null;
 
-  const now = Date.now();
-
   /* Réinitialiser le compteur journalier si on a changé de jour */
   const todayStart = new Date().setHours(0, 0, 0, 0);
   if (Albert.requestDayStart !== todayStart) {
@@ -82,14 +89,9 @@ Albert.checkRateLimit = function () {
     Albert.requestCountToday = 0;
   }
 
-  /* Nettoyer les timestamps de plus d'une minute */
-  Albert.requestTimestamps = Albert.requestTimestamps.filter(
-    (t) => now - t < 60000
-  );
-
-  /* Vérifier rpm (requêtes par minute) */
-  if (limits.rpm && Albert.requestTimestamps.length >= limits.rpm) {
-    const waitSec = Math.ceil((60000 - (now - Albert.requestTimestamps[0])) / 1000);
+  /* Vérifier rpm (requêtes par minute) avec fenêtre glissante */
+  if (limits.rpm && Albert.requestWindow.total() >= limits.rpm) {
+    const waitSec = Math.ceil(Albert.requestWindow.secondsUntilNextSlot());
     return `Limite requêtes/minute (rpm) atteinte : ${limits.rpm} max. Pause ${waitSec}s.`;
   }
 
@@ -103,7 +105,7 @@ Albert.checkRateLimit = function () {
 
 /* Enregistre qu'une requête vient d'être envoyée. */
 Albert.recordRequest = function () {
-  Albert.requestTimestamps.push(Date.now());
+  Albert.requestWindow.add();
   Albert.requestCountToday++;
 };
 

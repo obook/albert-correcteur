@@ -42,8 +42,7 @@ Albert.scheduleCheck = function (el) {
   let maxDelay = Albert.MAX_DEBOUNCE_MS;
   const limits = Albert.limits;
   if (limits && limits.rpm) {
-    const now = Date.now();
-    const recentCount = Albert.requestTimestamps.filter(t => now - t < 60000).length;
+    const recentCount = Albert.requestWindow.total();
     if (recentCount >= limits.rpm * 0.8) {
       delay = Albert.THROTTLE_DEBOUNCE_MS;
       maxDelay = Albert.THROTTLE_MAX_DEBOUNCE_MS;

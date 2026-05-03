@@ -3,9 +3,13 @@
  *
  * Gère le suivi des limites côté client dans la fenêtre de composition :
  *   - checkRateLimit()  : vérifie qu'on n'atteint pas 80 % du rpm.
- *   - recordRequest()   : enregistre l'horodatage d'une requête.
+ *   - recordRequest()   : enregistre une requête dans la fenêtre glissante.
  *   - loadLimits()      : charge les limites depuis le service worker
  *     et ajuste les délais de debounce en fonction du rpm.
+ *
+ * Le compteur rpm utilise Albert.RollingWindow (partagé avec Firefox via
+ * sources-commun/verification/rolling-window.js) pour calculer précisément
+ * le temps avant le prochain slot disponible.
  *
  * Auteur : O. Booklage
  * Date : Avril 2026
@@ -14,15 +18,14 @@
 
 "use strict";
 
+Albert.requestWindow = new Albert.RollingWindow(60000);
+
 Albert.checkRateLimit = function () {
   const limits = Albert.limits;
   if (!limits) return true;
 
-  const now = Date.now();
-  Albert.requestTimestamps = Albert.requestTimestamps.filter((t) => now - t < 60000);
-
   const rpm = limits.rpm;
-  if (rpm && Albert.requestTimestamps.length >= rpm * 0.8) {
+  if (rpm && Albert.requestWindow.total() >= rpm * 0.8) {
     return false;
   }
 
@@ -30,7 +33,7 @@ Albert.checkRateLimit = function () {
 };
 
 Albert.recordRequest = function () {
-  Albert.requestTimestamps.push(Date.now());
+  Albert.requestWindow.add();
 };
 
 Albert.loadLimits = async function () {

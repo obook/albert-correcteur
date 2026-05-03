@@ -26,6 +26,8 @@
 - Popup de suggestion avec explication et correction en un clic (fermeture par Échap ou clic en dehors)
 - Animation de rotation du logo pendant la vérification
 - Indication visuelle d'une panne API (badge ambre cliquable pour relancer la vérification, message explicite en bulle d'aide)
+- Auto-fallback de modèle après deux 429 consécutifs (large -> medium -> small pendant 60 s)
+- Affichage de l'usage du jour (rpd, tpd) et des paliers EXP/PROD documentés dans le popup de configuration
 - Fonctionne sur les `<textarea>`, `<input>` et les éléments `contenteditable` (Firefox)
 - Compatible avec les éditeurs riches : CKEditor, TinyMCE, Quill, ProseMirror, Draft.js, Lexical, WhatsApp Web, Slack (Firefox)
 - Gestion des saisies IME (langues CJK) sans déclenchement intempestif
@@ -33,7 +35,7 @@
 - Masquage automatique des éléments Albert lors de l'ouverture d'une modale Bootstrap (Firefox)
 - Injection dans les iframes et éditeurs intégrés (Firefox)
 - Détection automatique des nouveaux champs ajoutés dynamiquement, SPA, etc. (Firefox)
-- Respect de la limite API (backoff adaptatif calculé depuis le rpm du compte)
+- Respect de la limite API (fenêtre glissante 60 s, backoff adaptatif calculé depuis le rpm du compte, lecture du Retry-After dans l'en-tête HTTP et dans le corps de la réponse 429)
 - Accessibilité (RGAA) : attributs ARIA sur le badge, les popups et annonces pour lecteurs d'écran
 - Mises à jour automatiques via `updates.json` (Firefox et Thunderbird vérifient périodiquement les nouvelles versions)
 - Reformulation via le menu contextuel (clic droit dans un champ de saisie)

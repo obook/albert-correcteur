@@ -34,6 +34,7 @@ const COMPOSE_JS = [
   "compose/compose-popup-messages.js",
   "compose/compose-apply.js",
   "compose/compose-toast.js",
+  "verification/rolling-window.js",
   "compose/compose-limites.js",
   "compose/compose-debounce.js",
   "compose/compose-check.js",
