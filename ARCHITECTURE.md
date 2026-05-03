@@ -22,8 +22,11 @@ albert-ext/
       service-config.js                   <- Chargement de la configuration (clé, modèle, URL)
       service-langue.js                   <- Détection de langue locale (RGPD)
       service-prompts.js                  <- Chargement et construction des prompts
-      service-limites.js                  <- Cache et récupération des limites du compte
-      service-api.js                      <- Appels API (correction, reformulation, traduction)
+      service-limites.js                  <- Cache des limites, alias /v1/models, usage /v1/me/usage
+      service-api.js                      <- Appels API + parseRateLimit429 + auto-fallback de modèle
+
+    verification/                         <- Logique partagée Firefox + Thunderbird
+      rolling-window.js                   <- Classe Albert.RollingWindow (fenêtre glissante 60 s)
 
     prompts/                              <- Prompts éditables (fichiers texte)
       correction.txt                      <- Prompt Correcteur (placeholder {{LANG}})
@@ -123,7 +126,7 @@ albert-ext/
 
   tests/                                  <- Tests unitaires (Node.js, sans dépendance)
     run-all.sh                            <- Lance toutes les suites
-    test-*.js                             <- 9 suites, 158 tests
+    test-*.js                             <- 17 suites, 257 tests
 
   exemple/                                <- Pages de test
     test.html                             <- Page de test multilingue + éditeurs React
@@ -346,21 +349,56 @@ Les 5 fichiers de `sources-commun/service/` sont communs aux deux extensions. Ch
          v
   verification/albert-limites.js (checkRateLimit)
          |
-         +-- rpm : compteur de requêtes dans les 60 dernières secondes
-         +-- rpd : compteur journalier
+         +-- rpm : Albert.RollingWindow (fenêtre glissante 60 s, partagée Firefox + Thunderbird)
+         +-- rpd : compteur journalier local
          +-- updateDebounceFromRpm : délais calculés depuis le rpm du compte
          +-- Throttle : si >80 % du quota, les délais doublent
          |
          v si limite atteinte
          |
          +-- showRateLimitWarning : toast + badges grisés
-         +-- Pause automatique
+         +-- secondsUntilNextSlot() : temps précis avant le prochain slot
          |
          v si l'API retourne 429
          |
-         +-- Extraction du header Retry-After
-         +-- Toast avec le type de limite (rpm/rpd/tpm/tpd)
-         +-- Pause selon Retry-After
+         +-- service-api.js : parseRateLimit429()
+         |     +-- Lecture Retry-After dans l'en-tête HTTP
+         |     +-- Lecture du champ retry_after dans le corps JSON
+         |     +-- Calcul depuis le message texte ("Limit exceeded: N requests per minute")
+         |     +-- Détection du type de limite (rpm/rpd/tpm/tpd)
+         |
+         +-- service-api.js : record429()
+         |     +-- Compteur de 429 consécutifs par modèle
+         |     +-- Au seuil de 2 : auto-fallback large -> medium -> small pendant 60 s
+         |     +-- Reset du compteur sur succès (recordSuccess)
+         |
+         +-- Toast avec type de limite + délai à attendre
+         +-- selectEffectiveModel() : retourne le modèle de fallback si actif
+```
+
+### Récupération des alias et de l'usage journalier
+
+```
+  popup-configuration/popup-limits.js (fetchAndShowLimits)
+         |
+         v
+  service-limites.js (côté service worker)
+         |
+         +-- fetchLimits()       <- /v1/me/info  (cache 10 min)
+         +-- fetchAliases()      <- /v1/models   (cache 10 min)
+         |     +-- Map { alias serveur -> id canonique }
+         |     +-- Exposé via le message getAliases
+         +-- fetchDailyUsage()   <- /v1/me/usage (cache 30 s)
+               +-- Filtre par modèle canonique (résolution alias en amont)
+               +-- Somme requêtes et prompt_tokens depuis minuit UTC
+               +-- Exposé via le message getDailyUsage
+         |
+         v
+  popup-configuration/popup-limits.js
+         |
+         +-- Affiche la limite du compte (rpm, rpd, tpm, tpd)
+         +-- Affiche l'usage du jour (rpd_used / rpd_limit, tpd_used / tpd_limit)
+         +-- Affiche la table DOCUMENTED_MODEL_LIMITS (paliers EXP / PROD documentés)
 ```
 
 ### Modules content script (Firefox)
@@ -384,10 +422,11 @@ Les content scripts partagent le namespace `window.Albert` et sont chargés dans
 | 13 | `albert-apply-rich.js` | `correction/` | Éditeurs riches : sélection, événements, fallback |
 | 14 | `albert-apply.js` | `correction/` | Orchestration des corrections |
 | 15 | `albert-toast.js` | `notification/` | Notification toast |
-| 16 | `albert-limites.js` | `verification/` | Limites rpm/rpd, calcul debounce adaptatif |
-| 17 | `albert-debounce.js` | `verification/` | Double debounce (timer court + timer max) |
-| 18 | `albert-check.js` | `verification/` | triggerCheck, cycleCheckAll |
-| 19 | `albert-main.js` | `demarrage/` | Scan des champs, MutationObserver, IME, paste |
+| 16 | `rolling-window.js` | `verification/` (commun) | Classe `Albert.RollingWindow` (fenêtre glissante 60 s) |
+| 17 | `albert-limites.js` | `verification/` | Limites rpm/rpd via `RollingWindow`, debounce adaptatif |
+| 18 | `albert-debounce.js` | `verification/` | Double debounce (timer court + timer max) |
+| 19 | `albert-check.js` | `verification/` | triggerCheck, cycleCheckAll |
+| 20 | `albert-main.js` | `demarrage/` | Scan des champs, MutationObserver, IME, paste |
 
 ### Compose scripts (Thunderbird)
 
@@ -406,10 +445,11 @@ Thunderbird injecte les scripts dans la fenêtre de composition via `tabs.execut
 | 9 | `compose-popup-messages.js` | Dispatch des messages du script de fond |
 | 10 | `compose-apply.js` | Application des corrections |
 | 11 | `compose-toast.js` | Notifications temporaires |
-| 12 | `compose-limites.js` | Limites rpm/rpd, calcul debounce adaptatif |
-| 13 | `compose-debounce.js` | Double debounce (timer court + timer max) |
-| 14 | `compose-check.js` | triggerCheck |
-| 15 | `compose-main.js` | Initialisation, MutationObserver, événements |
+| 12 | `rolling-window.js` (`verification/` commun) | Classe `Albert.RollingWindow` (fenêtre glissante 60 s) |
+| 13 | `compose-limites.js` | Limites rpm/rpd via `RollingWindow`, debounce adaptatif |
+| 14 | `compose-debounce.js` | Double debounce (timer court + timer max) |
+| 15 | `compose-check.js` | triggerCheck |
+| 16 | `compose-main.js` | Initialisation, MutationObserver, événements |
 
 ### États du badge
 

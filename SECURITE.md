@@ -1,6 +1,6 @@
-# Fiche de sécurité -- Albert Correcteur
+# Fiche de sécurité - Albert Correcteur
 
-**Date de mise à jour :** 2026-03-28
+**Date de mise à jour :** 2026-05-03
 **Référentiel :** Guide ANSSI de développement sécurisé
 
 ## Surface d'attaque
@@ -21,6 +21,7 @@
 - **Unique destination :** le serveur API Albert configuré par l'utilisateur
 - **Protocole :** HTTPS exclusivement (imposé par le domaine dans le manifest)
 - **En-têtes :** `Authorization: Bearer <clé>`, `Content-Type: application/json`, `Accept: application/json`
+- **Endpoints utilisés :** `/v1/chat/completions` (correction, reformulation, traduction), `/v1/me/info` (limites du compte), `/v1/me/usage` (compteur journalier rpd/tpd), `/v1/models` (résolution des alias)
 - **Aucun CDN, aucun service tiers, aucune télémétrie**
 
 ### Stockage
@@ -38,7 +39,7 @@
 | Interception réseau (MITM) | HTTPS imposé par le manifest. Clé API transmise via en-tête Authorization (pas dans l'URL). |
 | Extension malveillante tierce | Content Security Policy : `script-src 'self'; object-src 'none'`. Aucun script inline. |
 | Accès non autorisé aux données | Permissions minimales. Pas d'accès `<all_urls>` côté API. Stockage local chiffré par le navigateur. |
-| Abus de l'API (rate limiting) | Détection du code HTTP 429, backoff adaptatif, affichage du délai à l'utilisateur. |
+| Abus de l'API (rate limiting) | Détection du code HTTP 429, lecture du Retry-After dans l'en-tête HTTP et dans le corps de la réponse, fenêtre glissante 60 s (`Albert.RollingWindow`), auto-fallback de modèle après deux 429 consécutifs (large -> medium -> small pendant 60 s), affichage du délai et du type de limite (rpm/rpd/tpm/tpd) à l'utilisateur. |
 
 ## Politique CSP
 
