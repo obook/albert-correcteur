@@ -67,6 +67,19 @@ Albert.ensureBadge = function (el) {
   Albert.positionBadge(el, badge);
   Albert.updateBadgeVisibility(el, badge);
 
+  /*
+   * Diagnostic : si le parent a overflow:hidden ou size 0, le badge sera
+   * invisible — on prévient l'utilisateur via la console.
+   */
+  const pcs = getComputedStyle(parent);
+  if (pcs.overflow === "hidden" || pcs.overflowX === "hidden" || pcs.overflowY === "hidden") {
+    Albert.warn("ensureBadge: le parent positionné a overflow:hidden, "
+      + "le badge peut être masqué", { parent, el });
+  }
+  Albert.log("ensureBadge: badge créé pour",
+    el.tagName.toLowerCase() + (el.id ? "#" + el.id : ""),
+    { parent: parent.tagName.toLowerCase() });
+
   /* Si le badge est en état de panne API, forcer la re-vérification
      (sinon le cache lastCheckedText empêcherait la relance). */
   const handleActivate = () => {

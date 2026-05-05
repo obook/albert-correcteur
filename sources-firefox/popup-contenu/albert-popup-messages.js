@@ -18,6 +18,9 @@
 "use strict";
 
 browser.runtime.onMessage.addListener((message) => {
+  Albert.log("onMessage:", message.type,
+    window.top !== window ? "(iframe " + location.href + ")" : "");
+
   if (message.type === "reformulateLoading") {
     Albert.showToast("Reformulation en cours\u2026", 30);
     return;
@@ -25,10 +28,18 @@ browser.runtime.onMessage.addListener((message) => {
 
   if (message.type === "reformulateResult") {
     if (message.result.error) {
+      Albert.warn("reformulateResult avec erreur:", message.result.error);
       Albert.showToast(message.result.error, 5);
       return;
     }
     const suggestions = message.result.corrections || [];
+    Albert.log("reformulateResult OK,", suggestions.length, "suggestions",
+      "savedSelection=" + (Albert.savedSelection ? Albert.savedSelection.type : "null"));
+    if (!Albert.savedSelection) {
+      Albert.warn("reformulateResult: aucune selection sauvegardee \u2014 "
+        + "le clic sur une suggestion ne pourra pas remplacer le texte. "
+        + "L'evenement contextmenu n'a peut-etre pas ete capte dans cette frame.");
+    }
     Albert.showReformulationPopup(message.originalText, suggestions);
   }
 

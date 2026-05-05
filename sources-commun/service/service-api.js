@@ -234,11 +234,13 @@ async function checkText(text, mode) {
         const desc = limitType
           ? `Limite ${limitType} dépassée.`
           : "Limite de débit dépassée.";
+        AlbertLog.warn("checkText:", mode, "429 (" + (limitType || "rate") + "), pause", retryAfter + "s");
         return {
           error: `${desc} Pause de ${retryAfter}s.`,
           retryAfter
         };
       }
+      AlbertLog.error("checkText:", mode, "API", response.status, "-", detail.slice(0, 500));
       return { error: `Erreur API (${response.status}) : ${detail}` };
     }
 
@@ -246,15 +248,19 @@ async function checkText(text, mode) {
     const data = await response.json();
     const rawContent = data.choices?.[0]?.message?.content;
     if (typeof rawContent !== "string") {
+      AlbertLog.error("checkText:", mode, "réponse API sans contenu, data=", data);
       return { error: "Réponse API invalide : contenu manquant." };
     }
     let parsed;
     try {
       parsed = JSON.parse(rawContent);
-    } catch {
+    } catch (err) {
+      AlbertLog.error("checkText:", mode, "JSON malformé:", err && err.message,
+        "rawContent=", rawContent.slice(0, 500));
       return { error: "Réponse API invalide : JSON malformé." };
     }
     if (!Array.isArray(parsed.corrections)) {
+      AlbertLog.error("checkText:", mode, "corrections manquantes, parsed=", parsed);
       return { error: "Réponse API invalide : corrections manquantes." };
     }
     /* Recalibrer les offsets : certains modèles retournent un offset
@@ -303,6 +309,7 @@ async function checkText(text, mode) {
     }).filter((c) => !c.suggestions || c.suggestions.length > 0);
     return { corrections, lang };
   } catch (err) {
+    AlbertLog.error("checkText:", mode, "exception:", err);
     return { error: `Erreur réseau : ${err.message}` };
   }
 }
@@ -355,11 +362,13 @@ async function translateText(text, targetLang) {
         const desc = limitType
           ? `Limite ${limitType} dépassée.`
           : "Limite de débit dépassée.";
+        AlbertLog.warn("translateText: 429 (" + (limitType || "rate") + "), pause", retryAfter + "s");
         return {
           error: `${desc} Pause de ${retryAfter}s.`,
           retryAfter
         };
       }
+      AlbertLog.error("translateText: API", response.status, "-", detail.slice(0, 500));
       return { error: `Erreur API (${response.status}) : ${detail}` };
     }
 
@@ -367,15 +376,19 @@ async function translateText(text, targetLang) {
     const data = await response.json();
     const rawContent = data.choices?.[0]?.message?.content;
     if (typeof rawContent !== "string") {
+      AlbertLog.error("translateText: réponse API sans contenu, data=", data);
       return { error: "Réponse API invalide : contenu manquant." };
     }
     let parsed;
     try {
       parsed = JSON.parse(rawContent);
-    } catch {
+    } catch (err) {
+      AlbertLog.error("translateText: JSON malformé:", err && err.message,
+        "rawContent=", rawContent.slice(0, 500));
       return { error: "Réponse API invalide : JSON malformé." };
     }
     if (typeof parsed.translation !== "string") {
+      AlbertLog.error("translateText: traduction manquante, parsed=", parsed);
       return { error: "Réponse API invalide : traduction manquante." };
     }
     return {
@@ -384,6 +397,7 @@ async function translateText(text, targetLang) {
       langCible: targetLang
     };
   } catch (err) {
+    AlbertLog.error("translateText: exception:", err);
     return { error: `Erreur réseau : ${err.message}` };
   }
 }

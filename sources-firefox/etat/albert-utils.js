@@ -70,6 +70,43 @@ Albert.isTextField = function (el) {
 };
 
 /**
+ * Diagnostic : explique pourquoi un élément n'est (ou n'est pas) considéré
+ * comme un champ texte. Utilisable depuis la console du navigateur :
+ *   Albert.diagnose(document.activeElement)
+ *
+ * @param {HTMLElement} el - Élément DOM à tester (par défaut : document.activeElement).
+ */
+Albert.diagnose = function (el) {
+  el = el || document.activeElement;
+  const out = { element: el };
+  if (!el || !el.tagName) {
+    out.verdict = "élément invalide ou sans tagName";
+    console.info("[Albert] diagnose:", out);
+    return out;
+  }
+  out.tag = el.tagName.toLowerCase();
+  out.type = el.type || "";
+  out.isContentEditable = el.isContentEditable;
+  out.isLoginField = Albert.isLoginField(el);
+  out.isTextField = Albert.isTextField(el);
+  out.isRichEditor = el.isContentEditable ? Albert.isRichEditor(el) : false;
+  const state = Albert.fieldStates.get(el);
+  out.attached = state ? state.attached : false;
+  out.focused = state ? state.focused : false;
+  out.hasBadge = state && state.badge ? document.contains(state.badge) : false;
+  out.frameInIframe = window.top !== window;
+  out.url = location.href;
+  if (out.isLoginField) out.verdict = "exclu : champ d'authentification";
+  else if (!out.isTextField) out.verdict = "non détecté comme champ texte";
+  else if (!out.attached) out.verdict = "détecté mais pas attaché — scanFields ne l'a pas vu";
+  else if (!out.focused) out.verdict = "attaché mais jamais focusé — le badge n'est créé qu'au premier focus";
+  else if (!out.hasBadge) out.verdict = "focusé mais badge absent du DOM — vérifier ensureBadge / parent positionné";
+  else out.verdict = "OK : champ pris en charge";
+  console.info("[Albert] diagnose:", out);
+  return out;
+};
+
+/**
  * Détecte si un contenteditable est géré par un éditeur riche.
  *
  * Les éditeurs riches (CKEditor, TinyMCE, Quill, ProseMirror,

@@ -73,7 +73,8 @@ async function fetchLimits() {
     cachedLimits = limits;
     limitsExpiry = now + CACHE_LIMITS_MS;
     return limits;
-  } catch {
+  } catch (err) {
+    AlbertLog.warn("fetchLimits a échoué, on garde le cache:", err && err.message);
     return cachedLimits;
   }
 }
@@ -111,7 +112,8 @@ async function fetchAliases() {
     cachedAliases = aliases;
     aliasesExpiry = now + CACHE_ALIASES_MS;
     return aliases;
-  } catch {
+  } catch (err) {
+    AlbertLog.warn("fetchAliases a échoué, on garde le cache:", err && err.message);
     return cachedAliases;
   }
 }
@@ -191,7 +193,8 @@ async function fetchDailyUsage(modelName) {
     cachedDailyUsageKey = canonical;
     dailyUsageExpiry = now + CACHE_DAILY_MS;
     return cachedDailyUsage;
-  } catch {
+  } catch (err) {
+    AlbertLog.warn("fetchDailyUsage a échoué:", err && err.message);
     return cachedDailyUsageKey === canonical ? cachedDailyUsage : null;
   }
 }

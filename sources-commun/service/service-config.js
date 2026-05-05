@@ -12,6 +12,23 @@
 
 "use strict";
 
+/*
+ * --- Logs de diagnostic du service worker ---
+ *
+ * Activable depuis la console "background" (about:debugging → Inspecter) :
+ *   AlbertLog.DEBUG = true
+ *
+ * log/info ne s'expriment que si DEBUG est vrai.
+ * warn et error sont toujours actifs pour ne pas masquer un crash.
+ */
+const AlbertLog = {
+  DEBUG: false,
+  log(...args)   { if (this.DEBUG) console.info("[Albert sw]", ...args); },
+  info(...args)  { if (this.DEBUG) console.info("[Albert sw]", ...args); },
+  warn(...args)  { console.warn("[Albert sw]", ...args); },
+  error(...args) { console.error("[Albert sw]", ...args); },
+};
+
 const DEFAULT_API_BASE = "https://albert.api.etalab.gouv.fr";
 
 /** URL par défaut de l'API Albert (DINUM / Etalab). */

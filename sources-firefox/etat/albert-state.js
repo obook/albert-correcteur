@@ -30,6 +30,22 @@
 
 window.Albert = {
   // ===============================================================
+  //  LOGS DE DIAGNOSTIC
+  // ===============================================================
+
+  /*
+   * Activable depuis la console : window.Albert.DEBUG = true
+   * Les méthodes log/info ne s'expriment que si DEBUG est vrai.
+   * warn et error sont toujours actifs, pour ne pas masquer
+   * un crash silencieux.
+   */
+  DEBUG: false,
+  log(...args)   { if (this.DEBUG) console.info("[Albert]", ...args); },
+  info(...args)  { if (this.DEBUG) console.info("[Albert]", ...args); },
+  warn(...args)  { console.warn("[Albert]", ...args); },
+  error(...args) { console.error("[Albert]", ...args); },
+
+  // ===============================================================
   //  CONFIGURATION
   // ===============================================================
 

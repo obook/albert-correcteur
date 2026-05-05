@@ -41,22 +41,50 @@ browser.contextMenus.create({
 
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
   const text = info.selectionText;
+  AlbertLog.log("contextMenu cliqué:", info.menuItemId,
+    "frameId=" + info.frameId,
+    "selectionText.length=" + (text ? text.length : 0));
+
   if (!text || text.trim().length < 3) {
+    AlbertLog.warn("contextMenu: sélection vide ou < 3 caractères, abandon "
+      + "(menu cliqué mais aucun message envoyé au content script).",
+      { menuItemId: info.menuItemId, selectionText: text });
     return;
   }
 
+  /*
+   * Cible explicitement la frame du clic-droit. Sans frameId, le message
+   * n'irait qu'à la frame top, ce qui rate les éditeurs en iframe
+   * (CKEditor d'EcoleDirecte, Confluence, etc.).
+   */
+  const sendOpts = typeof info.frameId === "number" ? { frameId: info.frameId } : undefined;
+
   if (info.menuItemId === "albert-reformulate") {
-    browser.tabs.sendMessage(tab.id, { type: "reformulateLoading" });
+    browser.tabs.sendMessage(tab.id, { type: "reformulateLoading" }, sendOpts)
+      .catch((err) => AlbertLog.error("sendMessage reformulateLoading a échoué:",
+        err && err.message, "(content script absent ou frame non autorisée ?)"));
+
+    AlbertLog.log("checkText(reformulation) en cours, longueur=" + text.length);
     const result = await checkText(text, "reformulation");
+    if (result.error) {
+      AlbertLog.warn("checkText(reformulation) erreur:", result.error);
+    } else {
+      AlbertLog.log("checkText(reformulation) OK,",
+        (result.corrections || []).length, "suggestions");
+    }
     browser.tabs.sendMessage(tab.id, {
       type: "reformulateResult",
       originalText: text,
       result,
-    });
+    }, sendOpts).catch((err) => AlbertLog.error(
+      "sendMessage reformulateResult a échoué:", err && err.message,
+      "(le toast de chargement va rester affiché jusqu'à expiration)"));
   }
 
   if (info.menuItemId === "albert-translate") {
-    browser.tabs.sendMessage(tab.id, { type: "translateGetSelection" });
+    browser.tabs.sendMessage(tab.id, { type: "translateGetSelection" }, sendOpts)
+      .catch((err) => AlbertLog.error("sendMessage translateGetSelection a échoué:",
+        err && err.message));
   }
 });
 

@@ -140,4 +140,8 @@ document.addEventListener("contextmenu", (e) => {
   } else {
     Albert.savedSelection = null;
   }
+  Albert.log("contextmenu:",
+    Albert.savedSelection ? Albert.savedSelection.type : "null",
+    Albert.savedSelection ? "len=" + Albert.savedSelection.text.length : "",
+    window.top !== window ? "(iframe " + location.href + ")" : "");
 });

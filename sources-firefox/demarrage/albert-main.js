@@ -46,6 +46,10 @@ Albert.attachField = function (el) {
   if (state.attached) return;
   state.attached = true;
 
+  Albert.log("attachField:", el.tagName.toLowerCase(),
+    { type: el.type || "", contenteditable: el.isContentEditable,
+      richEditor: el.isContentEditable && Albert.isRichEditor(el) });
+
   Albert.trackedFields.add(el);
 
   /* Désactiver le correcteur natif du navigateur pour éviter les doubles soulignements */
@@ -142,7 +146,10 @@ Albert.attachField = function (el) {
 
 /** Scanne la page pour trouver et attacher tous les champs texte existants. */
 Albert.scanFields = function () {
-  document.querySelectorAll(FIELD_SELECTOR).forEach(Albert.attachField);
+  const candidates = document.querySelectorAll(FIELD_SELECTOR);
+  Albert.log("scanFields:", candidates.length, "candidats trouvés",
+    window.top !== window ? "(iframe " + location.href + ")" : "");
+  candidates.forEach(Albert.attachField);
 };
 
 /*

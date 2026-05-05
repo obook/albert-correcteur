@@ -23,6 +23,8 @@
 "use strict";
 
 Albert.showReformulationPopup = function (originalText, suggestions) {
+  Albert.log("showReformulationPopup:", suggestions.length, "suggestions",
+    "originalText.length=" + originalText.length);
   Albert.closePopup();
   const loadingToast = document.querySelector(".albert-toast");
   if (loadingToast) loadingToast.remove();
@@ -98,6 +100,15 @@ Albert.showReformulationPopup = function (originalText, suggestions) {
 /* Applique la reformulation en utilisant la sélection sauvegardée. */
 Albert.applyReformulation = function (originalText, replacement) {
   const saved = Albert.savedSelection;
+  Albert.log("applyReformulation:",
+    saved ? "savedSelection." + saved.type : "savedSelection=null",
+    "replacement.length=" + replacement.length);
+  if (!saved) {
+    Albert.warn("applyReformulation: aucune sélection sauvegardée, "
+      + "remplacement impossible. L'éditeur a peut-être perdu le focus "
+      + "entre le contextmenu et le clic dans la popup.");
+    return;
+  }
 
   /* Éviter le double point final */
   const punctuation = [".", "!", "?", ";", ":"];
