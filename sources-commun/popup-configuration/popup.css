@@ -13,7 +13,7 @@ body {
   width: 350px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   font-size: 13px;
-  color: #333;
+  color: var(--pop-text);
   padding: 16px;
 }
 
@@ -40,7 +40,7 @@ label {
   margin: 10px 0 4px;
   font-weight: 500;
   font-size: 12px;
-  color: #555;
+  color: var(--pop-text-muted);
 }
 
 label:first-of-type {
@@ -53,17 +53,18 @@ input[type="url"],
 select {
   width: 100%;
   padding: 7px 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--pop-input-border);
   border-radius: 4px;
   font-size: 13px;
   font-family: inherit;
-  background: #fff;
+  background: var(--pop-input-bg);
+  color: var(--pop-text);
 }
 
 input:focus,
 select:focus {
   outline: none;
-  border-color: #000091;
+  border-color: var(--pop-link);
 }
 
 .model-row {
@@ -89,8 +90,8 @@ button {
   width: 100%;
   margin-top: 14px;
   padding: 8px;
-  background: #000091;
-  color: #fff;
+  background: var(--pop-button-bg);
+  color: var(--pop-button-text);
   border: none;
   border-radius: 4px;
   font-size: 13px;
@@ -99,7 +100,7 @@ button {
 }
 
 button:hover {
-  background: #0000b8;
+  background: var(--pop-button-hover);
 }
 
 .status {
@@ -109,12 +110,12 @@ button:hover {
   min-height: 18px;
 }
 
-.status.ok { color: #27ae60; }
-.status.err { color: #e74c3c; }
+.status.ok { color: var(--pop-status-ok); }
+.status.err { color: var(--pop-status-err); }
 
 .limits-section {
   margin-top: 14px;
-  background: #f6f6f6;
+  background: var(--pop-section-bg);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -122,7 +123,7 @@ button:hover {
 .limits-section summary {
   font-size: 12px;
   font-weight: 600;
-  color: #555;
+  color: var(--pop-text-muted);
   padding: 8px 10px;
   cursor: pointer;
   user-select: none;
@@ -138,12 +139,12 @@ button:hover {
 }
 
 .limits-section summary:hover {
-  background: #eee;
+  background: var(--pop-section-hover);
 }
 
 .limits-info {
   font-size: 12px;
-  color: #333;
+  color: var(--pop-text);
   line-height: 1.6;
   padding: 6px 10px 10px;
 }
@@ -158,16 +159,16 @@ button:hover {
 }
 
 .limits-info .limit-value.unlimited {
-  color: #27ae60;
+  color: var(--pop-status-ok);
 }
 
 .limits-info .tier-section-title {
   margin-top: 10px;
   padding-top: 8px;
-  border-top: 1px dashed #ddd;
+  border-top: 1px dashed var(--pop-tier-border);
   font-weight: 600;
   font-size: 11px;
-  color: #555;
+  color: var(--pop-text-muted);
 }
 
 .limits-info .tier-row {
@@ -176,7 +177,7 @@ button:hover {
 
 .limits-info .tier-title {
   font-size: 11px;
-  color: #777;
+  color: var(--pop-text-dim);
   font-weight: 500;
 }
 
@@ -185,7 +186,7 @@ button:hover {
   grid-template-columns: 1fr 1fr;
   gap: 2px 10px;
   font-size: 11px;
-  color: #444;
+  color: var(--pop-text-soft);
   margin-left: 6px;
 }
 
@@ -197,18 +198,18 @@ button:hover {
   margin-left: 0;
   margin-top: 4px;
   font-weight: 600;
-  color: #000091;
+  color: var(--pop-link);
 }
 
 .footer {
   margin-top: 16px;
   padding-top: 10px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--pop-footer-border);
   text-align: center;
 }
 
 .footer a {
-  color: #000091;
+  color: var(--pop-link);
   text-decoration: none;
   font-size: 12px;
 }
@@ -218,6 +219,6 @@ button:hover {
 }
 
 .footer-sep {
-  color: #ccc;
+  color: var(--pop-separator);
   margin: 0 4px;
 }

@@ -1,0 +1,73 @@
+/*
+ * popup-theme.css — Variables CSS pour le thème (sombre/clair) des
+ * pages popup.html (configuration) et popup-settings.html (paramètres).
+ *
+ * Le thème est appliqué via l'attribut data-theme sur <html> par
+ * popup-theme.js (lecture de browser.storage.local.popupTheme).
+ *
+ * Auteur : O. Booklage
+ * Date : Mai 2026
+ * Licence : MIT
+ */
+
+:root {
+  /* Thème clair (défaut) */
+  --pop-bg: #fff;
+  --pop-text: #333;
+  --pop-text-muted: #555;
+  --pop-text-faint: #888;
+  --pop-text-dim: #777;
+  --pop-text-soft: #444;
+  --pop-link: #000091;
+  --pop-link-hover: #0000b8;
+  --pop-link-tint: rgba(0, 0, 145, 0.2);
+  --pop-input-bg: #fff;
+  --pop-input-border: #ccc;
+  --pop-back-hover: #f0f0f0;
+  --pop-section-bg: #f6f6f6;
+  --pop-section-hover: #eee;
+  --pop-button-bg: #000091;
+  --pop-button-text: #fff;
+  --pop-button-hover: #0000b8;
+  --pop-footer-border: #eee;
+  --pop-separator: #ccc;
+  --pop-tier-border: #ddd;
+  --pop-status-ok: #27ae60;
+  --pop-status-err: #e74c3c;
+  --pop-tag-bg: #f0f0f0;
+  --pop-tag-button: #999;
+  --pop-preview-border: #ddd;
+}
+
+:root[data-theme="dark"] {
+  /* Thème sombre */
+  --pop-bg: #1e1e2e;
+  --pop-text: #e0e0e0;
+  --pop-text-muted: #aaa;
+  --pop-text-faint: #888;
+  --pop-text-dim: #999;
+  --pop-text-soft: #bbb;
+  --pop-link: #6cb6ff;
+  --pop-link-hover: #8ec5ff;
+  --pop-link-tint: rgba(108, 182, 255, 0.25);
+  --pop-input-bg: #272738;
+  --pop-input-border: #4a4a5a;
+  --pop-back-hover: #2a2a3c;
+  --pop-section-bg: #272738;
+  --pop-section-hover: #2f2f44;
+  --pop-button-bg: #3b82f6;
+  --pop-button-text: #fff;
+  --pop-button-hover: #2563eb;
+  --pop-footer-border: #3a3a4a;
+  --pop-separator: #4a4a5a;
+  --pop-tier-border: #3a3a4a;
+  --pop-status-ok: #4ade80;
+  --pop-status-err: #f87171;
+  --pop-tag-bg: #272738;
+  --pop-tag-button: #aaa;
+  --pop-preview-border: #4a4a5a;
+}
+
+body {
+  background: var(--pop-bg);
+}
