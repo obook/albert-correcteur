@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Albert Correcteur",
-  "version": "0.2.28",
+  "version": "0.2.29",
   "description": "Extension de correction orthographique, grammaticale et de traduction pour Thunderbird, propulsée par l'API Albert (DINUM).",
   "browser_specific_settings": {
     "gecko": {
@@ -41,7 +41,8 @@
       "service/service-limites.js",
       "service/service-api.js",
       "service/service-menus.js",
-      "service/service-compose-scripts.js"
+      "service/service-compose-scripts.js",
+      "service/service-compose-cleanup.js"
     ]
   }
 }
