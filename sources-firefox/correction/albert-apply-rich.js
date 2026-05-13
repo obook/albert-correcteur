@@ -17,8 +17,6 @@
  *    beforeinput → textInput → execCommand("insertText").
  * 5. Fallback paste si execCommand échoue.
  *
- * Inspiré de la technique d'EventMuter de LanguageTool.
- *
  * Dépendances :
  *   - albert-apply-segments.js (buildInnerTextSegments, findSegmentAt)
  *   - albert-apply.js          (findRealOffset)
@@ -37,7 +35,6 @@
  * peuvent réagir aux événements souris/pointer/sélection et déplacer leur curseur
  * interne. On mute ces événements en phase de capture au niveau du document
  * pour éviter toute interférence.
- * Inspiré de l'EventMuter de LanguageTool.
  */
 const _MUTED_EVENTS = [
   "mousedown", "mouseup", "mousemove", "mouseover", "mouseout",
@@ -138,8 +135,7 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
   const endRect = endRange.getBoundingClientRect();
 
   /*
-   * Simuler mousedown → mousemove → sélection → mousemove → mouseup
-   * (séquence complète, comme LanguageTool)
+   * Simuler la séquence complète mousedown → mousemove → sélection → mousemove → mouseup
    */
   Albert._simulateMouseEvent(startPos.node.parentElement || el, "mousedown", startRect);
   Albert._simulateMouseEvent(el, "mousemove", startRect);
