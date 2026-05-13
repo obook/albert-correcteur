@@ -45,7 +45,7 @@ Albert.renderCorrections = function (el) {
     state.badge.classList.toggle("albert-no-errors", !hasErrors);
     const img = state.badge.querySelector("img");
     if (img) {
-      img.src = hasErrors ? Albert.ICON_ERROR_URL : Albert.ICON_URL;
+      img.src = hasErrors ? Albert.ICON_ERROR_URL : Albert.ICON_OK_URL;
     }
     const title = hasErrors
       ? `${state.corrections.length} erreur${state.corrections.length > 1 ? "s" : ""}`

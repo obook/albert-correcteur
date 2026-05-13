@@ -39,6 +39,23 @@ const Albert = {
 
   /* Seuils badge */
   BADGE_MIN_LENGTH: 3,
+
+  /* État courant du badge (null | "loading" | "ok" | "has-errors" | "error") */
+  badgeState: null,
+
+  /* Dernière erreur connue : { message, retryAfter, timestamp } ou null */
+  lastError: null,
+};
+
+/* Helpers de log uniformes — préfixés [Albert] pour grep facile dans la console */
+Albert.log = function () {
+  console.log("[Albert]", ...arguments);
+};
+Albert.warn = function () {
+  console.warn("[Albert]", ...arguments);
+};
+Albert.error = function () {
+  console.error("[Albert]", ...arguments);
 };
 
 /* Charger les mots ignorés et le thème au démarrage */

@@ -214,7 +214,7 @@ Albert.triggerCheck = async function (el, force) {
       state.badge.classList.remove("albert-loading");
       const img = state.badge.querySelector("img");
       const hasErrors = state.corrections && state.corrections.length > 0;
-      if (img) img.src = hasErrors ? Albert.ICON_ERROR_URL : Albert.ICON_URL;
+      if (img) img.src = hasErrors ? Albert.ICON_ERROR_URL : Albert.ICON_OK_URL;
     }
   }
 };

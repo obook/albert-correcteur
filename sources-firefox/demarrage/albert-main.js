@@ -177,6 +177,14 @@ const observer = new MutationObserver((mutations) => {
   scanTimer = setTimeout(Albert.scanFields, Albert.SCAN_DEBOUNCE_MS);
 });
 
+/* Re-test au focus : un champ peut devenir éligible (auto-grow, modale qui s'affiche)
+   après le scan initial. On retente l'attachement à chaque focusin. */
+document.addEventListener("focusin", (e) => {
+  const el = e.target;
+  if (!el || Albert.trackedFields.has(el)) return;
+  Albert.attachField(el);
+}, true);
+
 // ===============================================================
 //  DÉMARRAGE
 // ===============================================================

@@ -40,6 +40,31 @@
       min-height: 80px;
     }
     .section { margin-bottom: 30px; }
+
+    /* Cas "trop petit" : sous les seuils 150x28 px */
+    .tiny-textarea {
+      width: 80px !important;
+      height: 20px !important;
+      min-height: 0;
+    }
+    .tiny-editable {
+      width: 120px;
+      min-height: 0 !important;
+      height: 18px;
+      overflow: hidden;
+    }
+
+    /* Cas "auto-grow au focus" : champ initialement petit qui s'agrandit au focus */
+    .auto-grow {
+      width: 80px;
+      height: 18px;
+      min-height: 0;
+      transition: width 0.2s, height 0.2s;
+    }
+    .auto-grow:focus {
+      width: 100%;
+      height: 100px;
+    }
     .DraftEditor-root, .lexical-editor {
       border: 1px solid #ccc;
       border-radius: 6px;
@@ -94,7 +119,7 @@
   </div>
 
   <div class="section">
-    <label for="input1">Input text</label>
+    <label for="input1">&lt;input type="text"&gt; (texte avec erreurs)</label>
     <input type="text" id="input1" value="Il a manger tout les gateaux.">
   </div>
 
@@ -103,10 +128,30 @@
     <div contenteditable="true">Je pence que sa va marcher. Les faute d'ortographe seront detectées.</div>
   </div>
 
-  <h1>Test champs d'authentification (ne doivent PAS être corrigés)</h1>
+  <h1>Test champs EXCLUS (badge attendu : aucun)</h1>
 
   <div class="section" style="border: 2px dashed #e74c3c; padding: 20px; border-radius: 8px;">
-    <p style="font-size: 13px; color: #e74c3c; margin-top: 0;">Albert ne doit ni afficher le badge ni corriger ces champs.</p>
+    <p style="font-size: 13px; color: #e74c3c; margin-top: 0;">
+      Albert ne doit ni afficher le badge ni corriger ces champs.
+      Pour diagnostiquer un cas dans la console : <code>Albert.diagnose(document.activeElement)</code>.
+    </p>
+
+    <label for="input-search">&lt;input type="search"&gt; — exclu</label>
+    <input type="search" id="input-search" value="Rechercher des erreur d'ortographe" style="margin-bottom: 10px;">
+
+    <label for="input-url">&lt;input type="url"&gt; — exclu</label>
+    <input type="url" id="input-url" value="https://exemple.fr/page-avec-des-faute" style="margin-bottom: 10px;">
+
+    <label for="tiny-input">&lt;input type="text"&gt; trop petit (largeur 80px, sous le seuil 150)</label>
+    <input type="text" id="tiny-input" value="Une faute d'ortografe" style="width: 80px; margin-bottom: 10px;">
+
+    <label for="tiny-ta">&lt;textarea&gt; trop petit (80×20px, sous le seuil 150×28)</label>
+    <textarea id="tiny-ta" class="tiny-textarea">Voici un texte avec une faute d'ortografe.</textarea>
+
+    <label for="tiny-ce" style="margin-top: 10px;">&lt;div contenteditable&gt; trop petit (120×18px)</label>
+    <div id="tiny-ce" class="tiny-editable" contenteditable="true">Petit champ avec faute d'ortografe.</div>
+
+    <p style="font-size: 13px; color: #e74c3c; margin: 20px 0 0;">Champs d'authentification (déjà exclus par isLoginField) :</p>
     <form autocomplete="on">
       <label for="login-user">Identifiant</label>
       <input type="text" id="login-user" name="username" autocomplete="username" placeholder="nom.prenom@ac-bordeaux.fr" style="margin-bottom: 10px;">
@@ -117,6 +162,17 @@
       <label for="login-pass">Mot de passe</label>
       <input type="password" id="login-pass" name="password" autocomplete="current-password" placeholder="********">
     </form>
+  </div>
+
+  <h1>Test auto-grow au focus (badge attendu APRÈS focus uniquement)</h1>
+
+  <div class="section" style="border: 2px dashed #f39c12; padding: 20px; border-radius: 8px;">
+    <p style="font-size: 13px; color: #f39c12; margin-top: 0;">
+      Champ initialement trop petit (80×18px) qui s'agrandit au focus (transition CSS).
+      Le badge doit apparaître après que tu cliques dessus, grâce au listener focusin global.
+    </p>
+    <label for="grow-ta">&lt;textarea&gt; auto-grow</label>
+    <textarea id="grow-ta" class="auto-grow">Cet exemple et fait pour tester l'auto-grow.</textarea>
   </div>
 
   <h1>Test éditeurs React (bug x.com)</h1>

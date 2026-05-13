@@ -20,6 +20,7 @@ Albert.debounceMaxTimer = null;
 Albert.scheduleCheck = function () {
   const text = Albert.getBodyText();
   if (text.trim().length < Albert.BADGE_MIN_LENGTH) {
+    Albert.log("scheduleCheck : texte trop court (", text.trim().length, "<", Albert.BADGE_MIN_LENGTH, "), réinitialisation badge");
     Albert.clearUnderlines();
     Albert.setBadgeState(null);
     return;
@@ -28,10 +29,12 @@ Albert.scheduleCheck = function () {
   if (Albert.debounceTimer) clearTimeout(Albert.debounceTimer);
 
   Albert.debounceTimer = setTimeout(() => {
+    Albert.log("scheduleCheck : debounce court écoulé (", Albert.DEBOUNCE_SHORT, "ms), déclenchement requestCheck");
     Albert.requestCheck(text);
   }, Albert.DEBOUNCE_SHORT);
 
   if (!Albert.debounceMaxTimer) {
+    Albert.log("scheduleCheck : démarrage timer max (", Albert.DEBOUNCE_MAX, "ms)");
     Albert.debounceMaxTimer = setTimeout(() => {
       Albert.debounceMaxTimer = null;
       if (Albert.debounceTimer) {
@@ -40,6 +43,7 @@ Albert.scheduleCheck = function () {
       }
       const currentText = Albert.getBodyText();
       if (currentText.trim().length >= Albert.BADGE_MIN_LENGTH) {
+        Albert.log("scheduleCheck : debounce max écoulé, déclenchement forcé requestCheck");
         Albert.requestCheck(currentText);
       }
     }, Albert.DEBOUNCE_MAX);

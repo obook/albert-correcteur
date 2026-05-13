@@ -97,6 +97,34 @@ Albert.applySuggestion = function (correction, suggestion) {
 
 Albert.triggerManualCheck = function () {
   const text = Albert.getBodyText();
-  if (text.trim().length < Albert.BADGE_MIN_LENGTH) return;
+  const state = Albert.badgeState;
+  Albert.log("triggerManualCheck : clic badge (state=", state, ", ", text.trim().length, "car.)");
+
+  if (text.trim().length < Albert.BADGE_MIN_LENGTH) {
+    Albert.showToast("Texte trop court pour être vérifié (" + Albert.BADGE_MIN_LENGTH + " caractères minimum).");
+    return;
+  }
+
+  if (state === "loading") {
+    Albert.showToast("Vérification déjà en cours…");
+    return;
+  }
+
+  if (state === "error") {
+    const last = Albert.lastError;
+    if (last && last.message) {
+      Albert.showToast("Dernière erreur : " + last.message + " — nouvelle tentative…");
+    } else {
+      Albert.showToast("Nouvelle tentative de vérification…");
+    }
+    /* Forcer une nouvelle requête même si le texte n'a pas changé */
+    if (Albert.composeState) Albert.composeState.checkedText = null;
+    Albert.requestCheck(text);
+    return;
+  }
+
+  /* États ok / has-errors / null : relance manuelle */
+  Albert.showToast("Vérification en cours…", 3000);
+  if (Albert.composeState) Albert.composeState.checkedText = null;
   Albert.requestCheck(text);
 };

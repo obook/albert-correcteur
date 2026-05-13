@@ -50,15 +50,18 @@ Albert.createBadge = function () {
 };
 
 Albert.setBadgeState = function (state) {
+  Albert.badgeState = state || null;
   const badge = Albert.badge;
   if (!badge) return;
   badge.className = "albert-badge";
   if (state) badge.classList.add("albert-" + state);
   const img = badge.querySelector("img");
   if (img) {
-    img.src = browser.runtime.getURL(
-      state === "loading" || state === "ok" ? "icons/icon.svg" : "icons/icon-error.svg"
-    );
+    let iconFile;
+    if (state === "ok") iconFile = "icons/icon-ok.svg";
+    else if (state === "loading") iconFile = "icons/icon.svg";
+    else iconFile = "icons/icon-error.svg";
+    img.src = browser.runtime.getURL(iconFile);
   }
 };
 

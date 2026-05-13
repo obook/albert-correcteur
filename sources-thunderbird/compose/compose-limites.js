@@ -44,5 +44,8 @@ Albert.loadLimits = async function () {
     const interval = Math.ceil(60000 / (limits.rpm * 0.4));
     Albert.DEBOUNCE_SHORT = Math.max(1500, interval);
     Albert.DEBOUNCE_MAX = Albert.DEBOUNCE_SHORT * 2.5;
+    Albert.log("loadLimits : rpm=", limits.rpm, "→ DEBOUNCE_SHORT=", Albert.DEBOUNCE_SHORT, "ms, DEBOUNCE_MAX=", Albert.DEBOUNCE_MAX, "ms");
+  } else {
+    Albert.log("loadLimits : pas de limites retournées par le service worker (défauts conservés)");
   }
 };

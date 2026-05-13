@@ -50,23 +50,37 @@ Albert.isLoginField = function (el) {
 /**
  * Vérifie si un élément est un champ de saisie texte exploitable.
  *
- * Reconnaît les textarea, les input texte (text, search, url) et
- * les contenteditable. Exclut les champs d'authentification.
+ * Reconnaît les textarea, les <input type="text"> et les contenteditable,
+ * à condition qu'ils soient visuellement assez grands. Exclut les autres
+ * types d'input (search, url, email, number, etc.) et les champs
+ * d'authentification.
  *
  * @param {HTMLElement} el - Élément DOM à tester.
  * @returns {boolean} true si l'élément est un champ texte.
  */
+Albert.MIN_FIELD_WIDTH_PX = 150;
+Albert.MIN_FIELD_HEIGHT_PX = 28;
+
 Albert.isTextField = function (el) {
   if (!el || !el.tagName) return false;
   if (Albert.isLoginField(el)) return false;
   const tag = el.tagName.toLowerCase();
-  if (tag === "textarea") return true;
-  if (tag === "input") {
+
+  let candidate = false;
+  if (tag === "textarea") candidate = true;
+  else if (tag === "input") {
     const type = (el.type || "text").toLowerCase();
-    return ["text", "search", "url"].includes(type);
+    candidate = (type === "text");
   }
-  if (el.isContentEditable) return true;
-  return false;
+  else if (el.isContentEditable) candidate = true;
+
+  if (!candidate) return false;
+
+  /* Seuil visuel : un champ trop petit n'est pas destiné à du texte rédigé */
+  const rect = el.getBoundingClientRect();
+  if (rect.width < Albert.MIN_FIELD_WIDTH_PX) return false;
+  if (rect.height < Albert.MIN_FIELD_HEIGHT_PX) return false;
+  return true;
 };
 
 /**
@@ -90,6 +104,8 @@ Albert.diagnose = function (el) {
   out.isLoginField = Albert.isLoginField(el);
   out.isTextField = Albert.isTextField(el);
   out.isRichEditor = el.isContentEditable ? Albert.isRichEditor(el) : false;
+  const rect = el.getBoundingClientRect();
+  out.size = { width: Math.round(rect.width), height: Math.round(rect.height) };
   const state = Albert.fieldStates.get(el);
   out.attached = state ? state.attached : false;
   out.focused = state ? state.focused : false;
@@ -97,6 +113,14 @@ Albert.diagnose = function (el) {
   out.frameInIframe = window.top !== window;
   out.url = location.href;
   if (out.isLoginField) out.verdict = "exclu : champ d'authentification";
+  else if (out.tag === "input" && (out.type || "text").toLowerCase() !== "text") {
+    out.verdict = "exclu : <input type=\"" + (out.type || "") + "\"> non géré (seul type=\"text\" est accepté)";
+  }
+  else if ((out.tag === "textarea" || out.tag === "input" || out.isContentEditable)
+    && (rect.width < Albert.MIN_FIELD_WIDTH_PX || rect.height < Albert.MIN_FIELD_HEIGHT_PX)) {
+    out.verdict = "exclu : champ trop petit (" + out.size.width + "x" + out.size.height
+      + "px, minimum " + Albert.MIN_FIELD_WIDTH_PX + "x" + Albert.MIN_FIELD_HEIGHT_PX + ")";
+  }
   else if (!out.isTextField) out.verdict = "non détecté comme champ texte";
   else if (!out.attached) out.verdict = "détecté mais pas attaché — scanFields ne l'a pas vu";
   else if (!out.focused) out.verdict = "attaché mais jamais focusé — le badge n'est créé qu'au premier focus";
