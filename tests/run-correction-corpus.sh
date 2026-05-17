@@ -40,13 +40,16 @@ PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 CORPUS_FILE="$SCRIPT_DIR/corpus/correction-samples.json"
 PROMPT_FULL="$PROJECT_DIR/sources-commun/prompts/correction.txt"
 PROMPT_LARGE="$PROJECT_DIR/sources-commun/prompts/correction-large.txt"
-API_URL="https://albert.api.etalab.gouv.fr/v1/chat/completions"
+# URL paramétrable via ALBERT_API_BASE pour tester contre une instance
+# alternative (mirroring, dev). Par défaut : l'API publique de l'État.
+API_BASE="${ALBERT_API_BASE:-https://albert.api.etalab.gouv.fr}"
+API_URL="${API_BASE%/}/v1/chat/completions"
 
-# Limites rpm documentées sur le palier EXP d'Albert (source :
+# Limites rpm et tpm documentées sur le palier EXP d'Albert (source :
 # sources-commun/popup-configuration/popup-limits.js). On respecte la
 # valeur la plus basse pour ne pas faire sauter le quota pendant la
-# campagne de mesure, même si le compte est en PROD avec un rpm plus
-# élevé : c'est cher en temps d'attente mais robuste à 100 %.
+# campagne de mesure, même si le compte est en PROD avec des limites
+# plus élevées : c'est cher en temps d'attente mais robuste à 100 %.
 rpm_for_model() {
     case "$1" in
         openweight-large)  echo 10 ;;
@@ -55,6 +58,21 @@ rpm_for_model() {
         *)                 echo 10 ;;
     esac
 }
+
+tpm_for_model() {
+    case "$1" in
+        openweight-large)  echo 128000 ;;
+        openweight-medium) echo 128000 ;;
+        openweight-small)  echo 128000 ;;
+        *)                 echo 128000 ;;
+    esac
+}
+
+# Estimation grossière de la taille d'une requête en tokens (prompt
+# système enrichi + texte utilisateur + réponse). Le prompt de
+# correction étoffé fait ~5500 tokens à lui seul. Surévalué exprès pour
+# garder une marge contre le 429 tpm.
+TOKENS_PER_REQUEST_EST=6500
 
 for dep in jq curl; do
     if ! command -v "$dep" >/dev/null 2>&1; then
@@ -81,8 +99,11 @@ build_system_prompt() {
 }
 
 # Interroge l'API pour une phrase et un modèle, renvoie la liste des
-# mots détectés (un par ligne) ou rien en cas d'erreur. Sur erreur
-# d'authentification (clé invalide), termine immédiatement le script.
+# mots détectés (un par ligne) ou rien en cas d'erreur. Sur 429 (rate
+# limit), retente jusqu'à MAX_RETRIES fois en respectant un délai
+# adaptatif. Sur erreur d'authentification, termine le script.
+MAX_RETRIES=3
+
 query_model() {
     local model="$1"
     local text="$2"
@@ -104,34 +125,59 @@ query_model() {
             ]
         }')
 
-    local response
-    response=$(curl -sS \
-        -H "Authorization: Bearer $API_KEY" \
-        -H "Content-Type: application/json" \
-        -d "$body" \
-        "$API_URL" 2>/dev/null || true)
+    local attempt=0
+    while [ "$attempt" -lt "$MAX_RETRIES" ]; do
+        attempt=$((attempt + 1))
+        local response
+        response=$(curl -sS \
+            -H "Authorization: Bearer $API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$body" \
+            "$API_URL" 2>/dev/null || true)
 
-    # En cas d'erreur HTTP/réseau, on signale et on renvoie vide.
-    if echo "$response" | jq -e '.error // .detail' >/dev/null 2>&1; then
+        # Pas d'erreur : on extrait les corrections et on sort.
+        if ! echo "$response" | jq -e '.error // .detail' >/dev/null 2>&1; then
+            echo "$response" | jq -r '
+                try (.choices[0].message.content
+                    | fromjson
+                    | .corrections[]?.word) catch empty
+            '
+            return
+        fi
+
         local err_msg
         err_msg=$(echo "$response" | jq -r '.error // .detail | tostring')
-        echo "" >&2
-        echo "[ERREUR] $model : $err_msg" >&2
-        # Auth invalide : inutile de continuer, on arrête tout.
+
+        # Auth invalide : on arrête tout.
         case "$err_msg" in
             *"Invalid API key"*|*"invalid_api_key"*|*"Unauthorized"*|*"401"*)
+                echo "" >&2
+                echo "[ERREUR] $model : $err_msg" >&2
                 echo "Clé API rejetée par Albert. Arrêt." >&2
                 exit 1
                 ;;
         esac
-        return
-    fi
 
-    echo "$response" | jq -r '
-        try (.choices[0].message.content
-            | fromjson
-            | .corrections[]?.word) catch empty
-    '
+        # Rate limit : on temporise puis on retente.
+        case "$err_msg" in
+            *"rate"*|*"limit"*|*"per minute"*|*"per day"*|*"429"*|*"tokens"*|*"requests"*)
+                local backoff=$((10 * attempt))
+                echo "" >&2
+                echo "[RATE LIMIT $attempt/$MAX_RETRIES] $model : $err_msg" >&2
+                echo "[ATTENTE] ${backoff}s puis nouvelle tentative" >&2
+                sleep "$backoff"
+                continue
+                ;;
+        esac
+
+        # Autre erreur : on abandonne cette phrase.
+        echo "" >&2
+        echo "[ERREUR] $model : $err_msg" >&2
+        return
+    done
+
+    echo "" >&2
+    echo "[ABANDON] $model : $MAX_RETRIES tentatives échouées" >&2
 }
 
 # Compare deux ensembles de mots (attendus vs détectés) en
@@ -157,7 +203,11 @@ score() {
 
     while IFS= read -r word; do
         if echo "$detected" | grep -iqxF "$word"; then
-            ((found++))
+            # Forme arithmétique plutôt que ((found++)) : ce dernier
+            # renvoie le code de sortie 1 quand found=0 (post-incrément
+            # qui retourne l'ancienne valeur), ce qui termine le script
+            # via set -e.
+            found=$((found + 1))
         fi
     done <<< "$expected"
 
@@ -177,12 +227,21 @@ for model in "${MODELS[@]}"; do
     total_found=0
     fp_count=0
 
-    # Délai entre deux requêtes pour respecter le rpm du modèle.
-    # +1s de marge sur le slot théorique (60/rpm) pour absorber un
-    # éventuel décalage d'horloge côté serveur.
+    # Délai entre deux requêtes : on respecte rpm ET tpm, en prenant
+    # le plus contraignant des deux + 1 s de marge. Le prompt
+    # actuel est suffisamment gros (~5500 tokens) pour que tpm soit
+    # généralement la contrainte limitante avant rpm.
     rpm=$(rpm_for_model "$model")
-    sleep_seconds=$(awk -v r="$rpm" 'BEGIN { printf "%d", (60.0 / r) + 1 }')
-    echo "  (rpm=$rpm -> pause de ${sleep_seconds}s entre chaque requête)"
+    tpm=$(tpm_for_model "$model")
+    sleep_seconds=$(awk \
+        -v r="$rpm" -v t="$tpm" -v tpr="$TOKENS_PER_REQUEST_EST" \
+        'BEGIN {
+            from_rpm = 60.0 / r;
+            from_tpm = (60.0 * tpr) / t;
+            slot = (from_rpm > from_tpm) ? from_rpm : from_tpm;
+            printf "%d", slot + 1;
+         }')
+    echo "  (rpm=$rpm, tpm=$tpm -> pause de ${sleep_seconds}s entre chaque requête)"
 
     for i in $(seq 0 $((total_samples - 1))); do
         sample=$(jq -c ".samples[$i]" "$CORPUS_FILE")
@@ -201,13 +260,16 @@ for model in "${MODELS[@]}"; do
         printf "  %-30s %s\n" "$id" "$result"
 
         # Stats agrégées : on ignore les phrases sans faute pour le ratio.
-        if [ -n "$expected_words" ]; then
-            n_expected=$(echo "$expected_words" | wc -l)
-            n_found=$(echo "$result" | cut -d/ -f1 || echo 0)
+        # On ne décompose le score que s'il a bien la forme "N/M", ce qui
+        # exclut tout cas ambigu (OK ..., FAUX POSITIFS ...) et évite une
+        # erreur arithmétique Bash silencieuse.
+        if [[ "$result" =~ ^([0-9]+)/([0-9]+)$ ]]; then
+            n_found=${BASH_REMATCH[1]}
+            n_expected=${BASH_REMATCH[2]}
             total_expected=$((total_expected + n_expected))
             total_found=$((total_found + n_found))
         elif echo "$result" | grep -q FAUX; then
-            ((fp_count++))
+            fp_count=$((fp_count + 1))
         fi
     done
 

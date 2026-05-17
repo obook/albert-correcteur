@@ -150,6 +150,13 @@ Albert.showTranslationPopup = function (originalText) {
     Albert.doTranslate(originalText, langSelect.value, resultDiv, copyBtn, loadingMsg, langInfoEl);
   });
 
+  /* Tout changement de langue cible déclenche une nouvelle traduction,
+     pour éviter une incohérence entre la langue affichée dans le menu
+     et le texte visible à l'écran. */
+  langSelect.addEventListener("change", () => {
+    Albert.doTranslate(originalText, langSelect.value, resultDiv, copyBtn, loadingMsg, langInfoEl);
+  });
+
   copyBtn.addEventListener("click", () => {
     navigator.clipboard.writeText(resultDiv.textContent).then(() => {
       copyBtn.textContent = "Copié !";

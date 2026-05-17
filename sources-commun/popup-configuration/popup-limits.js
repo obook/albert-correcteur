@@ -177,8 +177,14 @@ async function fetchDailyUsageForModel(apiBase, apiKey, canonicalId) {
       if (!ev || ev.model !== canonicalId) continue;
       if (typeof ev.created !== "number" || ev.created < utcMidnight) continue;
       rpdUsed += 1;
-      const tokens = (ev.usage || {}).prompt_tokens;
-      if (typeof tokens === "number") tpdUsed += tokens;
+      /* Le quota tpd côté Albert couvre prompt + completion. Sommer les
+         deux pour ne pas sous-évaluer l'usage affiché. */
+      const usage = ev.usage || {};
+      const promptTokens = typeof usage.prompt_tokens === "number"
+        ? usage.prompt_tokens : 0;
+      const completionTokens = typeof usage.completion_tokens === "number"
+        ? usage.completion_tokens : 0;
+      tpdUsed += promptTokens + completionTokens;
     }
     return { rpdUsed, tpdUsed };
   } catch {

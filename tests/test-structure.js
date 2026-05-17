@@ -120,7 +120,8 @@ test("manifest.json - popup déclarée", () => {
 test("service/ - tous les scripts partagés existent", () => {
   const fichiers = [
     "service-config.js", "service-langue.js", "service-prompts.js",
-    "service-limites.js", "service-api.js",
+    "service-limites.js", "service-fallback.js", "service-rate-limit.js",
+    "service-api.js",
   ];
   for (const f of fichiers) {
     assert.ok(fs.existsSync(path.join(SHARED, "service", f)), `Manquant : sources-commun/service/${f}`);

@@ -183,10 +183,14 @@ async function fetchDailyUsage(modelName) {
       if (!ev || ev.model !== canonical) continue;
       if (typeof ev.created !== "number" || ev.created < utcMidnight) continue;
       rpdUsed += 1;
+      /* Le quota tpd côté Albert couvre prompt + completion. Sommer les
+         deux pour ne pas sous-évaluer l'usage. */
       const usage = ev.usage || {};
-      const tokens = typeof usage.prompt_tokens === "number"
+      const promptTokens = typeof usage.prompt_tokens === "number"
         ? usage.prompt_tokens : 0;
-      tpdUsed += tokens;
+      const completionTokens = typeof usage.completion_tokens === "number"
+        ? usage.completion_tokens : 0;
+      tpdUsed += promptTokens + completionTokens;
     }
 
     cachedDailyUsage = { rpdUsed, tpdUsed };

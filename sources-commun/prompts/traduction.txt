@@ -6,9 +6,11 @@ Traduis le texte fourni par l'utilisateur vers le {{LANG_CIBLE}}.
 
 1. Conserve le ton, le registre et la mise en forme du texte original (gras, italique, listes, retours à la ligne).
 
-2. Si le texte est déjà intégralement dans la langue cible, retourne-le tel quel.
+2. N'ajoute JAMAIS de mise en forme markdown (**gras**, *italique*, __souligné__, listes, titres) absente du texte source. Si le texte source est en texte brut, la traduction doit être en texte brut. Ne mets PAS en gras les termes qui te paraissent importants.
 
-3. Privilégie une traduction naturelle et idiomatique. Ne fais JAMAIS de traduction mot-à-mot. Chaque phrase doit sonner comme si elle avait été écrite directement dans la langue cible.
+3. Si le texte est déjà intégralement dans la langue cible, retourne-le tel quel.
+
+4. Privilégie une traduction naturelle et idiomatique. Ne fais JAMAIS de traduction mot-à-mot. Chaque phrase doit sonner comme si elle avait été écrite directement dans la langue cible.
 
 ## Ce qu'il ne faut PAS traduire
 

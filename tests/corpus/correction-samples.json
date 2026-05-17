@@ -207,7 +207,7 @@
       "id": "negation-incomplete",
       "text": "Je mange pas de viande.",
       "expected": [
-        { "word": "mange pas", "type": "grammar" }
+        { "word": "mange", "type": "grammar" }
       ]
     },
     {
@@ -329,6 +329,33 @@
       "text": "Ses très important pour lui.",
       "expected": [
         { "word": "Ses", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "phrase-multi-fautes-session-17mai",
+      "text": "Bonjour à tous ! Je suis content de vous revoir. Cet exemple et fait pour tester l'extention Albert.",
+      "expected": [
+        { "word": "et", "type": "grammar" },
+        { "word": "extention", "type": "spelling" }
+      ]
+    },
+    {
+      "id": "cet-determinant-correct",
+      "text": "Cet exemple est fait pour tester. Cet outil fonctionne bien.",
+      "expected": []
+    },
+    {
+      "id": "extention-vs-extension",
+      "text": "L'extention Albert est installée.",
+      "expected": [
+        { "word": "extention", "type": "spelling" }
+      ]
+    },
+    {
+      "id": "et-est-dans-phrase-longue",
+      "text": "Le ciel et bleu et les oiseaux chantent.",
+      "expected": [
+        { "word": "et", "type": "grammar" }
       ]
     }
   ]

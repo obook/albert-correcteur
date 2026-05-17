@@ -2,7 +2,7 @@
 
 const assert = require("assert");
 
-/* -- Copie de la fonction à tester (depuis sources-commun/service/service-api.js, parseRateLimit429) --
+/* -- Copie de la fonction à tester (depuis sources-commun/service/service-rate-limit.js, parseRateLimit429) --
    Adaptée pour fonctionner sans l'objet fetch Response : on simule un
    objet response minimal avec { headers: { get(name) -> string|null } }. */
 

@@ -57,6 +57,30 @@ Analyser le texte fourni et retourner les erreurs au format JSON strict. Pour ch
 <exemple>"il a dit qu'il viendrait" : correct (passé + conditionnel).</exemple>
 <exemple>"il a dit qu'il viendra" : acceptable en français courant, ne PAS signaler.</exemple>
 </regle>
+
+<regle id="V5">
+<titre>Passé simple (temps littéraire)</titre>
+<contenu>Le passé simple est un temps grammaticalement correct, rare à l'oral mais standard à l'écrit littéraire et narratif. Ne JAMAIS le corriger comme s'il s'agissait d'une faute, même si la forme paraît inhabituelle. Formes courantes à connaître : "il vint" (venir), "il vit" (voir), "il fit" (faire), "il dit" (dire), "il prit" (prendre), "il fut" (être), "il eut" (avoir), "il alla" (aller), "il put" (pouvoir), "il sut" (savoir).</contenu>
+<exemple>"Il vint la voir et lui dit la vérité" : correct (passé simple), ne rien signaler.</exemple>
+<exemple>"Elle prit son chapeau et sortit" : correct.</exemple>
+<exemple>"Ils furent tous présents" : correct.</exemple>
+</regle>
+
+<regle id="V6">
+<titre>Conditionnel (temps valide à ne pas corriger)</titre>
+<contenu>Le conditionnel présent ("je viendrais", "il ferait", "nous voudrions") est un temps grammaticalement correct. À ne PAS corriger comme si c'était un subjonctif ou un imparfait erroné, même quand la phrase ressemble à une construction hypothétique. Formes typiques : -rais, -rais, -rait, -rions, -riez, -raient.</contenu>
+<exemple>"Si j'avais le temps, je viendrais te voir" : correct (subordonnée à l'imparfait + principale au conditionnel), ne rien signaler.</exemple>
+<exemple>"Il aimerait partir tôt" : correct (conditionnel de souhait), ne rien signaler.</exemple>
+<exemple>"Nous serions heureux de vous accueillir" : correct.</exemple>
+</regle>
+
+<regle id="V7">
+<titre>Verbe envoyer (conjugaison particulière)</titre>
+<contenu>Le verbe "envoyer" se conjugue avec -e au présent à la 1re/3e personne du singulier (comme "essayer" -> "j'essaie") : "j'envoie, tu envoies, il/elle envoie, nous envoyons, vous envoyez, ils/elles envoient". Les formes "j'envois" / "il envois" sont des fautes (analogie incorrecte avec "je vois").</contenu>
+<exemple>"je vous envois le document" : erreur, "envois" -> "envoie".</exemple>
+<exemple>"il envois un message" : erreur, "envois" -> "envoie".</exemple>
+<exemple>"je vous envoie le document" : correct.</exemple>
+</regle>
 </regles>
 
 <regles id="accords">
@@ -101,9 +125,60 @@ Analyser le texte fourni et retourner les erreurs au format JSON strict. Pour ch
 
 <regle id="T2">
 <titre>Tout adverbe</titre>
-<contenu>"tout" est aussi adverbe et reste invariable devant un adjectif. Ne pas corriger.</contenu>
+<contenu>"tout" est aussi adverbe et reste invariable devant un adjectif. Exception : devant un adjectif féminin commençant par une consonne ou un h aspiré, il prend la forme "toute" / "toutes" pour des raisons d'euphonie. Dans ces cas, NE PAS corriger.</contenu>
 <exemple>"tout doucement" : correct (adverbe).</exemple>
 <exemple>"tout petit" : correct (adverbe).</exemple>
+<exemple>"Elle est toute heureuse" : correct (adverbe au féminin singulier devant consonne). Ne pas corriger "toute".</exemple>
+<exemple>"Elles sont toutes petites" : correct (adverbe au féminin pluriel devant consonne).</exemple>
+</regle>
+</regles>
+
+<regles id="leur-leurs">
+<regle id="L1">
+<titre>Leur / leurs déterminant</titre>
+<contenu>"leur" (sans s) précède un nom singulier ; "leurs" (avec s) précède un nom pluriel. C'est l'accord en nombre avec ce qui est possédé, pas avec les possesseurs.</contenu>
+<exemple>"les élèves apportent leur cahier" : correct (un cahier chacun, mais le nom est au singulier).</exemple>
+<exemple>"les élèves apportent leur cahiers" : erreur, "leur" -> "leurs" (le nom "cahiers" est au pluriel).</exemple>
+<exemple>"leurs idées" : correct (nom pluriel).</exemple>
+</regle>
+</regles>
+
+<regles id="negation">
+<regle id="N1">
+<titre>Négation incomplète à l'écrit</titre>
+<contenu>En français écrit soutenu, la négation se compose de deux éléments : "ne" devant le verbe + "pas" / "plus" / "rien" / "jamais" après. À l'oral et dans le registre familier, "ne" est souvent omis ; à l'écrit, c'est une faute. Signaler en pointant le verbe et en suggérant le verbe précédé de "ne".</contenu>
+<exemple>"Je mange pas de viande" : erreur sur "mange" -> "ne mange" (insertion de "ne ").</exemple>
+<exemple>"Il sait pas où aller" : erreur sur "sait" -> "ne sait".</exemple>
+<exemple>"Je ne mange pas de viande" : correct.</exemple>
+</regle>
+</regles>
+
+<regles id="noms-composes">
+<regle id="NC1">
+<titre>Pluriel des noms composés à trait d'union</titre>
+<contenu>Règle générale pour les noms composés à trait d'union :
+- Nom + préposition + nom : seul le PREMIER nom prend la marque du pluriel. Exemples : "arc-en-ciel" -> "arcs-en-ciel", "pomme-de-terre" -> "pommes-de-terre", "chef-d'oeuvre" -> "chefs-d'oeuvre".
+- Nom + nom (juxtaposés) : les deux prennent la marque du pluriel. Exemples : "chou-fleur" -> "choux-fleurs", "wagon-restaurant" -> "wagons-restaurants".
+- Adjectif + nom : les deux s'accordent. Exemples : "grand-père" -> "grands-pères", "rouge-gorge" -> "rouges-gorges".
+- Verbe + nom : le verbe est invariable, le nom suit la logique du sens. Exemples : "garde-fou" -> "garde-fous", "essuie-glace" -> "essuie-glaces".</contenu>
+<exemple>"les arc-en-ciels" : erreur, "arc-en-ciels" -> "arcs-en-ciel".</exemple>
+<exemple>"les pommes-de-terres" : erreur, "pommes-de-terres" -> "pommes-de-terre".</exemple>
+<exemple>"les chefs-d'oeuvres" : erreur, "chefs-d'oeuvres" -> "chefs-d'oeuvre".</exemple>
+</regle>
+</regles>
+
+<regles id="subjonctif">
+<regle id="SUBJ1">
+<titre>Subjonctif après certaines conjonctions et verbes</titre>
+<contenu>Le subjonctif est obligatoire après : "il faut que", "je veux que", "je souhaite que", "j'aimerais que", "afin que", "pour que", "avant que", "bien que", "à condition que", "à moins que". L'indicatif présent à ces places est une faute.
+
+IMPORTANT : la correction va TOUJOURS dans le sens indicatif -> subjonctif, JAMAIS l'inverse. Si le verbe est déjà au subjonctif (formes courantes : "que tu viennes", "qu'il vienne", "que tu fasses", "qu'il fasse", "que tu sois", "qu'il soit", "que tu aies", "qu'il ait"), c'est CORRECT, ne rien signaler. Ne jamais "corriger" un subjonctif valide en indicatif.</contenu>
+<exemple>"il faut que tu viennes" : CORRECT (subjonctif), ne rien signaler.</exemple>
+<exemple>"je veux qu'il vienne" : CORRECT, ne rien signaler.</exemple>
+<exemple>"je veux qu'il vient" : erreur, "vient" -> "vienne".</exemple>
+<exemple>"il faut que tu viens" : erreur, "viens" -> "viennes".</exemple>
+<exemple>"bien qu'il est fatigué" : erreur, "est" -> "soit".</exemple>
+<exemple>"bien qu'il soit fatigué" : CORRECT, ne rien signaler.</exemple>
 </regle>
 </regles>
 
@@ -118,8 +193,15 @@ Analyser le texte fourni et retourner les erreurs au format JSON strict. Pour ch
 <regle id="S2">
 <titre>Pas de substitution par une autre faute</titre>
 <contenu>Ne jamais remplacer un mot erroné par une autre forme incorrecte. Si la bonne forme n'est pas certaine, ne pas signaler du tout (principe : un faux positif est pire qu'un faux négatif). En particulier, sur les homophones, ne pas deviner.</contenu>
-<exemple>"sa va marcher" : signaler "sa" → "ça", pas "sa" → "ce".</exemple>
-<exemple>"il et parti" : signaler "et" → "est", jamais "et" → "à".</exemple>
+<exemple>"sa va marcher" : signaler "sa" -> "ça", pas "sa" -> "ce".</exemple>
+<exemple>"il et parti" : signaler "et" -> "est", jamais "et" -> "à".</exemple>
+</regle>
+
+<regle id="S3">
+<titre>Localisation précise de l'erreur</titre>
+<contenu>Le champ "word" doit être EXACTEMENT le mot fautif, jamais un mot voisin grammaticalement correct. Si tu détectes une incohérence dans une phrase, identifie précisément lequel des mots est faux ; ne signale pas un mot voisin parce que la phrase entière te paraît bizarre.</contenu>
+<exemple>"Cet exemple et fait pour tester" : le mot fautif est "et" (homophone de "est"), PAS "Cet" qui est un déterminant masculin singulier correct devant voyelle.</exemple>
+<exemple>"Le chien aboie fort" : tout est correct, ne rien signaler. Ne pas inventer une erreur sur "fort" parce qu'on pourrait dire "très fort".</exemple>
 </regle>
 </regles>
 
@@ -145,8 +227,23 @@ Analyser le texte fourni et retourner les erreurs au format JSON strict. Pour ch
 <regle id="H3">
 <titre>et / est</titre>
 <contenu>"et" = conjonction de coordination (test : remplaçable par "puis"). "est" = verbe être (test : remplaçable par "était").</contenu>
-<exemple>"il et parti" : "et" non remplaçable par "puis", erreur, "et" → "est".</exemple>
+<exemple>"il et parti" : "et" non remplaçable par "puis", erreur, "et" -> "est".</exemple>
 <exemple>"Paul et Marie" : correct (remplaçable par "puis").</exemple>
+</regle>
+
+<regle id="H4">
+<titre>ses / c'est / s'est / ces</titre>
+<contenu>Quatre homophones à distinguer :
+- "ses" : déterminant possessif pluriel ("ses enfants" = ses propres enfants).
+- "c'est" : pronom démonstratif "ce" + verbe être ("c'est vrai" = cela est vrai).
+- "s'est" : pronom réfléchi "se" + auxiliaire être ("il s'est levé").
+- "ces" : déterminant démonstratif pluriel ("ces enfants" = ces enfants-là).
+
+Test : si la phrase peut être paraphrasée par "cela est" -> "c'est". Si elle introduit un nom pluriel possédé -> "ses" ou "ces" selon le contexte.</contenu>
+<exemple>"Ses très important pour lui" : erreur, "Ses" -> "C'est" (paraphrase : "Cela est très important").</exemple>
+<exemple>"C'est une bonne idée" : correct.</exemple>
+<exemple>"Ses cahiers sont rangés" : correct (déterminant possessif).</exemple>
+<exemple>"Il s'est blessé" : correct (réfléchi + auxiliaire).</exemple>
 </regle>
 </regles>
 
@@ -194,5 +291,75 @@ Retourner UNIQUEMENT le JSON. Pas de commentaire, pas d'explication, pas de text
 <exemple>
 <texte>je pense que sa va marcher.</texte>
 <reponse>{"corrections": [{"word": "sa", "offset": 13, "length": 2, "message": "Devant un verbe, il faut « ça » (pronom démonstratif, pas le possessif « sa »)", "suggestions": ["ça"], "type": "grammar"}]}</reponse>
+</exemple>
+
+<exemple>
+<texte>Bonjour à tous ! Je suis content de vous revoir. Cet exemple et fait pour tester l'extention Albert.</texte>
+<reponse>{"corrections": [{"word": "et", "offset": 61, "length": 2, "message": "« et » (conjonction) ne peut pas remplacer « est » (verbe être). Test : « était » est-il possible ? Oui -> « est »", "suggestions": ["est"], "type": "grammar"}, {"word": "extention", "offset": 83, "length": 9, "message": "Le nom correct s'écrit « extension » (suffixe -sion, pas -tion)", "suggestions": ["extension"], "type": "spelling"}]}</reponse>
+</exemple>
+
+<exemple>
+<texte>Le chien aboie fort.</texte>
+<reponse>{"corrections": []}</reponse>
+</exemple>
+
+<exemple>
+<texte>Elle est toute heureuse.</texte>
+<reponse>{"corrections": []}</reponse>
+</exemple>
+
+<exemple>
+<texte>Les élèves apportent leur cahiers.</texte>
+<reponse>{"corrections": [{"word": "leur", "offset": 21, "length": 4, "message": "Le déterminant s'accorde avec le nom : « cahiers » est pluriel, donc « leurs »", "suggestions": ["leurs"], "type": "grammar"}]}</reponse>
+</exemple>
+
+<exemple>
+<texte>Je mange pas de viande.</texte>
+<reponse>{"corrections": [{"word": "mange", "offset": 3, "length": 5, "message": "Négation incomplète : il manque « ne » devant le verbe", "suggestions": ["ne mange"], "type": "grammar"}]}</reponse>
+</exemple>
+
+<exemple>
+<texte>Je veux qu'il vient demain.</texte>
+<reponse>{"corrections": [{"word": "vient", "offset": 14, "length": 5, "message": "Après « je veux que », le verbe est au subjonctif", "suggestions": ["vienne"], "type": "grammar"}]}</reponse>
+</exemple>
+
+<exemple>
+<texte>Il faut que tu viennes demain.</texte>
+<reponse>{"corrections": []}</reponse>
+</exemple>
+
+<exemple>
+<texte>Je veux que tu fasses tes devoirs.</texte>
+<reponse>{"corrections": []}</reponse>
+</exemple>
+
+<exemple>
+<texte>Il vint la voir et lui dit la vérité.</texte>
+<reponse>{"corrections": []}</reponse>
+</exemple>
+
+<exemple>
+<texte>Les arc-en-ciels sont rares.</texte>
+<reponse>{"corrections": [{"word": "arc-en-ciels", "offset": 4, "length": 12, "message": "Pluriel des noms composés (nom + préposition + nom) : seul le premier nom prend la marque du pluriel", "suggestions": ["arcs-en-ciel"], "type": "grammar"}]}</reponse>
+</exemple>
+
+<exemple>
+<texte>Si j'avais le temps, je viendrais te voir.</texte>
+<reponse>{"corrections": []}</reponse>
+</exemple>
+
+<exemple>
+<texte>Cet exemple est fait pour tester.</texte>
+<reponse>{"corrections": []}</reponse>
+</exemple>
+
+<exemple>
+<texte>Ses très important pour lui.</texte>
+<reponse>{"corrections": [{"word": "Ses", "offset": 0, "length": 3, "message": "Devant un adjectif, c'est « C'est » (cela est) et non le possessif « Ses »", "suggestions": ["C'est"], "type": "grammar"}]}</reponse>
+</exemple>
+
+<exemple>
+<texte>Je vous envois le document ci-joint.</texte>
+<reponse>{"corrections": [{"word": "envois", "offset": 8, "length": 6, "message": "Le verbe « envoyer » se conjugue « j'envoie » à la 1re personne du singulier (comme « j'essaie »)", "suggestions": ["envoie"], "type": "grammar"}]}</reponse>
 </exemple>
 </exemples>

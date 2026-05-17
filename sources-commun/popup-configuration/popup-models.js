@@ -28,16 +28,9 @@ const MODEL_DESCRIPTIONS = {
 };
 
 /*
- * Table id canonique -> alias serveur, dupliquée du service worker
- * pour normaliser côté popup une configuration potentiellement
- * enregistrée sous l'id canonique (versions antérieures du projet).
+ * CANONICAL_TO_ALIAS et normalizeModelId sont fournis par
+ * util/model-aliases.js, chargé dans popup.html avant ce script.
  */
-const CANONICAL_TO_ALIAS = {
-  "openai/gpt-oss-120b": "openweight-large",
-  "mistralai/mistral-small-3.2-24b-instruct-2506": "openweight-medium",
-  "mistralai/ministral-3-8b-instruct-2512": "openweight-small",
-  "qwen/qwen3-coder-30b-a3b-instruct": "openweight-code",
-};
 
 /*
  * Types de tâche acceptés comme "modèle de chat" côté API.
@@ -55,20 +48,6 @@ const CHAT_TYPES = new Set(["text-generation", "image-text-to-text"]);
 
 const modelSelect = document.getElementById("model");
 const refreshBtn = document.getElementById("refresh-models");
-
-/**
- * Normalise un identifiant de modèle vers son alias serveur stable.
- *
- * @param {string} id - Alias ou id canonique.
- * @returns {string}
- */
-function normalizeModelId(id) {
-  if (!id) return id;
-  const lower = id.toLowerCase();
-  if (lower in CANONICAL_TO_ALIAS) return CANONICAL_TO_ALIAS[lower];
-  if (lower.startsWith("openweight-")) return lower;
-  return id;
-}
 
 /**
  * Renvoie l'identifiant à afficher pour un modèle de la réponse API.

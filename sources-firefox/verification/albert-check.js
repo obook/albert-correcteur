@@ -149,8 +149,11 @@ Albert.triggerCheck = async function (el, force) {
 
     if (response.error) {
       console.warn("[Albert]", response.error);
-      if (response.retryAfter || response.error.includes("Limite de débit") || response.error.includes("Pause") || response.error.includes("Quota")) {
-        const delay = (response.retryAfter || 30) * 1000;
+      /* Toute réponse de rate-limit du service worker porte le champ
+         retryAfter ; c'est notre marqueur unique, indépendant du libellé
+         textuel du message. */
+      if (response.retryAfter) {
+        const delay = response.retryAfter * 1000;
         Albert.rateLimited = true;
         Albert.showRateLimitWarning(el, response.error);
         setTimeout(() => { Albert.rateLimited = false; }, delay);

@@ -118,13 +118,6 @@ function pluralForm(word) {
   return word + "s";
 }
 
-/*
- * Règle composite : sur "tout les <mot>" ou "toute les <mot>", on
- * suggère aussi le pluriel du mot suivant. Ne s'applique que si la
- * pluralisation est sûre (cf. pluralForm).
- */
-const PATTERN_TOUT_LES_NOM = /\btout(?:e)?\s+(?:les|mes|tes|ses|nos|vos|leurs|ces)\s+([a-zàâçéèêëîïôûùüÿ]+)/gi;
-
 /**
  * Détecte les noms à pluraliser dans le pattern "tout/toute + dét.
  * pluriel + nom singulier". Émet une correction sur le nom.
@@ -133,14 +126,18 @@ const PATTERN_TOUT_LES_NOM = /\btout(?:e)?\s+(?:les|mes|tes|ses|nos|vos|leurs|ce
  * REGLES_LOCALES classiques ; ce module se concentre uniquement sur le
  * mot suivant.
  *
+ * La RegExp est instanciée localement à chaque appel : un pattern avec
+ * flag /g partagé au niveau module conserve un lastIndex global qui
+ * peut interférer avec d'autres appels concurrents.
+ *
  * @param {string} text
  * @returns {Array}
  */
 function findNounsAfterToutLes(text) {
+  const pattern = /\btout(?:e)?\s+(?:les|mes|tes|ses|nos|vos|leurs|ces)\s+([a-zàâçéèêëîïôûùüÿ]+)/gi;
   const corrections = [];
-  PATTERN_TOUT_LES_NOM.lastIndex = 0;
   let m;
-  while ((m = PATTERN_TOUT_LES_NOM.exec(text)) !== null) {
+  while ((m = pattern.exec(text)) !== null) {
     const noun = m[1];
     const plural = pluralForm(noun);
     if (!plural || plural === noun) continue;

@@ -2,7 +2,7 @@
 
 const assert = require("assert");
 
-/* -- Copie de la logique à tester (depuis sources-commun/service/service-api.js) --
+/* -- Copie de la logique à tester (depuis sources-commun/service/service-fallback.js) --
    La copie est instrumentée avec une horloge injectable et expose les
    maps internes (consecutive429, fallbackUntil) en paramètre pour
    pouvoir simuler des séquences indépendantes par test. */
@@ -10,11 +10,13 @@ const assert = require("assert");
 const FALLBACK_TRIGGER_429 = 2;
 const FALLBACK_DURATION_MS = 60000;
 
+/* Doit refléter exactement la FALLBACK_CHAIN de service-fallback.js.
+   Les ids canoniques (gpt-oss-120b, etc.) sont normalisés en alias par
+   loadConfig() avant d'atteindre cette table, donc seuls les alias y
+   figurent. */
 const FALLBACK_CHAIN = {
   "openweight-large": "openweight-medium",
   "openweight-medium": "openweight-small",
-  "openai/gpt-oss-120b": "openweight-medium",
-  "mistralai/mistral-small-3.2-24b-instruct-2506": "openweight-small",
 };
 
 function createFallbackState() {
@@ -154,15 +156,13 @@ test("Pas de fallback connu : pas de bascule (small)", () => {
   assert.strictEqual(state.consecutive429.get("openweight-small"), 2);
 });
 
-test("Id canonique reconnu (gpt-oss-120b -> openweight-medium)", () => {
-  const state = createFallbackState();
-  record429(state, "openai/gpt-oss-120b", 1000);
-  record429(state, "openai/gpt-oss-120b", 2000);
-  assert.strictEqual(
-    selectEffectiveModel(state, "openai/gpt-oss-120b", 3000),
-    "openweight-medium"
-  );
-});
+/* Note : il existait ici un test "Id canonique reconnu (gpt-oss-120b
+   -> openweight-medium)" qui validait des entrées canoniques dans
+   FALLBACK_CHAIN. Ces entrées ont été supprimées du module de
+   production : la normalisation canonique -> alias est faite en amont
+   par normalizeModelId() dans service-config.js. La couverture
+   correspondante doit aller dans une suite dédiée à
+   normalizeModelId, pas ici. */
 
 test("Modèle inconnu : pas de bascule, comportement transparent", () => {
   const state = createFallbackState();
