@@ -149,7 +149,7 @@ Albert.triggerCheck = async function (el, force) {
 
     if (response.error) {
       console.warn("[Albert]", response.error);
-      if (response.retryAfter || response.error.includes("Limite de débit") || response.error.includes("Pause")) {
+      if (response.retryAfter || response.error.includes("Limite de débit") || response.error.includes("Pause") || response.error.includes("Quota")) {
         const delay = (response.retryAfter || 30) * 1000;
         Albert.rateLimited = true;
         Albert.showRateLimitWarning(el, response.error);

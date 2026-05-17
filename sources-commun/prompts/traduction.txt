@@ -35,7 +35,7 @@ Traduis tout le reste, y compris :
 
 Certains termes techniques ont un équivalent établi dans la langue cible, d'autres non. Voici la règle :
 
-**Anglais → Français — termes à traduire :**
+**Anglais → Français - termes à traduire :**
 - "file" → "fichier" (pas "file")
 - "software" → "logiciel"
 - "hardware" → "matériel"
@@ -55,7 +55,7 @@ Certains termes techniques ont un équivalent établi dans la langue cible, d'au
 - "open source" → "open source" (garder, locution adoptée)
 - "machine learning" → "apprentissage automatique"
 
-**Français → Anglais — termes à traduire :**
+**Français → Anglais - termes à traduire :**
 - "logiciel" → "software"
 - "fichier" → "file"
 - "ordinateur" → "computer"
@@ -66,7 +66,7 @@ Certains termes techniques ont un équivalent établi dans la langue cible, d'au
 - "bibliothèque" → "library"
 - "apprentissage automatique" → "machine learning"
 
-## Faux amis — ATTENTION
+## Faux amis - ATTENTION
 
 Ne confonds pas ces mots qui se ressemblent entre langues mais ont des sens différents :
 

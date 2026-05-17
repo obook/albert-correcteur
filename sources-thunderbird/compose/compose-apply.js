@@ -113,7 +113,7 @@ Albert.triggerManualCheck = function () {
   if (state === "error") {
     const last = Albert.lastError;
     if (last && last.message) {
-      Albert.showToast("Dernière erreur : " + last.message + " — nouvelle tentative…");
+      Albert.showToast("Dernière erreur : " + last.message + " - nouvelle tentative…");
     } else {
       Albert.showToast("Nouvelle tentative de vérification…");
     }

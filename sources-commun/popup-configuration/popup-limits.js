@@ -39,30 +39,18 @@ const LIMIT_LABELS = {
  * Paliers documentés Albert par modèle (source : page tarifs publique
  * https://albert.sites.beta.gouv.fr/prices/).
  *
- * Indexés à la fois par alias serveur (openweight-large, ...) et par
- * id canonique (openai/gpt-oss-120b, ...) pour résister aux deux
- * façons dont le modèle peut apparaître dans la configuration.
+ * Indexés uniquement par alias serveur. Toute entrée reçue sous forme
+ * d'id canonique est convertie en alias par normalizeModelId() (cf.
+ * popup-models.js) avant le lookup.
  *
  * Une valeur null représente un quota "illimité" selon la documentation.
  */
 const DOCUMENTED_MODEL_LIMITS = {
-  "openai/gpt-oss-120b": {
-    exp:  { rpm: 10, rpd: 1000,   tpm: 128000, tpd: 1280000 },
-    prod: { rpm: 50, rpd: 5000,   tpm: 246000, tpd: null },
-  },
   "openweight-large": {
     exp:  { rpm: 10, rpd: 1000,   tpm: 128000, tpd: 1280000 },
     prod: { rpm: 50, rpd: 5000,   tpm: 246000, tpd: null },
   },
-  "mistralai/mistral-small-3.2-24b-instruct-2506": {
-    exp:  { rpm: 50,  rpd: 1000,  tpm: 128000, tpd: 2460000 },
-    prod: { rpm: 100, rpd: 50000, tpm: 246000, tpd: null },
-  },
   "openweight-medium": {
-    exp:  { rpm: 50,  rpd: 1000,  tpm: 128000, tpd: 2460000 },
-    prod: { rpm: 100, rpd: 50000, tpm: 246000, tpd: null },
-  },
-  "mistralai/ministral-3-8b-instruct-2512": {
     exp:  { rpm: 50,  rpd: 1000,  tpm: 128000, tpd: 2460000 },
     prod: { rpm: 100, rpd: 50000, tpm: 246000, tpd: null },
   },
@@ -74,21 +62,18 @@ const DOCUMENTED_MODEL_LIMITS = {
 
 /**
  * Cherche les paliers documentés pour un identifiant de modèle.
- * Tolère casse différente (openweight-LARGE vs openweight-large).
+ *
+ * Normalise l'identifiant en alias serveur ([[normalizeModelId]] de
+ * popup-models.js) pour gérer les configurations héritées qui auraient
+ * été enregistrées sous un id canonique.
  *
  * @param {string} modelId - Alias ou id canonique du modèle.
  * @returns {{exp: Object, prod: Object} | null}
  */
 function documentedLimitsFor(modelId) {
   if (!modelId) return null;
-  if (modelId in DOCUMENTED_MODEL_LIMITS) {
-    return DOCUMENTED_MODEL_LIMITS[modelId];
-  }
-  const lower = modelId.toLowerCase();
-  for (const [key, value] of Object.entries(DOCUMENTED_MODEL_LIMITS)) {
-    if (key.toLowerCase() === lower) return value;
-  }
-  return null;
+  const alias = normalizeModelId(modelId);
+  return DOCUMENTED_MODEL_LIMITS[alias] || null;
 }
 
 /**

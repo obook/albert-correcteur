@@ -47,40 +47,40 @@ test("reformulation.txt contient le placeholder {{LANG}}", () => {
   assert.ok(content.includes("{{LANG}}"));
 });
 
-test("correction.txt — substitution français", () => {
+test("correction.txt - substitution français", () => {
   const template = fs.readFileSync(path.join(PROMPTS_DIR, "correction.txt"), "utf-8");
   const result = buildPrompt(template, "fr");
   assert.ok(result.includes("français"));
   assert.ok(!result.includes("{{LANG}}"));
 });
 
-test("correction.txt — substitution anglais", () => {
+test("correction.txt - substitution anglais", () => {
   const template = fs.readFileSync(path.join(PROMPTS_DIR, "correction.txt"), "utf-8");
   const result = buildPrompt(template, "en");
   assert.ok(result.includes("anglais"));
   assert.ok(!result.includes("{{LANG}}"));
 });
 
-test("correction.txt — substitution espagnol", () => {
+test("correction.txt - substitution espagnol", () => {
   const template = fs.readFileSync(path.join(PROMPTS_DIR, "correction.txt"), "utf-8");
   const result = buildPrompt(template, "es");
   assert.ok(result.includes("espagnol"));
 });
 
-test("correction.txt — substitution allemand", () => {
+test("correction.txt - substitution allemand", () => {
   const template = fs.readFileSync(path.join(PROMPTS_DIR, "correction.txt"), "utf-8");
   const result = buildPrompt(template, "de");
   assert.ok(result.includes("allemand"));
 });
 
-test("reformulation.txt — substitution français", () => {
+test("reformulation.txt - substitution français", () => {
   const template = fs.readFileSync(path.join(PROMPTS_DIR, "reformulation.txt"), "utf-8");
   const result = buildPrompt(template, "fr");
   assert.ok(result.includes("français"));
   assert.ok(!result.includes("{{LANG}}"));
 });
 
-test("Langue inconnue — fallback français", () => {
+test("Langue inconnue - fallback français", () => {
   const template = fs.readFileSync(path.join(PROMPTS_DIR, "correction.txt"), "utf-8");
   const result = buildPrompt(template, "xx");
   assert.ok(result.includes("français"));
@@ -124,7 +124,7 @@ test("traduction.txt contient {{LANG_SOURCE}} et {{LANG_CIBLE}}", () => {
   assert.ok(content.includes("{{LANG_CIBLE}}"));
 });
 
-test("traduction.txt — substitution français → anglais", () => {
+test("traduction.txt - substitution français → anglais", () => {
   const template = fs.readFileSync(path.join(PROMPTS_DIR, "traduction.txt"), "utf-8");
   const result = template
     .replace(/\{\{LANG_SOURCE\}\}/g, LANG_NAMES["fr"])

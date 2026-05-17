@@ -82,7 +82,7 @@ Albert.requestCheck = function (text) {
     Albert.renderCorrections(filtered);
   }).catch((err) => {
     if (controller.signal.aborted) {
-      Albert.log("requestCheck : exception sur requête abandonnée — ignorée");
+      Albert.log("requestCheck : exception sur requête abandonnée - ignorée");
       return;
     }
     Albert.error("requestCheck : exception sendMessage :", err);

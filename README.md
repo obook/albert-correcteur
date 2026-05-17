@@ -1,9 +1,10 @@
 # Albert Correcteur - Extension Firefox et Thunderbird
 
-![Licence](media/badge-licence.svg)
-![Firefox](media/badge-firefox.svg)
-![Thunderbird](media/badge-thunderbird.svg)
+![Licence](badges/licence.svg)
+![Firefox](badges/firefox.svg)
+![Thunderbird](badges/thunderbird.svg)
 ![IA](badges/ia.svg)
+![RGPD](badges/rgpd.svg)
 
 **Extension expérimentale** de correction orthographique, grammaticale et de traduction pour Firefox et Thunderbird, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web (Firefox) et dans la fenêtre de composition de mail (Thunderbird), propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné (français, anglais, espagnol, allemand).
 
@@ -103,7 +104,7 @@ Le fichier `.xpi` distribué est signé par Mozilla, mais pendant le développem
    - Accepter l'avertissement
    - Rechercher `xpinstall.signatures.required` et passer la valeur à `false`
 
-   > Cette option n'est disponible que sur Developer Edition, Nightly et ESR — elle n'existe pas sur Firefox standard.
+   > Cette option n'est disponible que sur Developer Edition, Nightly et ESR - elle n'existe pas sur Firefox standard.
 
 3. **Charger l'extension** via `about:addons` → roue dentée → « Installer un module depuis un fichier… » et sélectionner le `.xpi` non signé
 

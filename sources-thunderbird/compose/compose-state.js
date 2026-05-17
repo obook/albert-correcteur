@@ -47,7 +47,7 @@ const Albert = {
   lastError: null,
 };
 
-/* Helpers de log uniformes — préfixés [Albert] pour grep facile dans la console */
+/* Helpers de log uniformes - préfixés [Albert] pour grep facile dans la console */
 Albert.log = function () {
   console.log("[Albert]", ...arguments);
 };

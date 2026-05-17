@@ -1,4 +1,4 @@
-// test-react-editors.js — Simule le comportement React (re-rendu du DOM à la sélection).
+// test-react-editors.js - Simule le comportement React (re-rendu du DOM à la sélection).
 // Objectif : vérifier que l'extension utilise un overlay et non des spans injectés
 // dans le DOM, car React écrase toute modification DOM extérieure lors du re-rendu.
 

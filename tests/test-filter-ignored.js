@@ -26,7 +26,7 @@ function test(name, fn) {
 
 console.log("Filtrage des mots ignorés :");
 
-test("Aucun mot ignoré — tout passe", () => {
+test("Aucun mot ignoré - tout passe", () => {
   const text = "Bonnjour a tous";
   const corrections = [
     { offset: 0, length: 8 },
@@ -36,7 +36,7 @@ test("Aucun mot ignoré — tout passe", () => {
   assert.strictEqual(result.length, 2);
 });
 
-test("Un mot ignoré — filtré", () => {
+test("Un mot ignoré - filtré", () => {
   const text = "Bonnjour a tous";
   const corrections = [
     { offset: 0, length: 8 },
@@ -47,7 +47,7 @@ test("Un mot ignoré — filtré", () => {
   assert.strictEqual(result[0].offset, 9);
 });
 
-test("Tous les mots ignorés — liste vide", () => {
+test("Tous les mots ignorés - liste vide", () => {
   const text = "Bonnjour a";
   const corrections = [
     { offset: 0, length: 8 },
@@ -57,7 +57,7 @@ test("Tous les mots ignorés — liste vide", () => {
   assert.strictEqual(result.length, 0);
 });
 
-test("Casse ignorée — mot en majuscules filtré", () => {
+test("Casse ignorée - mot en majuscules filtré", () => {
   const text = "BONNJOUR a tous";
   const corrections = [
     { offset: 0, length: 8 },
@@ -66,7 +66,7 @@ test("Casse ignorée — mot en majuscules filtré", () => {
   assert.strictEqual(result.length, 0);
 });
 
-test("Mot pas dans le dictionnaire — conservé", () => {
+test("Mot pas dans le dictionnaire - conservé", () => {
   const text = "Bonnjour a tous";
   const corrections = [
     { offset: 0, length: 8 },
@@ -75,7 +75,7 @@ test("Mot pas dans le dictionnaire — conservé", () => {
   assert.strictEqual(result.length, 1);
 });
 
-test("Dictionnaire vide — tout conservé", () => {
+test("Dictionnaire vide - tout conservé", () => {
   const text = "erreur ici";
   const corrections = [
     { offset: 0, length: 6 },
@@ -85,7 +85,7 @@ test("Dictionnaire vide — tout conservé", () => {
   assert.strictEqual(result.length, 2);
 });
 
-test("Corrections vides — résultat vide", () => {
+test("Corrections vides - résultat vide", () => {
   const result = filterIgnoredCorrections([], "texte", new Set(["mot"]));
   assert.strictEqual(result.length, 0);
 });

@@ -1,14 +1,15 @@
 /*
  * popup-models.js - Chargement et sélection des modèles depuis l'API.
  *
- * Interroge l'endpoint /v1/models pour lister les modèles de type
- * "text-generation" disponibles sur le compte. Enrichit les
- * libellés avec des descriptions connues et marque le modèle
- * recommandé (openweight-large par défaut).
+ * Interroge l'endpoint /v1/models pour lister les modèles de chat
+ * disponibles sur le compte. Accepte les modèles texte
+ * ("text-generation") et les modèles multimodaux ("image-text-to-text"),
+ * et garde par sécurité tout modèle qui porte un alias openweight-*
+ * connu, quel que soit son type.
  *
- * Gère également la résolution des alias : si le modèle recommandé
- * n'existe pas en tant qu'id direct, il est cherché via les alias
- * déclarés dans la réponse API.
+ * Préfère systématiquement l'alias serveur (openweight-large/medium/
+ * small) à l'id canonique afin que le projet manipule un identifiant
+ * stable, indépendant des renommages côté fournisseur.
  *
  * Auteur : O. Booklage
  * Date : Avril 2026
@@ -23,35 +24,92 @@ const MODEL_DESCRIPTIONS = {
   "openweight-large": "Complexe (120B)",
   "openweight-medium": "Modéré (24B)",
   "openweight-small": "Simple (8B)",
+  "openweight-code": "Spécialisé code (30B)",
 };
+
+/*
+ * Table id canonique -> alias serveur, dupliquée du service worker
+ * pour normaliser côté popup une configuration potentiellement
+ * enregistrée sous l'id canonique (versions antérieures du projet).
+ */
+const CANONICAL_TO_ALIAS = {
+  "openai/gpt-oss-120b": "openweight-large",
+  "mistralai/mistral-small-3.2-24b-instruct-2506": "openweight-medium",
+  "mistralai/ministral-3-8b-instruct-2512": "openweight-small",
+  "qwen/qwen3-coder-30b-a3b-instruct": "openweight-code",
+};
+
+/*
+ * Types de tâche acceptés comme "modèle de chat" côté API.
+ *
+ * Albert renvoie un champ `type` aligné sur les pipelines HuggingFace :
+ *   - "text-generation"      pour les modèles texte purs (gpt-oss-120b,
+ *                            Ministral-3-8B)
+ *   - "image-text-to-text"   pour les modèles multimodaux qui acceptent
+ *                            aussi du texte seul (Mistral-Small-3.2-24B)
+ *
+ * Un modèle multimodal reste parfaitement utilisable en mode texte
+ * pour la correction orthographique : on l'inclut donc dans la liste.
+ */
+const CHAT_TYPES = new Set(["text-generation", "image-text-to-text"]);
 
 const modelSelect = document.getElementById("model");
 const refreshBtn = document.getElementById("refresh-models");
 
 /**
- * Construit le libellé affiché pour un modèle dans le <select>.
+ * Normalise un identifiant de modèle vers son alias serveur stable.
  *
- * Cherche une description connue par id direct ou par alias.
- * Ajoute "(recommandé)" si le modèle correspond au modèle
- * recommandé résolu.
- *
- * @param {string} id            - Identifiant du modèle.
- * @param {Object} aliasToId     - Table alias → id résolu.
- * @param {string} recommendedId - Id résolu du modèle recommandé.
- * @returns {string} Libellé formaté (ex. : "openweight-large - Complexe (120B) (recommandé)").
+ * @param {string} id - Alias ou id canonique.
+ * @returns {string}
  */
-function modelLabel(id, aliasToId, recommendedId) {
-  let desc = MODEL_DESCRIPTIONS[id];
-  if (!desc) {
-    for (const [alias, target] of Object.entries(aliasToId)) {
-      if (target === id && MODEL_DESCRIPTIONS[alias]) {
-        desc = MODEL_DESCRIPTIONS[alias];
-        break;
-      }
+function normalizeModelId(id) {
+  if (!id) return id;
+  const lower = id.toLowerCase();
+  if (lower in CANONICAL_TO_ALIAS) return CANONICAL_TO_ALIAS[lower];
+  if (lower.startsWith("openweight-")) return lower;
+  return id;
+}
+
+/**
+ * Renvoie l'identifiant à afficher pour un modèle de la réponse API.
+ *
+ * Préfère, dans l'ordre :
+ *   1. un alias documenté ([[MODEL_DESCRIPTIONS]]),
+ *   2. n'importe quel alias respectant la convention `openweight-*`
+ *      (filet face à un futur alias non encore documenté côté projet),
+ *   3. l'id canonique en dernier recours.
+ *
+ * @param {{id: string, aliases?: string[]}} m - Entrée de /v1/models.
+ * @returns {string}
+ */
+function preferredIdFor(m) {
+  if (!Array.isArray(m.aliases)) return m.id;
+
+  for (const alias of m.aliases) {
+    if (typeof alias === "string" && alias in MODEL_DESCRIPTIONS) {
+      return alias;
     }
   }
+  for (const alias of m.aliases) {
+    if (typeof alias === "string"
+      && alias.toLowerCase().startsWith("openweight-")) {
+      return alias.toLowerCase();
+    }
+  }
+  return m.id;
+}
+
+/**
+ * Construit le libellé affiché pour un modèle dans le <select>.
+ *
+ * @param {string} id            - Identifiant du modèle (alias de préférence).
+ * @param {string} recommendedId - Id du modèle recommandé.
+ * @returns {string} Libellé formaté (ex. : "openweight-large - Complexe (120B) (recommandé)").
+ */
+function modelLabel(id, recommendedId) {
+  const desc = MODEL_DESCRIPTIONS[id];
   const parts = [id];
-  if (desc) parts.push(`\u2014 ${desc}`);
+  if (desc) parts.push(`- ${desc}`);
   if (id === recommendedId) parts.push("(recommandé)");
   return parts.join(" ");
 }
@@ -59,8 +117,10 @@ function modelLabel(id, aliasToId, recommendedId) {
 /**
  * Charge les modèles disponibles depuis l'API et remplit le <select>.
  *
- * Filtre les modèles de type "text-generation", résout les alias,
- * et présélectionne le modèle sauvegardé ou le modèle recommandé.
+ * Filtre les modèles de type "text-generation", remplace chaque id
+ * canonique par son alias serveur quand l'alias est connu, et
+ * présélectionne le modèle sauvegardé (après normalisation) ou le
+ * modèle recommandé.
  */
 async function fetchModels() {
   const apiKey = document.getElementById("api-key").value.trim();
@@ -86,18 +146,29 @@ async function fetchModels() {
     }
 
     const data = await response.json();
-    const rawModels = (data.data || [])
-      .filter((m) => m.type === "text-generation");
-
-    /* Construire une table alias -> id pour enrichir les descriptions. */
-    const aliasToId = {};
-    for (const m of rawModels) {
+    /*
+     * Garde un modèle si son type est un type de chat reconnu, ou s'il
+     * porte un alias openweight-* connu (filet de sécurité face à un
+     * éventuel changement de nomenclature côté API).
+     */
+    const rawModels = (data.data || []).filter((m) => {
+      if (CHAT_TYPES.has(m.type)) return true;
       if (Array.isArray(m.aliases)) {
-        for (const a of m.aliases) aliasToId[a] = m.id;
+        return m.aliases.some((a) => a in MODEL_DESCRIPTIONS);
       }
-    }
+      return false;
+    });
 
-    const models = rawModels.map((m) => m.id).sort();
+    /* Déduplique au cas où plusieurs entrées partageraient le même alias. */
+    const seen = new Set();
+    const models = [];
+    for (const m of rawModels) {
+      const id = preferredIdFor(m);
+      if (seen.has(id)) continue;
+      seen.add(id);
+      models.push(id);
+    }
+    models.sort();
 
     if (models.length === 0) {
       modelSelect.innerHTML =
@@ -105,19 +176,20 @@ async function fetchModels() {
       return;
     }
 
-    const saved = (await browser.storage.local.get("model")).model || "";
+    const saved = normalizeModelId(
+      (await browser.storage.local.get("model")).model || ""
+    );
     const savedAvailable = saved && models.includes(saved);
 
-    /* Résoudre le modèle recommandé : id direct ou via alias. */
     const recommendedId = models.includes(RECOMMENDED_MODEL)
       ? RECOMMENDED_MODEL
-      : aliasToId[RECOMMENDED_MODEL] || "";
+      : "";
 
     modelSelect.innerHTML = "";
     for (const id of models) {
       const opt = document.createElement("option");
       opt.value = id;
-      opt.textContent = modelLabel(id, aliasToId, recommendedId);
+      opt.textContent = modelLabel(id, recommendedId);
       if (savedAvailable && id === saved) {
         opt.selected = true;
       } else if (!savedAvailable && id === recommendedId) {
@@ -137,4 +209,11 @@ async function fetchModels() {
   }
 }
 
-refreshBtn.addEventListener("click", () => fetchModels());
+refreshBtn.addEventListener("click", async () => {
+  await fetchModels();
+  /* Rafraîchir aussi les limites : une sélection programmatique du
+     <select> ne déclenche pas l'event 'change'. */
+  if (document.getElementById("api-key").value.trim()) {
+    fetchAndShowLimits();
+  }
+});

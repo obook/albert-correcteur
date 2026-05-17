@@ -69,7 +69,7 @@ Albert.ensureBadge = function (el) {
 
   /*
    * Diagnostic : si le parent a overflow:hidden ou size 0, le badge sera
-   * invisible — on prévient l'utilisateur via la console.
+   * invisible - on prévient l'utilisateur via la console.
    */
   const pcs = getComputedStyle(parent);
   if (pcs.overflow === "hidden" || pcs.overflowX === "hidden" || pcs.overflowY === "hidden") {
@@ -80,11 +80,13 @@ Albert.ensureBadge = function (el) {
     el.tagName.toLowerCase() + (el.id ? "#" + el.id : ""),
     { parent: parent.tagName.toLowerCase() });
 
-  /* Si le badge est en état de panne API, forcer la re-vérification
-     (sinon le cache lastCheckedText empêcherait la relance). */
+  /* Toute interaction utilisateur sur le badge force la re-vérification,
+     même si le texte est identique au dernier check : c'est le sens du
+     bouton ("Cliquez pour vérifier"). Sans force=true, le cache
+     state.lastCheckedText fait court-circuiter triggerCheck quand le
+     badge est vert (albert-no-errors) ou rouge (albert-has-errors). */
   const handleActivate = () => {
-    const force = badge.classList.contains("albert-api-error");
-    Albert.triggerCheck(el, force);
+    Albert.triggerCheck(el, true);
   };
   badge.addEventListener("click", (e) => {
     e.preventDefault();

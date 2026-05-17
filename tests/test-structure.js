@@ -63,30 +63,30 @@ test("manifest.json existe et est du JSON valide", () => {
   assert.ok(manifest);
 });
 
-test("manifest.json — manifest_version = 2", () => {
+test("manifest.json - manifest_version = 2", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
   assert.strictEqual(manifest.manifest_version, 2);
 });
 
-test("manifest.json — a un ID gecko", () => {
+test("manifest.json - a un ID gecko", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
   assert.ok(manifest.browser_specific_settings.gecko.id);
 });
 
-test("manifest.json — scripts de fond déclarés", () => {
+test("manifest.json - scripts de fond déclarés", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
   assert.ok(manifest.background.scripts.includes("service/service-config.js"));
   assert.ok(manifest.background.scripts.includes("service/service-menus.js"));
 });
 
-test("manifest.json — content scripts déclarés", () => {
+test("manifest.json - content scripts déclarés", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
   const cs = manifest.content_scripts[0];
   assert.ok(cs.js.length > 0);
   assert.ok(cs.css.length > 0);
 });
 
-test("manifest.json — tous les JS content scripts existent", () => {
+test("manifest.json - tous les JS content scripts existent", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
   for (const jsFile of manifest.content_scripts[0].js) {
     const inFirefox = fs.existsSync(path.join(FIREFOX, jsFile));
@@ -95,7 +95,7 @@ test("manifest.json — tous les JS content scripts existent", () => {
   }
 });
 
-test("manifest.json — tous les CSS content scripts existent", () => {
+test("manifest.json - tous les CSS content scripts existent", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
   for (const cssFile of manifest.content_scripts[0].css) {
     const inFirefox = fs.existsSync(path.join(FIREFOX, cssFile));
@@ -104,20 +104,20 @@ test("manifest.json — tous les CSS content scripts existent", () => {
   }
 });
 
-test("manifest.json — options_ui déclaré", () => {
+test("manifest.json - options_ui déclaré", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
   assert.ok(manifest.options_ui);
   assert.ok(manifest.options_ui.page);
 });
 
-test("manifest.json — popup déclarée", () => {
+test("manifest.json - popup déclarée", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
   assert.ok(manifest.browser_action.default_popup);
 });
 
 /* -- Fichiers clés -- */
 
-test("service/ — tous les scripts partagés existent", () => {
+test("service/ - tous les scripts partagés existent", () => {
   const fichiers = [
     "service-config.js", "service-langue.js", "service-prompts.js",
     "service-limites.js", "service-api.js",
@@ -127,7 +127,7 @@ test("service/ — tous les scripts partagés existent", () => {
   }
 });
 
-test("service/ — service-menus.js existe dans sources-firefox", () => {
+test("service/ - service-menus.js existe dans sources-firefox", () => {
   assert.ok(fs.existsSync(path.join(FIREFOX, "service", "service-menus.js")), "Manquant : sources-firefox/service/service-menus.js");
 });
 
@@ -222,19 +222,19 @@ test("Ancien dossier toast/ supprimé", () => {
 
 /* -- Manifest : permissions -- */
 
-test("manifest.json — permission contextMenus", () => {
+test("manifest.json - permission contextMenus", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
   assert.ok(manifest.permissions.includes("contextMenus"), "Permission contextMenus manquante");
 });
 
-test("manifest.json — permission storage", () => {
+test("manifest.json - permission storage", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
   assert.ok(manifest.permissions.includes("storage"), "Permission storage manquante");
 });
 
 /* -- Manifest : icônes SVG uniquement -- */
 
-test("manifest.json — icônes pointent vers des PNG", () => {
+test("manifest.json - icônes pointent vers des PNG", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));
   for (const [size, file] of Object.entries(manifest.icons)) {
     assert.ok(file.endsWith(".png"), `Icône ${size} n'est pas un PNG : ${file}`);

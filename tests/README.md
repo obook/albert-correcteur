@@ -38,6 +38,22 @@ node tests/test-detect-language.js
 
 **Total** : 17 suites, 257 tests.
 
+## Corpus d'intégration
+
+`tests/run-correction-corpus.sh` mesure le taux de détection des fautes par modèle Albert sur un jeu de phrases de référence (`tests/corpus/correction-samples.json`). Contrairement aux suites unitaires, ce test interroge l'API réelle et nécessite une clé.
+
+```bash
+# Tester tous les modèles (large, medium, small)
+ALBERT_API_KEY=sk-xxx ./tests/run-correction-corpus.sh
+
+# Limiter à un modèle
+ALBERT_API_KEY=sk-xxx ./tests/run-correction-corpus.sh openweight-medium
+```
+
+La clé est lue uniquement dans la variable d'environnement (jamais passée en argument). Si la clé est rejetée à la première requête, le script s'arrête immédiatement plutôt que d'épuiser le corpus.
+
+Le script utilise le bon fichier de prompt selon le modèle (cf. `service-prompts.js`), affiche par phrase la détection sous la forme `trouvés/attendus`, signale les faux positifs sur les phrases correctes, et calcule un taux de détection global par modèle. Sert à objectiver l'impact d'une modification de prompt avant intégration.
+
 ## Pipeline CI/CD
 
 Les tests sont exécutés automatiquement par GitLab CI sur chaque tag `v*` (voir `.gitlab-ci.yml`). Le pipeline contient ensuite deux jobs de build symétriques (`build-firefox` et `build-thunderbird`), suivis de la signature Mozilla, de la création de la release et de la mise à jour de `updates.json`.

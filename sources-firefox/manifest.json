@@ -42,6 +42,7 @@
       "service/service-langue.js",
       "service/service-prompts.js",
       "service/service-limites.js",
+      "verification/regles-locales.js",
       "service/service-api.js",
       "service/service-menus.js"
     ]

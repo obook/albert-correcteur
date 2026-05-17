@@ -8,9 +8,16 @@
  * les noms de langues détectés.
  *
  * Prompts disponibles :
- *   - correction.txt    : prompt de correction orthographique/grammaticale.
- *   - reformulation.txt : prompt de reformulation de texte.
- *   - traduction.txt    : prompt de traduction.
+ *   - correction.txt        : version étoffée (XML, few-shot exhaustifs)
+ *                             utilisée par défaut sur les modèles
+ *                             medium/small qui ont besoin d'exemples
+ *                             concrets pour ne pas rater les fautes.
+ *   - correction-large.txt  : version compacte (règles condensées, pas
+ *                             de few-shot) pour openweight-large.
+ *                             Économise des tokens sur le modèle dont
+ *                             le quota tpd EXP est le plus serré.
+ *   - reformulation.txt     : prompt de reformulation de texte.
+ *   - traduction.txt        : prompt de traduction.
  *
  * Auteur : O. Booklage
  * Date : Avril 2026
@@ -37,14 +44,33 @@ async function loadPromptTemplate(name) {
 }
 
 /**
+ * Choisit le fichier de correction adapté au modèle actif.
+ *
+ * Le large (gpt-oss-120b) reçoit une version compacte qui économise
+ * des tokens. Les modèles plus petits (medium, small) reçoivent la
+ * version étoffée avec few-shot exhaustifs.
+ *
+ * @param {string} modelAlias - Alias serveur du modèle (openweight-*).
+ * @returns {string} Nom du prompt à charger.
+ */
+function correctionPromptName(modelAlias) {
+  if (modelAlias === "openweight-large") return "correction-large";
+  return "correction";
+}
+
+/**
  * Construit le prompt système pour la correction ou la reformulation.
  *
- * @param {string} mode - "correction" ou "reformulation".
- * @param {string} lang - Code langue détecté (fr, en, es, de).
- * @returns {Promise<string>} Prompt système prêt à envoyer.
+ * @param {string} mode        - "correction" ou "reformulation".
+ * @param {string} lang        - Code langue détecté (fr, en, es, de).
+ * @param {string} modelAlias  - Alias du modèle actif (sert au choix
+ *                               de prompt pour la correction).
+ * @returns {Promise<string>}  - Prompt système prêt à envoyer.
  */
-async function buildPrompt(mode, lang) {
-  const name = mode === "reformulation" ? "reformulation" : "correction";
+async function buildPrompt(mode, lang, modelAlias) {
+  const name = mode === "reformulation"
+    ? "reformulation"
+    : correctionPromptName(modelAlias);
   const template = await loadPromptTemplate(name);
   const langName = LANG_NAMES[lang] || "français";
   return template.replace(/\{\{LANG\}\}/g, langName);

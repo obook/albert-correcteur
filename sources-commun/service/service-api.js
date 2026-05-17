@@ -55,11 +55,16 @@
 const FALLBACK_TRIGGER_429 = 2;       // 429 consécutifs déclenchant le fallback
 const FALLBACK_DURATION_MS = 60000;   // durée pendant laquelle le fallback reste actif
 
+/*
+ * Chaîne de fallback exprimée en alias serveur uniquement.
+ *
+ * Les ids canoniques (openai/gpt-oss-120b, etc.) sont normalisés en
+ * alias par [[normalizeModelId]] dans service-config.js avant d'arriver
+ * ici, donc cette table n'a besoin de couvrir que les alias.
+ */
 const FALLBACK_CHAIN = {
   "openweight-large": "openweight-medium",
   "openweight-medium": "openweight-small",
-  "openai/gpt-oss-120b": "openweight-medium",
-  "mistralai/mistral-small-3.2-24b-instruct-2506": "openweight-small",
 };
 
 const consecutive429 = new Map();
@@ -113,42 +118,60 @@ function recordSuccess(primary) {
   consecutive429.delete(primary);
 }
 
+/* Plafond du délai pour une limite journalière : on retente au plus
+   tard au bout d'une heure même si minuit UTC est plus éloigné, pour
+   rester réactif si l'API a basculé le compte sur un autre palier. */
+const DAILY_RETRY_CAP_S = 3600;
+
+/**
+ * Renvoie le nombre de secondes restant jusqu'au prochain minuit UTC.
+ *
+ * @returns {number}
+ */
+function secondsUntilNextUtcMidnight() {
+  const now = Date.now();
+  const d = new Date();
+  const nextMidnight = Date.UTC(
+    d.getUTCFullYear(),
+    d.getUTCMonth(),
+    d.getUTCDate() + 1
+  );
+  return Math.max(1, Math.ceil((nextMidnight - now) / 1000));
+}
+
 /**
  * Analyse une réponse 429 d'Albert et en extrait un délai de retry
- * exploitable.
+ * exploitable ainsi qu'un message d'erreur prêt à afficher.
  *
- * Trois sources, dans l'ordre de priorité :
+ * Sources du délai, par ordre de priorité :
  *   1. En-tête HTTP Retry-After (en secondes).
- *   2. Champ retry_after du corps JSON s'il existe (variantes Albert).
- *   3. Calcul depuis le message texte du type "Limit exceeded:
- *      50 requests per minute". Si on connaît la limite par minute,
- *      un délai sûr de 60 / N secondes (au moins 2 s) est calculé.
- *
- * Renvoie aussi le type de limite (rpm, rpd, tpm, tpd) repéré dans
- * le message, pour un libellé d'erreur plus précis.
+ *   2. Champ retry_after du corps JSON (variantes Albert).
+ *   3. Pour une limite à la minute, calcul depuis le message texte
+ *      ("Limit exceeded: 50 requests per minute") : 60 / N secondes,
+ *      borné à [2s, 60s].
+ *   4. Pour une limite journalière (rpd, tpd), délai jusqu'au prochain
+ *      minuit UTC (Albert réinitialise le quota à cet instant), plafonné
+ *      à [[DAILY_RETRY_CAP_S]] pour rester réactif.
+ *   5. Filet de sécurité : 30 s.
  *
  * @param {Response} response - Réponse fetch ayant le statut 429.
  * @param {string}   detail   - Corps de la réponse, déjà lu en texte.
- * @returns {{retryAfter: number, limitType: string}}
+ * @returns {{retryAfter: number, limitType: string, message: string}}
  */
 function parseRateLimit429(response, detail) {
-  /* 1. Source la plus fiable : l'en-tête HTTP. */
   const headerValue = parseInt(response.headers.get("Retry-After"), 10);
   let retryAfter = headerValue > 0 ? headerValue : 0;
 
-  /* 2/3. Parsing du corps JSON ou texte. */
   let limitType = "";
   let bodyMessage = "";
   try {
     const err = JSON.parse(detail);
     bodyMessage = (err.detail || err.message || "").toString();
-    /* Albert peut renvoyer un retry_after explicite dans certaines variantes */
     if (!retryAfter && typeof err.retry_after === "number"
       && err.retry_after > 0) {
       retryAfter = Math.ceil(err.retry_after);
     }
   } catch {
-    /* Réponse non-JSON : on garde le texte brut */
     bodyMessage = detail || "";
   }
 
@@ -163,26 +186,58 @@ function parseRateLimit429(response, detail) {
     limitType = "tokens/jour (tpd)";
   }
 
-  /* 3. Pas d'en-tête : tenter d'extraire la limite documentée du message
-        ("50 requests per minute") pour calculer un délai raisonnable. */
-  if (!retryAfter) {
+  const isDailyLimit = limitType.startsWith("requêtes/jour")
+    || limitType.startsWith("tokens/jour");
+
+  /* Limite à la minute : extraire le débit autorisé pour un délai sûr. */
+  if (!retryAfter && !isDailyLimit) {
     const match = lower.match(
-      /(\d+)\s+(?:requests|tokens)\s+per\s+(minute|day)/
+      /(\d+)\s+(?:requests|tokens)\s+per\s+minute/
     );
     if (match) {
       const limit = parseInt(match[1], 10);
-      const window = match[2] === "minute" ? 60 : 86400;
-      /* Délai sûr : un slot complet de la fenêtre, borné à [2s, fenêtre] */
       if (limit > 0) {
-        retryAfter = Math.min(window, Math.max(2, Math.ceil(window / limit)));
+        retryAfter = Math.min(60, Math.max(2, Math.ceil(60 / limit)));
       }
     }
   }
 
-  /* Filet de sécurité : 30 s si rien n'a marché. */
+  /* Limite journalière : aligner sur le reset minuit UTC, plafonné. */
+  if (!retryAfter && isDailyLimit) {
+    retryAfter = Math.min(secondsUntilNextUtcMidnight(), DAILY_RETRY_CAP_S);
+  }
+
   if (!retryAfter) retryAfter = 30;
 
-  return { retryAfter, limitType };
+  const message = formatRateLimitMessage(limitType, retryAfter, isDailyLimit);
+  return { retryAfter, limitType, message };
+}
+
+/**
+ * Construit un message d'erreur lisible pour un 429.
+ *
+ * - Limite journalière : indique l'attente jusqu'au reset minuit UTC,
+ *   avec l'heure locale approximative, plutôt qu'un compteur en secondes.
+ * - Limite à la minute : indique la pause en secondes.
+ * - Limite inconnue : message générique avec la pause en secondes.
+ *
+ * @param {string}  limitType    - Type de limite ou chaîne vide.
+ * @param {number}  retryAfter   - Délai retenu, en secondes.
+ * @param {boolean} isDailyLimit - Vrai si la limite est journalière.
+ * @returns {string}
+ */
+function formatRateLimitMessage(limitType, retryAfter, isDailyLimit) {
+  if (isDailyLimit) {
+    const reset = new Date(Date.now() + secondsUntilNextUtcMidnight() * 1000);
+    const hh = reset.getHours().toString().padStart(2, "0");
+    const mm = reset.getMinutes().toString().padStart(2, "0");
+    return `Quota ${limitType} épuisé. Réinitialisation à minuit UTC `
+      + `(≈ ${hh}:${mm} heure locale).`;
+  }
+  if (limitType) {
+    return `Limite ${limitType} dépassée. Pause de ${retryAfter}s.`;
+  }
+  return `Limite de débit dépassée. Pause de ${retryAfter}s.`;
 }
 
 /**
@@ -202,7 +257,7 @@ async function checkText(text, mode) {
   }
 
   const lang = detectLanguage(text);
-  const systemPrompt = await buildPrompt(mode, lang);
+  const systemPrompt = await buildPrompt(mode, lang, config.model);
 
   try {
     const effectiveModel = selectEffectiveModel(config.model);
@@ -230,15 +285,9 @@ async function checkText(text, mode) {
       const detail = await response.text();
       if (response.status === 429) {
         record429(config.model);
-        const { retryAfter, limitType } = parseRateLimit429(response, detail);
-        const desc = limitType
-          ? `Limite ${limitType} dépassée.`
-          : "Limite de débit dépassée.";
+        const { retryAfter, limitType, message } = parseRateLimit429(response, detail);
         AlbertLog.warn("checkText:", mode, "429 (" + (limitType || "rate") + "), pause", retryAfter + "s");
-        return {
-          error: `${desc} Pause de ${retryAfter}s.`,
-          retryAfter
-        };
+        return { error: message, retryAfter };
       }
       AlbertLog.error("checkText:", mode, "API", response.status, "-", detail.slice(0, 500));
       return { error: `Erreur API (${response.status}) : ${detail}` };
@@ -292,7 +341,7 @@ async function checkText(text, mode) {
     }
 
     /* Filtrer les suggestions incorrectes */
-    const corrections = (parsed.corrections || []).map((c) => {
+    const apiCorrections = (parsed.corrections || []).map((c) => {
       if (c.suggestions && c.word) {
         c.suggestions = c.suggestions.filter((s) => {
           /* Supprimer les suggestions identiques au mot erroné */
@@ -307,6 +356,14 @@ async function checkText(text, mode) {
       }
       return c;
     }).filter((c) => !c.suggestions || c.suggestions.length > 0);
+
+    /* Fusionner avec les corrections détectées localement par regex
+       (filet de sécurité pour les patterns mécaniques que les petits
+       modèles ratent parfois, cf. regles-locales.js). */
+    const localCorrections = (mode === "correction")
+      ? findLocalCorrections(text)
+      : [];
+    const corrections = mergeCorrections(apiCorrections, localCorrections);
     return { corrections, lang };
   } catch (err) {
     AlbertLog.error("checkText:", mode, "exception:", err);
@@ -358,15 +415,9 @@ async function translateText(text, targetLang) {
       const detail = await response.text();
       if (response.status === 429) {
         record429(config.model);
-        const { retryAfter, limitType } = parseRateLimit429(response, detail);
-        const desc = limitType
-          ? `Limite ${limitType} dépassée.`
-          : "Limite de débit dépassée.";
+        const { retryAfter, limitType, message } = parseRateLimit429(response, detail);
         AlbertLog.warn("translateText: 429 (" + (limitType || "rate") + "), pause", retryAfter + "s");
-        return {
-          error: `${desc} Pause de ${retryAfter}s.`,
-          retryAfter
-        };
+        return { error: message, retryAfter };
       }
       AlbertLog.error("translateText: API", response.status, "-", detail.slice(0, 500));
       return { error: `Erreur API (${response.status}) : ${detail}` };

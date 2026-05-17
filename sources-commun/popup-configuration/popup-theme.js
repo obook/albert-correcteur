@@ -1,5 +1,5 @@
 /*
- * popup-theme.js — Applique le thème (sombre/clair/auto) aux pages
+ * popup-theme.js - Applique le thème (sombre/clair/auto) aux pages
  * popup.html (configuration) et popup-settings.html (paramètres).
  *
  * Lit la préférence "popupTheme" dans browser.storage.local et pose

@@ -53,7 +53,7 @@ function test(name, fn) {
 
 console.log("Construction du HTML souligné :");
 
-test("Aucune correction — texte inchangé", () => {
+test("Aucune correction - texte inchangé", () => {
   assert.strictEqual(buildHighlightedHTML("Bonjour le monde", []), "Bonjour le monde");
 });
 
@@ -91,7 +91,7 @@ test("Deux corrections non chevauchantes", () => {
   assert.ok(result.includes('data-idx="1"'));
 });
 
-test("Corrections désordonnées — triées par offset", () => {
+test("Corrections désordonnées - triées par offset", () => {
   const result = buildHighlightedHTML("Bonnjour a tous", [
     { offset: 9, length: 1, type: "grammar", message: "", suggestions: [] },
     { offset: 0, length: 8, type: "spelling", message: "", suggestions: [] },
@@ -100,7 +100,7 @@ test("Corrections désordonnées — triées par offset", () => {
   assert.ok(result.indexOf('data-idx="1"') < result.indexOf('data-idx="0"'));
 });
 
-test("Corrections chevauchantes — la seconde est ignorée", () => {
+test("Corrections chevauchantes - la seconde est ignorée", () => {
   const result = buildHighlightedHTML("Bonnjour", [
     { offset: 0, length: 5, type: "spelling", message: "", suggestions: [] },
     { offset: 3, length: 5, type: "grammar", message: "", suggestions: [] },
@@ -117,7 +117,7 @@ test("Type par défaut grammar", () => {
   assert.ok(result.includes("albert-error-grammar"));
 });
 
-test("Caractères HTML dans le texte — échappés", () => {
+test("Caractères HTML dans le texte - échappés", () => {
   const result = buildHighlightedHTML("<script>alert('xss')</script>", []);
   assert.ok(!result.includes("<script>"));
   assert.ok(result.includes("&lt;script&gt;"));

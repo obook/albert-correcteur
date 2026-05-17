@@ -1,0 +1,335 @@
+{
+  "description": "Corpus de phrases de référence pour mesurer le taux de détection des fautes par modèle Albert. Chaque sample contient le texte saisi et la liste des mots erronés attendus. Les types attendus sont indicatifs (spelling/grammar/style).",
+  "samples": [
+    {
+      "id": "tout-les-gateau",
+      "text": "Il a mangé tout les gâteau.",
+      "expected": [
+        { "word": "tout", "type": "grammar" },
+        { "word": "gâteau", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "tous-les-gateaux-correct",
+      "text": "Il a mangé tous les gâteaux.",
+      "expected": []
+    },
+    {
+      "id": "elle-est-parti",
+      "text": "Elle est parti hier soir.",
+      "expected": [
+        { "word": "parti", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "avoir-beau-ironise",
+      "text": "Il avait beau ironisé, personne ne l'écoutait.",
+      "expected": [
+        { "word": "ironisé", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "les-enfant-joue",
+      "text": "Les enfant joue dans la cours.",
+      "expected": [
+        { "word": "enfant", "type": "grammar" },
+        { "word": "joue", "type": "grammar" },
+        { "word": "cours", "type": "spelling" }
+      ]
+    },
+    {
+      "id": "il-a-manger",
+      "text": "Il a manger tout le gateau.",
+      "expected": [
+        { "word": "manger", "type": "grammar" },
+        { "word": "gateau", "type": "spelling" }
+      ]
+    },
+    {
+      "id": "il-et-parti",
+      "text": "Il et parti sans nous attendre.",
+      "expected": [
+        { "word": "et", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "phrase-correcte",
+      "text": "Elle marchait tranquillement dans la rue.",
+      "expected": []
+    },
+    {
+      "id": "imparfait-correct",
+      "text": "Il marchait tranquillement quand il a vu le chat.",
+      "expected": []
+    },
+    {
+      "id": "les-grande-maisons",
+      "text": "Les grande maisons du quartier sont anciennes.",
+      "expected": [
+        { "word": "grande", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "tout-doucement-correct",
+      "text": "Il avança tout doucement.",
+      "expected": []
+    },
+    {
+      "id": "toute-les-filles",
+      "text": "Toute les filles sont là.",
+      "expected": [
+        { "word": "Toute", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "des-resultats-positif",
+      "text": "Nous avons obtenu des résultats positif.",
+      "expected": [
+        { "word": "positif", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "deux-fautes-proches",
+      "text": "Les chien aboie fort.",
+      "expected": [
+        { "word": "chien", "type": "grammar" },
+        { "word": "aboie", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "expression-figee",
+      "text": "Il avait beau insister, rien n'y faisait.",
+      "expected": []
+    },
+    {
+      "id": "homophone-a-prepo",
+      "text": "Bonjour a tous, je vais a Paris demain.",
+      "expected": [
+        { "word": "a", "type": "grammar" },
+        { "word": "a", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "homophone-sa-pronom",
+      "text": "Je pense que sa va marcher.",
+      "expected": [
+        { "word": "sa", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "homophone-on-ont",
+      "text": "Ils on mangé hier soir.",
+      "expected": [
+        { "word": "on", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "homophone-ou-ou-accent",
+      "text": "Je sais pas ou il est.",
+      "expected": [
+        { "word": "ou", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "phrase-truffee",
+      "text": "Bonnjour a tous, je pence que sa va marcher.",
+      "expected": [
+        { "word": "Bonnjour", "type": "spelling" },
+        { "word": "a", "type": "grammar" },
+        { "word": "pence", "type": "spelling" },
+        { "word": "sa", "type": "grammar" }
+      ]
+    },
+
+    {
+      "id": "accord-adj-feminin-pluriel",
+      "text": "Les pommes sont délicieux ce matin.",
+      "expected": [
+        { "word": "délicieux", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "accord-pp-cod-anteposé",
+      "text": "Les fleurs que j'ai cueilli sentent bon.",
+      "expected": [
+        { "word": "cueilli", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "subjonctif-correct",
+      "text": "Il faut que tu viennes demain.",
+      "expected": []
+    },
+    {
+      "id": "conditionnel-correct",
+      "text": "Si j'avais le temps, je viendrais te voir.",
+      "expected": []
+    },
+    {
+      "id": "imparfait-vs-pp",
+      "text": "Quand il était petit, il marchais lentement.",
+      "expected": [
+        { "word": "marchais", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "homophone-on-pronom-correct",
+      "text": "On a déjà mangé ce matin.",
+      "expected": []
+    },
+    {
+      "id": "homophone-ce-se",
+      "text": "Il ce demande ce qu'il va faire.",
+      "expected": [
+        { "word": "ce", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "homophone-son-sont",
+      "text": "Les enfants son fatigués.",
+      "expected": [
+        { "word": "son", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "homophone-leur-leurs",
+      "text": "Les élèves apportent leur cahiers.",
+      "expected": [
+        { "word": "leur", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "homophone-la-ou-correct",
+      "text": "Je vais là où il habite.",
+      "expected": []
+    },
+    {
+      "id": "negation-incomplete",
+      "text": "Je mange pas de viande.",
+      "expected": [
+        { "word": "mange pas", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "negation-correcte",
+      "text": "Je ne mange pas de viande.",
+      "expected": []
+    },
+    {
+      "id": "double-faute-orthographe",
+      "text": "Le proffeseur a corrijé les copies.",
+      "expected": [
+        { "word": "proffeseur", "type": "spelling" },
+        { "word": "corrijé", "type": "spelling" }
+      ]
+    },
+    {
+      "id": "accent-circonflexe",
+      "text": "Cet hopital est tres ancien.",
+      "expected": [
+        { "word": "hopital", "type": "spelling" },
+        { "word": "tres", "type": "spelling" }
+      ]
+    },
+    {
+      "id": "majuscule-debut-correct",
+      "text": "Le chat dort sur le canapé.",
+      "expected": []
+    },
+    {
+      "id": "verbes-coordonnés",
+      "text": "Il chante et danse très bien.",
+      "expected": []
+    },
+    {
+      "id": "subjonctif-rate",
+      "text": "Je veux qu'il vient demain.",
+      "expected": [
+        { "word": "vient", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "futur-vs-conditionnel",
+      "text": "Demain je mangerai des pâtes si tu veux.",
+      "expected": []
+    },
+    {
+      "id": "accord-sujet-loin",
+      "text": "Le chien des voisins, qui habite à côté, aboie souvent.",
+      "expected": []
+    },
+    {
+      "id": "tout-adverbe-feminin",
+      "text": "Elle est toute heureuse.",
+      "expected": []
+    },
+    {
+      "id": "pluriel-noms-composes",
+      "text": "Les arc-en-ciels sont rares.",
+      "expected": [
+        { "word": "arc-en-ciels", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "tu-tutoiement-correct",
+      "text": "Tu manges trop de bonbons.",
+      "expected": []
+    },
+    {
+      "id": "imperatif-2e-pers",
+      "text": "Manges ta soupe avant qu'elle refroidisse.",
+      "expected": [
+        { "word": "Manges", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "passe-simple-correct",
+      "text": "Il vint la voir et lui dit la vérité.",
+      "expected": []
+    },
+    {
+      "id": "redondance-style",
+      "text": "Il monte en haut de l'escalier.",
+      "expected": [
+        { "word": "en haut", "type": "style" }
+      ]
+    },
+    {
+      "id": "verbe-pronominal",
+      "text": "Elle s'est lavée les mains.",
+      "expected": [
+        { "word": "lavée", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "mail-admin-truffé",
+      "text": "Madame, suite a notre échange je vous envois ci-joint le document.",
+      "expected": [
+        { "word": "a", "type": "grammar" },
+        { "word": "envois", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "copie-eleve-truffe",
+      "text": "Le chevalier monta sur sont cheval et parti au combat.",
+      "expected": [
+        { "word": "sont", "type": "grammar" },
+        { "word": "parti", "type": "grammar" }
+      ]
+    },
+    {
+      "id": "il-y-a",
+      "text": "Il i a beaucoup de gens dehors.",
+      "expected": [
+        { "word": "i", "type": "spelling" }
+      ]
+    },
+    {
+      "id": "homophone-c-est-ses",
+      "text": "Ses très important pour lui.",
+      "expected": [
+        { "word": "Ses", "type": "grammar" }
+      ]
+    }
+  ]
+}

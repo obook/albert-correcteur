@@ -41,51 +41,51 @@ function test(name, fn) {
 
 console.log("Détection de langue :");
 
-test("Français — phrase simple", () => {
+test("Français - phrase simple", () => {
   assert.strictEqual(detectLanguage("Bonjour, je suis content de vous revoir dans le jardin."), "fr");
 });
 
-test("Français — texte avec erreurs", () => {
+test("Français - texte avec erreurs", () => {
   assert.strictEqual(detectLanguage("Bonnjour a tous ! Je suis contant de vous revoir."), "fr");
 });
 
-test("Français — texte court avec assez de marqueurs", () => {
+test("Français - texte court avec assez de marqueurs", () => {
   assert.strictEqual(detectLanguage("Les enfants sont dans la cour."), "fr");
 });
 
-test("Anglais — phrase simple", () => {
+test("Anglais - phrase simple", () => {
   assert.strictEqual(detectLanguage("The children are playing in the garden with their friends."), "en");
 });
 
-test("Anglais — texte avec erreurs", () => {
+test("Anglais - texte avec erreurs", () => {
   assert.strictEqual(detectLanguage("I was very hapyy to see that the informations was correct."), "en");
 });
 
-test("Espagnol — phrase simple", () => {
+test("Espagnol - phrase simple", () => {
   assert.strictEqual(detectLanguage("Los niños están en el parque con sus amigos."), "es");
 });
 
-test("Espagnol — texte avec erreurs", () => {
+test("Espagnol - texte avec erreurs", () => {
   assert.strictEqual(detectLanguage("Ayer yo fue al mercado y compré mucho frutas para la familia."), "es");
 });
 
-test("Allemand — phrase simple", () => {
+test("Allemand - phrase simple", () => {
   assert.strictEqual(detectLanguage("Die Kinder sind in der Schule und sie lernen viel."), "de");
 });
 
-test("Allemand — texte avec erreurs", () => {
+test("Allemand - texte avec erreurs", () => {
   assert.strictEqual(detectLanguage("Ich habe gestern ein sehr gutes Buch gelest und das war toll."), "de");
 });
 
-test("Texte trop court — fallback français", () => {
+test("Texte trop court - fallback français", () => {
   assert.strictEqual(detectLanguage("Hello world"), "fr");
 });
 
-test("Texte vide — fallback français", () => {
+test("Texte vide - fallback français", () => {
   assert.strictEqual(detectLanguage(""), "fr");
 });
 
-test("Un seul mot — fallback français", () => {
+test("Un seul mot - fallback français", () => {
   assert.strictEqual(detectLanguage("Bonjour"), "fr");
 });
 
@@ -97,11 +97,11 @@ test("Majuscules ignorées", () => {
   assert.strictEqual(detectLanguage("THE CHILDREN ARE PLAYING IN THE GARDEN."), "en");
 });
 
-test("Mélange — majorité française", () => {
+test("Mélange - majorité française", () => {
   assert.strictEqual(detectLanguage("Le projet est dans le repository et les tests sont OK."), "fr");
 });
 
-test("Mélange — majorité anglaise", () => {
+test("Mélange - majorité anglaise", () => {
   assert.strictEqual(detectLanguage("The project is in the repository and the tests are OK."), "en");
 });
 

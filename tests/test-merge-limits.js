@@ -35,7 +35,7 @@ function test(name, fn) {
 
 console.log("Fusion des limites API :");
 
-test("Liste vide — objet vide", () => {
+test("Liste vide - objet vide", () => {
   assert.deepStrictEqual(mergeLimits([]), {});
 });
 
@@ -69,7 +69,7 @@ test("null = illimité, valeur numérique prioritaire", () => {
   assert.deepStrictEqual(result, { tpm: 5000 });
 });
 
-test("Valeur numérique d'abord, null ensuite — garde la valeur", () => {
+test("Valeur numérique d'abord, null ensuite - garde la valeur", () => {
   const result = mergeLimits([
     { type: "tpm", value: 5000 },
     { type: "tpm", value: null },
@@ -77,7 +77,7 @@ test("Valeur numérique d'abord, null ensuite — garde la valeur", () => {
   assert.deepStrictEqual(result, { tpm: 5000 });
 });
 
-test("Tout null — garde null", () => {
+test("Tout null - garde null", () => {
   const result = mergeLimits([
     { type: "tpd", value: null },
     { type: "tpd", value: null },
@@ -85,7 +85,7 @@ test("Tout null — garde null", () => {
   assert.deepStrictEqual(result, { tpd: null });
 });
 
-test("Cas réel — plusieurs routers avec 4 types", () => {
+test("Cas réel - plusieurs routers avec 4 types", () => {
   const result = mergeLimits([
     { type: "rpm", value: 500 },
     { type: "rpd", value: 50000 },
@@ -106,7 +106,7 @@ test("Cas réel — plusieurs routers avec 4 types", () => {
   assert.strictEqual(result.tpd, 1280000);
 });
 
-test("Valeur 0 — traitée comme restrictive", () => {
+test("Valeur 0 - traitée comme restrictive", () => {
   const result = mergeLimits([
     { type: "rpm", value: 10 },
     { type: "rpm", value: 0 },

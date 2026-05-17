@@ -31,12 +31,16 @@ const apiBaseInput = document.getElementById("api-base");
 
 /* --- Charger la config existante --- */
 
-browser.storage.local.get(["apiKey", "apiBase", "model"]).then((result) => {
+browser.storage.local.get(["apiKey", "apiBase", "model"]).then(async (result) => {
   if (result.apiKey) apiKeyInput.value = result.apiKey;
   apiBaseInput.value = result.apiBase || DEFAULT_API_BASE;
 
   if (result.apiKey) {
-    fetchModels();
+    /* fetchModels remplit le <select> et sélectionne le modèle sauvegardé.
+       Il faut attendre cette étape avant d'afficher les limites, sinon
+       modelSelect.value est encore vide et les sections "Usage du jour"
+       et "Paliers documentés" sont sautées au premier rendu. */
+    await fetchModels();
     fetchAndShowLimits();
   }
 });
