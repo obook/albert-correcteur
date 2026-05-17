@@ -38,11 +38,13 @@
 /**
  * Envoie un texte à l'API Albert pour correction ou reformulation.
  *
- * @param {string} text - Texte à vérifier.
- * @param {string} mode - Mode : "correction" ou "reformulation".
+ * @param {string} text       - Texte à vérifier.
+ * @param {string} mode       - Mode : "correction" ou "reformulation".
+ * @param {string} [personaId] - Id de persona (mode reformulation
+ *                               uniquement, défaut : "neutre").
  * @returns {Promise<{corrections?: Array, lang?: string, error?: string}>}
  */
-async function checkText(text, mode) {
+async function checkText(text, mode, personaId) {
   const config = await loadConfig();
   if (!config.apiKey) {
     return {
@@ -52,7 +54,7 @@ async function checkText(text, mode) {
   }
 
   const lang = detectLanguage(text);
-  const systemPrompt = await buildPrompt(mode, lang, config.model);
+  const systemPrompt = await buildPrompt(mode, lang, config.model, personaId);
 
   try {
     const effectiveModel = selectEffectiveModel(config.model);

@@ -39,6 +39,7 @@
   "background": {
     "scripts": [
       "util/model-aliases.js",
+      "util/personas.js",
       "service/service-config.js",
       "service/service-langue.js",
       "service/service-prompts.js",

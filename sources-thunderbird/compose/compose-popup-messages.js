@@ -21,7 +21,7 @@ browser.runtime.onMessage.addListener((message) => {
   }
 
   if (message.type === "reformulateResult") {
-    Albert.showReformulationPopup(message.originalText, message.result);
+    Albert.showReformulationPopup(message.originalText, message.result, message.personaLabel);
   }
 
   if (message.type === "translateGetSelection") {

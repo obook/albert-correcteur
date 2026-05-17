@@ -34,24 +34,41 @@ browser.menus.create({
   contexts: ["compose_body"],
 });
 
+for (const persona of PERSONAS) {
+  browser.menus.create({
+    id: "albert-reformulate-" + persona.id,
+    parentId: "albert-reformulate",
+    title: persona.label,
+    contexts: ["compose_body"],
+  });
+}
+
 browser.menus.create({
   id: "albert-translate",
   title: "Traduire avec Albert",
   contexts: ["compose_body", "selection"],
 });
 
+const REFORMULATE_PREFIX = "albert-reformulate-";
+
 browser.menus.onClicked.addListener(async (info, tab) => {
   const text = info.selectionText;
   if (!text || text.trim().length < 3) return;
 
-  if (info.menuItemId === "albert-reformulate") {
+  if (typeof info.menuItemId === "string"
+    && info.menuItemId.startsWith(REFORMULATE_PREFIX)) {
+    const personaId = info.menuItemId.slice(REFORMULATE_PREFIX.length);
+    const persona = getPersonaById(personaId);
+    browser.storage.local.set({ lastReformulationPersona: persona.id });
     browser.tabs.sendMessage(tab.id, { type: "reformulateLoading" });
-    const result = await checkText(text, "reformulation");
+    const result = await checkText(text, "reformulation", persona.id);
     browser.tabs.sendMessage(tab.id, {
       type: "reformulateResult",
       originalText: text,
+      personaLabel: persona.label,
       result,
     });
+    return;
   }
 
   if (info.menuItemId === "albert-translate") {

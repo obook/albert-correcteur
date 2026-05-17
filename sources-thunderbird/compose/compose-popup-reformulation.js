@@ -31,7 +31,7 @@ Albert.closeReformulationPopup = function () {
   Albert.restoreFocus();
 };
 
-Albert.showReformulationPopup = function (originalText, result) {
+Albert.showReformulationPopup = function (originalText, result, personaLabel) {
   Albert.closeReformulationPopup();
   Albert.closeCorrectionPopup();
   Albert.closeTranslationPopup();
@@ -54,7 +54,7 @@ Albert.showReformulationPopup = function (originalText, result) {
 
   const title = document.createElement("span");
   title.className = "albert-popup-type";
-  title.textContent = "Reformulation";
+  title.textContent = personaLabel ? "Reformulation : " + personaLabel : "Reformulation";
   header.appendChild(title);
 
   const closeBtn = document.createElement("button");

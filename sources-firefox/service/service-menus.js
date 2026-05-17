@@ -27,17 +27,31 @@
 
 /* --- Menus contextuels --- */
 
+/* Parent du sous-menu de reformulation. Chaque enfant correspond à un
+   persona déclaré dans util/personas.js. */
 browser.contextMenus.create({
   id: "albert-reformulate",
   title: "Reformuler avec Albert",
   contexts: ["editable"],
 });
 
+for (const persona of PERSONAS) {
+  browser.contextMenus.create({
+    id: "albert-reformulate-" + persona.id,
+    parentId: "albert-reformulate",
+    title: persona.label,
+    contexts: ["editable"],
+  });
+}
+
 browser.contextMenus.create({
   id: "albert-translate",
   title: "Traduire avec Albert",
   contexts: ["selection"],
 });
+
+/* Préfixe d'id qui identifie un clic sur un sous-item de reformulation. */
+const REFORMULATE_PREFIX = "albert-reformulate-";
 
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
   const text = info.selectionText;
@@ -59,13 +73,20 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
    */
   const sendOpts = typeof info.frameId === "number" ? { frameId: info.frameId } : undefined;
 
-  if (info.menuItemId === "albert-reformulate") {
+  if (typeof info.menuItemId === "string"
+    && info.menuItemId.startsWith(REFORMULATE_PREFIX)) {
+    const personaId = info.menuItemId.slice(REFORMULATE_PREFIX.length);
+    const persona = getPersonaById(personaId);
+    /* Mémoriser le dernier persona utilisé pour pré-cocher l'UI plus tard. */
+    browser.storage.local.set({ lastReformulationPersona: persona.id });
+
     browser.tabs.sendMessage(tab.id, { type: "reformulateLoading" }, sendOpts)
       .catch((err) => AlbertLog.error("sendMessage reformulateLoading a échoué:",
         err && err.message, "(content script absent ou frame non autorisée ?)"));
 
-    AlbertLog.log("checkText(reformulation) en cours, longueur=" + text.length);
-    const result = await checkText(text, "reformulation");
+    AlbertLog.log("checkText(reformulation) persona=" + persona.id,
+      "longueur=" + text.length);
+    const result = await checkText(text, "reformulation", persona.id);
     if (result.error) {
       AlbertLog.warn("checkText(reformulation) erreur:", result.error);
     } else {
@@ -75,10 +96,12 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
     browser.tabs.sendMessage(tab.id, {
       type: "reformulateResult",
       originalText: text,
+      personaLabel: persona.label,
       result,
     }, sendOpts).catch((err) => AlbertLog.error(
       "sendMessage reformulateResult a échoué:", err && err.message,
       "(le toast de chargement va rester affiché jusqu'à expiration)"));
+    return;
   }
 
   if (info.menuItemId === "albert-translate") {

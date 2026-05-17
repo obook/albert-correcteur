@@ -65,15 +65,27 @@ function correctionPromptName(modelAlias) {
  * @param {string} lang        - Code langue détecté (fr, en, es, de).
  * @param {string} modelAlias  - Alias du modèle actif (sert au choix
  *                               de prompt pour la correction).
+ * @param {string} personaId   - Id de persona (mode "reformulation"
+ *                               uniquement) ; ignoré sinon. Si vide
+ *                               ou inconnu, le persona "neutre" est
+ *                               appliqué.
  * @returns {Promise<string>}  - Prompt système prêt à envoyer.
  */
-async function buildPrompt(mode, lang, modelAlias) {
+async function buildPrompt(mode, lang, modelAlias, personaId) {
   const name = mode === "reformulation"
     ? "reformulation"
     : correctionPromptName(modelAlias);
   const template = await loadPromptTemplate(name);
   const langName = LANG_NAMES[lang] || "français";
-  return template.replace(/\{\{LANG\}\}/g, langName);
+  let prompt = template.replace(/\{\{LANG\}\}/g, langName);
+
+  if (mode === "reformulation") {
+    /* getPersonaById est défini dans util/personas.js (chargé en amont
+       via manifest.background.scripts). */
+    const persona = getPersonaById(personaId);
+    prompt = prompt.replace(/\{\{PERSONA_TONE\}\}/g, persona.tone);
+  }
+  return prompt;
 }
 
 /**

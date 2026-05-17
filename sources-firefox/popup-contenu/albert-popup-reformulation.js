@@ -22,8 +22,9 @@
 
 "use strict";
 
-Albert.showReformulationPopup = function (originalText, suggestions) {
+Albert.showReformulationPopup = function (originalText, suggestions, personaLabel) {
   Albert.log("showReformulationPopup:", suggestions.length, "suggestions",
+    "persona=" + (personaLabel || "(aucun)"),
     "originalText.length=" + originalText.length);
   Albert.closePopup();
   const loadingToast = document.querySelector(".albert-toast");
@@ -45,7 +46,9 @@ Albert.showReformulationPopup = function (originalText, suggestions) {
 
   const title = document.createElement("span");
   title.className = "albert-popup-mode-btn";
-  title.textContent = "Reformuler";
+  title.textContent = personaLabel
+    ? "Reformuler : " + personaLabel
+    : "Reformuler";
   title.style.cursor = "default";
   headerLeft.appendChild(title);
 

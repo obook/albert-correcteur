@@ -40,7 +40,7 @@ browser.runtime.onMessage.addListener((message) => {
         + "le clic sur une suggestion ne pourra pas remplacer le texte. "
         + "L'evenement contextmenu n'a peut-etre pas ete capte dans cette frame.");
     }
-    Albert.showReformulationPopup(message.originalText, suggestions);
+    Albert.showReformulationPopup(message.originalText, suggestions, message.personaLabel);
   }
 
   if (message.type === "translateGetSelection") {
