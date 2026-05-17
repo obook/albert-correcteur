@@ -3,6 +3,8 @@
   "name": "Albert Correcteur",
   "version": "0.2.30",
   "description": "Extension de correction orthographique, grammaticale et de traduction pour Thunderbird, propulsée par l'API Albert (DINUM).",
+  "author": "Olivier Booklage",
+  "homepage_url": "https://forge.apps.education.fr/booklageolivier/albert-correcteur",
   "browser_specific_settings": {
     "gecko": {
       "id": "albert-correcteur-thunderbird@ac-bordeaux.fr",

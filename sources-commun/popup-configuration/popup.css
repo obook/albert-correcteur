@@ -222,3 +222,19 @@ button:hover {
   color: var(--pop-separator);
   margin: 0 4px;
 }
+
+.credits {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--pop-text-dim);
+}
+
+.credits a {
+  color: var(--pop-link);
+  text-decoration: none;
+}
+
+.credits a:hover {
+  text-decoration: underline;
+}
