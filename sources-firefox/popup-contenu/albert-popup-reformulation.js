@@ -56,14 +56,15 @@ Albert.showReformulationPopup = function (originalText, suggestions, personaLabe
   const body = document.createElement("div");
   body.className = "albert-popup-body";
 
-  if (suggestions.length === 0) {
-    const msg = document.createElement("div");
-    msg.className = "albert-popup-message";
-    msg.textContent = "Aucune reformulation proposée.";
-    body.appendChild(msg);
-  }
+  /* Compter les boutons réellement générés : un block sans suggestion
+     chaînée valide ne doit pas masquer le message "aucune
+     proposition". */
+  let totalSuggestions = 0;
 
   suggestions.forEach((s) => {
+    const sugList = (s.suggestions || []).filter((sug) => typeof sug === "string" && sug.length > 0);
+    if (sugList.length === 0 && !s.message) return;
+
     const block = document.createElement("div");
     block.style.marginBottom = "8px";
 
@@ -77,7 +78,7 @@ Albert.showReformulationPopup = function (originalText, suggestions, personaLabe
     const sugBox = document.createElement("div");
     sugBox.className = "albert-popup-suggestions";
 
-    (s.suggestions || []).forEach((sug) => {
+    sugList.forEach((sug) => {
       const btn = document.createElement("button");
       btn.className = "albert-popup-suggestion";
       btn.textContent = sug;
@@ -86,10 +87,20 @@ Albert.showReformulationPopup = function (originalText, suggestions, personaLabe
         Albert.closePopup();
       });
       sugBox.appendChild(btn);
+      totalSuggestions++;
     });
     block.appendChild(sugBox);
     body.appendChild(block);
   });
+
+  if (totalSuggestions === 0) {
+    const msg = document.createElement("div");
+    msg.className = "albert-popup-message";
+    msg.textContent = "Aucune reformulation proposée. Le modèle a "
+      + "estimé que le texte ne nécessitait pas de modification, ou "
+      + "n'a pas su l'adapter au persona choisi.";
+    body.appendChild(msg);
+  }
 
   popup.appendChild(body);
   document.body.appendChild(popup);

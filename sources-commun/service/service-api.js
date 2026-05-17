@@ -137,8 +137,34 @@ async function checkText(text, mode, personaId) {
       }
     }
 
+    /* Coercer chaque suggestion en chaîne. Les petits modèles renvoient
+       parfois un objet (ex. { text: "..." }, { reformulation: "..." })
+       au lieu d'une chaîne, ce qui produit "[object Object]" côté UI.
+       On essaie d'abord les clés connues, puis on tombe sur la
+       première propriété chaînée non vide trouvée. */
+    const coerceSuggestion = (s) => {
+      if (typeof s === "string") return s;
+      if (s && typeof s === "object") {
+        const knownKeys = ["text", "suggestion", "content", "value",
+          "reformulation", "rephrasing", "rephrased", "output"];
+        for (const key of knownKeys) {
+          if (typeof s[key] === "string" && s[key].length > 0) return s[key];
+        }
+        /* Dernier recours : prendre la première propriété chaînée non vide. */
+        for (const v of Object.values(s)) {
+          if (typeof v === "string" && v.length > 0) return v;
+        }
+      }
+      return null;
+    };
+
     /* Filtrer les suggestions incorrectes */
     const apiCorrections = (parsed.corrections || []).map((c) => {
+      if (Array.isArray(c.suggestions)) {
+        c.suggestions = c.suggestions
+          .map(coerceSuggestion)
+          .filter((s) => s !== null);
+      }
       if (c.suggestions && c.word) {
         c.suggestions = c.suggestions.filter((s) => {
           /* Supprimer les suggestions identiques au mot erroné */
