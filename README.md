@@ -8,7 +8,7 @@
 
 **Extension expérimentale** de correction orthographique, grammaticale et de traduction pour Firefox et Thunderbird, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web (Firefox) et dans la fenêtre de composition de mail (Thunderbird), propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné (français, anglais, espagnol, allemand).
 
-**Téléchargement** : [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases) | **Sécurité** : [SECURITE.md](SECURITE.md) | **Accessibilité** : [RGAA](ACCESSIBILITE.md)
+**Téléchargement .xpi (signés par Mozilla)** : [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases) | **Sécurité** : [SECURITE.md](SECURITE.md) | **Accessibilité** : [RGAA](ACCESSIBILITE.md)
 
 | Correction et reformulation | Traduction multi-langues |
 |:---:|:---:|
