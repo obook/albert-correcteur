@@ -307,7 +307,8 @@
   outline-offset: 1px;
 }
 
-/* Masquer la popup quand une modale Bootstrap est ouverte (EcoleDirecte) */
-body.modal-open .albert-popup {
-  display: none !important;
-}
+/* Aucun masquage explicite des popups quand une modale Bootstrap s'ouvre :
+   le popup est greffé à document.body avec un z-index maximum et serait masqué
+   à tort sur EcoleDirecte (Cahier de texte) où l'édition se fait dans une
+   modale. Le popup étant transitoire (clic extérieur / Échap), tout popup
+   d'arrière-plan est de toute façon fermé par le clic qui ouvre la modale. */

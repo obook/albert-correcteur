@@ -35,7 +35,15 @@
   background-image: linear-gradient(to right, #3490dc 50%, transparent 50%);
 }
 
-/* Masquer l'overlay quand une modale Bootstrap est ouverte (EcoleDirecte) */
+/* Masquer les overlays des champs d'arrière-plan quand une modale Bootstrap
+   est ouverte (EcoleDirecte), tout en conservant ceux à l'intérieur de la
+   modale active (CKEditor du Cahier de texte, etc.). */
 body.modal-open .albert-overlay {
-  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+body.modal-open .modal.show .albert-overlay,
+body.modal-open .modal.in .albert-overlay {
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
