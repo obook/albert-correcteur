@@ -54,7 +54,7 @@
 
 ## Installations
 
-### <img src="images/firefox.png" width="24" alt="Firefox"> Firefox
+### <img src="images/firefox.png" width="24" alt="Firefox" style="vertical-align: middle;"> Firefox
 
 1. Télécharger le `.xpi` signé par Mozilla depuis les [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases)
 2. Dans Firefox : `about:addons` → roue dentée → "Installer un module depuis un fichier"
@@ -64,7 +64,7 @@ Le `.xpi` est signé automatiquement par Mozilla (canal unlisted) lors du pipeli
 
 **Configuration** : cliquer sur l'icône Albert dans la barre d'outils de Firefox.
 
-### <img src="images/thunderbird.png" width="24" alt="Thunderbird"> Thunderbird
+### <img src="images/thunderbird.png" width="24" alt="Thunderbird" style="vertical-align: middle;"> Thunderbird
 
 1. Télécharger le `.xpi` Thunderbird depuis les [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases)
 2. Dans Thunderbird : Menu > Modules complémentaires > roue dentée > « Installer un module depuis un fichier... »
