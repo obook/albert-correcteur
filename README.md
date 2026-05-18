@@ -6,9 +6,9 @@
 ![IA](badges/ia.svg)
 ![RGPD](badges/rgpd.svg)
 
-**Extension expérimentale** de correction orthographique, grammaticale et de traduction pour Firefox et Thunderbird, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web (Firefox) et dans la fenêtre de composition de mail (Thunderbird), propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné (français, anglais, espagnol, allemand).
+**Extension expérimentale** de correction orthographique, grammaticale et de traduction pour Firefox et Thunderbird, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web (Firefox) et dans la fenêtre de composition de mail (Thunderbird), propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné vers une des quatre langues au choix : français, anglais, espagnol, allemand.
 
-**Téléchargement .xpi (signés par Mozilla)** : [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases) | **Sécurité** : [SECURITE](SECURITE.md) | **Accessibilité** : [RGAA](ACCESSIBILITE.md)
+**Téléchargement .xpi (signé par Mozilla)** : [RELEASES](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases) | **Sécurité** : [SECURITE](SECURITE.md) | **Accessibilité** : [RGAA](ACCESSIBILITE.md)
 
 | Correction et reformulation | Traduction multi-langues |
 |:---:|:---:|
@@ -54,7 +54,7 @@
 
 ## Installations
 
-### Firefox
+### <img src="images/firefox.png" width="24" alt="Firefox"> Firefox
 
 1. Télécharger le `.xpi` signé par Mozilla depuis les [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases)
 2. Dans Firefox : `about:addons` → roue dentée → "Installer un module depuis un fichier"
@@ -64,7 +64,7 @@ Le `.xpi` est signé automatiquement par Mozilla (canal unlisted) lors du pipeli
 
 **Configuration** : cliquer sur l'icône Albert dans la barre d'outils de Firefox.
 
-### Thunderbird
+### <img src="images/thunderbird.png" width="24" alt="Thunderbird"> Thunderbird
 
 1. Télécharger le `.xpi` Thunderbird depuis les [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases)
 2. Dans Thunderbird : Menu > Modules complémentaires > roue dentée > « Installer un module depuis un fichier... »
@@ -109,8 +109,15 @@ Le fichier `.xpi` distribué est signé par Mozilla, mais pendant le développem
 - Cliquer sur « Charger un module complémentaire temporaire… »
 - Sélectionner le fichier `manifest.json` à la racine du répertoire source
 
+## Auteur
+
+Olivier Booklage (Académie de Bordeaux)
+
 ## Licences
 
 - **Code source** : [licence MIT](LICENSE)
 - **Logo Albert** : issu du projet [Albert](https://albert.sites.beta.gouv.fr/) (DINUM), sous [licence Ouverte Etalab 2.0](https://github.com/etalab/licence-ouverte/blob/master/LO.md)
+- **Logo Firefox** : sous [Mozilla Public License Version 2](https://www.mozilla.org/en-US/MPL/2.0/)
+- **Logo Thunderbird** : sous [licence Creative Commons Attribution 3.0 Non Transposé](https://creativecommons.org/licenses/by/3.0/deed.fr)
 
+> Firefox est une marque déposée de la Mozilla Foundation. Thunderbird est une marque déposée de MZLA Technologies Corporation.

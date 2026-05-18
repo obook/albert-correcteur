@@ -16,7 +16,7 @@ Chaque script de build assemble le code partagé avec le code spécifique pour p
 ## Arborescence
 
 ```
-albert-ext/
+albert-correcteur/
   sources-commun/                                <- Code partagé (Firefox + Thunderbird)
     service/                              <- Scripts de fond communs (5 fichiers)
       service-config.js                   <- Chargement de la configuration (clé, modèle, URL)
