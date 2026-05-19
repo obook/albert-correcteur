@@ -3,16 +3,18 @@
     "albert-correcteur@ac-bordeaux.fr": {
       "updates": [
         {
-          "version": "0.3.3",
-          "update_link": "https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/jobs/artifacts/v0.3.3/raw/albert-correcteur-firefox_0.3.3.xpi?job=sign"
+          "version": "0.3.4",
+          "update_link": "https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/jobs/artifacts/v0.3.4/raw/albert-correcteur-firefox_0.3.4.xpi?job=sign",
+          "update_hash": "sha256:770fa62c957359389e0ef7d2ad01d93fa9650891cd1984b2be464c6237938b26"
         }
       ]
     },
     "albert-correcteur-thunderbird@ac-bordeaux.fr": {
       "updates": [
         {
-          "version": "0.3.3",
-          "update_link": "https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/jobs/artifacts/v0.3.3/raw/albert-correcteur-thunderbird_0.3.3.xpi?job=build-thunderbird"
+          "version": "0.3.4",
+          "update_link": "https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/jobs/artifacts/v0.3.4/raw/albert-correcteur-thunderbird_0.3.4.xpi?job=build-thunderbird",
+          "update_hash": "sha256:6b1cabb46935b9927e6f8ece6569b1a17f7ad8e9df3e1e5b88f2e81521669d57"
         }
       ]
     }
