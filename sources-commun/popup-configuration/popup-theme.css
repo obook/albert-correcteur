@@ -15,8 +15,8 @@
   --pop-bg: #fff;
   --pop-text: #333;
   --pop-text-muted: #555;
-  --pop-text-faint: #888;
-  --pop-text-dim: #777;
+  --pop-text-faint: #717171;
+  --pop-text-dim: #6e6e6e;
   --pop-text-soft: #444;
   --pop-link: #000091;
   --pop-link-hover: #0000b8;
@@ -30,10 +30,10 @@
   --pop-button-text: #fff;
   --pop-button-hover: #0000b8;
   --pop-footer-border: #eee;
-  --pop-separator: #ccc;
+  --pop-separator: #767676;
   --pop-tier-border: #ddd;
-  --pop-status-ok: #27ae60;
-  --pop-status-err: #e74c3c;
+  --pop-status-ok: #1e7e45;
+  --pop-status-err: #c0392b;
   --pop-tag-bg: #f0f0f0;
   --pop-tag-button: #999;
   --pop-preview-border: #ddd;
@@ -59,7 +59,7 @@
   --pop-button-text: #fff;
   --pop-button-hover: #2563eb;
   --pop-footer-border: #3a3a4a;
-  --pop-separator: #4a4a5a;
+  --pop-separator: #8a8a9a;
   --pop-tier-border: #3a3a4a;
   --pop-status-ok: #4ade80;
   --pop-status-err: #f87171;
