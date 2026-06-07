@@ -7,6 +7,16 @@ et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Ajouté
+- Portage de l'extension pour Brave et les navigateurs Chromium : manifest
+  Manifest V3, service worker (`sources-brave/`), script `build-brave.sh` et
+  cible `build-brave` dans la CI. Les content scripts de Firefox sont réutilisés
+  tels quels.
+
+### Corrigé
+- Badge cassé sous Brave : ajout des icônes SVG dans `web_accessible_resources`,
+  requis par le Manifest V3 pour les ressources injectées dans la page.
+
 ### Accessibilité
 - Ajout d'un élément `<title>` aux pages `popup.html` (Configuration) et
   `popup-settings.html` (Paramètres).

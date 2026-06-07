@@ -2,22 +2,24 @@
 
 ## Organisation générale
 
-Le projet est découpé en trois répertoires de sources et deux scripts de build :
+Le projet est découpé en quatre répertoires de sources et trois scripts de build :
 
-- **`sources-commun/`** - Code partagé entre Firefox et Thunderbird (service API, prompts, icônes, CSS communs, popup de configuration)
+- **`sources-commun/`** - Code partagé entre toutes les cibles (service API, prompts, icônes, CSS communs, popup de configuration)
 - **`sources-firefox/`** - Code spécifique à Firefox (content scripts, overlays, popups, badge CSS, manifest)
 - **`sources-thunderbird/`** - Code spécifique à Thunderbird (compose scripts, badge CSS, popup traduction lecture, manifest)
+- **`sources-brave/`** - Surcouche Brave/Chromium (manifest Manifest V3, service worker, polyfill). Les content scripts ne sont pas dupliqués : la cible Brave réutilise ceux de `sources-firefox/`, qui sont indépendants du navigateur.
 
-Chaque script de build assemble le code partagé avec le code spécifique pour produire un `.xpi` :
+Chaque script de build assemble le code partagé avec le code spécifique :
 
 - **`build-firefox.sh`** - Copie `sources-commun/` + `sources-firefox/` dans un dossier temporaire, puis crée le `.xpi` Firefox
 - **`build-thunderbird.sh`** - Copie `sources-commun/` + `sources-thunderbird/` dans un dossier temporaire, puis crée le `.xpi` Thunderbird
+- **`build-brave.sh`** - Copie `sources-commun/` + `sources-firefox/` + `sources-brave/` (qui écrase le manifest), puis crée le `.zip` Brave
 
 ## Arborescence
 
 ```
 albert-correcteur/
-  sources-commun/                                <- Code partagé (Firefox + Thunderbird)
+  sources-commun/                                <- Code partagé (toutes les cibles)
     service/                              <- Scripts de fond communs (5 fichiers)
       service-config.js                   <- Chargement de la configuration (clé, modèle, URL)
       service-langue.js                   <- Détection de langue locale (RGPD)
@@ -124,6 +126,13 @@ albert-correcteur/
     css/                                  <- Style spécifique Thunderbird
       badge.css                           <- Badge (positionnement fixe)
 
+  sources-brave/                          <- Surcouche Brave / Chromium (Manifest V3)
+    manifest.json                         <- Manifeste Brave (Manifest V3, action, host_permissions, web_accessible_resources)
+    service/
+      service-worker.js                   <- Point d'entrée du fond : importScripts() rejoue l'ordre des background.scripts MV2
+    lib/
+      browser-polyfill.js                 <- webextension-polyfill (expose browser.* à partir de chrome.*)
+
   tests/                                  <- Tests unitaires (Node.js, sans dépendance)
     run-all.sh                            <- Lance toutes les suites
     test-*.js                             <- 17 suites, 257 tests
@@ -142,6 +151,7 @@ albert-correcteur/
   .gitlab-ci.yml                          <- Pipeline CI/CD (tests, build, sign, release)
   build-firefox.sh                        <- Script d'assemblage Firefox (.xpi)
   build-thunderbird.sh                    <- Script d'assemblage Thunderbird (.xpi)
+  build-brave.sh                          <- Script d'assemblage Brave (.zip)
 ```
 
 ## Fonctionnement
@@ -151,8 +161,18 @@ albert-correcteur/
 L'extension se compose de deux parties :
 
 - **Script de fond** (`sources-commun/service/` + `sources-firefox/service/` ou `sources-thunderbird/service/`) - s'exécute en arrière-plan, communique avec l'API Albert, gère les menus contextuels (Reformuler, Traduire), la détection de langue et le cache des limites.
-- **Content scripts Firefox** (`sources-firefox/` : `etat/`, `verification/`, `correction/`, `affichage/`, `notification/`, `demarrage/`, `popup-contenu/`) - injectés dans chaque page, détectent les champs texte, affichent les corrections, la reformulation et la traduction.
+- **Content scripts Firefox** (`sources-firefox/` : `etat/`, `verification/`, `correction/`, `affichage/`, `notification/`, `demarrage/`, `popup-contenu/`) - injectés dans chaque page, détectent les champs texte, affichent les corrections, la reformulation et la traduction. La cible Brave réutilise ces mêmes content scripts.
 - **Compose scripts Thunderbird** (`sources-thunderbird/compose/`) - injectés dans la fenêtre de composition de mail, détectent le body de l'éditeur, affichent les corrections, la reformulation et la traduction.
+
+### Spécificités de la cible Brave (Manifest V3)
+
+Brave est basé sur Chromium et n'accepte que le Manifest V3. La cible Brave réutilise tel quel le code commun et les content scripts de Firefox ; seules trois choses changent, regroupées dans `sources-brave/` :
+
+- **Service worker au lieu des background scripts.** Le Manifest V2 charge une liste de scripts de fond dans un scope global partagé ; le Manifest V3 n'autorise qu'un seul point d'entrée. Le fichier `service/service-worker.js` reproduit le comportement V2 avec `importScripts()`, qui rejoue les mêmes fichiers dans le même ordre et conserve le scope global partagé. Aucun refactor du code commun n'est donc nécessaire.
+- **Polyfill `browser.*`.** Le code utilise partout l'API `browser.*` (standard, à base de promesses), que Chromium n'expose pas. Le fichier `lib/browser-polyfill.js` (webextension-polyfill) la recrée à partir de `chrome.*`. Il est chargé en premier, aussi bien dans le service worker que dans les content scripts.
+- **`web_accessible_resources`.** Les icônes SVG du badge sont injectées dans la page via `runtime.getURL`. Sous Manifest V3, une ressource chargée dans le contexte de la page doit être déclarée dans `web_accessible_resources`, faute de quoi l'image est bloquée.
+
+Le service worker est arrêté après quelques secondes d'inactivité, ce qui vide les caches en mémoire (limites, prompts). Ils sont simplement reconstruits à la demande, sans incidence sur le fonctionnement. Le contrôle du rythme local s'exécute côté content script, lié à la page, et n'est donc pas affecté.
 
 ### Scripts de fond (partagés)
 
