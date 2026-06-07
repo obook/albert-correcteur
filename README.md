@@ -93,7 +93,7 @@ Voir [ARCHITECTURE.md](ARCHITECTURE.md) pour l'arborescence, les flux et les dé
 
 ## Conformité RGPD
 
-- Pas de CDN ni d'appel à un service tiers : tout est embarqué dans l'extension (la version Brave inclut le polyfill `webextension-polyfill`, vendoré localement)
+- Aucune bibliothèque externe : pas de CDN, pas de dépendance tierce, tout est embarqué dans l'extension
 - Aucun appel réseau en dehors du serveur API Albert configuré par l'utilisateur
 - Détection de langue locale : réalisée côté client sans appel externe
 - Polices système uniquement (`-apple-system`, `Segoe UI`, etc.)

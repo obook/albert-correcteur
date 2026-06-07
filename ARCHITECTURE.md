@@ -7,7 +7,7 @@ Le projet est découpé en quatre répertoires de sources et trois scripts de bu
 - **`sources-commun/`** - Code partagé entre toutes les cibles (service API, prompts, icônes, CSS communs, popup de configuration)
 - **`sources-firefox/`** - Code spécifique à Firefox (content scripts, overlays, popups, badge CSS, manifest)
 - **`sources-thunderbird/`** - Code spécifique à Thunderbird (compose scripts, badge CSS, popup traduction lecture, manifest)
-- **`sources-brave/`** - Surcouche Brave/Chromium (manifest Manifest V3, service worker, polyfill). Les content scripts ne sont pas dupliqués : la cible Brave réutilise ceux de `sources-firefox/`, qui sont indépendants du navigateur.
+- **`sources-brave/`** - Surcouche Brave/Chromium (manifest Manifest V3, service worker, shim `browser.*`). Les content scripts ne sont pas dupliqués : la cible Brave réutilise ceux de `sources-firefox/`, qui sont indépendants du navigateur.
 
 Chaque script de build assemble le code partagé avec le code spécifique :
 
@@ -131,7 +131,7 @@ albert-correcteur/
     service/
       service-worker.js                   <- Point d'entrée du fond : importScripts() rejoue l'ordre des background.scripts MV2
     lib/
-      browser-polyfill.js                 <- webextension-polyfill (expose browser.* à partir de chrome.*)
+      browser-shim.js                     <- Alias maison : expose browser.* à partir de chrome.* (pas de dépendance externe)
 
   tests/                                  <- Tests unitaires (Node.js, sans dépendance)
     run-all.sh                            <- Lance toutes les suites
@@ -169,7 +169,7 @@ L'extension se compose de deux parties :
 Brave est basé sur Chromium et n'accepte que le Manifest V3. La cible Brave réutilise tel quel le code commun et les content scripts de Firefox ; seules trois choses changent, regroupées dans `sources-brave/` :
 
 - **Service worker au lieu des background scripts.** Le Manifest V2 charge une liste de scripts de fond dans un scope global partagé ; le Manifest V3 n'autorise qu'un seul point d'entrée. Le fichier `service/service-worker.js` reproduit le comportement V2 avec `importScripts()`, qui rejoue les mêmes fichiers dans le même ordre et conserve le scope global partagé. Aucun refactor du code commun n'est donc nécessaire.
-- **Polyfill `browser.*`.** Le code utilise partout l'API `browser.*` (standard, à base de promesses), que Chromium n'expose pas. Le fichier `lib/browser-polyfill.js` (webextension-polyfill) la recrée à partir de `chrome.*`. Il est chargé en premier, aussi bien dans le service worker que dans les content scripts.
+- **Shim `browser.*`.** Le code utilise partout l'API `browser.*` (standard, à base de promesses), que Chromium n'expose pas sous ce nom. Le fichier `lib/browser-shim.js` se contente de l'aliaser sur `chrome.*`, qui renvoie déjà des promesses sous Manifest V3 pour toutes les API employées. Pas de bibliothèque tierce. Il est chargé en premier, aussi bien dans le service worker que dans les content scripts.
 - **`web_accessible_resources`.** Les icônes SVG du badge sont injectées dans la page via `runtime.getURL`. Sous Manifest V3, une ressource chargée dans le contexte de la page doit être déclarée dans `web_accessible_resources`, faute de quoi l'image est bloquée.
 
 Le service worker est arrêté après quelques secondes d'inactivité, ce qui vide les caches en mémoire (limites, prompts). Ils sont simplement reconstruits à la demande, sans incidence sur le fonctionnement. Le contrôle du rythme local s'exécute côté content script, lié à la page, et n'est donc pas affecté.

@@ -10,10 +10,11 @@
  * d'un module à l'autre, exactement comme en MV2. Aucun refactor du code commun
  * n'est nécessaire.
  *
- * IMPORTANT : browser-polyfill.js DOIT être importé en premier. Chromium n'expose
- * pas le namespace "browser.*" ; le polyfill de Mozilla (webextension-polyfill) le
- * crée à partir de "chrome.*" et promisifie les API. Le reste du code commun peut
- * alors continuer d'utiliser "browser.*" tel quel.
+ * IMPORTANT : browser-shim.js DOIT être importé en premier. Chromium n'expose pas
+ * le namespace "browser.*" ; le shim l'aliase simplement sur "chrome.*", qui
+ * renvoie déjà des promesses sous Manifest V3 pour toutes les API employées ici.
+ * Le reste du code commun peut alors continuer d'utiliser "browser.*" tel quel,
+ * sans dépendance externe.
  *
  * L'ordre ci-dessous reproduit exactement background.scripts du manifest Firefox.
  *
@@ -24,7 +25,7 @@
  */
 
 importScripts(
-  "../lib/browser-polyfill.js",
+  "../lib/browser-shim.js",
 
   "../util/model-aliases.js",
   "service-config.js",

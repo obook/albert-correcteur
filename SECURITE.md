@@ -53,7 +53,7 @@ script-src 'self'; object-src 'self'     (Brave)
 
 ## Pratiques de développement
 
-- **Zéro dépendance au runtime** : aucun `npm install` requis pour Firefox et Thunderbird. La cible Brave embarque une seule bibliothèque tierce, `webextension-polyfill` (Mozilla, licence MIT), vendorée dans le dépôt et chargée localement, sans appel réseau.
+- **Zéro dépendance externe** : aucun `npm install`, aucune bibliothèque tierce. Sous Brave, l'accès à l'API `browser.*` repose sur un alias maison d'une ligne vers `chrome.*` (`sources-brave/lib/browser-shim.js`), pas sur une bibliothèque externe.
 - **Échappement systématique** : `textContent`, `createTextNode`, `escapeHtml()`
 - **Pas de code dynamique** : aucun `eval()`, `Function()`, `setTimeout(string)`
 - **Validation d'entrée** : vérification du type et de la structure des réponses API

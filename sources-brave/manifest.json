@@ -48,7 +48,7 @@
     {
       "matches": ["<all_urls>"],
       "js": [
-        "lib/browser-polyfill.js",
+        "lib/browser-shim.js",
         "etat/albert-state.js",
         "etat/albert-fields.js",
         "etat/albert-paragraphes.js",

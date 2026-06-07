@@ -91,7 +91,7 @@ vérifier manuellement la détection et le remplacement.
 | `sources-commun/` | Code partagé entre toutes les cibles |
 | `sources-firefox/` | Code spécifique à Firefox (réutilisé par Brave) |
 | `sources-thunderbird/` | Code spécifique à Thunderbird |
-| `sources-brave/` | Surcouche Brave / Chromium (manifest V3, service worker, polyfill) |
+| `sources-brave/` | Surcouche Brave / Chromium (manifest V3, service worker, shim `browser.*`) |
 | `sources-commun/prompts/` | Prompts système (correction, reformulation, traduction) |
 | `exemple/` | Page de test manuel |
 | `tests/` | Ressources de test |

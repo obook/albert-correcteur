@@ -75,31 +75,26 @@ build-thunderbird:
 
 # ── Build du .zip Brave / Chromium (Manifest V3, uniquement sur les tags v*) ──
 # Assemble sources-commun/ + sources-firefox/ (logique content/UI, agnostique) +
-# sources-brave/ (overrides MV3). Le polyfill webextension-polyfill n'est pas
-# versionné : il est récupéré ici et placé dans lib/browser-polyfill.js.
+# sources-brave/ (overrides MV3 : manifest, service worker, shim browser.*).
 # Le .zip produit est prêt pour un envoi sur le Chrome Web Store ou un
 # chargement "non empaqueté" dans brave://extensions (après décompression).
 
 build-brave:
   stage: build
-  image: node:20-alpine
+  image: alpine:latest
   before_script:
     - apk add --no-cache zip
   script:
     - VERSION="${CI_COMMIT_TAG#v}"
     - BRAVE_ZIP_NAME="albert-correcteur-brave_${VERSION}.zip"
-    - mkdir -p .build-brave/lib
+    - mkdir -p .build-brave
     - cp -r sources-commun/* .build-brave/
     - cp -r sources-firefox/* .build-brave/
     - cp -r sources-brave/* .build-brave/
-    # Vendorer webextension-polyfill (Mozilla) — non versionné dans le dépôt
-    - npm pack webextension-polyfill@0.12.0
-    - tar -xzf webextension-polyfill-*.tgz -C /tmp
-    - cp /tmp/package/dist/browser-polyfill.min.js .build-brave/lib/browser-polyfill.js
     - cd .build-brave
     - zip -r "../${BRAVE_ZIP_NAME}" . -x ".*"
     - cd ..
-    - rm -rf .build-brave webextension-polyfill-*.tgz
+    - rm -rf .build-brave
     - echo "BRAVE_ZIP_NAME=${BRAVE_ZIP_NAME}" > build-brave.env
     - echo "Extension Brave packagée -> ${BRAVE_ZIP_NAME}"
   artifacts:

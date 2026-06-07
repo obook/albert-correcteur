@@ -2,8 +2,8 @@
 # Construit le paquet pour Brave / Chromium (Manifest V3).
 # Assemble sources-commun/ (code partagé) + sources-firefox/ (logique content/UI,
 # agnostique du navigateur) + sources-brave/ (overrides MV3 : manifest, service
-# worker, polyfill). L'ordre de copie fait que sources-brave/ écrase le manifest
-# de Firefox.
+# worker, shim browser.*). L'ordre de copie fait que sources-brave/ écrase le
+# manifest de Firefox.
 #
 # Produit :
 #   - un dossier décompressé prêt pour "load unpacked" dans brave://extensions
@@ -30,15 +30,6 @@ if [ ! -d "$FIREFOX_DIR" ]; then
 fi
 if [ ! -d "$BRAVE_DIR" ]; then
     echo "Erreur : le dossier sources-brave/ est introuvable."
-    exit 1
-fi
-
-# Vérifier que le polyfill a bien été fourni (non versionné, à vendorer)
-if [ ! -f "$BRAVE_DIR/lib/browser-polyfill.js" ]; then
-    echo "Erreur : sources-brave/lib/browser-polyfill.js est manquant."
-    echo "  Récupérer webextension-polyfill (Mozilla) et le placer à cet emplacement :"
-    echo "    npm pack webextension-polyfill"
-    echo "    # puis extraire dist/browser-polyfill.min.js vers sources-brave/lib/browser-polyfill.js"
     exit 1
 fi
 
