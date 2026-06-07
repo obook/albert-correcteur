@@ -73,6 +73,44 @@ build-thunderbird:
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v/'
 
+# ── Build du .zip Brave / Chromium (Manifest V3, uniquement sur les tags v*) ──
+# Assemble sources-commun/ + sources-firefox/ (logique content/UI, agnostique) +
+# sources-brave/ (overrides MV3). Le polyfill webextension-polyfill n'est pas
+# versionné : il est récupéré ici et placé dans lib/browser-polyfill.js.
+# Le .zip produit est prêt pour un envoi sur le Chrome Web Store ou un
+# chargement "non empaqueté" dans brave://extensions (après décompression).
+
+build-brave:
+  stage: build
+  image: node:20-alpine
+  before_script:
+    - apk add --no-cache zip
+  script:
+    - VERSION="${CI_COMMIT_TAG#v}"
+    - BRAVE_ZIP_NAME="albert-correcteur-brave_${VERSION}.zip"
+    - mkdir -p .build-brave/lib
+    - cp -r sources-commun/* .build-brave/
+    - cp -r sources-firefox/* .build-brave/
+    - cp -r sources-brave/* .build-brave/
+    # Vendorer webextension-polyfill (Mozilla) — non versionné dans le dépôt
+    - npm pack webextension-polyfill@0.12.0
+    - tar -xzf webextension-polyfill-*.tgz -C /tmp
+    - cp /tmp/package/dist/browser-polyfill.min.js .build-brave/lib/browser-polyfill.js
+    - cd .build-brave
+    - zip -r "../${BRAVE_ZIP_NAME}" . -x ".*"
+    - cd ..
+    - rm -rf .build-brave webextension-polyfill-*.tgz
+    - echo "BRAVE_ZIP_NAME=${BRAVE_ZIP_NAME}" > build-brave.env
+    - echo "Extension Brave packagée -> ${BRAVE_ZIP_NAME}"
+  artifacts:
+    paths:
+      - "albert-correcteur-brave_*.zip"
+    reports:
+      dotenv: build-brave.env
+    expire_in: never
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v/'
+
 # ── Signature Mozilla pour Firefox (uniquement sur les tags v*) ──
 # Nécessite les variables CI/CD WEB_EXT_API_KEY et WEB_EXT_API_SECRET (identifiants AMO)
 # Si la version existe déjà sur AMO (erreur 409), le .xpi signé est récupéré via l'API.
@@ -149,6 +187,8 @@ release:
       artifacts: true
     - job: build-thunderbird
       artifacts: true
+    - job: build-brave
+      artifacts: true
   before_script:
     - apk add --no-cache curl >/dev/null 2>&1 || true
     - |
@@ -174,7 +214,7 @@ release:
   release:
     tag_name: $CI_COMMIT_TAG
     name: "Albert Correcteur ${CI_COMMIT_TAG}"
-    description: "Release ${CI_COMMIT_TAG} — Extensions Albert Correcteur (Firefox signée Mozilla + Thunderbird)"
+    description: "Release ${CI_COMMIT_TAG} — Extensions Albert Correcteur (Firefox signée Mozilla + Thunderbird + Brave/Chromium)"
     assets:
       links:
         - name: "${XPI_NAME}"
@@ -182,6 +222,9 @@ release:
           link_type: package
         - name: "albert-correcteur-thunderbird_${VERSION}.xpi"
           url: "${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/albert-correcteur-thunderbird_${VERSION}.xpi?job=build-thunderbird"
+          link_type: package
+        - name: "albert-correcteur-brave_${VERSION}.zip"
+          url: "${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_TAG}/raw/albert-correcteur-brave_${VERSION}.zip?job=build-brave"
           link_type: package
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v/'

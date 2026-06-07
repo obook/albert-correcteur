@@ -1,4 +1,5 @@
 firefox-release/
 thunderbird-release/
+brave-release/
 .env
 *credentials*
