@@ -39,6 +39,7 @@
 | Interception réseau (MITM) | HTTPS imposé par le manifest. Clé API transmise via en-tête Authorization (pas dans l'URL). |
 | Extension malveillante tierce | Content Security Policy : `script-src 'self'` (`object-src 'none'` sous Firefox, `object-src 'self'` sous Brave). Aucun script inline. |
 | Accès non autorisé aux données | Permissions minimales. Pas d'accès `<all_urls>` côté API. Stockage local protégé par le navigateur. Sous Brave, seules les trois icônes SVG du badge sont déclarées dans `web_accessible_resources` (aucune donnée exposée). |
+| Détection de l'extension par les sites (fingerprinting) | Sous Brave, les ressources exposées utilisent `use_dynamic_url: true` : leur URL est un jeton tournant, ce qui empêche un site de sonder leur présence pour identifier l'utilisateur. |
 | Abus de l'API (rate limiting) | Détection du code HTTP 429, lecture du Retry-After dans l'en-tête HTTP et dans le corps de la réponse, fenêtre glissante 60 s (`Albert.RollingWindow`), auto-fallback de modèle après deux 429 consécutifs (large -> medium -> small pendant 60 s), affichage du délai et du type de limite (rpm/rpd/tpm/tpd) à l'utilisateur. |
 
 ## Politique CSP

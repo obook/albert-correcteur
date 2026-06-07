@@ -5,17 +5,23 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
-## [Non publié]
+## [0.4.0] - 2026-06-07
 
 ### Ajouté
 - Portage de l'extension pour Brave et les navigateurs Chromium : manifest
   Manifest V3, service worker (`sources-brave/`), script `build-brave.sh` et
   cible `build-brave` dans la CI. Les content scripts de Firefox sont réutilisés
   tels quels.
+- Accès à l'API `browser.*` sous Brave via un shim maison d'une ligne
+  (`browser-shim.js`), sans aucune dépendance tierce.
 
 ### Corrigé
 - Badge cassé sous Brave : ajout des icônes SVG dans `web_accessible_resources`,
   requis par le Manifest V3 pour les ressources injectées dans la page.
+
+### Sécurité
+- Protection contre la détection de l'extension par les sites (`use_dynamic_url`
+  sous Brave) : l'URL des ressources exposées devient un jeton tournant.
 
 ### Accessibilité
 - Ajout d'un élément `<title>` aux pages `popup.html` (Configuration) et
