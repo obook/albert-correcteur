@@ -5,9 +5,11 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
-## [Non publié]
+## [0.5.0] - 2026-06-11
 
 ### Ajouté
+- Bloc "Soutenir le développement" dans le popup de configuration : QR code
+  PayPal et texte d'invitation au don, sur le modèle de l'extension Edepp.
 - La mise à jour automatique de l'extension est différée jusqu'au prochain
   démarrage du navigateur (`service-update.js`, chargé sur les trois
   cibles). Sans ce report, le navigateur appliquait la mise à jour à

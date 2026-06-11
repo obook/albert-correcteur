@@ -238,3 +238,34 @@ button:hover {
 .credits a:hover {
   text-decoration: underline;
 }
+
+.donate {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--pop-footer-border);
+  text-align: center;
+}
+
+.donate-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--pop-text-muted);
+  margin-bottom: 8px;
+}
+
+.donate-qr {
+  width: 160px;
+  height: 160px;
+  display: block;
+  margin: 0 auto 8px;
+  border: 1px solid var(--pop-input-border);
+  border-radius: 6px;
+  background: #fff;
+  padding: 4px;
+}
+
+.donate-help {
+  font-size: 11px;
+  color: var(--pop-text-dim);
+  line-height: 1.45;
+}
