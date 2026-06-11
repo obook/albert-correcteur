@@ -28,6 +28,7 @@ importScripts(
   "../lib/browser-shim.js",
 
   "../util/model-aliases.js",
+  "service-update.js",
   "service-config.js",
   "service-langue.js",
   "service-prompts.js",

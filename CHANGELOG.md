@@ -5,6 +5,16 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [Non publié]
+
+### Ajouté
+- La mise à jour automatique de l'extension est différée jusqu'au prochain
+  démarrage du navigateur (`service-update.js`, chargé sur les trois
+  cibles). Sans ce report, le navigateur appliquait la mise à jour à
+  chaud : les scripts de contenu des pages ouvertes devenaient orphelins
+  et les boutons Albert restaient inertes jusqu'au rechargement manuel
+  de chaque page.
+
 ## [0.4.0] - 2026-06-07
 
 ### Ajouté

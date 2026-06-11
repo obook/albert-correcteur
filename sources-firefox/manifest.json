@@ -39,6 +39,7 @@
   "background": {
     "scripts": [
       "util/model-aliases.js",
+      "service/service-update.js",
       "service/service-config.js",
       "service/service-langue.js",
       "service/service-prompts.js",
