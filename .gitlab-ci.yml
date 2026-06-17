@@ -209,7 +209,7 @@ release:
   release:
     tag_name: $CI_COMMIT_TAG
     name: "Albert Correcteur ${CI_COMMIT_TAG}"
-    description: "Release ${CI_COMMIT_TAG} — Extensions Albert Correcteur (Firefox signée Mozilla + Thunderbird + Brave/Chromium)"
+    description: ./RELEASE_NOTES.md
     assets:
       links:
         - name: "${XPI_NAME}"
