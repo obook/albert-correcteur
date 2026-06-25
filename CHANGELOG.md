@@ -5,6 +5,26 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.5.2] - 2026-06-25
+
+### Corrigé
+- Enregistrement de la clé API : le bouton "Enregistrer" refusait de
+  sauvegarder la nouvelle clé tant qu'aucun modèle n'était sélectionné, or la
+  liste des modèles ne pouvait pas se charger avec une clé expirée. L'ancienne
+  clé restait alors active et les corrections continuaient d'échouer. Le bouton
+  recharge désormais les modèles avec la clé saisie avant de renoncer.
+- Messages d'erreur plus clairs en cas de clé invalide ou non autorisée
+  (codes 401 et 403) : un message invite à vérifier la clé au lieu du message
+  générique.
+
+## [0.5.1] - 2026-06-17
+
+### Corrigé
+- Soulignement des erreurs dans les champs de saisie mono-ligne
+  (`<input type="text">`) : sur un texte long qui défile horizontalement, le
+  soulignement était mal positionné. L'alignement et la synchronisation du
+  défilement sont rétablis.
+
 ## [0.5.0] - 2026-06-11
 
 ### Ajouté
