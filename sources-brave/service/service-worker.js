@@ -28,6 +28,7 @@ importScripts(
   "../lib/browser-shim.js",
 
   "../util/model-aliases.js",
+  "../util/personas.js",
   "service-update.js",
   "service-config.js",
   "service-langue.js",
@@ -37,5 +38,6 @@ importScripts(
   "service-rate-limit.js",
   "../verification/regles-locales.js",
   "service-api.js",
+  "service-dispatch.js",
   "service-menus.js"
 );

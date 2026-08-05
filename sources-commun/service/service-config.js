@@ -6,7 +6,7 @@
  * worker (service-api.js, service-limites.js).
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -29,7 +29,8 @@ const AlbertLog = {
   error(...args) { console.error("[Albert sw]", ...args); },
 };
 
-const DEFAULT_API_BASE = "https://albert.api.etalab.gouv.fr";
+/* DEFAULT_API_BASE est déclarée dans util/model-aliases.js, chargé
+   avant ce script dans le service worker. */
 
 /** URL par défaut de l'API Albert (DINUM / Etalab). */
 

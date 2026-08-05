@@ -1,13 +1,19 @@
-/* Tests -- Calcul de l'usage journalier (rpd, tpd) depuis /v1/me/usage. */
+/*
+ * test-daily-usage.js
+ * Tests : Calcul de l'usage journalier (rpd, tpd) depuis /v1/me/usage.
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 
 const assert = require("assert");
 
-/* -- Copie de la logique à tester (depuis sources-commun/popup-configuration/popup-limits.js,
-      fonction fetchDailyUsageForModel - et sources-commun/service/service-limites.js,
-      fonction fetchDailyUsage). On extrait juste le coeur de calcul,
-      indépendant de fetch. --
-   La fonction reçoit la liste d'évènements et l'identifiant canonique,
-   et retourne { rpdUsed, tpdUsed } en sommant les évènements postérieurs
+/* -- Copie du cœur de calcul de fetchDailyUsageForModel
+      (sources-commun/popup-configuration/popup-limits.js), extrait de
+      sa partie réseau. --
+   La fonction reçoit la liste d'événements et l'identifiant canonique,
+   et retourne { rpdUsed, tpdUsed } en sommant les événements postérieurs
    à minuit UTC du jour courant simulé. */
 
 function aggregateDailyUsage(events, canonicalId, now) {
@@ -26,8 +32,14 @@ function aggregateDailyUsage(events, canonicalId, now) {
     if (!ev || ev.model !== canonicalId) continue;
     if (typeof ev.created !== "number" || ev.created < utcMidnight) continue;
     rpdUsed += 1;
-    const tokens = (ev.usage || {}).prompt_tokens;
-    if (typeof tokens === "number") tpdUsed += tokens;
+    /* Le quota tpd d'Albert couvre le prompt et la complétion : sommer
+       les deux, sans quoi l'usage affiché est très en dessous du réel. */
+    const usage = ev.usage || {};
+    const promptTokens = typeof usage.prompt_tokens === "number"
+      ? usage.prompt_tokens : 0;
+    const completionTokens = typeof usage.completion_tokens === "number"
+      ? usage.completion_tokens : 0;
+    tpdUsed += promptTokens + completionTokens;
   }
   return { rpdUsed, tpdUsed };
 }
@@ -69,7 +81,7 @@ test("Modèle vide : retour direct sans calcul", () => {
   assert.deepStrictEqual(result, { rpdUsed: 0, tpdUsed: 0 });
 });
 
-test("Compte les évènements du jour pour le bon modèle", () => {
+test("Compte les événements du jour pour le bon modèle", () => {
   const events = [
     { model: "openai/gpt-oss-120b", created: MIDNIGHT_UTC + 100,
       usage: { prompt_tokens: 50 } },
@@ -82,7 +94,7 @@ test("Compte les évènements du jour pour le bon modèle", () => {
   assert.deepStrictEqual(result, { rpdUsed: 3, tpdUsed: 330 });
 });
 
-test("Filtre les évènements d'un autre modèle", () => {
+test("Filtre les événements d'un autre modèle", () => {
   const events = [
     { model: "openai/gpt-oss-120b", created: MIDNIGHT_UTC + 100,
       usage: { prompt_tokens: 50 } },
@@ -95,7 +107,7 @@ test("Filtre les évènements d'un autre modèle", () => {
   assert.deepStrictEqual(result, { rpdUsed: 2, tpdUsed: 80 });
 });
 
-test("Filtre les évènements antérieurs à minuit UTC", () => {
+test("Filtre les événements antérieurs à minuit UTC", () => {
   const events = [
     /* Hier soir : 23h59 UTC la veille */
     { model: "openai/gpt-oss-120b", created: MIDNIGHT_UTC - 60,
@@ -108,7 +120,48 @@ test("Filtre les évènements antérieurs à minuit UTC", () => {
   assert.deepStrictEqual(result, { rpdUsed: 1, tpdUsed: 50 });
 });
 
-test("Évènement à minuit UTC pile inclus (frontière >=)", () => {
+test("Le tpd somme les tokens de prompt et de complétion", () => {
+  const events = [
+    { model: "openai/gpt-oss-120b", created: MIDNIGHT_UTC + 60,
+      usage: { prompt_tokens: 120, completion_tokens: 80 } },
+  ];
+  const result = aggregateDailyUsage(events, "openai/gpt-oss-120b", NOON_UTC);
+  assert.deepStrictEqual(result, { rpdUsed: 1, tpdUsed: 200 });
+});
+
+test("Complétion seule comptée quand le prompt est absent", () => {
+  const events = [
+    { model: "openai/gpt-oss-120b", created: MIDNIGHT_UTC + 60,
+      usage: { completion_tokens: 45 } },
+  ];
+  const result = aggregateDailyUsage(events, "openai/gpt-oss-120b", NOON_UTC);
+  assert.deepStrictEqual(result, { rpdUsed: 1, tpdUsed: 45 });
+});
+
+test("Cumul prompt et complétion sur plusieurs événements", () => {
+  const events = [
+    { model: "openai/gpt-oss-120b", created: MIDNIGHT_UTC + 10,
+      usage: { prompt_tokens: 100, completion_tokens: 50 } },
+    { model: "openai/gpt-oss-120b", created: MIDNIGHT_UTC + 20,
+      usage: { prompt_tokens: 30, completion_tokens: 20 } },
+    /* Sans complétion : seul le prompt compte. */
+    { model: "openai/gpt-oss-120b", created: MIDNIGHT_UTC + 30,
+      usage: { prompt_tokens: 10 } },
+  ];
+  const result = aggregateDailyUsage(events, "openai/gpt-oss-120b", NOON_UTC);
+  assert.deepStrictEqual(result, { rpdUsed: 3, tpdUsed: 210 });
+});
+
+test("Valeurs de tokens non numériques ignorées", () => {
+  const events = [
+    { model: "openai/gpt-oss-120b", created: MIDNIGHT_UTC + 60,
+      usage: { prompt_tokens: "50", completion_tokens: null } },
+  ];
+  const result = aggregateDailyUsage(events, "openai/gpt-oss-120b", NOON_UTC);
+  assert.deepStrictEqual(result, { rpdUsed: 1, tpdUsed: 0 });
+});
+
+test("Événement à minuit UTC pile inclus (frontière >=)", () => {
   const events = [
     { model: "openai/gpt-oss-120b", created: MIDNIGHT_UTC,
       usage: { prompt_tokens: 10 } },
@@ -117,7 +170,7 @@ test("Évènement à minuit UTC pile inclus (frontière >=)", () => {
   assert.deepStrictEqual(result, { rpdUsed: 1, tpdUsed: 10 });
 });
 
-test("Évènement sans champ usage : compté en rpd, 0 en tpd", () => {
+test("Événement sans champ usage : compté en rpd, 0 en tpd", () => {
   const events = [
     { model: "openai/gpt-oss-120b", created: MIDNIGHT_UTC + 100 },
   ];
@@ -125,7 +178,7 @@ test("Évènement sans champ usage : compté en rpd, 0 en tpd", () => {
   assert.deepStrictEqual(result, { rpdUsed: 1, tpdUsed: 0 });
 });
 
-test("Évènement avec usage incomplet : tokens ignorés", () => {
+test("Événement avec usage incomplet : tokens ignorés", () => {
   const events = [
     { model: "openai/gpt-oss-120b", created: MIDNIGHT_UTC + 100,
       usage: {} },
@@ -136,7 +189,7 @@ test("Évènement avec usage incomplet : tokens ignorés", () => {
   assert.deepStrictEqual(result, { rpdUsed: 2, tpdUsed: 0 });
 });
 
-test("Évènement sans created ou avec created non-numérique : ignoré", () => {
+test("Événement sans created ou avec created non-numérique : ignoré", () => {
   const events = [
     { model: "openai/gpt-oss-120b", usage: { prompt_tokens: 50 } },
     { model: "openai/gpt-oss-120b", created: "not-a-number",
@@ -148,7 +201,7 @@ test("Évènement sans created ou avec created non-numérique : ignoré", () => 
   assert.deepStrictEqual(result, { rpdUsed: 1, tpdUsed: 30 });
 });
 
-test("Élements null ou non-objets dans la liste : ignorés", () => {
+test("Éléments null ou non-objets dans la liste : ignorés", () => {
   const events = [
     null,
     undefined,
@@ -169,10 +222,10 @@ test("Modèle non trouvé : compteurs à zéro", () => {
   assert.deepStrictEqual(result, { rpdUsed: 0, tpdUsed: 0 });
 });
 
-test("Comparaison stricte : alias non résolu ne match pas l'id canonique", () => {
-  /* L'évènement /v1/me/usage porte toujours l'id canonique. Si on
+test("Comparaison stricte : alias non résolu ne correspond pas à l'id canonique", () => {
+  /* L'événement /v1/me/usage porte toujours l'id canonique. Si on
      interroge avec l'alias serveur, sans résolution préalable, rien
-     ne match. C'est pour ça que la résolution d'alias est faite
+     ne correspond. C'est pourquoi la résolution d'alias est faite
      en amont dans le code de prod. */
   const events = [
     { model: "openai/gpt-oss-120b", created: MIDNIGHT_UTC + 100,

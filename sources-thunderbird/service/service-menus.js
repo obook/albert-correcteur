@@ -1,26 +1,20 @@
 /*
- * service-menus.js - Menus contextuels et dispatch des messages (Thunderbird).
+ * service-menus.js - Menus contextuels (Thunderbird).
  *
  * Ce script s'exécute dans le service worker (background script).
- * Il gère deux responsabilités :
+ * Il déclare les entrées de menu et traite les clics.
  *
- * 1. Menus contextuels (browser.menus) :
+ * Menus contextuels (browser.menus) :
  *    - "Reformuler avec Albert" (contexte : compose_body).
  *    - "Traduire avec Albert" (contexte : compose_body + selection).
  *      Dans le compose → envoie au compose script.
  *      En lecture de mail → ouvre une fenêtre popup de traduction.
  *
- * 2. Dispatch des messages du compose script :
- *    Route les requêtes vers les fonctions du service worker :
- *    - "check"          → checkText()       (service-api.js)
- *    - "getConfig"      → loadConfig()      (service-config.js)
- *    - "getLimits"      → fetchLimits()     (service-limites.js)
- *    - "getAliases"     → fetchAliases()    (service-limites.js)
- *    - "getDailyUsage"  → fetchDailyUsage() (service-limites.js)
- *    - "translate"      → translateText()   (service-api.js)
+ * Le routage des messages reçus par le script de fond est assuré
+ * par service-dispatch.js, partagé entre les cibles.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -34,32 +28,63 @@ browser.menus.create({
   contexts: ["compose_body"],
 });
 
+for (const persona of PERSONAS) {
+  browser.menus.create({
+    id: "albert-reformulate-" + persona.id,
+    parentId: "albert-reformulate",
+    title: persona.label,
+    contexts: ["compose_body"],
+  });
+}
+
 browser.menus.create({
   id: "albert-translate",
   title: "Traduire avec Albert",
   contexts: ["compose_body", "selection"],
 });
 
+const REFORMULATE_PREFIX = "albert-reformulate-";
+
 browser.menus.onClicked.addListener(async (info, tab) => {
   const text = info.selectionText;
   if (!text || text.trim().length < 3) return;
 
-  if (info.menuItemId === "albert-reformulate") {
-    browser.tabs.sendMessage(tab.id, { type: "reformulateLoading" });
-    const result = await checkText(text, "reformulation");
+  if (typeof info.menuItemId === "string"
+    && info.menuItemId.startsWith(REFORMULATE_PREFIX)) {
+    const personaId = info.menuItemId.slice(REFORMULATE_PREFIX.length);
+    const persona = getPersonaById(personaId);
+    browser.storage.local.set({ lastReformulationPersona: persona.id })
+      .catch((err) => AlbertLog.warn(
+        "Mémorisation du persona impossible :", err && err.message));
+    /* Sans .catch(), l'échec de l'envoi (compose script non injecté,
+       fenêtre fermée entre-temps) devient un rejet silencieux : le
+       résultat de la reformulation est calculé puis perdu sans trace. */
+    browser.tabs.sendMessage(tab.id, { type: "reformulateLoading" })
+      .catch((err) => AlbertLog.error("sendMessage reformulateLoading a échoué :",
+        err && err.message));
+    const result = await checkText(text, "reformulation", persona.id);
     browser.tabs.sendMessage(tab.id, {
       type: "reformulateResult",
       originalText: text,
+      personaLabel: persona.label,
       result,
-    });
+    }).catch((err) => AlbertLog.error("sendMessage reformulateResult a échoué :",
+      err && err.message, "- le toast de chargement va rester affiché."));
+    return;
   }
 
   if (info.menuItemId === "albert-translate") {
     /* Déterminer si on est dans un compose ou dans un affichage de message */
     const tabInfo = await browser.tabs.get(tab.id);
     if (tabInfo.type === "messageCompose") {
-      /* Dans le compose : envoyer au compose script */
-      browser.tabs.sendMessage(tab.id, { type: "translateGetSelection" });
+      /* Dans le compose : envoyer au compose script. La sélection est
+         transmise car Thunderbird la réduit parfois à néant en fermant
+         le menu contextuel, avant que le script ne puisse la relire. */
+      browser.tabs.sendMessage(tab.id, {
+        type: "translateGetSelection",
+        selectionText: text,
+      }).catch((err) => AlbertLog.error("sendMessage translateGetSelection a échoué :",
+        err && err.message));
     } else {
       /* Dans la lecture de mail : ouvrir une fenêtre popup de traduction */
       const encodedText = encodeURIComponent(text);
@@ -70,34 +95,5 @@ browser.menus.onClicked.addListener(async (info, tab) => {
         height: 320,
       });
     }
-  }
-});
-
-/* --- Dispatch des messages du compose script --- */
-
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "check") {
-    checkText(message.text, message.mode).then(sendResponse);
-    return true;
-  }
-  if (message.type === "getConfig") {
-    loadConfig().then(sendResponse);
-    return true;
-  }
-  if (message.type === "getLimits") {
-    fetchLimits().then(sendResponse);
-    return true;
-  }
-  if (message.type === "getAliases") {
-    fetchAliases().then(sendResponse);
-    return true;
-  }
-  if (message.type === "getDailyUsage") {
-    fetchDailyUsage(message.model).then(sendResponse);
-    return true;
-  }
-  if (message.type === "translate") {
-    translateText(message.text, message.targetLang).then(sendResponse);
-    return true;
   }
 });

@@ -7,7 +7,7 @@
  * système (prefers-color-scheme). Réagit aux changements en direct.
  *
  * Auteur : O. Booklage
- * Date : Mai 2026
+ * Date : mai 2026
  * Licence : MIT
  */
 

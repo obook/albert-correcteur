@@ -11,13 +11,18 @@
  * document.execCommand("insertText") pour préserver l'undo natif.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
 "use strict";
 
 Albert.reformulationPopup = null;
+/* Range cloné au moment où la popup est créée, pour pouvoir restaurer
+   la sélection d'origine dans le corps du compose avant d'appliquer
+   une suggestion. La popup vole le focus dès son ouverture, ce qui
+   collapserait la sélection sinon. */
+Albert.reformulationSavedRange = null;
 
 Albert.closeReformulationPopup = function () {
   if (Albert.reformulationPopup) {
@@ -28,15 +33,23 @@ Albert.closeReformulationPopup = function () {
     Albert.reformulationPopup.remove();
     Albert.reformulationPopup = null;
   }
+  Albert.reformulationSavedRange = null;
   Albert.restoreFocus();
 };
 
-Albert.showReformulationPopup = function (originalText, result) {
+Albert.showReformulationPopup = function (originalText, result, personaLabel) {
   Albert.closeReformulationPopup();
   Albert.closeCorrectionPopup();
   Albert.closeTranslationPopup();
   const loadingToast = document.querySelector(".albert-toast");
   if (loadingToast) loadingToast.remove();
+
+  /* Capturer la sélection AVANT toute manipulation DOM ou changement de
+     focus, sinon elle est perdue quand la popup s'ouvre. */
+  const sel = window.getSelection();
+  Albert.reformulationSavedRange = (sel && sel.rangeCount > 0)
+    ? sel.getRangeAt(0).cloneRange()
+    : null;
 
   const popup = document.createElement("div");
   popup.className = "albert-popup " + Albert.getPopupThemeClass();
@@ -54,7 +67,7 @@ Albert.showReformulationPopup = function (originalText, result) {
 
   const title = document.createElement("span");
   title.className = "albert-popup-type";
-  title.textContent = "Reformulation";
+  title.textContent = personaLabel ? "Reformulation : " + personaLabel : "Reformulation";
   header.appendChild(title);
 
   const closeBtn = document.createElement("button");
@@ -75,8 +88,16 @@ Albert.showReformulationPopup = function (originalText, result) {
 
   const corrections = (result && result.corrections) || [];
 
+  /* Calculer le nombre réel de boutons générés : un block sans
+     suggestion (peut arriver si la conversion côté worker a vidé le
+     tableau) ne doit pas masquer le message "aucune proposition". */
+  let totalSuggestions = 0;
+
   if (corrections.length) {
     for (const c of corrections) {
+      const sugList = (c.suggestions || []).filter((s) => typeof s === "string" && s.length > 0);
+      if (sugList.length === 0 && !c.message) continue;
+
       const block = document.createElement("div");
       block.style.marginBottom = "8px";
 
@@ -89,7 +110,7 @@ Albert.showReformulationPopup = function (originalText, result) {
 
       const sugDiv = document.createElement("div");
       sugDiv.className = "albert-popup-suggestions";
-      for (const sug of (c.suggestions || [])) {
+      for (const sug of sugList) {
         const btn = document.createElement("button");
         btn.className = "albert-popup-suggestion";
         btn.textContent = sug;
@@ -99,15 +120,28 @@ Albert.showReformulationPopup = function (originalText, result) {
           Albert.closeReformulationPopup();
         });
         sugDiv.appendChild(btn);
+        totalSuggestions++;
       }
       block.appendChild(sugDiv);
       popup.appendChild(block);
     }
-  } else if (result && result.error) {
+  }
+
+  if (result && result.error) {
     const errDiv = document.createElement("div");
     errDiv.className = "albert-popup-message";
     errDiv.textContent = result.error;
     popup.appendChild(errDiv);
+  } else if (totalSuggestions === 0) {
+    /* Le modèle a renvoyé un tableau vide ou des objets non
+       coercibles : afficher un message clair plutôt qu'une popup avec
+       seulement le texte d'origine. */
+    const noneDiv = document.createElement("div");
+    noneDiv.className = "albert-popup-message";
+    noneDiv.textContent = "Aucune reformulation proposée. Le modèle "
+      + "a estimé que le texte ne nécessitait pas de modification, "
+      + "ou n'a pas su l'adapter au persona choisi.";
+    popup.appendChild(noneDiv);
   }
 
   document.body.appendChild(popup);
@@ -153,12 +187,31 @@ Albert.showReformulationPopup = function (originalText, result) {
 };
 
 Albert.replaceSelection = function (text) {
-  document.execCommand("insertText", false, text);
+  /* Restaurer la sélection d'origine dans le compose body : la popup
+     vient de la collapser en prenant le focus. Sans cette restauration,
+     execCommand("insertText") opère sur le bouton de la popup au lieu
+     du corps du mail et l'insertion est silencieusement perdue. */
+  const range = Albert.reformulationSavedRange;
+  if (range) {
+    const body = Albert.getComposeBody();
+    if (body) body.focus();
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  /* insertText conserve l'historique d'annulation natif. Si le moteur
+     ne le supporte pas (cas marginal en designMode), on retombe sur
+     une manipulation DOM directe via le range sauvegardé. */
+  if (!document.execCommand("insertText", false, text) && range) {
+    range.deleteContents();
+    range.insertNode(document.createTextNode(text));
+    const body = Albert.getComposeBody();
+    if (body) body.normalize();
+  }
 };
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") Albert.closeReformulationPopup();
-});
+/* La fermeture par Échap est centralisée dans compose-popup-utils.js. */
 document.addEventListener("mousedown", (e) => {
   if (Albert.reformulationPopup && !Albert.reformulationPopup.contains(e.target)) {
     Albert.closeReformulationPopup();

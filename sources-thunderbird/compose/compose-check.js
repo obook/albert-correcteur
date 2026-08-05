@@ -7,7 +7,7 @@
  * avant que la précédente ne revienne, le résultat périmé est ignoré.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -26,8 +26,8 @@ Albert.requestCheck = function (text) {
 
   if (!Albert.checkRateLimit()) {
     Albert.warn("requestCheck reporté : rate-limit local atteint (", Albert.requestWindow.total(), "/", Albert.limits && Albert.limits.rpm, "rpm)");
-    Albert.lastError = { message: "Limite API approchée, vérification reportée.", retryAfter: null, timestamp: Date.now() };
-    Albert.showToast("Limite API approchée, vérification reportée.");
+    Albert.lastError = { message: "Limite API presque atteinte, vérification reportée.", retryAfter: null, timestamp: Date.now() };
+    Albert.showToast("Limite API presque atteinte, vérification reportée.");
     return;
   }
 
@@ -52,8 +52,7 @@ Albert.requestCheck = function (text) {
     }
     Albert.pendingAbort = null;
 
-    if (Albert.debounceTimer) { clearTimeout(Albert.debounceTimer); Albert.debounceTimer = null; }
-    if (Albert.debounceMaxTimer) { clearTimeout(Albert.debounceMaxTimer); Albert.debounceMaxTimer = null; }
+    Albert.cancelDebounce();
 
     if (!result) {
       Albert.error("requestCheck : réponse vide du service worker");

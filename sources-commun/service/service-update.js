@@ -21,7 +21,7 @@
  * (Manifest V2), Brave / Chromium (Manifest V3 via browser-shim.js).
  *
  * Auteur : O. Booklage
- * Date : Juin 2026
+ * Date : juin 2026
  * Licence : MIT
  */
 

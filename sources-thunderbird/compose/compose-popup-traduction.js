@@ -6,10 +6,12 @@
  * à l'ouverture, bouton "Copier".
  *
  * La dernière langue utilisée est mémorisée dans
- * Albert.lastTranslationLang (non persistée entre sessions).
+ * Albert.lastTranslationLang et persistée sous la clé de storage du
+ * même nom, partagée avec la popup de traduction en lecture de message
+ * et avec l'extension Firefox.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -17,6 +19,11 @@
 
 Albert.translationPopup = null;
 Albert.lastTranslationLang = "en";
+
+/* Relire la préférence enregistrée au chargement du compose script. */
+browser.storage.local.get("lastTranslationLang").then((r) => {
+  if (r.lastTranslationLang) Albert.lastTranslationLang = r.lastTranslationLang;
+});
 
 Albert.closeTranslationPopup = function () {
   if (Albert.translationPopup) {
@@ -56,8 +63,7 @@ Albert.showTranslationPopup = function (text) {
   const langSelect = document.createElement("select");
   langSelect.className = "albert-popup-lang-select";
   langSelect.setAttribute("aria-label", "Langue cible");
-  const langs = { fr: "Français", en: "Anglais", es: "Espagnol", de: "Allemand" };
-  for (const [code, name] of Object.entries(langs)) {
+  for (const [code, name] of Object.entries(Albert.LANG_LABELS)) {
     const opt = document.createElement("option");
     opt.value = code;
     opt.textContent = name;
@@ -79,7 +85,7 @@ Albert.showTranslationPopup = function (text) {
 
   const resultDiv = document.createElement("div");
   resultDiv.className = "albert-popup-translation-result";
-  resultDiv.textContent = "Traduction en cours...";
+  resultDiv.textContent = "Traduction en cours…";
   popup.appendChild(resultDiv);
 
   const langInfo = document.createElement("div");
@@ -91,9 +97,22 @@ Albert.showTranslationPopup = function (text) {
   copyBtn.textContent = "Copier";
   copyBtn.style.display = "none";
   copyBtn.addEventListener("click", () => {
-    navigator.clipboard.writeText(resultDiv.textContent);
-    copyBtn.textContent = "Copié !";
-    setTimeout(() => { copyBtn.textContent = "Copier"; }, 1500);
+    /* Le repli par textarea couvre le cas où l'API presse-papiers est
+       refusée : sans lui, l'échec passait inaperçu et le bouton
+       annonçait « Copié ! » alors que rien ne l'était. */
+    navigator.clipboard.writeText(resultDiv.textContent).then(() => {
+      copyBtn.textContent = "Copié !";
+      setTimeout(() => { copyBtn.textContent = "Copier"; }, 1500);
+    }).catch(() => {
+      const zone = document.createElement("textarea");
+      zone.value = resultDiv.textContent;
+      document.body.appendChild(zone);
+      zone.select();
+      const copie = document.execCommand("copy");
+      zone.remove();
+      copyBtn.textContent = copie ? "Copié !" : "Copie impossible";
+      setTimeout(() => { copyBtn.textContent = "Copier"; }, 1500);
+    });
   });
   popup.appendChild(copyBtn);
 
@@ -109,7 +128,8 @@ Albert.showTranslationPopup = function (text) {
 
   const doTranslate = async (targetLang) => {
     Albert.lastTranslationLang = targetLang;
-    resultDiv.textContent = "Traduction en cours...";
+    browser.storage.local.set({ lastTranslationLang: targetLang });
+    resultDiv.textContent = "Traduction en cours…";
     copyBtn.style.display = "none";
     const result = await browser.runtime.sendMessage({
       type: "translate",
@@ -121,8 +141,8 @@ Albert.showTranslationPopup = function (text) {
     } else {
       resultDiv.textContent = result.translation;
       resultDiv.setAttribute("lang", targetLang);
-      const langNames = { fr: "français", en: "anglais", es: "espagnol", de: "allemand" };
-      langInfo.textContent = "Langue détectée : " + (langNames[result.langSource] || result.langSource);
+      langInfo.textContent = "Langue détectée : "
+        + Albert.nomLangue(result.langSource);
       copyBtn.style.display = "";
     }
   };
@@ -131,9 +151,7 @@ Albert.showTranslationPopup = function (text) {
   doTranslate(Albert.lastTranslationLang);
 };
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") Albert.closeTranslationPopup();
-});
+/* La fermeture par Échap est centralisée dans compose-popup-utils.js. */
 document.addEventListener("mousedown", (e) => {
   if (Albert.translationPopup && !Albert.translationPopup.contains(e.target)) {
     Albert.closeTranslationPopup();

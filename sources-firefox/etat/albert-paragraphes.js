@@ -9,7 +9,7 @@
  *   - albert-state.js (objet global Albert)
  *
  * Auteur : O. Booklage
- * Date : Mai 2026
+ * Date : mai 2026
  * Licence : MIT
  */
 

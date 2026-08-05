@@ -30,13 +30,18 @@ albert-correcteur/
     verification/                         <- Logique partagée Firefox + Thunderbird
       rolling-window.js                   <- Classe Albert.RollingWindow (fenêtre glissante 60 s)
 
+    util/                                 <- Utilitaires partagés
+      model-aliases.js                    <- Table canonique -> alias, DEFAULT_API_BASE
+      personas.js                         <- Personas de reformulation
+      inner-text.js                       <- Correspondance offsets innerText <-> nœuds texte
+
     prompts/                              <- Prompts éditables (fichiers texte)
       correction.txt                      <- Prompt Correcteur (placeholder {{LANG}})
       reformulation.txt                   <- Prompt Reformuler (placeholder {{LANG}})
       traduction.txt                      <- Prompt Traduire ({{LANG_SOURCE}}, {{LANG_CIBLE}})
 
     icons/                                <- Icônes
-      icon.svg                            <- SVG normal (rouge/bleue)
+      icon.svg                            <- SVG normal (rouge/bleu)
       icon-error.svg                      <- SVG erreurs (deux branches rouges)
       icon-48/96/128.png                  <- PNG pour le manifest (AMO)
 
@@ -68,7 +73,7 @@ albert-correcteur/
     correction/                           <- Application des corrections dans le texte
       albert-apply.js                     <- Orchestration, findRealOffset, dispatch par type
       albert-apply-rich.js                <- Éditeurs riches : sélection, événements, fallback
-      albert-apply-segments.js            <- Mapping innerText <-> noeuds DOM
+      albert-apply-segments.js            <- Recherche d'un nœud texte par offset (findSegmentAt)
 
     affichage/                            <- Rendu visuel
       albert-badge.js                     <- Badge (icône dans le coin des champs, ARIA)
@@ -119,7 +124,7 @@ albert-correcteur/
       service-menus.js                    <- Menus contextuels (compose + lecture) et dispatch
       service-compose-scripts.js          <- Injection des scripts dans les fenêtres de composition
 
-    message/                              <- Popup de traduction pour la lecture de mail
+    message/                              <- Popup de traduction pour la lecture de courriel
       message-traduction.html             <- Interface HTML de la popup de traduction
       message-traduction-popup.js         <- Logique de la popup (appel API, affichage)
 
@@ -135,7 +140,7 @@ albert-correcteur/
 
   tests/                                  <- Tests unitaires (Node.js, sans dépendance)
     run-all.sh                            <- Lance toutes les suites
-    test-*.js                             <- 17 suites, 257 tests
+    test-*.js                             <- 20 suites, 301 tests
 
   exemple/                                <- Pages de test
     test.html                             <- Page de test multilingue + éditeurs React
@@ -162,7 +167,7 @@ L'extension se compose de deux parties :
 
 - **Script de fond** (`sources-commun/service/` + `sources-firefox/service/` ou `sources-thunderbird/service/`) - s'exécute en arrière-plan, communique avec l'API Albert, gère les menus contextuels (Reformuler, Traduire), la détection de langue et le cache des limites.
 - **Content scripts Firefox** (`sources-firefox/` : `etat/`, `verification/`, `correction/`, `affichage/`, `notification/`, `demarrage/`, `popup-contenu/`) - injectés dans chaque page, détectent les champs texte, affichent les corrections, la reformulation et la traduction. La cible Brave réutilise ces mêmes content scripts.
-- **Compose scripts Thunderbird** (`sources-thunderbird/compose/`) - injectés dans la fenêtre de composition de mail, détectent le body de l'éditeur, affichent les corrections, la reformulation et la traduction.
+- **Compose scripts Thunderbird** (`sources-thunderbird/compose/`) - injectés dans la fenêtre de composition de courriel, détectent le body de l'éditeur, affichent les corrections, la reformulation et la traduction.
 
 ### Spécificités de la cible Brave (Manifest V3)
 
@@ -407,11 +412,9 @@ Les 5 fichiers de `sources-commun/service/` sont communs aux deux extensions. Ch
          +-- fetchLimits()       <- /v1/me/info  (cache 10 min)
          +-- fetchAliases()      <- /v1/models   (cache 10 min)
          |     +-- Map { alias serveur -> id canonique }
-         |     +-- Exposé via le message getAliases
          +-- fetchDailyUsage()   <- /v1/me/usage (cache 30 s)
                +-- Filtre par modèle canonique (résolution alias en amont)
                +-- Somme requêtes et prompt_tokens depuis minuit UTC
-               +-- Exposé via le message getDailyUsage
          |
          v
   popup-configuration/popup-limits.js
@@ -438,7 +441,7 @@ Les content scripts partagent le namespace `window.Albert` et sont chargés dans
 | 9 | `albert-popup-reformulation.js` | `popup-contenu/` | Popup de reformulation |
 | 10 | `albert-popup-traduction.js` | `popup-contenu/` | Popup de traduction |
 | 11 | `albert-popup-messages.js` | `popup-contenu/` | Dispatch des messages du script de fond |
-| 12 | `albert-apply-segments.js` | `correction/` | Mapping innerText <-> noeuds DOM |
+| 12 | `inner-text.js` (commun) + `albert-apply-segments.js` | `util/`, `correction/` | Correspondance offsets innerText <-> nœuds texte |
 | 13 | `albert-apply-rich.js` | `correction/` | Éditeurs riches : sélection, événements, fallback |
 | 14 | `albert-apply.js` | `correction/` | Orchestration des corrections |
 | 15 | `albert-toast.js` | `notification/` | Notification toast |
@@ -488,8 +491,9 @@ Les prompts sont des fichiers texte dans `sources-commun/prompts/`, éditables �
 
 | Fichier | Placeholders | Usage |
 |---------|-------------|-------|
-| `correction.txt` | `{{LANG}}` | Mode Correcteur |
-| `reformulation.txt` | `{{LANG}}` | Mode Reformuler |
+| `correction.txt` | `{{LANG}}` | Mode Correcteur (modèles medium et small : règles et exemples détaillés) |
+| `correction-large.txt` | `{{LANG}}` | Mode Correcteur (modèle large : version compacte, économise des tokens) |
+| `reformulation.txt` | `{{LANG}}`, `{{PERSONA_TONE}}` | Mode Reformuler, le ton dépendant du persona choisi |
 | `traduction.txt` | `{{LANG_SOURCE}}`, `{{LANG_CIBLE}}` | Traduction |
 
 ### Assemblage des extensions

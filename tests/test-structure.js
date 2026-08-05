@@ -1,4 +1,11 @@
-/* Tests -- Vérification de la structure du projet. */
+/*
+ * test-structure.js
+ * Tests : Vérification de la structure du projet.
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 
 const assert = require("assert");
 const fs = require("fs");
@@ -7,6 +14,7 @@ const path = require("path");
 const ROOT = path.join(__dirname, "..");
 const SHARED = path.join(ROOT, "sources-commun");
 const FIREFOX = path.join(ROOT, "sources-firefox");
+const THUNDERBIRD = path.join(ROOT, "sources-thunderbird");
 
 let passed = 0;
 let failed = 0;
@@ -197,8 +205,17 @@ test("Dossier sources-firefox/affichage/ existe", () => {
   assert.ok(fs.existsSync(path.join(FIREFOX, "affichage")));
 });
 
-test("Dossier sources-firefox/notification/ existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "notification")));
+test("Dossier sources-commun/notification/ existe", () => {
+  assert.ok(fs.existsSync(path.join(SHARED, "notification")));
+});
+
+test("Toast partagé entre les cibles, sans copie spécifique", () => {
+  assert.ok(fs.existsSync(path.join(SHARED, "notification", "toast.js")),
+    "sources-commun/notification/toast.js manquant");
+  assert.ok(!fs.existsSync(path.join(FIREFOX, "notification")),
+    "sources-firefox/notification/ aurait dû disparaître avec la factorisation");
+  assert.ok(!fs.existsSync(path.join(THUNDERBIRD, "compose", "compose-toast.js")),
+    "compose-toast.js aurait dû disparaître avec la factorisation");
 });
 
 test("Dossier sources-firefox/demarrage/ existe", () => {
@@ -233,7 +250,7 @@ test("manifest.json - permission storage", () => {
   assert.ok(manifest.permissions.includes("storage"), "Permission storage manquante");
 });
 
-/* -- Manifest : icônes SVG uniquement -- */
+/* -- Manifest : icônes au format PNG -- */
 
 test("manifest.json - icônes pointent vers des PNG", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(FIREFOX, "manifest.json"), "utf-8"));

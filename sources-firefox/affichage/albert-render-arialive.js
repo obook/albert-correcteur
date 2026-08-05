@@ -13,7 +13,7 @@
  *   - La zone utilise role="status" et aria-atomic="true".
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -52,8 +52,7 @@ Albert._ensureAriaLive = function () {
  */
 Albert._announceErrors = function (count, lang) {
   Albert._ensureAriaLive();
-  const langLabel =
-    { fr: "français", en: "anglais", es: "espagnol", de: "allemand" }[lang] || "";
+  const langLabel = Albert.nomLangue(lang);
   if (count === 0) {
     Albert._ariaLive.textContent =
       "Albert : aucune erreur détectée" + (langLabel ? ` (${langLabel})` : "");
@@ -93,4 +92,40 @@ Albert.clearCorrections = function (el) {
       parent.normalize();
     });
   }
+};
+
+/**
+ * Détache complètement un champ retiré du DOM.
+ *
+ * L'overlay et le badge sont insérés dans le parent positionné du champ,
+ * pas dans le champ lui-même : quand une application monopage supprime le
+ * champ, ils survivent et s'accumulent en artefacts visuels. Cette
+ * fonction libère aussi les timers et l'observateur de redimensionnement.
+ *
+ * @param {HTMLElement} el - Champ retiré du document.
+ */
+Albert.detachField = function (el) {
+  const state = Albert.fieldStates.get(el);
+  if (!state) return;
+
+  Albert.clearCorrections(el);
+
+  if (state.badge) {
+    state.badge.remove();
+    state.badge = null;
+  }
+  if (state.resizeObserver) {
+    state.resizeObserver.disconnect();
+    state.resizeObserver = null;
+  }
+  clearTimeout(state.timer);
+  state.timer = null;
+  clearTimeout(state.maxTimer);
+  state.maxTimer = null;
+  if (state.abortController) {
+    state.abortController.abort();
+    state.abortController = null;
+  }
+  state.attached = false;
+  state.focused = false;
 };

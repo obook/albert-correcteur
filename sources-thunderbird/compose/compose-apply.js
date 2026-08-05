@@ -11,7 +11,7 @@
  * Contient également triggerManualCheck() pour le clic sur le badge.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -24,14 +24,18 @@ Albert.applySuggestion = function (correction, suggestion) {
     const body = Albert.getComposeBody();
     if (!body) return;
 
-    const mark = document.querySelector('[data-correction-index="' + correction.index + '"]');
-    if (mark) {
-      /* Redonner le focus au body éditable avant la manipulation */
-      const body = Albert.getComposeBody();
+    /* Un mot à cheval sur plusieurs nœuds (gras, lien) est souligné par
+       plusieurs spans partageant le même index : les remplacer tous. */
+    const marks = document.querySelectorAll(
+      '[data-correction-index="' + correction.index + '"]'
+    );
+    if (marks.length > 0) {
+      /* Redonner le focus au corps éditable avant la manipulation */
       body.focus();
 
       const range = document.createRange();
-      range.selectNodeContents(mark);
+      range.setStartBefore(marks[0]);
+      range.setEndAfter(marks[marks.length - 1]);
       const sel = window.getSelection();
       sel.removeAllRanges();
       sel.addRange(range);
@@ -93,6 +97,16 @@ Albert.applySuggestion = function (correction, suggestion) {
   } finally {
     Albert.applyingCorrection = false;
   }
+
+  /* Le span de soulignement entoure désormais le mot corrigé : sans
+     re-rendu, l'erreur reste visuellement signalée. Le re-rendu
+     réattribue aussi des index contigus aux spans restants, sans quoi
+     la navigation Suivant / Précédent de la popup ne les retrouve plus.
+     Une nouvelle vérification est ensuite programmée, car le remplacement
+     par le repli DOM ne déclenche aucun événement input. */
+  const state = Albert.composeState;
+  Albert.renderCorrections(state && state.corrections ? state.corrections : []);
+  setTimeout(() => Albert.scheduleCheck(), 200);
 };
 
 Albert.triggerManualCheck = function () {
@@ -113,7 +127,7 @@ Albert.triggerManualCheck = function () {
   if (state === "error") {
     const last = Albert.lastError;
     if (last && last.message) {
-      Albert.showToast("Dernière erreur : " + last.message + " - nouvelle tentative…");
+      Albert.showToast("Dernière erreur : " + last.message + ". Nouvelle tentative…");
     } else {
       Albert.showToast("Nouvelle tentative de vérification…");
     }

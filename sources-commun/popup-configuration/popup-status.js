@@ -7,7 +7,7 @@
  * Les messages "ok" disparaissent automatiquement après 3 secondes.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 

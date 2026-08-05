@@ -20,7 +20,7 @@
  *    d'attente avant le prochain slot disponible.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -31,9 +31,12 @@
    sources-commun/verification/rolling-window.js. */
 Albert.requestWindow = new Albert.RollingWindow(60000);
 
-/* Charge les limites depuis le script de fond (cache 10 min côté service). */
+/* Charge les limites depuis le script de fond (cache 10 min côté service).
+   La comparaison porte sur undefined et non sur une valeur fausse :
+   sans clé API configurée, le service renvoie null, et un test de
+   véracité relancerait un aller-retour à chaque vérification. */
 Albert.loadLimits = async function () {
-  if (!Albert.limits) {
+  if (Albert.limits === undefined) {
     Albert.limits = await browser.runtime.sendMessage({ type: "getLimits" });
     Albert.updateDebounceFromRpm();
   }
@@ -44,7 +47,7 @@ Albert.loadLimits = async function () {
    pour forcer le rechargement et le recalcul des délais de debounce. */
 browser.storage.onChanged.addListener((changes) => {
   if (changes.apiKey || changes.model || changes.apiBase) {
-    Albert.limits = null;
+    Albert.limits = undefined;
     Albert.requestWindow.reset();
   }
 });
@@ -123,7 +126,7 @@ Albert.showRateLimitWarning = function (el, message) {
   /* Afficher le toast */
   const delay = /(\d+)s/.exec(message);
   const sec = delay ? parseInt(delay[1], 10) : 30;
-  Albert.showToast(message, sec);
+  Albert.showToast(message, sec * 1000);
 
   /* Retirer l'état visuel après la pause */
   setTimeout(() => {

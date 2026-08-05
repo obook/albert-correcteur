@@ -24,7 +24,7 @@
  *   - albert-render.js   (renderCorrections, clearCorrections)
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -53,9 +53,9 @@ Albert.clearBadgeApiError = function (el) {
   state.lastError = null;
   if (!state.badge) return;
   state.badge.classList.remove("albert-api-error");
-  state.badge.title = "Albert Correcteur - Cliquez pour vérifier";
+  state.badge.title = "Albert Correcteur : cliquez pour vérifier";
   state.badge.setAttribute(
-    "aria-label", "Albert Correcteur - Cliquez pour vérifier"
+    "aria-label", "Albert Correcteur : cliquez pour vérifier"
   );
 };
 
@@ -89,6 +89,22 @@ Albert.triggerCheck = async function (el, force) {
 
   if (state.lastCheckedText === text) return;
 
+  /* Verrou par champ posé avant le premier await : sans lui, deux
+     appels concurrents (frappe et cycle périodique) se croisent pendant
+     le chargement des limites, partent tous les deux vers l'API et
+     s'écrasent mutuellement le badge. */
+  if (state.checkRunning) return;
+  state.checkRunning = true;
+
+  try {
+    await Albert._triggerCheckInterne(el, state, text);
+  } finally {
+    state.checkRunning = false;
+  }
+};
+
+/* Corps de la vérification, exécuté sous le verrou state.checkRunning. */
+Albert._triggerCheckInterne = async function (el, state, text) {
   /* Charger les limites si pas encore fait */
   await Albert.loadLimits();
 
@@ -118,13 +134,10 @@ Albert.triggerCheck = async function (el, force) {
       const sendText = contextParas.map((p) => p.text).join("\n");
       /* Offset du premier paragraphe du contexte dans le texte complet */
       const baseOffset = contextParas[0].offset;
-      /* Offset du paragraphe modifié dans le texte envoyé */
-      const modOffsetInSend = newParas[modIdx].offset - baseOffset;
       incremental = {
         sendText,
         baseOffset,
         modPara: newParas[modIdx],
-        modOffsetInSend,
       };
     }
   }
@@ -161,7 +174,7 @@ Albert.triggerCheck = async function (el, force) {
         /* Panne API persistante (clé invalide, 5xx, réseau, modèle introuvable...) :
            afficher un état d'erreur explicite sur le badge et un toast. */
         Albert.markBadgeApiError(el, response.error);
-        Albert.showToast(`Albert : ${response.error}`, 15);
+        Albert.showToast(`Albert : ${response.error}`, 15000);
       }
       return;
     }
@@ -207,7 +220,7 @@ Albert.triggerCheck = async function (el, force) {
     if (err.name !== "AbortError") {
       console.error("[Albert]", err);
       Albert.markBadgeApiError(el, err.message || "Erreur interne");
-      Albert.showToast(`Albert : ${err.message || "Erreur interne"}`, 15);
+      Albert.showToast(`Albert : ${err.message || "Erreur interne"}`, 15000);
     }
   } finally {
     if (state.abortController === controller) {
@@ -229,9 +242,10 @@ Albert.cycleCheckAll = async function () {
   Albert.checkInProgress = true;
 
   try {
-    /* Nettoyer les champs retirés du DOM */
+    /* Nettoyer les champs retirés du DOM, overlay et badge compris */
     for (const el of Albert.trackedFields) {
       if (!document.contains(el)) {
+        Albert.detachField(el);
         Albert.trackedFields.delete(el);
       }
     }

@@ -1,4 +1,11 @@
-/* Tests -- Filtrage des mots ignorés (dictionnaire personnel). */
+/*
+ * test-filter-ignored.js
+ * Tests : Filtrage des mots ignorés (dictionnaire personnel).
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 
 const assert = require("assert");
 

@@ -10,8 +10,8 @@
  *   2. Usage journalier réel (depuis /v1/me/usage)
  *      Compte les requêtes et tokens consommés depuis minuit UTC
  *      pour le modèle sélectionné. La résolution d'alias en id
- *      canonique est faite via /v1/models pour matcher les
- *      évènements d'usage qui portent toujours l'id canonique.
+ *      canonique est faite via /v1/models pour faire correspondre les
+ *      événements d'usage qui portent toujours l'id canonique.
  *
  *   3. Paliers documentés EXP/PROD pour le modèle sélectionné
  *      Lus dans la table DOCUMENTED_MODEL_LIMITS. Permet de
@@ -19,7 +19,7 @@
  *      production.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -254,7 +254,7 @@ async function fetchAndShowLimits() {
 
     /*
      * Section "Usage du jour" : interroger /v1/me/usage avec
-     * résolution d'alias -> id canonique, car les évènements
+     * résolution d'alias -> id canonique, car les événements
      * d'usage sont indexés par id canonique.
      */
     if (selectedModel) {

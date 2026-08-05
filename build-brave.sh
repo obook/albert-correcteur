@@ -11,6 +11,10 @@
 #
 # Usage : ./build-brave.sh
 
+# Interrompre le script à la première erreur : sans cela, un cp ou un
+# zip en échec produirait une archive incomplète sans le signaler.
+set -euo pipefail
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 COMMON_DIR="$SCRIPT_DIR/sources-commun"
 FIREFOX_DIR="$SCRIPT_DIR/sources-firefox"

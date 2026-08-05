@@ -19,7 +19,7 @@
  *   - compose-limites.js   (loadLimits)
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -37,6 +37,11 @@
 
   const body = Albert.getComposeBody();
   if (!body) return;
+
+  /* Déclaré avant les écouteurs qui le lisent : la saisie au clavier
+     asiatique (IME) passe par composition* et ne doit pas déclencher
+     de vérification tant qu'elle est en cours. */
+  let composing = false;
 
   body.addEventListener("input", (e) => {
     if (Albert.applyingCorrection) return;
@@ -57,7 +62,6 @@
 
   /* Gestion IME/composition (langues CJK) : ignorer les événements input
    * pendant la composition pour éviter les vérifications sur du texte partiel */
-  let composing = false;
   body.addEventListener("compositionstart", () => { composing = true; });
   body.addEventListener("compositionend", () => {
     composing = false;
@@ -66,8 +70,9 @@
 
   body.addEventListener("paste", () => {
     setTimeout(() => {
-      if (Albert.debounceTimer) clearTimeout(Albert.debounceTimer);
-      if (Albert.debounceMaxTimer) { clearTimeout(Albert.debounceMaxTimer); Albert.debounceMaxTimer = null; }
+      /* Un collage justifie une vérification immédiate : annuler la
+         temporisation en cours plutôt que d'attendre son échéance. */
+      Albert.cancelDebounce();
       const text = Albert.getBodyText();
       if (text.trim().length >= Albert.BADGE_MIN_LENGTH) {
         Albert.requestCheck(text);

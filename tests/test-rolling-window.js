@@ -1,4 +1,11 @@
-/* Tests -- Compteur d'évènements sur fenêtre glissante. */
+/*
+ * test-rolling-window.js
+ * Tests : Compteur d'événements sur fenêtre glissante.
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 
 const assert = require("assert");
 
@@ -94,21 +101,21 @@ test("add(N) cumule la quantité", () => {
   assert.strictEqual(win.total(), 200);
 });
 
-test("Évènements antérieurs à la fenêtre éliminés", () => {
+test("Événements antérieurs à la fenêtre éliminés", () => {
   let now = 1000;
   const win = new RollingWindow(60000, () => now);
   win.add();
   win.add();
-  /* Avancer de 70 s : les deux évènements doivent être éjectés */
+  /* Avancer de 70 s : les deux événements doivent être éjectés */
   now += 70000;
   assert.strictEqual(win.total(), 0);
 });
 
-test("Évènements à la frontière conservés", () => {
+test("Événements à la frontière conservés", () => {
   let now = 1000;
   const win = new RollingWindow(60000, () => now);
   win.add();
-  /* Avancer de 59 s : l'évènement reste dans la fenêtre */
+  /* Avancer de 59 s : l'événement reste dans la fenêtre */
   now += 59000;
   assert.strictEqual(win.total(), 1);
 });
@@ -133,7 +140,7 @@ test("secondsUntilNextSlot : 0 quand la fenêtre est dépassée", () => {
   assert.strictEqual(win.secondsUntilNextSlot(), 0);
 });
 
-test("secondsUntilNextSlot pointe vers l'évènement le plus ancien", () => {
+test("secondsUntilNextSlot pointe vers l'événement le plus ancien", () => {
   let now = 0;
   const win = new RollingWindow(60000, () => now);
   win.add();

@@ -10,7 +10,7 @@
  * depuis browser.storage.local, et synchronise les changements.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -47,15 +47,17 @@ const Albert = {
   lastError: null,
 };
 
-/* Helpers de log uniformes - préfixés [Albert] pour grep facile dans la console */
-Albert.log = function () {
-  console.log("[Albert]", ...arguments);
+/* Journalisation uniforme, préfixée [Albert] pour filtrer facilement
+   dans la console. Les paramètres rest remplacent l'objet arguments,
+   déprécié et invisible dans la signature de la fonction. */
+Albert.log = function (...args) {
+  console.log("[Albert]", ...args);
 };
-Albert.warn = function () {
-  console.warn("[Albert]", ...arguments);
+Albert.warn = function (...args) {
+  console.warn("[Albert]", ...args);
 };
-Albert.error = function () {
-  console.error("[Albert]", ...arguments);
+Albert.error = function (...args) {
+  console.error("[Albert]", ...args);
 };
 
 /* Charger les mots ignorés et le thème au démarrage */

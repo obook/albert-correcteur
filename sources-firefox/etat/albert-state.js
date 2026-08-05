@@ -8,21 +8,21 @@
  * Architecture :
  *   albert-state.js (ce fichier)
  *       ↓ fournit l'objet global Albert à :
- *   albert-main.js          – point d'entrée, scan des champs
- *   albert-check.js         – envoi des textes au service worker
- *   albert-render*.js       – affichage des corrections (overlay, badge)
- *   albert-apply*.js        – application des suggestions
- *   albert-popup-*.js       – popups de correction, reformulation, traduction
- *   albert-debounce.js      – temporisation adaptative des vérifications
- *   albert-limites.js       – suivi des limites API (rpm/rpd)
- *   albert-utils.js         – fonctions utilitaires (détection, migration)
+ *   albert-main.js          - point d'entrée, scan des champs
+ *   albert-check.js         - envoi des textes au service worker
+ *   albert-render*.js       - affichage des corrections (overlay, badge)
+ *   albert-apply*.js        - application des suggestions
+ *   albert-popup-*.js       - popups de correction, reformulation, traduction
+ *   albert-debounce.js      - temporisation adaptative des vérifications
+ *   albert-limites.js       - suivi des limites API (rpm/rpd)
+ *   albert-utils.js         - fonctions utilitaires (détection, migration)
  *
  * Les délais de debounce sont recalculés dynamiquement par
  * updateDebounceFromRpm() (albert-limites.js) dès que les limites
  * du compte sont connues.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -91,7 +91,7 @@ window.Albert = {
   //  LIMITES API
   // ===============================================================
 
-  limits: null,            /* { rpm, rpd, tpm, tpd } depuis /v1/me/info */
+  limits: undefined,            /* { rpm, rpd, tpm, tpd } depuis /v1/me/info */
   requestCountToday: 0,    /* compteur de requêtes du jour */
   requestDayStart: 0,      /* début de la journée courante (timestamp ms) */
 };

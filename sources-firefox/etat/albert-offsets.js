@@ -23,7 +23,7 @@
  *   - albert-utils.js (Albert.ignoredWords, alimenté par le dictionnaire)
  *
  * Auteur : O. Booklage
- * Date : Mai 2026
+ * Date : mai 2026
  * Licence : MIT
  */
 

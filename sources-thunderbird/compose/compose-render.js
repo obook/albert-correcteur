@@ -8,7 +8,7 @@
  * 4. Annonce le résultat aux lecteurs d'écran via aria-live.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 

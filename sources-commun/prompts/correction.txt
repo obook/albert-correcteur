@@ -25,8 +25,8 @@ Analyser le texte fourni et retourner les erreurs au format JSON strict. Pour ch
 <regle id="V1">
 <titre>Périphrase verbale</titre>
 <contenu>Après "avoir beau", "laisser", "faire", "aller", "venir de", "être en train de", "devoir", "pouvoir", "vouloir", "savoir", le verbe qui suit est à l'INFINITIF.</contenu>
-<exemple>"il avait beau ironisé" : erreur, "ironisé" → "ironiser" (infinitif après "avoir beau").</exemple>
-<exemple>"il avait beau ironisait" : erreur, "ironisait" → "ironiser".</exemple>
+<exemple>"il avait beau ironisé" : erreur, "ironisé" -> "ironiser" (infinitif après "avoir beau").</exemple>
+<exemple>"il avait beau ironisait" : erreur, "ironisait" -> "ironiser".</exemple>
 <exemple>"il avait beau ironiser" : correct, ne rien signaler.</exemple>
 <exemple>"elle laisse tomber" : correct.</exemple>
 <exemple>"il va manger" : correct.</exemple>
@@ -35,10 +35,10 @@ Analyser le texte fourni et retourner les erreurs au format JSON strict. Pour ch
 <regle id="V2">
 <titre>Infinitif ou participe passé pour les verbes en -er</titre>
 <contenu>Tester par substitution avec "vendre/vendu".</contenu>
-<exemple>"il a mangé" → "il a vendu" : participe passé, -é est correct.</exemple>
-<exemple>"il va manger" → "il va vendre" : infinitif, -er est correct.</exemple>
-<exemple>"il a manger" → "il a vendre" : impossible, erreur, "manger" → "mangé".</exemple>
-<exemple>"il va mangé" → "il va vendu" : impossible, erreur, "mangé" → "manger".</exemple>
+<exemple>"il a mangé" -> "il a vendu" : participe passé, -é est correct.</exemple>
+<exemple>"il va manger" -> "il va vendre" : infinitif, -er est correct.</exemple>
+<exemple>"il a manger" -> "il a vendre" : impossible, erreur, "manger" -> "mangé".</exemple>
+<exemple>"il va mangé" -> "il va vendu" : impossible, erreur, "mangé" -> "manger".</exemple>
 </regle>
 
 <regle id="V3">
@@ -89,8 +89,8 @@ Analyser le texte fourni et retourner les erreurs au format JSON strict. Pour ch
 <regle id="A1">
 <titre>Accord avec un déterminant pluriel</titre>
 <contenu>Si le déterminant est "les", "des", "ces", "ses", "plusieurs", le nom et l'adjectif doivent être au PLURIEL.</contenu>
-<exemple>"les chien mange" : deux erreurs, "chien" → "chiens" et "mange" → "mangent".</exemple>
-<exemple>"les grande maisons" : erreur, "grande" → "grandes".</exemple>
+<exemple>"les chien mange" : deux erreurs, "chien" -> "chiens" et "mange" -> "mangent".</exemple>
+<exemple>"les grande maisons" : erreur, "grande" -> "grandes".</exemple>
 <exemple>"les grandes maisons" : correct.</exemple>
 </regle>
 
@@ -103,7 +103,7 @@ Analyser le texte fourni et retourner les erreurs au format JSON strict. Pour ch
 <regle id="A3">
 <titre>Participe passé avec être et sujet féminin</titre>
 <contenu>Si le sujet est féminin, le participe passé avec être et l'attribut doivent être au FÉMININ.</contenu>
-<exemple>"elle est parti" : erreur, "parti" → "partie".</exemple>
+<exemple>"elle est parti" : erreur, "parti" -> "partie".</exemple>
 </regle>
 </regles>
 
@@ -119,8 +119,8 @@ Analyser le texte fourni et retourner les erreurs au format JSON strict. Pour ch
 - "toutes" + nom féminin pluriel : "toutes les classes", "toutes mes idées".
 </contenu>
 <repere>"tout les ..." est presque toujours une erreur ; corriger en "tous les ...".</repere>
-<exemple>"tout les enfants" : erreur, "tout" → "tous".</exemple>
-<exemple>"toute les filles" : erreur, "toute" → "toutes".</exemple>
+<exemple>"tout les enfants" : erreur, "tout" -> "tous".</exemple>
+<exemple>"toute les filles" : erreur, "toute" -> "toutes".</exemple>
 </regle>
 
 <regle id="T2">
@@ -128,8 +128,10 @@ Analyser le texte fourni et retourner les erreurs au format JSON strict. Pour ch
 <contenu>"tout" est aussi adverbe et reste invariable devant un adjectif. Exception : devant un adjectif féminin commençant par une consonne ou un h aspiré, il prend la forme "toute" / "toutes" pour des raisons d'euphonie. Dans ces cas, NE PAS corriger.</contenu>
 <exemple>"tout doucement" : correct (adverbe).</exemple>
 <exemple>"tout petit" : correct (adverbe).</exemple>
-<exemple>"Elle est toute heureuse" : correct (adverbe au féminin singulier devant consonne). Ne pas corriger "toute".</exemple>
-<exemple>"Elles sont toutes petites" : correct (adverbe au féminin pluriel devant consonne).</exemple>
+<exemple>"Elle est toute contente" : correct (adverbe accordé devant un adjectif féminin commençant par une consonne). Ne pas corriger "toute".</exemple>
+<exemple>"Elles sont toutes petites" : correct (adverbe accordé au féminin pluriel devant consonne).</exemple>
+<exemple>"Elle est tout heureuse" : correct. Le h de "heureuse" est muet, donc l'adverbe reste invariable : ne pas corriger "tout" en "toute".</exemple>
+<exemple>"Elle est toute honteuse" : correct. Le h de "honteuse" est aspiré, donc l'adverbe s'accorde : ne pas corriger "toute".</exemple>
 </regle>
 </regles>
 
@@ -157,13 +159,14 @@ Analyser le texte fourni et retourner les erreurs au format JSON strict. Pour ch
 <regle id="NC1">
 <titre>Pluriel des noms composés à trait d'union</titre>
 <contenu>Règle générale pour les noms composés à trait d'union :
-- Nom + préposition + nom : seul le PREMIER nom prend la marque du pluriel. Exemples : "arc-en-ciel" -> "arcs-en-ciel", "pomme-de-terre" -> "pommes-de-terre", "chef-d'oeuvre" -> "chefs-d'oeuvre".
+- Nom + préposition + nom : seul le PREMIER nom prend la marque du pluriel. Exemples : "arc-en-ciel" -> "arcs-en-ciel", "chef-lieu" -> "chefs-lieux", "chef-d'œuvre" -> "chefs-d'œuvre".
 - Nom + nom (juxtaposés) : les deux prennent la marque du pluriel. Exemples : "chou-fleur" -> "choux-fleurs", "wagon-restaurant" -> "wagons-restaurants".
 - Adjectif + nom : les deux s'accordent. Exemples : "grand-père" -> "grands-pères", "rouge-gorge" -> "rouges-gorges".
 - Verbe + nom : le verbe est invariable, le nom suit la logique du sens. Exemples : "garde-fou" -> "garde-fous", "essuie-glace" -> "essuie-glaces".</contenu>
 <exemple>"les arc-en-ciels" : erreur, "arc-en-ciels" -> "arcs-en-ciel".</exemple>
-<exemple>"les pommes-de-terres" : erreur, "pommes-de-terres" -> "pommes-de-terre".</exemple>
-<exemple>"les chefs-d'oeuvres" : erreur, "chefs-d'oeuvres" -> "chefs-d'oeuvre".</exemple>
+<exemple>"les chefs-lieu" : erreur, "chefs-lieu" -> "chefs-lieux".</exemple>
+<exemple>"les chefs-d'œuvres" : erreur, "chefs-d'œuvres" -> "chefs-d'œuvre".</exemple>
+<exemple>"pomme de terre" s'écrit sans trait d'union : ne pas appliquer cette règle, le pluriel est "pommes de terre".</exemple>
 </regle>
 </regles>
 
@@ -212,16 +215,16 @@ IMPORTANT : la correction va TOUJOURS dans le sens indicatif -> subjonctif, JAMA
 <titre>a / à</titre>
 <contenu>"a" = verbe avoir (test : remplaçable par "avait"). "à" = préposition (test : non remplaçable par "avait").</contenu>
 <exemple>"il a mangé" : "a" = avoir, correct.</exemple>
-<exemple>"Bonjour a tous" : "a" ne peut pas être remplacé par "avait", erreur, "a" → "à".</exemple>
-<exemple>"je vais a Paris" : erreur, "a" → "à".</exemple>
+<exemple>"Bonjour a tous" : "a" ne peut pas être remplacé par "avait", erreur, "a" -> "à".</exemple>
+<exemple>"je vais a Paris" : erreur, "a" -> "à".</exemple>
 </regle>
 
 <regle id="H2">
 <titre>sa / ça</titre>
 <contenu>"sa" = déterminant possessif féminin (sa voiture, sa mère). "ça" = pronom démonstratif, toujours avec cédille, employé devant un verbe ou en début de proposition.</contenu>
 <exemple>"sa voiture" : correct.</exemple>
-<exemple>"sa va marcher" : erreur, "sa" → "ça" (suivi du verbe "va").</exemple>
-<exemple>"sa ne fait rien" : erreur, "sa" → "ça".</exemple>
+<exemple>"sa va marcher" : erreur, "sa" -> "ça" (suivi du verbe "va").</exemple>
+<exemple>"sa ne fait rien" : erreur, "sa" -> "ça".</exemple>
 </regle>
 
 <regle id="H3">
@@ -260,7 +263,7 @@ Retourner UNIQUEMENT le JSON. Pas de commentaire, pas d'explication, pas de text
 <exemples>
 <exemple>
 <texte>Il avait beau ironisé, personne ne l'écoutait.</texte>
-<reponse>{"corrections": [{"word": "ironisé", "offset": 15, "length": 7, "message": "Après « avoir beau », le verbe doit être à l'infinitif", "suggestions": ["ironiser"], "type": "grammar"}]}</reponse>
+<reponse>{"corrections": [{"word": "ironisé", "offset": 14, "length": 7, "message": "Après « avoir beau », le verbe doit être à l'infinitif", "suggestions": ["ironiser"], "type": "grammar"}]}</reponse>
 </exemple>
 
 <exemple>
@@ -275,7 +278,7 @@ Retourner UNIQUEMENT le JSON. Pas de commentaire, pas d'explication, pas de text
 
 <exemple>
 <texte>Il a manger tout le gateau.</texte>
-<reponse>{"corrections": [{"word": "manger", "offset": 5, "length": 6, "message": "Après l'auxiliaire « a », il faut le participe passé, pas l'infinitif (test : « il a vendu » → « il a mangé »)", "suggestions": ["mangé"], "type": "grammar"}, {"word": "gateau", "offset": 22, "length": 6, "message": "Il manque l'accent circonflexe", "suggestions": ["gâteau"], "type": "spelling"}]}</reponse>
+<reponse>{"corrections": [{"word": "manger", "offset": 5, "length": 6, "message": "Après l'auxiliaire « a », il faut le participe passé, pas l'infinitif (test : « il a vendu » → « il a mangé »)", "suggestions": ["mangé"], "type": "grammar"}, {"word": "gateau", "offset": 20, "length": 6, "message": "Il manque l'accent circonflexe", "suggestions": ["gâteau"], "type": "spelling"}]}</reponse>
 </exemple>
 
 <exemple>
@@ -304,7 +307,7 @@ Retourner UNIQUEMENT le JSON. Pas de commentaire, pas d'explication, pas de text
 </exemple>
 
 <exemple>
-<texte>Elle est toute heureuse.</texte>
+<texte>Elle est toute contente.</texte>
 <reponse>{"corrections": []}</reponse>
 </exemple>
 

@@ -34,7 +34,7 @@
 
 | Menace | Mesure |
 |--------|--------|
-| Injection de code (XSS) | Utilisation systématique de `textContent` et `document.createTextNode()`. Fonction `escapeHtml()` testée (7 cas). Aucun `innerHTML` sur des données utilisateur. Aucun `eval()` ni `Function()`. |
+| Injection de code (XSS) | Utilisation systématique de `textContent` et `document.createTextNode()` pour tout contenu d'origine externe (texte de l'utilisateur, réponses de l'API). Les rares `innerHTML` ne reçoivent que des chaînes littérales du code. Aucun `eval()` ni `Function()`. |
 | Réponse API malformée ou compromise | Validation structurelle des réponses JSON avant exploitation. Rejet avec message utilisateur si format inattendu. |
 | Interception réseau (MITM) | HTTPS imposé par le manifest. Clé API transmise via en-tête Authorization (pas dans l'URL). |
 | Extension malveillante tierce | Content Security Policy : `script-src 'self'` (`object-src 'none'` sous Firefox, `object-src 'self'` sous Brave). Aucun script inline. |
@@ -55,7 +55,7 @@ script-src 'self'; object-src 'self'     (Brave)
 ## Pratiques de développement
 
 - **Zéro dépendance externe** : aucun `npm install`, aucune bibliothèque tierce. Sous Brave, l'accès à l'API `browser.*` repose sur un alias maison d'une ligne vers `chrome.*` (`sources-brave/lib/browser-shim.js`), pas sur une bibliothèque externe.
-- **Échappement systématique** : `textContent`, `createTextNode`, `escapeHtml()`
+- **Échappement systématique** : `textContent` et `createTextNode`, jamais `innerHTML`, pour toute donnée d'origine externe
 - **Pas de code dynamique** : aucun `eval()`, `Function()`, `setTimeout(string)`
 - **Validation d'entrée** : vérification du type et de la structure des réponses API
 - **Tests de sécurité** : suite de tests incluant l'échappement HTML et les cas XSS (7+ cas)

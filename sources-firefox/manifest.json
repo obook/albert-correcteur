@@ -11,7 +11,9 @@
       "update_url": "https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/raw/main/updates.json",
       "strict_min_version": "128.0",
       "data_collection_permissions": {
-        "required": ["none"]
+        "required": [
+          "none"
+        ]
       }
     }
   },
@@ -39,6 +41,7 @@
   "background": {
     "scripts": [
       "util/model-aliases.js",
+      "util/personas.js",
       "service/service-update.js",
       "service/service-config.js",
       "service/service-langue.js",
@@ -48,12 +51,15 @@
       "service/service-rate-limit.js",
       "verification/regles-locales.js",
       "service/service-api.js",
+      "service/service-dispatch.js",
       "service/service-menus.js"
     ]
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": [
+        "<all_urls>"
+      ],
       "js": [
         "etat/albert-state.js",
         "etat/albert-fields.js",
@@ -61,19 +67,22 @@
         "etat/albert-offsets.js",
         "etat/albert-utils.js",
         "affichage/albert-badge.js",
+        "util/lang-names.js",
         "affichage/albert-render-arialive.js",
         "affichage/albert-render-overlay.js",
         "affichage/albert-render.js",
+        "util/popup-focus.js",
         "popup-contenu/albert-popup-common.js",
         "popup-contenu/albert-popup-layout.js",
         "popup-contenu/albert-popup-correction.js",
         "popup-contenu/albert-popup-reformulation.js",
         "popup-contenu/albert-popup-traduction.js",
         "popup-contenu/albert-popup-messages.js",
+        "util/inner-text.js",
         "correction/albert-apply-segments.js",
         "correction/albert-apply-rich.js",
         "correction/albert-apply.js",
-        "notification/albert-toast.js",
+        "notification/toast.js",
         "verification/rolling-window.js",
         "verification/albert-limites.js",
         "verification/albert-debounce.js",
@@ -81,6 +90,7 @@
         "demarrage/albert-main.js"
       ],
       "css": [
+        "css/badge-base.css",
         "css/badge.css",
         "css/overlay.css",
         "css/popup-dark.css",

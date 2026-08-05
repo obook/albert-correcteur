@@ -29,20 +29,44 @@
  *   - regles-locales.js     (findLocalCorrections, mergeCorrections)
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
 "use strict";
 
+/* Délai maximal d'attente d'une réponse de l'API. Sans cette limite, une
+   requête acceptée mais jamais servie laisse le badge en chargement
+   pendant plusieurs minutes (timeout TCP du navigateur). */
+const API_TIMEOUT_MS = 30000;
+
+/**
+ * Traduit une exception en message affichable par l'utilisateur.
+ *
+ * @param {Error} err - Exception levée pendant l'appel.
+ * @returns {string} Message destiné à l'utilisateur.
+ */
+function messageErreurReseau(err) {
+  if (!err) return "Erreur inconnue.";
+  if (err.name === "TimeoutError" || err.name === "AbortError") {
+    return "Délai dépassé : l'API Albert n'a pas répondu en "
+      + (API_TIMEOUT_MS / 1000) + " secondes.";
+  }
+  /* fetch signale une panne réseau par une TypeError. */
+  if (err.name === "TypeError") return `Erreur réseau : ${err.message}`;
+  return err.message || "Erreur inconnue.";
+}
+
 /**
  * Envoie un texte à l'API Albert pour correction ou reformulation.
  *
- * @param {string} text - Texte à vérifier.
- * @param {string} mode - Mode : "correction" ou "reformulation".
+ * @param {string} text       - Texte à vérifier.
+ * @param {string} mode       - Mode : "correction" ou "reformulation".
+ * @param {string} [personaId] - Id de persona (mode reformulation
+ *                               uniquement, défaut : "neutre").
  * @returns {Promise<{corrections?: Array, lang?: string, error?: string}>}
  */
-async function checkText(text, mode) {
+async function checkText(text, mode, personaId) {
   const config = await loadConfig();
   if (!config.apiKey) {
     return {
@@ -52,9 +76,12 @@ async function checkText(text, mode) {
   }
 
   const lang = detectLanguage(text);
-  const systemPrompt = await buildPrompt(mode, lang, config.model);
 
   try {
+    /* Dans le try : le chargement du prompt échoue si le fichier est
+       absent, et l'erreur doit remonter à l'utilisateur plutôt que de
+       partir en rejet non géré du service worker. */
+    const systemPrompt = await buildPrompt(mode, lang, config.model, personaId);
     const effectiveModel = selectEffectiveModel(config.model);
     const body = {
       model: effectiveModel,
@@ -74,6 +101,7 @@ async function checkText(text, mode) {
         Accept: "application/json",
       },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(API_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -139,8 +167,34 @@ async function checkText(text, mode) {
       }
     }
 
+    /* Convertir chaque suggestion en chaîne. Les petits modèles renvoient
+       parfois un objet (ex. { text: "..." }, { reformulation: "..." })
+       au lieu d'une chaîne, ce qui produit "[object Object]" côté UI.
+       On essaie d'abord les clés connues, puis on tombe sur la
+       première propriété chaînée non vide trouvée. */
+    const coerceSuggestion = (s) => {
+      if (typeof s === "string") return s;
+      if (s && typeof s === "object") {
+        const knownKeys = ["text", "suggestion", "content", "value",
+          "reformulation", "rephrasing", "rephrased", "output"];
+        for (const key of knownKeys) {
+          if (typeof s[key] === "string" && s[key].length > 0) return s[key];
+        }
+        /* Dernier recours : prendre la première propriété chaînée non vide. */
+        for (const v of Object.values(s)) {
+          if (typeof v === "string" && v.length > 0) return v;
+        }
+      }
+      return null;
+    };
+
     /* Filtrer les suggestions incorrectes */
-    const apiCorrections = (parsed.corrections || []).map((c) => {
+    const apiCorrections = parsed.corrections.map((c) => {
+      if (Array.isArray(c.suggestions)) {
+        c.suggestions = c.suggestions
+          .map(coerceSuggestion)
+          .filter((s) => s !== null);
+      }
       if (c.suggestions && c.word) {
         c.suggestions = c.suggestions.filter((s) => {
           /* Supprimer les suggestions identiques au mot erroné */
@@ -166,7 +220,7 @@ async function checkText(text, mode) {
     return { corrections, lang };
   } catch (err) {
     AlbertLog.error("checkText:", mode, "exception:", err);
-    return { error: `Erreur réseau : ${err.message}` };
+    return { error: messageErreurReseau(err) };
   }
 }
 
@@ -184,10 +238,9 @@ async function translateText(text, targetLang) {
   }
 
   const langSource = detectLanguage(text);
-  const systemPrompt =
-    await buildTranslationPrompt(langSource, targetLang);
 
   try {
+    const systemPrompt = await buildTranslationPrompt(langSource, targetLang);
     const effectiveModel = selectEffectiveModel(config.model);
     const body = {
       model: effectiveModel,
@@ -208,6 +261,7 @@ async function translateText(text, targetLang) {
         Accept: "application/json",
       },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(API_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -252,6 +306,6 @@ async function translateText(text, targetLang) {
     };
   } catch (err) {
     AlbertLog.error("translateText: exception:", err);
-    return { error: `Erreur réseau : ${err.message}` };
+    return { error: messageErreurReseau(err) };
   }
 }

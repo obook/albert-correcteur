@@ -15,7 +15,7 @@
  * (point d'entrée) en dernier.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -24,16 +24,19 @@
 const COMPOSE_JS = [
   "compose/compose-state.js",
   "compose/compose-utils.js",
+  "util/inner-text.js",
+  "util/lang-names.js",
+  "notification/toast.js",
   "compose/compose-badge.js",
   "compose/compose-overlay.js",
   "compose/compose-render.js",
+  "util/popup-focus.js",
   "compose/compose-popup-utils.js",
   "compose/compose-popup-correction.js",
   "compose/compose-popup-reformulation.js",
   "compose/compose-popup-traduction.js",
   "compose/compose-popup-messages.js",
   "compose/compose-apply.js",
-  "compose/compose-toast.js",
   "verification/rolling-window.js",
   "compose/compose-limites.js",
   "compose/compose-debounce.js",
@@ -42,6 +45,7 @@ const COMPOSE_JS = [
 ];
 
 const COMPOSE_CSS = [
+  "css/badge-base.css",
   "css/badge.css",
   "css/overlay.css",
   "css/popup-dark.css",
@@ -55,7 +59,7 @@ async function injectComposeScripts(tabId) {
   if (injectedTabs.has(tabId)) return;
   injectedTabs.add(tabId);
 
-  console.log("[Albert] Injection des scripts dans le compose tab", tabId);
+  AlbertLog.log("Injection des scripts dans l'onglet de composition", tabId);
 
   try {
     for (const file of COMPOSE_CSS) {
@@ -70,18 +74,37 @@ async function injectComposeScripts(tabId) {
         if (!e.message.includes("non-structured-clonable")) throw e;
       }
     }
-    console.log("[Albert] Scripts injectés avec succès dans tab", tabId);
+    AlbertLog.log("Scripts injectés dans l'onglet", tabId);
   } catch (err) {
-    console.error("[Albert] Erreur injection compose scripts :", err);
+    AlbertLog.error("Injection des compose scripts impossible :", err);
     injectedTabs.delete(tabId);
   }
 }
 
-/* Injection dans les nouveaux onglets de composition */
+/* Injection dans les nouveaux onglets de composition.
+ *
+ * Le document de composition est prêt quand son chargement est terminé.
+ * Un simple délai fixe ne suffisait pas : sur une réponse à un courriel
+ * volumineux (fil de discussion, images intégrées, plusieurs niveaux de
+ * citation), Thunderbird met plus longtemps à monter l'éditeur, si bien
+ * que l'injection tombait sur un corps encore vide. La vérification
+ * initiale du texte déjà présent était alors sautée, et l'utilisateur
+ * devait taper un caractère pour déclencher la première analyse.
+ *
+ * injectedTabs empêche la double injection, onUpdated pouvant se
+ * déclencher plusieurs fois pour un même onglet. */
+browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (tab.type !== "messageCompose") return;
+  if (changeInfo.status !== "complete") return;
+  injectComposeScripts(tabId);
+});
+
+/* Repli pour les versions de Thunderbird qui ne signalent pas la fin de
+   chargement d'un onglet de composition : injecter après un délai, sans
+   effet si onUpdated a déjà fait le travail. */
 browser.tabs.onCreated.addListener((tab) => {
   if (tab.type === "messageCompose") {
-    /* Attendre que l'éditeur soit prêt */
-    setTimeout(() => injectComposeScripts(tab.id), 500);
+    setTimeout(() => injectComposeScripts(tab.id), 1500);
   }
 });
 

@@ -41,13 +41,17 @@
         "icons/icon-ok.svg",
         "icons/icon-error.svg"
       ],
-      "matches": ["<all_urls>"],
+      "matches": [
+        "<all_urls>"
+      ],
       "use_dynamic_url": true
     }
   ],
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": [
+        "<all_urls>"
+      ],
       "js": [
         "lib/browser-shim.js",
         "etat/albert-state.js",
@@ -56,19 +60,22 @@
         "etat/albert-offsets.js",
         "etat/albert-utils.js",
         "affichage/albert-badge.js",
+        "util/lang-names.js",
         "affichage/albert-render-arialive.js",
         "affichage/albert-render-overlay.js",
         "affichage/albert-render.js",
+        "util/popup-focus.js",
         "popup-contenu/albert-popup-common.js",
         "popup-contenu/albert-popup-layout.js",
         "popup-contenu/albert-popup-correction.js",
         "popup-contenu/albert-popup-reformulation.js",
         "popup-contenu/albert-popup-traduction.js",
         "popup-contenu/albert-popup-messages.js",
+        "util/inner-text.js",
         "correction/albert-apply-segments.js",
         "correction/albert-apply-rich.js",
         "correction/albert-apply.js",
-        "notification/albert-toast.js",
+        "notification/toast.js",
         "verification/rolling-window.js",
         "verification/albert-limites.js",
         "verification/albert-debounce.js",
@@ -76,6 +83,7 @@
         "demarrage/albert-main.js"
       ],
       "css": [
+        "css/badge-base.css",
         "css/badge.css",
         "css/overlay.css",
         "css/popup-dark.css",

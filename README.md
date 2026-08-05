@@ -6,7 +6,7 @@
 ![IA](badges/ia.svg)
 ![RGPD](badges/rgpd.svg)
 
-**Extension expérimentale** de correction orthographique, grammaticale et de traduction pour Firefox, Thunderbird et Brave, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web (Firefox et Brave) et dans la fenêtre de composition de mail (Thunderbird), propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné vers une des quatre langues au choix : français, anglais, espagnol, allemand.
+**Extension expérimentale** de correction orthographique et grammaticale et de traduction pour Firefox, Thunderbird et Brave, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web (Firefox et Brave) et dans la fenêtre de composition de courriel (Thunderbird), propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné vers une des quatre langues au choix : français, anglais, espagnol, allemand.
 
 **Téléchargement .xpi (signé par Mozilla)** : [RELEASES](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases) | **Sécurité** : [SECURITE](SECURITE.md) | **Accessibilité** : [RGAA](ACCESSIBILITE.md)
 
@@ -21,9 +21,9 @@
 - Vérification du champ de saisie dès le focus
 - Vérification manuelle en cliquant sur le badge Albert dans le coin du champ
 - Soulignements colorés selon le type d'erreur :
- - **Rouge** - orthographe
- - **Orange** - grammaire
- - **Bleu** - style
+  - **Rouge** : orthographe
+  - **Orange** : grammaire
+  - **Bleu** : style
 - Popup de suggestion avec explication et correction en un clic (fermeture par Échap ou clic en dehors)
 - Animation de rotation du logo pendant la vérification
 - Indication visuelle d'une panne API (badge ambre cliquable pour relancer la vérification, message explicite en bulle d'aide)
@@ -42,17 +42,17 @@
 - Mises à jour automatiques via `updates.json` (Firefox et Thunderbird vérifient périodiquement les nouvelles versions ; sous Brave, la mise à jour se fait par le Chrome Web Store)
 - Reformulation via le menu contextuel (clic droit dans un champ de saisie)
 - Traduction via le menu contextuel (clic droit sur n'importe quelle sélection de texte)
- - Langues de traduction : français, anglais, espagnol, allemand
- - Détection automatique de la langue source
- - Traduction automatique à l'ouverture dans la dernière langue choisie
- - Bouton "Copier" pour récupérer le résultat
+  - Langues de traduction : français, anglais, espagnol, allemand
+  - Détection automatique de la langue source
+  - Traduction automatique à l'ouverture dans la dernière langue choisie
+  - Bouton « Copier » pour récupérer le résultat
 
 ## Prérequis
 
 - Firefox 128 ou supérieur, Thunderbird 128 ou supérieur, ou Brave (ou un autre navigateur Chromium récent)
 - Une clé API Albert (réservée aux agents de la fonction publique d'État) → [Demander un accès](https://albert.sites.beta.gouv.fr/)
 
-## Installations
+## Installation
 
 ### <img src="images/firefox.png" width="18" alt="Firefox"> Firefox
 
@@ -67,7 +67,7 @@ Le `.xpi` est signé automatiquement par Mozilla (canal unlisted) lors du pipeli
 ### <img src="images/thunderbird.png" width="18" alt="Thunderbird"> Thunderbird
 
 1. Télécharger le `.xpi` Thunderbird depuis les [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases)
-2. Dans Thunderbird : Menu > Modules complémentaires > roue dentée > « Installer un module depuis un fichier... »
+2. Dans Thunderbird : Menu > Modules complémentaires > roue dentée > « Installer un module depuis un fichier… »
 3. Sélectionner le fichier `.xpi`
 
 **Configuration** : ouvrir une fenêtre de rédaction, puis cliquer sur l'icône Albert Correcteur dans la barre d'outils de composition.

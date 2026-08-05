@@ -1,25 +1,18 @@
 /*
- * service-menus.js - Menus contextuels et dispatch des messages (Firefox).
+ * service-menus.js - Menus contextuels (Firefox).
  *
  * Ce script s'exécute dans le service worker (background script).
- * Il gère deux responsabilités :
+ * Il déclare les entrées de menu et traite les clics.
  *
- * 1. Menus contextuels :
+ * Menus contextuels :
  *    - "Reformuler avec Albert" (contexte : champ éditable).
  *    - "Traduire avec Albert" (contexte : texte sélectionné).
  *
- * 2. Dispatch des messages du content script :
- *    Écoute browser.runtime.onMessage et route les requêtes vers
- *    les fonctions du service worker :
- *    - "check"          → checkText()       (service-api.js)
- *    - "getConfig"      → loadConfig()      (service-config.js)
- *    - "getLimits"      → fetchLimits()     (service-limites.js)
- *    - "getAliases"     → fetchAliases()    (service-limites.js)
- *    - "getDailyUsage"  → fetchDailyUsage() (service-limites.js)
- *    - "translate"      → translateText()   (service-api.js)
+ * Le routage des messages reçus par le script de fond est assuré
+ * par service-dispatch.js, partagé entre les cibles.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -27,11 +20,22 @@
 
 /* --- Menus contextuels --- */
 
+/* Parent du sous-menu de reformulation. Chaque enfant correspond à un
+   persona déclaré dans util/personas.js. */
 browser.contextMenus.create({
   id: "albert-reformulate",
   title: "Reformuler avec Albert",
   contexts: ["editable"],
 });
+
+for (const persona of PERSONAS) {
+  browser.contextMenus.create({
+    id: "albert-reformulate-" + persona.id,
+    parentId: "albert-reformulate",
+    title: persona.label,
+    contexts: ["editable"],
+  });
+}
 
 browser.contextMenus.create({
   id: "albert-translate",
@@ -39,9 +43,12 @@ browser.contextMenus.create({
   contexts: ["selection"],
 });
 
+/* Préfixe d'id qui identifie un clic sur un sous-item de reformulation. */
+const REFORMULATE_PREFIX = "albert-reformulate-";
+
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
   const text = info.selectionText;
-  AlbertLog.log("contextMenu cliqué:", info.menuItemId,
+  AlbertLog.log("contextMenu cliqué :", info.menuItemId,
     "frameId=" + info.frameId,
     "selectionText.length=" + (text ? text.length : 0));
 
@@ -59,15 +66,24 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
    */
   const sendOpts = typeof info.frameId === "number" ? { frameId: info.frameId } : undefined;
 
-  if (info.menuItemId === "albert-reformulate") {
+  if (typeof info.menuItemId === "string"
+    && info.menuItemId.startsWith(REFORMULATE_PREFIX)) {
+    const personaId = info.menuItemId.slice(REFORMULATE_PREFIX.length);
+    const persona = getPersonaById(personaId);
+    /* Mémoriser le dernier persona utilisé pour pré-cocher l'UI plus tard. */
+    browser.storage.local.set({ lastReformulationPersona: persona.id })
+      .catch((err) => AlbertLog.warn(
+        "Mémorisation du persona impossible :", err && err.message));
+
     browser.tabs.sendMessage(tab.id, { type: "reformulateLoading" }, sendOpts)
-      .catch((err) => AlbertLog.error("sendMessage reformulateLoading a échoué:",
+      .catch((err) => AlbertLog.error("sendMessage reformulateLoading a échoué :",
         err && err.message, "(content script absent ou frame non autorisée ?)"));
 
-    AlbertLog.log("checkText(reformulation) en cours, longueur=" + text.length);
-    const result = await checkText(text, "reformulation");
+    AlbertLog.log("checkText(reformulation) persona=" + persona.id,
+      "longueur=" + text.length);
+    const result = await checkText(text, "reformulation", persona.id);
     if (result.error) {
-      AlbertLog.warn("checkText(reformulation) erreur:", result.error);
+      AlbertLog.warn("checkText(reformulation) erreur :", result.error);
     } else {
       AlbertLog.log("checkText(reformulation) OK,",
         (result.corrections || []).length, "suggestions");
@@ -75,44 +91,17 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
     browser.tabs.sendMessage(tab.id, {
       type: "reformulateResult",
       originalText: text,
+      personaLabel: persona.label,
       result,
     }, sendOpts).catch((err) => AlbertLog.error(
-      "sendMessage reformulateResult a échoué:", err && err.message,
+      "sendMessage reformulateResult a échoué :", err && err.message,
       "(le toast de chargement va rester affiché jusqu'à expiration)"));
+    return;
   }
 
   if (info.menuItemId === "albert-translate") {
     browser.tabs.sendMessage(tab.id, { type: "translateGetSelection" }, sendOpts)
-      .catch((err) => AlbertLog.error("sendMessage translateGetSelection a échoué:",
+      .catch((err) => AlbertLog.error("sendMessage translateGetSelection a échoué :",
         err && err.message));
-  }
-});
-
-/* --- Dispatch des messages du content script --- */
-
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "check") {
-    checkText(message.text, message.mode).then(sendResponse);
-    return true;
-  }
-  if (message.type === "getConfig") {
-    loadConfig().then(sendResponse);
-    return true;
-  }
-  if (message.type === "getLimits") {
-    fetchLimits().then(sendResponse);
-    return true;
-  }
-  if (message.type === "getAliases") {
-    fetchAliases().then(sendResponse);
-    return true;
-  }
-  if (message.type === "getDailyUsage") {
-    fetchDailyUsage(message.model).then(sendResponse);
-    return true;
-  }
-  if (message.type === "translate") {
-    translateText(message.text, message.targetLang).then(sendResponse);
-    return true;
   }
 });

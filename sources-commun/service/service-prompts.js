@@ -20,7 +20,7 @@
  *   - traduction.txt        : prompt de traduction.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -38,7 +38,16 @@ async function loadPromptTemplate(name) {
   if (promptCache[name]) return promptCache[name];
   const url = browser.runtime.getURL(`prompts/${name}.txt`);
   const response = await fetch(url);
+  /* Sans ce contrôle, un fichier absent ou renommé fournit une chaîne
+     vide qui part en cache et sert d'instruction système : l'extension
+     paraît fonctionner mais les corrections deviennent absurdes. */
+  if (!response.ok) {
+    throw new Error(`Prompt "${name}" introuvable (${response.status}).`);
+  }
   const text = await response.text();
+  if (!text.trim()) {
+    throw new Error(`Prompt "${name}" vide.`);
+  }
   promptCache[name] = text;
   return text;
 }
@@ -65,15 +74,27 @@ function correctionPromptName(modelAlias) {
  * @param {string} lang        - Code langue détecté (fr, en, es, de).
  * @param {string} modelAlias  - Alias du modèle actif (sert au choix
  *                               de prompt pour la correction).
+ * @param {string} personaId   - Id de persona (mode "reformulation"
+ *                               uniquement) ; ignoré sinon. Si vide
+ *                               ou inconnu, le persona "neutre" est
+ *                               appliqué.
  * @returns {Promise<string>}  - Prompt système prêt à envoyer.
  */
-async function buildPrompt(mode, lang, modelAlias) {
+async function buildPrompt(mode, lang, modelAlias, personaId) {
   const name = mode === "reformulation"
     ? "reformulation"
     : correctionPromptName(modelAlias);
   const template = await loadPromptTemplate(name);
   const langName = LANG_NAMES[lang] || "français";
-  return template.replace(/\{\{LANG\}\}/g, langName);
+  let prompt = template.replace(/\{\{LANG\}\}/g, langName);
+
+  if (mode === "reformulation") {
+    /* getPersonaById est défini dans util/personas.js (chargé en amont
+       via manifest.background.scripts). */
+    const persona = getPersonaById(personaId);
+    prompt = prompt.replace(/\{\{PERSONA_TONE\}\}/g, persona.tone);
+  }
+  return prompt;
 }
 
 /**

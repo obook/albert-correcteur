@@ -22,7 +22,7 @@
  *   - albert-utils.js         (ignoreWord, filterIgnoredCorrections)
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -132,7 +132,11 @@ Albert.showPopup = function (el, correction, markEl) {
   ignoreBtn.addEventListener("click", async (e) => {
     e.stopPropagation();
     const text = Albert.getTextContent(el);
-    const word = text.slice(correction.offset, correction.offset + correction.length);
+    /* correction.word est fiable même si le texte a changé depuis le
+       rendu ; l'extraction par offset ajouterait alors le mauvais mot
+       au dictionnaire personnel. */
+    const word = correction.word
+      || text.slice(correction.offset, correction.offset + correction.length);
     await Albert.ignoreWord(word);
     const st = Albert.getOrCreateState(el);
     st.corrections = Albert.filterIgnoredCorrections(st.corrections, text);

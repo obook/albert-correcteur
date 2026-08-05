@@ -9,7 +9,7 @@
  * Seuil minimum : au moins 2 mots reconnus, sinon défaut "fr".
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 

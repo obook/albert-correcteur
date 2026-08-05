@@ -1,8 +1,16 @@
-/* Tests -- Détection automatique de la langue. */
+/*
+ * test-detect-language.js
+ * Tests : Détection automatique de la langue.
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 
 const assert = require("assert");
 
-/* -- Copie des fonctions à tester (depuis service/service.js) -- */
+/* -- Copie des fonctions à tester
+      (depuis sources-commun/service/service-langue.js) -- */
 
 const LANG_WORDS = {
   fr: ["le", "la", "les", "de", "des", "un", "une", "du", "est", "et", "en", "que", "qui", "dans", "pour", "pas", "sur", "avec", "ce", "sont", "nous", "vous", "ils", "mais", "plus", "être", "avoir", "cette", "tout", "aussi"],

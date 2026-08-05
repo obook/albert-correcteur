@@ -17,7 +17,7 @@
  * d'arriver ici, donc la chaîne de fallback ne couvre que les alias.
  *
  * Auteur : O. Booklage
- * Date : Mai 2026
+ * Date : mai 2026
  * Licence : MIT
  */
 
@@ -73,7 +73,7 @@ function record429(primary) {
   if (next >= FALLBACK_TRIGGER_429 && fallback) {
     fallbackUntil.set(primary, Date.now() + FALLBACK_DURATION_MS);
     consecutive429.set(primary, 0);
-    console.info(
+    AlbertLog.log(
       `[Albert] Fallback ${primary} -> ${fallback} pendant `
       + `${FALLBACK_DURATION_MS / 1000}s (deux 429 consécutifs)`
     );

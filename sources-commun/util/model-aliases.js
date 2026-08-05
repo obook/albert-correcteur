@@ -19,11 +19,17 @@
  *   - dans popup.html et popup-settings.html via <script src="...">
  *
  * Auteur : O. Booklage
- * Date : Mai 2026
+ * Date : mai 2026
  * Licence : MIT
  */
 
 "use strict";
+
+/* URL de l'API Albert par défaut. Déclarée ici, avec les autres
+   constantes partagées, pour qu'un changement d'URL n'ait qu'un seul
+   point d'application : elle était auparavant écrite à l'identique dans
+   le service worker et dans la popup de configuration. */
+const DEFAULT_API_BASE = "https://albert.api.etalab.gouv.fr";
 
 /* Clés en minuscules pour permettre une recherche insensible à la casse. */
 const CANONICAL_TO_ALIAS = {

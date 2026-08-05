@@ -13,7 +13,7 @@
  *   - applyUnderlines()     : insère les spans dans le DOM.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -48,37 +48,14 @@ Albert.createUnderlineSpan = function (correction, index) {
   return span;
 };
 
-/* Construit une map des text nodes avec un offset "innerText-compatible"
- * en ajoutant les \n que innerText insère pour les éléments block (<p>, <div>, <br>). */
+/* Construit la correspondance entre les offsets de innerText et les
+ * nœuds texte du corps du message. L'algorithme est partagé avec la
+ * version Firefox (util/inner-text.js) : compter un seul saut de ligne
+ * par bloc décalait les offsets d'un caractère par paragraphe, si bien
+ * que les erreurs des derniers paragraphes d'un long courriel
+ * n'étaient plus soulignées. */
 Albert.buildTextNodeMap = function (body) {
-  const BLOCK_TAGS = new Set([
-    "P", "DIV", "BR", "LI", "TR", "BLOCKQUOTE",
-    "H1", "H2", "H3", "H4", "H5", "H6", "PRE", "HR", "UL", "OL",
-  ]);
-  const map = [];
-  let innerOffset = 0;
-  let prevNode = null;
-
-  const walker = document.createTreeWalker(body, NodeFilter.SHOW_ALL, null);
-  let current;
-  while ((current = walker.nextNode())) {
-    /* Quand on rencontre un élément block ou <br>, innerText ajoute un \n */
-    if (current.nodeType === Node.ELEMENT_NODE && BLOCK_TAGS.has(current.tagName)) {
-      /* <br> ajoute un \n, les blocs ouvrants aussi (sauf le premier enfant du body) */
-      if (current.tagName === "BR") {
-        innerOffset += 1;
-      } else if (prevNode) {
-        /* Un bloc ajoute un \n si ce n'est pas le tout premier contenu */
-        innerOffset += 1;
-      }
-    }
-    if (current.nodeType === Node.TEXT_NODE && current.textContent.length > 0) {
-      map.push({ node: current, start: innerOffset, end: innerOffset + current.textContent.length });
-      innerOffset += current.textContent.length;
-      prevNode = current;
-    }
-  }
-  return map;
+  return Albert.buildInnerTextSegments(body);
 };
 
 Albert.applyUnderlines = function (corrections) {
@@ -99,28 +76,52 @@ Albert.applyUnderlines = function (corrections) {
     const realOffset = Albert.findRealOffset(innerText, correction.word, correction.offset);
     if (realOffset === -1) continue;
 
-    const startInfo = textNodes.find((n) => n.start <= realOffset && n.end > realOffset);
-    if (!startInfo) continue;
+    const finErreur = realOffset + correction.word.length;
 
-    const localStart = realOffset - startInfo.start;
-    const localEnd = Math.min(localStart + correction.word.length, startInfo.node.textContent.length);
+    /* Un mot peut chevaucher plusieurs nœuds texte, par exemple quand une
+       partie est en gras ou dans un lien. Souligner uniquement le premier
+       nœud laissait la fin du mot sans marque ni zone cliquable : on
+       découpe donc la portion à souligner nœud par nœud. */
+    const portions = [];
+    for (const info of textNodes) {
+      if (info.end <= realOffset || info.start >= finErreur) continue;
+      portions.push({
+        node: info.node,
+        debut: Math.max(realOffset, info.start) - info.start,
+        fin: Math.min(finErreur, info.end) - info.start,
+      });
+    }
+    if (portions.length === 0) continue;
 
-    const range = document.createRange();
-    range.setStart(startInfo.node, localStart);
-    range.setEnd(startInfo.node, localEnd);
+    /* De droite à gauche : découper un nœud ne décale pas les portions
+       situées avant lui. */
+    for (let i = portions.length - 1; i >= 0; i--) {
+      const portion = portions[i];
+      const range = document.createRange();
+      range.setStart(portion.node, portion.debut);
+      range.setEnd(portion.node, portion.fin);
 
-    const span = Albert.createUnderlineSpan(correction, correction.index);
-    range.surroundContents(span);
-
-    span.addEventListener("click", (e) => {
-      e.stopPropagation();
-      Albert.showCorrectionPopup(correction, span);
-    });
-    span.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        Albert.showCorrectionPopup(correction, span);
+      const span = Albert.createUnderlineSpan(correction, correction.index);
+      try {
+        range.surroundContents(span);
+      } catch (err) {
+        /* Le nœud a changé depuis la construction de la table :
+           passer cette portion sans interrompre les corrections
+           suivantes. */
+        Albert.log("applyUnderlines : portion ignorée -", err && err.message);
+        continue;
       }
-    });
+
+      span.addEventListener("click", (e) => {
+        e.stopPropagation();
+        Albert.showCorrectionPopup(correction, span);
+      });
+      span.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          Albert.showCorrectionPopup(correction, span);
+        }
+      });
+    }
   }
 };
