@@ -87,7 +87,13 @@ Albert.isTextField = function (el) {
 
 /**
  * Diagnostic : explique pourquoi un élément n'est (ou n'est pas) considéré
- * comme un champ texte. Utilisable depuis la console du navigateur :
+ * comme un champ texte.
+ *
+ * À appeler depuis la console du content script, et non depuis celle de
+ * la page : les content scripts s'exécutent dans un contexte isolé, où
+ * le namespace Albert n'est pas visible pour le code de la page. Ouvrir
+ * about:debugging, « Ce Firefox », bouton « Inspecter » en face
+ * d'Albert Correcteur, puis :
  *   Albert.diagnose(document.activeElement)
  *
  * @param {HTMLElement} el - Élément DOM à tester (par défaut : document.activeElement).

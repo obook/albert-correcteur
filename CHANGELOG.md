@@ -5,6 +5,56 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.6.0] - 2026-08-05
+
+### Corrigé
+- Les vérifications s'arrêtaient dès qu'une correction était affichée : la
+  migration des offsets écrasait le repère qui sert à éviter les requêtes en
+  double, si bien que plus aucune analyse ne partait tant que le champ n'était
+  pas vidé. C'est la cause principale du symptôme « ça marche, puis ça ne
+  marche plus ».
+- Les appels à l'API ont désormais un délai maximal de 30 secondes. Sans lui,
+  une requête acceptée mais jamais servie laissait le badge en chargement
+  pendant plusieurs minutes.
+- Thunderbird : les popups, notifications et annonces destinées aux lecteurs
+  d'écran sont retirées du corps du message avant l'envoi. Un envoi effectué
+  pendant qu'une popup était ouverte expédiait son contenu au destinataire.
+- Thunderbird : après application d'une suggestion, le mot corrigé restait
+  souligné en rouge et la navigation entre erreurs ne répondait plus.
+- La reformulation passe par la chaîne d'événements attendue par les éditeurs
+  riches (Draft.js, Lexical, CKEditor, ProseMirror). La modification directe du
+  document laissait ces éditeurs désynchronisés, et le texte d'origine
+  réapparaissait au rendu suivant.
+- Les positions des soulignements sont recalculées selon le comportement réel
+  du moteur de rendu, mesuré plutôt que supposé : un paragraphe insère deux
+  sauts de ligne et non un. Sur un long courriel, l'écart accumulé faisait
+  disparaître les soulignements des derniers paragraphes.
+- Traduction dans Thunderbird : la sélection est transmise avec la demande, car
+  la fermeture du menu contextuel l'annulait parfois avant lecture.
+- L'injection dans les fenêtres de composition attend la fin du chargement au
+  lieu d'un délai fixe, trop court pour une réponse à un courriel volumineux.
+- Le bouton « Copier » de la traduction signale un échec au lieu d'annoncer une
+  copie qui n'a pas eu lieu.
+- Le pluriel de « lieu » est de nouveau « lieux ».
+- Les soulignements couvrent les mots à cheval sur plusieurs balises, par
+  exemple une portion en gras ou dans un lien.
+
+### Modifié
+- Les exemples des prompts envoyés au modèle contenaient des positions et des
+  longueurs fausses, ainsi qu'une règle sur « tout » adverbe que son propre
+  exemple contredisait. Ces exemples servent de référence au modèle : les
+  corriger améliore directement la qualité des suggestions.
+- Code partagé entre les trois cibles au lieu d'être dupliqué : notifications,
+  piège de focus, routage des messages, styles du badge, noms des langues et
+  calcul des positions.
+- Préférence de langue de traduction commune à Firefox et Thunderbird. La
+  valeur enregistrée sous l'ancien nom est reprise automatiquement.
+
+### Ajouté
+- Thunderbird : permission d'écriture dans le presse-papiers, nécessaire au
+  bouton « Copier » de la popup de traduction. La mise à jour demandera votre
+  accord.
+
 ## [0.5.2] - 2026-06-25
 
 ### Corrigé

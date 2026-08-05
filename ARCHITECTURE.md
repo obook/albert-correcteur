@@ -20,12 +20,13 @@ Chaque script de build assemble le code partagé avec le code spécifique :
 ```
 albert-correcteur/
   sources-commun/                                <- Code partagé (toutes les cibles)
-    service/                              <- Scripts de fond communs (5 fichiers)
+    service/                              <- Scripts de fond communs
       service-config.js                   <- Chargement de la configuration (clé, modèle, URL)
       service-langue.js                   <- Détection de langue locale (RGPD)
       service-prompts.js                  <- Chargement et construction des prompts
-      service-limites.js                  <- Cache des limites, alias /v1/models, usage /v1/me/usage
+      service-limites.js                  <- Cache des limites du compte (/v1/me/info)
       service-api.js                      <- Appels API + parseRateLimit429 + auto-fallback de modèle
+      service-dispatch.js                 <- Routage des messages reçus (check, translate, getLimits)
 
     verification/                         <- Logique partagée Firefox + Thunderbird
       rolling-window.js                   <- Classe Albert.RollingWindow (fenêtre glissante 60 s)
@@ -34,10 +35,16 @@ albert-correcteur/
       model-aliases.js                    <- Table canonique -> alias, DEFAULT_API_BASE
       personas.js                         <- Personas de reformulation
       inner-text.js                       <- Correspondance offsets innerText <-> nœuds texte
+      lang-names.js                       <- Noms affichables des langues (fr, en, es, de)
+      popup-focus.js                      <- Piège de focus des popups (RGAA)
+
+    notification/                         <- Messages temporaires
+      toast.js                            <- Toast partagé (icône seulement si ICON_URL défini)
 
     prompts/                              <- Prompts éditables (fichiers texte)
-      correction.txt                      <- Prompt Correcteur (placeholder {{LANG}})
-      reformulation.txt                   <- Prompt Reformuler (placeholder {{LANG}})
+      correction.txt                      <- Prompt Correcteur (medium et small)
+      correction-large.txt                <- Prompt Correcteur compact (modèle large)
+      reformulation.txt                   <- Prompt Reformuler ({{LANG}}, {{PERSONA_TONE}})
       traduction.txt                      <- Prompt Traduire ({{LANG_SOURCE}}, {{LANG_CIBLE}})
 
     icons/                                <- Icônes
@@ -46,6 +53,7 @@ albert-correcteur/
       icon-48/96/128.png                  <- PNG pour le manifest (AMO)
 
     css/                                  <- Styles partagés
+      badge-base.css                      <- Badge : états et animation, hors positionnement
       overlay.css                         <- Soulignements (spelling, grammar, style)
       popup-dark.css                      <- Popup thème sombre
       popup-light.css                     <- Popup thème clair
@@ -79,16 +87,13 @@ albert-correcteur/
       albert-badge.js                     <- Badge (icône dans le coin des champs, ARIA)
       albert-render-arialive.js           <- Zone aria-live, annonces, clearCorrections
       albert-render-overlay.js            <- Overlay transparent, scroll sync, soulignements
-      albert-render.js                    <- Orchestration rendu + contenteditable simple
-
-    notification/                         <- Messages utilisateur
-      albert-toast.js                     <- Notifications temporaires
+      albert-render.js                    <- Orchestration du rendu et du badge
 
     demarrage/                            <- Initialisation
       albert-main.js                      <- Scan des champs, MutationObserver, IME, paste
 
     service/                              <- Scripts de fond spécifiques Firefox
-      service-menus.js                    <- Menus contextuels et dispatch des messages
+      service-menus.js                    <- Menus contextuels (le dispatch est partagé)
 
     popup-contenu/                        <- Popups injectées dans les pages web
       albert-popup-common.js              <- Thème, drag, close, positionnement
@@ -98,7 +103,7 @@ albert-correcteur/
       albert-popup-messages.js            <- Dispatch des messages du script de fond
 
     css/                                  <- Style spécifique Firefox
-      badge.css                           <- Badge (positionnement absolu, modale Bootstrap)
+      badge.css                           <- Badge : positionnement absolu, panne API, modale Bootstrap
 
   sources-thunderbird/                    <- Code spécifique Thunderbird
     manifest.json                         <- Manifeste Thunderbird (Manifest V2, compose_scripts)
@@ -114,7 +119,6 @@ albert-correcteur/
       compose-popup-traduction.js         <- Popup de traduction
       compose-popup-messages.js           <- Dispatch des messages du script de fond
       compose-apply.js                    <- Application des corrections dans le texte
-      compose-toast.js                    <- Notifications temporaires
       compose-limites.js                  <- Limites rpm/rpd, calcul debounce adaptatif
       compose-debounce.js                 <- Double debounce (timer court + timer max)
       compose-check.js                    <- triggerCheck
@@ -142,7 +146,7 @@ albert-correcteur/
     run-all.sh                            <- Lance toutes les suites
     test-*.js                             <- 20 suites, 301 tests
 
-  exemple/                                <- Pages de test
+  exemple/                                <- Pages de test (à servir en HTTP, voir plus bas)
     test.html                             <- Page de test multilingue + éditeurs React
     test-react-editors.js                 <- Simulation re-rendu React (Draft.js/Lexical)
   media/                                  <- Captures d'écran pour le README
@@ -193,8 +197,9 @@ Les 5 fichiers de `sources-commun/service/` sont communs aux deux extensions. Ch
 | 3 | `service-prompts.js` | `sources-commun/service/` | Chargement et construction des prompts |
 | 4 | `service-limites.js` | `sources-commun/service/` | Cache et récupération des limites du compte |
 | 5 | `service-api.js` | `sources-commun/service/` | Appels API (correction, reformulation, traduction) |
-| 6 | `service-menus.js` | Spécifique | Menus contextuels et dispatch des messages |
-| 7 | `service-compose-scripts.js` | Thunderbird seul | Gestion des compose scripts |
+| 6 | `service-dispatch.js` | `sources-commun/service/` | Routage des messages (check, translate, getLimits) |
+| 7 | `service-menus.js` | Spécifique | Menus contextuels |
+| 8 | `service-compose-scripts.js` | Thunderbird seul | Gestion des compose scripts |
 
 ### Flux de correction (Firefox)
 
@@ -233,8 +238,7 @@ Les 5 fichiers de `sources-commun/service/` sont communs aux deux extensions. Ch
          v
   affichage/albert-render.js (renderCorrections)
          |
-         +-- textarea/input/éditeur riche -> albert-render-overlay.js
-         +-- contenteditable simple -> albert-render.js (renderContentEditable)
+         +-- tous les champs -> albert-render-overlay.js (overlay transparent)
          +-- albert-render-arialive.js : annonce pour les lecteurs d'écran
          |
          v
@@ -430,26 +434,33 @@ Les content scripts partagent le namespace `window.Albert` et sont chargés dans
 
 | Ordre | Module | Dossier | Rôle |
 |-------|--------|---------|------|
-| 1 | `albert-state.js` | `etat/` | Constantes, état global, URLs des icônes |
-| 2 | `albert-utils.js` | `etat/` | Détection champs, éditeurs riches, dictionnaire |
-| 3 | `albert-badge.js` | `affichage/` | Création et positionnement du badge (ARIA) |
-| 4 | `albert-render-arialive.js` | `affichage/` | Zone aria-live, annonces, clearCorrections |
-| 5 | `albert-render-overlay.js` | `affichage/` | Overlay transparent, scroll sync, soulignements |
-| 6 | `albert-render.js` | `affichage/` | Orchestration rendu + contenteditable simple |
-| 7 | `albert-popup-common.js` | `popup-contenu/` | Thème, drag, close, positionnement, sélection |
-| 8 | `albert-popup-correction.js` | `popup-contenu/` | Popup de correction et navigation |
-| 9 | `albert-popup-reformulation.js` | `popup-contenu/` | Popup de reformulation |
-| 10 | `albert-popup-traduction.js` | `popup-contenu/` | Popup de traduction |
-| 11 | `albert-popup-messages.js` | `popup-contenu/` | Dispatch des messages du script de fond |
-| 12 | `inner-text.js` (commun) + `albert-apply-segments.js` | `util/`, `correction/` | Correspondance offsets innerText <-> nœuds texte |
-| 13 | `albert-apply-rich.js` | `correction/` | Éditeurs riches : sélection, événements, fallback |
-| 14 | `albert-apply.js` | `correction/` | Orchestration des corrections |
-| 15 | `albert-toast.js` | `notification/` | Notification toast |
-| 16 | `rolling-window.js` | `verification/` (commun) | Classe `Albert.RollingWindow` (fenêtre glissante 60 s) |
-| 17 | `albert-limites.js` | `verification/` | Limites rpm/rpd via `RollingWindow`, debounce adaptatif |
-| 18 | `albert-debounce.js` | `verification/` | Double debounce (timer court + timer max) |
-| 19 | `albert-check.js` | `verification/` | triggerCheck, cycleCheckAll |
-| 20 | `albert-main.js` | `demarrage/` | Scan des champs, MutationObserver, IME, paste |
+| 1 | `albert-state.js` | `etat/` | Constantes, état global, URL des icônes |
+| 2 | `albert-fields.js` | `etat/` | Détection des champs texte et des éditeurs riches |
+| 3 | `albert-paragraphes.js` | `etat/` | Découpage en paragraphes (vérification incrémentale) |
+| 4 | `albert-offsets.js` | `etat/` | Migration des offsets pendant la frappe |
+| 5 | `albert-utils.js` | `etat/` | État par champ, dictionnaire personnel, utilitaires |
+| 6 | `albert-badge.js` | `affichage/` | Création et positionnement du badge (ARIA) |
+| 7 | `lang-names.js` | `util/ (commun)` | Noms affichables des langues |
+| 8 | `albert-render-arialive.js` | `affichage/` | Zone aria-live, annonces, clearCorrections, detachField |
+| 9 | `albert-render-overlay.js` | `affichage/` | Overlay transparent, synchronisation du défilement, soulignements |
+| 10 | `albert-render.js` | `affichage/` | Orchestration du rendu et du badge |
+| 11 | `popup-focus.js` | `util/ (commun)` | Piège de focus des popups (RGAA) |
+| 12 | `albert-popup-common.js` | `popup-contenu/` | Thème, fermeture, sauvegarde de la sélection |
+| 13 | `albert-popup-layout.js` | `popup-contenu/` | Positionnement, déplacement et en-tête des popups |
+| 14 | `albert-popup-correction.js` | `popup-contenu/` | Popup de correction et navigation entre erreurs |
+| 15 | `albert-popup-reformulation.js` | `popup-contenu/` | Popup de reformulation |
+| 16 | `albert-popup-traduction.js` | `popup-contenu/` | Popup de traduction |
+| 17 | `albert-popup-messages.js` | `popup-contenu/` | Dispatch des messages du script de fond |
+| 18 | `inner-text.js` | `util/ (commun)` | Correspondance offsets innerText <-> nœuds texte |
+| 19 | `albert-apply-segments.js` | `correction/` | Recherche d'un nœud texte par offset |
+| 20 | `albert-apply-rich.js` | `correction/` | Éditeurs riches : sélection, événements, repli |
+| 21 | `albert-apply.js` | `correction/` | Orchestration des corrections |
+| 22 | `toast.js` | `notification/ (commun)` | Notification toast, partagée entre les cibles |
+| 23 | `rolling-window.js` | `verification/ (commun)` | Classe `Albert.RollingWindow` (fenêtre glissante 60 s) |
+| 24 | `albert-limites.js` | `verification/` | Limites rpm/rpd, debounce adaptatif |
+| 25 | `albert-debounce.js` | `verification/` | Double debounce (timer court + timer long) |
+| 26 | `albert-check.js` | `verification/` | triggerCheck, cycleCheckAll |
+| 27 | `albert-main.js` | `demarrage/` | Scan des champs, MutationObserver, IME, collage |
 
 ### Compose scripts (Thunderbird)
 
@@ -457,22 +468,26 @@ Thunderbird injecte les scripts dans la fenêtre de composition via `tabs.execut
 
 | Ordre | Module | Rôle |
 |-------|--------|------|
-| 1 | `compose-state.js` | Constantes, état global |
-| 2 | `compose-utils.js` | Utilitaires, détection du body compose |
-| 3 | `compose-badge.js` | Badge (icône dans le coin de l'éditeur) |
-| 4 | `compose-overlay.js` | Overlay transparent, soulignements |
-| 5 | `compose-render.js` | Orchestration du rendu des corrections |
-| 6 | `compose-popup-correction.js` | Popup de correction (suggestions) |
-| 7 | `compose-popup-reformulation.js` | Popup de reformulation |
-| 8 | `compose-popup-traduction.js` | Popup de traduction |
-| 9 | `compose-popup-messages.js` | Dispatch des messages du script de fond |
-| 10 | `compose-apply.js` | Application des corrections |
-| 11 | `compose-toast.js` | Notifications temporaires |
-| 12 | `rolling-window.js` (`verification/` commun) | Classe `Albert.RollingWindow` (fenêtre glissante 60 s) |
-| 13 | `compose-limites.js` | Limites rpm/rpd via `RollingWindow`, debounce adaptatif |
-| 14 | `compose-debounce.js` | Double debounce (timer court + timer max) |
-| 15 | `compose-check.js` | triggerCheck |
-| 16 | `compose-main.js` | Initialisation, MutationObserver, événements |
+| 1 | `compose-state.js` | Constantes, état global, journalisation |
+| 2 | `compose-utils.js` | Accès au corps du message, dictionnaire personnel, utilitaires |
+| 3 | `inner-text.js` | Correspondance offsets innerText <-> nœuds texte (commun) |
+| 4 | `lang-names.js` | Noms affichables des langues (commun) |
+| 5 | `toast.js` | Notification toast, partagée entre les cibles (commun) |
+| 6 | `compose-badge.js` | Badge (icône fixée dans le coin de l'éditeur) |
+| 7 | `compose-overlay.js` | Soulignements insérés dans le corps du message |
+| 8 | `compose-render.js` | Orchestration du rendu des corrections |
+| 9 | `popup-focus.js` | Piège de focus des popups, RGAA (commun) |
+| 10 | `compose-popup-utils.js` | Fermeture des popups, écouteurs globaux |
+| 11 | `compose-popup-correction.js` | Popup de correction (suggestions) |
+| 12 | `compose-popup-reformulation.js` | Popup de reformulation |
+| 13 | `compose-popup-traduction.js` | Popup de traduction |
+| 14 | `compose-popup-messages.js` | Dispatch des messages du script de fond |
+| 15 | `compose-apply.js` | Application des corrections |
+| 16 | `rolling-window.js` | Classe `Albert.RollingWindow`, fenêtre glissante 60 s (commun) |
+| 17 | `compose-limites.js` | Limites rpm/rpd, debounce adaptatif |
+| 18 | `compose-debounce.js` | Double debounce et annulation (cancelDebounce) |
+| 19 | `compose-check.js` | requestCheck |
+| 20 | `compose-main.js` | Initialisation, MutationObserver, événements |
 
 ### États du badge
 
@@ -506,3 +521,25 @@ Les deux scripts de build suivent le même principe :
 4. Créer le fichier `.xpi` (archive ZIP)
 
 Les fichiers spécifiques peuvent surcharger les fichiers partagés si nécessaire (par exemple, chaque extension a son propre `service-menus.js`).
+
+### Pages de test locales
+
+Les pages de `exemple/` doivent être servies en HTTP, et non ouvertes
+directement par un chemin de fichier :
+
+```bash
+cd exemple && python3 -m http.server 8765
+# puis http://localhost:8765/test.html
+```
+
+Le manifeste déclare `<all_urls>`, ce qui ne garantit pas l'injection des
+content scripts sur le protocole `file:` : selon la configuration de
+Firefox et le mode d'installation de l'extension (chargement temporaire
+via `about:debugging` ou XPI installé), la page locale peut rester sans
+badge alors que l'extension fonctionne normalement ailleurs. Servir la
+page en HTTP supprime cette variable et rend le test reproductible d'un
+poste à l'autre.
+
+Le badge n'apparaît qu'au premier focus dans un champ non vide : un
+chargement de page sans clic ne l'affiche jamais, quel que soit le
+protocole.
