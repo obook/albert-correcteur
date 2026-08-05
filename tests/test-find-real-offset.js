@@ -1,4 +1,11 @@
-/* Tests -- Recherche d'offset réel (findRealOffset). */
+/*
+ * test-find-real-offset.js
+ * Tests : Recherche d'offset réel (findRealOffset).
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 
 const assert = require("assert");
 
@@ -80,7 +87,7 @@ test("Mot dupliqué - choisit l'occurrence la plus proche de l'offset original",
   assert.strictEqual(findRealOffset(text, correction, text), 9);
 });
 
-test("Mot dupliqué - premier occurrence plus proche", () => {
+test("Mot dupliqué - première occurrence plus proche", () => {
   const text = "Le chat dort et le chat mange";
   const correction = { offset: 3, length: 4 }; /* le 1er "chat" */
   assert.strictEqual(findRealOffset(text, correction, text), 3);

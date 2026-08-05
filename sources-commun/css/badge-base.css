@@ -1,0 +1,106 @@
+/*
+ * badge-base.css - Apparence commune du badge Albert.
+ *
+ * États visuels du badge (chargement, erreurs détectées, aucune erreur,
+ * limite de débit atteinte) et animation du radar, identiques sur
+ * toutes les cibles.
+ *
+ * Le positionnement reste propre à chaque cible et vit dans son
+ * css/badge.css : absolu dans une page web, fixe dans la fenêtre de
+ * composition de Thunderbird. Firefox y ajoute aussi l'état de panne
+ * API et la gestion des modales Bootstrap.
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
+
+/* --- Icône Albert dans les champs texte --- */
+.albert-badge {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  z-index: 2147483646;
+  opacity: 0.35;
+  transition: opacity 0.15s;
+  border-radius: 4px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  padding: 0;
+}
+
+.albert-badge img {
+  width: 100%;
+  height: 100%;
+}
+
+.albert-badge:hover {
+  opacity: 1;
+}
+
+.albert-badge:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+.albert-badge.albert-loading {
+  opacity: 1 !important;
+  transition: none;
+  overflow: visible;
+}
+
+.albert-badge.albert-loading::before {
+  content: "";
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #3b82f6;
+  border-radius: 50%;
+  top: -3px;
+  left: 50%;
+  transform-origin: 50% calc(50% + 3px + 8px - 1.5px);
+  animation: albert-radar 1s linear infinite;
+  z-index: 2147483647;
+  box-shadow: none;
+}
+
+.albert-badge.albert-loading::after {
+  content: "";
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: #e53e3e;
+  border-radius: 50%;
+  bottom: -3px;
+  left: 50%;
+  transform-origin: 50% calc(-50% - 3px - 8px + 3px);
+  animation: albert-radar 1s linear infinite;
+  z-index: 2147483647;
+  box-shadow: none;
+}
+
+.albert-badge.albert-has-errors {
+  opacity: 0.35;
+}
+
+.albert-badge.albert-no-errors {
+  opacity: 0.35;
+}
+
+.albert-badge.albert-rate-limited {
+  opacity: 0.35;
+}
+
+.albert-badge.albert-rate-limited img {
+  filter: grayscale(1) opacity(0.5);
+}
+
+/* Rotation du radar de chargement, utilisée par les deux cibles. */
+@keyframes albert-radar {
+  0%   { transform: translateX(-50%) rotate(0deg); }
+  100% { transform: translateX(-50%) rotate(360deg); }
+}

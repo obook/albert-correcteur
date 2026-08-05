@@ -8,7 +8,7 @@
  * Les délais sont ajustés par compose-limites.js en fonction du rpm.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -16,6 +16,24 @@
 
 Albert.debounceTimer = null;
 Albert.debounceMaxTimer = null;
+
+/**
+ * Annule les deux temporisateurs de vérification en attente.
+ *
+ * Les identifiants de timer appartiennent à ce module : les effacer
+ * depuis un autre fichier revenait à toucher son état interne, au
+ * risque de supprimer une vérification programmée entre-temps.
+ */
+Albert.cancelDebounce = function () {
+  if (Albert.debounceTimer) {
+    clearTimeout(Albert.debounceTimer);
+    Albert.debounceTimer = null;
+  }
+  if (Albert.debounceMaxTimer) {
+    clearTimeout(Albert.debounceMaxTimer);
+    Albert.debounceMaxTimer = null;
+  }
+};
 
 Albert.scheduleCheck = function () {
   const text = Albert.getBodyText();

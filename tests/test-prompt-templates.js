@@ -1,4 +1,11 @@
-/* Tests -- Templates de prompts (chargement et substitution). */
+/*
+ * test-prompt-templates.js
+ * Tests : Templates de prompts (chargement et substitution).
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 
 const assert = require("assert");
 const fs = require("fs");

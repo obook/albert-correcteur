@@ -16,7 +16,7 @@
  *                               createPopupHeader)
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 

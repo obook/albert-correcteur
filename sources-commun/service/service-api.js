@@ -29,7 +29,7 @@
  *   - regles-locales.js     (findLocalCorrections, mergeCorrections)
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -167,7 +167,7 @@ async function checkText(text, mode, personaId) {
       }
     }
 
-    /* Coercer chaque suggestion en chaîne. Les petits modèles renvoient
+    /* Convertir chaque suggestion en chaîne. Les petits modèles renvoient
        parfois un objet (ex. { text: "..." }, { reformulation: "..." })
        au lieu d'une chaîne, ce qui produit "[object Object]" côté UI.
        On essaie d'abord les clés connues, puis on tombe sur la
@@ -189,7 +189,7 @@ async function checkText(text, mode, personaId) {
     };
 
     /* Filtrer les suggestions incorrectes */
-    const apiCorrections = (parsed.corrections || []).map((c) => {
+    const apiCorrections = parsed.corrections.map((c) => {
       if (Array.isArray(c.suggestions)) {
         c.suggestions = c.suggestions
           .map(coerceSuggestion)

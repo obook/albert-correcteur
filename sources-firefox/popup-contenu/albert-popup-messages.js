@@ -3,7 +3,7 @@
  *
  * Écoute les messages envoyés par le service worker (service-menus.js)
  * via browser.runtime.onMessage et les dispatche vers la bonne popup :
- *   - reformulateLoading  → toast "Reformulation en cours..."
+ *   - reformulateLoading  → toast « Reformulation en cours… »
  *   - reformulateResult   → showReformulationPopup()
  *   - translateGetSelection → showTranslationPopup()
  *
@@ -11,7 +11,7 @@
  * "Reformuler avec Albert" et "Traduire avec Albert".
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -28,7 +28,7 @@ browser.runtime.onMessage.addListener((message) => {
 
   if (message.type === "reformulateResult") {
     if (message.result.error) {
-      Albert.warn("reformulateResult avec erreur:", message.result.error);
+      Albert.warn("reformulateResult avec erreur :", message.result.error);
       Albert.showToast(message.result.error, 5000);
       return;
     }
@@ -36,9 +36,9 @@ browser.runtime.onMessage.addListener((message) => {
     Albert.log("reformulateResult OK,", suggestions.length, "suggestions",
       "savedSelection=" + (Albert.savedSelection ? Albert.savedSelection.type : "null"));
     if (!Albert.savedSelection) {
-      Albert.warn("reformulateResult: aucune selection sauvegardee \u2014 "
+      Albert.warn("reformulateResult : aucune s\u00e9lection sauvegard\u00e9e, "
         + "le clic sur une suggestion ne pourra pas remplacer le texte. "
-        + "L'evenement contextmenu n'a peut-etre pas ete capte dans cette frame.");
+        + "L'\u00e9v\u00e9nement contextmenu n'a peut-\u00eatre pas \u00e9t\u00e9 capt\u00e9 dans ce cadre.");
     }
     Albert.showReformulationPopup(message.originalText, suggestions, message.personaLabel);
   }

@@ -1,10 +1,17 @@
-/* Tests -- Recalibrage des offsets retournes par le LLM. */
+/*
+ * test-recalibrate-offsets.js
+ * Tests : Recalibrage des offsets retournés par le LLM.
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 
 const assert = require("assert");
 
 /**
  * Reproduit la logique de recalibrage dans service-api.js.
- * Corrige offset et length a partir du champ word si necessaire.
+ * Corrige offset et length à partir du champ word si nécessaire.
  */
 function recalibrateCorrections(corrections, text) {
   for (const c of corrections) {
@@ -54,7 +61,7 @@ console.log("Recalibrage des offsets LLM :");
 
 /* -- Offset et length corrects -- */
 
-test("Offset et length corrects --- aucun changement", () => {
+test("Offset et length corrects : aucun changement", () => {
   const c = [{ word: "pence", offset: 3, length: 5, suggestions: ["pense"] }];
   recalibrateCorrections(c, TEXT);
   assert.strictEqual(c[0].offset, 3);
@@ -63,37 +70,37 @@ test("Offset et length corrects --- aucun changement", () => {
 
 /* -- Length incorrect -- */
 
-test("Length trop grand --- corrige a la longueur du word", () => {
+test("Length trop grand : corrigé à la longueur du word", () => {
   const c = [{ word: "pence", offset: 3, length: 8, suggestions: ["pense"] }];
   recalibrateCorrections(c, TEXT);
   assert.strictEqual(c[0].offset, 3);
   assert.strictEqual(c[0].length, 5);
 });
 
-test("Length trop petit --- corrige a la longueur du word", () => {
+test("Length trop petit : corrigé à la longueur du word", () => {
   const c = [{ word: "ortographe", offset: 40, length: 7, suggestions: ["orthographe"] }];
   recalibrateCorrections(c, TEXT);
   assert.strictEqual(c[0].offset, 40);
   assert.strictEqual(c[0].length, 10);
 });
 
-/* -- Offset decale -- */
+/* -- Offset décalé -- */
 
-test("Offset decale de 1 --- recalcule a la bonne position", () => {
+test("Offset décalé de 1 : recalculé à la bonne position", () => {
   const c = [{ word: "pence", offset: 4, length: 5, suggestions: ["pense"] }];
   recalibrateCorrections(c, TEXT);
   assert.strictEqual(c[0].offset, 3);
   assert.strictEqual(c[0].length, 5);
 });
 
-test("Offset decale de 2 --- recalcule a la bonne position", () => {
+test("Offset décalé de 2 : recalculé à la bonne position", () => {
   const c = [{ word: "sa", offset: 15, length: 2, suggestions: ["ça"] }];
   recalibrateCorrections(c, TEXT);
   assert.strictEqual(c[0].offset, 13);
   assert.strictEqual(c[0].length, 2);
 });
 
-test("Offset a 0 pour mot plus loin --- recalcule", () => {
+test("Offset à 0 pour un mot plus loin : recalculé", () => {
   const c = [{ word: "detectées", offset: 0, length: 9, suggestions: ["détectées"] }];
   recalibrateCorrections(c, TEXT);
   assert.strictEqual(c[0].offset, 58);
@@ -102,7 +109,7 @@ test("Offset a 0 pour mot plus loin --- recalcule", () => {
 
 /* -- Offset et length tous les deux faux -- */
 
-test("Offset et length faux --- les deux sont corriges", () => {
+test("Offset et length faux : les deux sont corrigés", () => {
   const c = [{ word: "faute", offset: 30, length: 7, suggestions: ["fautes"] }];
   recalibrateCorrections(c, TEXT);
   assert.strictEqual(c[0].offset, 32);
@@ -111,7 +118,7 @@ test("Offset et length faux --- les deux sont corriges", () => {
 
 /* -- Word introuvable -- */
 
-test("Word introuvable --- offset et length inchanges", () => {
+test("Word introuvable : offset et length inchangés", () => {
   const c = [{ word: "inexistant", offset: 10, length: 10, suggestions: ["mot"] }];
   recalibrateCorrections(c, TEXT);
   assert.strictEqual(c[0].offset, 10);
@@ -120,7 +127,7 @@ test("Word introuvable --- offset et length inchanges", () => {
 
 /* -- Plusieurs corrections -- */
 
-test("Plusieurs corrections --- chacune recalibree independamment", () => {
+test("Plusieurs corrections : chacune recalibrée indépendamment", () => {
   const c = [
     { word: "pence", offset: 4, length: 5, suggestions: ["pense"] },
     { word: "ortographe", offset: 38, length: 7, suggestions: ["orthographe"] },
@@ -134,14 +141,14 @@ test("Plusieurs corrections --- chacune recalibree independamment", () => {
 
 /* -- Cas limites -- */
 
-test("Correction sans word --- ignoree", () => {
+test("Correction sans word : ignorée", () => {
   const c = [{ offset: 3, length: 5, suggestions: ["pense"] }];
   recalibrateCorrections(c, TEXT);
   assert.strictEqual(c[0].offset, 3);
   assert.strictEqual(c[0].length, 5);
 });
 
-test("Correction sans offset --- ignoree", () => {
+test("Correction sans offset : ignorée", () => {
   const c = [{ word: "pence", length: 5, suggestions: ["pense"] }];
   recalibrateCorrections(c, TEXT);
   assert.strictEqual(c[0].length, 5);

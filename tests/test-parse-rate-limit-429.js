@@ -1,57 +1,36 @@
-/* Tests -- Extraction du Retry-After et du type de limite depuis une réponse 429. */
+/*
+ * test-parse-rate-limit-429.js
+ * Tests : extraction du Retry-After, du type de limite et du message
+ * depuis une réponse 429 d'Albert.
+ *
+ * Le module de production est chargé et évalué tel quel, sans copie :
+ * une copie finit toujours par diverger, et c'est précisément ce qui
+ * s'était produit ici (les branches de limite journalière manquaient,
+ * si bien que le test validait un comportement que le code n'avait
+ * plus).
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 
 const assert = require("assert");
+const fs = require("fs");
+const path = require("path");
 
-/* -- Copie de la fonction à tester (depuis sources-commun/service/service-rate-limit.js, parseRateLimit429) --
-   Adaptée pour fonctionner sans l'objet fetch Response : on simule un
-   objet response minimal avec { headers: { get(name) -> string|null } }. */
+/* Le module s'exécute dans un service worker et n'exporte rien : on
+   l'évalue et on récupère les symboles nécessaires aux tests. */
+const source = fs.readFileSync(
+  path.join(__dirname, "..", "sources-commun", "service", "service-rate-limit.js"),
+  "utf8"
+);
+const { parseRateLimit429, secondsUntilNextUtcMidnight, DAILY_RETRY_CAP_S } =
+  new Function(
+    source
+    + "\nreturn { parseRateLimit429, secondsUntilNextUtcMidnight, DAILY_RETRY_CAP_S };"
+  )();
 
-function parseRateLimit429(response, detail) {
-  const headerValue = parseInt(response.headers.get("Retry-After"), 10);
-  let retryAfter = headerValue > 0 ? headerValue : 0;
-
-  let limitType = "";
-  let bodyMessage = "";
-  try {
-    const err = JSON.parse(detail);
-    bodyMessage = (err.detail || err.message || "").toString();
-    if (!retryAfter && typeof err.retry_after === "number"
-      && err.retry_after > 0) {
-      retryAfter = Math.ceil(err.retry_after);
-    }
-  } catch {
-    bodyMessage = detail || "";
-  }
-
-  const lower = bodyMessage.toLowerCase();
-  if (lower.includes("rpm") || lower.includes("requests per minute")) {
-    limitType = "requêtes/minute (rpm)";
-  } else if (lower.includes("rpd") || lower.includes("requests per day")) {
-    limitType = "requêtes/jour (rpd)";
-  } else if (lower.includes("tpm") || lower.includes("tokens per minute")) {
-    limitType = "tokens/minute (tpm)";
-  } else if (lower.includes("tpd") || lower.includes("tokens per day")) {
-    limitType = "tokens/jour (tpd)";
-  }
-
-  if (!retryAfter) {
-    const match = lower.match(
-      /(\d+)\s+(?:requests|tokens)\s+per\s+(minute|day)/
-    );
-    if (match) {
-      const limit = parseInt(match[1], 10);
-      const window = match[2] === "minute" ? 60 : 86400;
-      if (limit > 0) {
-        retryAfter = Math.min(window, Math.max(2, Math.ceil(window / limit)));
-      }
-    }
-  }
-
-  if (!retryAfter) retryAfter = 30;
-  return { retryAfter, limitType };
-}
-
-/* Helper : construit une fausse Response avec un en-tête Retry-After. */
+/* Construit une fausse Response avec un en-tête Retry-After. */
 function makeResponse(retryAfterHeader) {
   return {
     headers: {
@@ -62,8 +41,6 @@ function makeResponse(retryAfterHeader) {
     },
   };
 }
-
-/* -- Tests -- */
 
 let passed = 0;
 let failed = 0;
@@ -100,7 +77,7 @@ test("En-tête absent : retombée sur le calcul du corps", () => {
     detail: "Limit exceeded: 50 requests per minute",
   });
   const { retryAfter } = parseRateLimit429(response, detail);
-  /* 60 / 50 = 1.2 -> arrondi à 2 (plancher) */
+  /* 60 / 50 = 1,2 -> arrondi à 2 (plancher) */
   assert.strictEqual(retryAfter, 2);
 });
 
@@ -127,9 +104,9 @@ test("retry_after fractionnaire arrondi vers le haut", () => {
   assert.strictEqual(retryAfter, 5);
 });
 
-/* --- Source 3 : calcul depuis le message --- */
+/* --- Source 3 : calcul depuis le message, limite à la minute --- */
 
-test("Calcul depuis 'requests per minute'", () => {
+test("Calcul depuis « requests per minute »", () => {
   const response = makeResponse(null);
   const detail = JSON.stringify({
     detail: "Limit exceeded: 10 requests per minute",
@@ -139,17 +116,7 @@ test("Calcul depuis 'requests per minute'", () => {
   assert.strictEqual(retryAfter, 6);
 });
 
-test("Calcul depuis 'requests per day' (très grand)", () => {
-  const response = makeResponse(null);
-  const detail = JSON.stringify({
-    detail: "Limit exceeded: 1000 requests per day",
-  });
-  const { retryAfter } = parseRateLimit429(response, detail);
-  /* 86400 / 1000 = 86.4 -> 87 */
-  assert.strictEqual(retryAfter, 87);
-});
-
-test("Calcul depuis 'tokens per minute'", () => {
+test("Calcul depuis « tokens per minute »", () => {
   const response = makeResponse(null);
   const detail = JSON.stringify({
     detail: "Limit exceeded: 30 tokens per minute",
@@ -165,13 +132,44 @@ test("Plancher de 2 secondes appliqué (limite très élevée)", () => {
     detail: "Limit exceeded: 1000 requests per minute",
   });
   const { retryAfter } = parseRateLimit429(response, detail);
-  /* 60 / 1000 = 0.06 -> plancher 2 */
+  /* 60 / 1000 = 0,06 -> plancher 2 */
   assert.strictEqual(retryAfter, 2);
+});
+
+/* --- Source 4 : limite journalière, alignée sur minuit UTC --- */
+
+test("Limite journalière : délai jusqu'à minuit UTC, plafonné", () => {
+  const response = makeResponse(null);
+  const detail = JSON.stringify({
+    detail: "Limit exceeded: 1000 requests per day",
+  });
+  const { retryAfter } = parseRateLimit429(response, detail);
+  const attendu = Math.min(secondsUntilNextUtcMidnight(), DAILY_RETRY_CAP_S);
+  assert.strictEqual(retryAfter, attendu);
+  /* Le délai ne doit jamais provenir de la division 86400 / 1000. */
+  assert.notStrictEqual(retryAfter, 87);
+  assert.ok(retryAfter <= DAILY_RETRY_CAP_S,
+    `délai ${retryAfter}s au-delà du plafond ${DAILY_RETRY_CAP_S}s`);
+});
+
+test("Limite journalière en tokens : même traitement", () => {
+  const response = makeResponse(null);
+  const detail = JSON.stringify({ detail: "Limit: 100000 tokens per day" });
+  const { retryAfter } = parseRateLimit429(response, detail);
+  assert.ok(retryAfter <= DAILY_RETRY_CAP_S);
+  assert.ok(retryAfter >= 1);
+});
+
+test("Limite journalière : l'en-tête Retry-After reste prioritaire", () => {
+  const response = makeResponse("120");
+  const detail = JSON.stringify({ detail: "rpd exceeded" });
+  const { retryAfter } = parseRateLimit429(response, detail);
+  assert.strictEqual(retryAfter, 120);
 });
 
 /* --- Détection du type de limite --- */
 
-test("limitType : rpm depuis 'requests per minute'", () => {
+test("limitType : rpm depuis « requests per minute »", () => {
   const response = makeResponse("5");
   const detail = JSON.stringify({
     detail: "Limit exceeded: 50 requests per minute",
@@ -180,7 +178,7 @@ test("limitType : rpm depuis 'requests per minute'", () => {
   assert.strictEqual(limitType, "requêtes/minute (rpm)");
 });
 
-test("limitType : rpd depuis 'requests per day'", () => {
+test("limitType : rpd depuis « requests per day »", () => {
   const response = makeResponse("5");
   const detail = JSON.stringify({
     detail: "Limit exceeded: 1000 requests per day",
@@ -189,25 +187,84 @@ test("limitType : rpd depuis 'requests per day'", () => {
   assert.strictEqual(limitType, "requêtes/jour (rpd)");
 });
 
-test("limitType : tpm depuis acronyme dans le message", () => {
+test("limitType : tpm depuis l'acronyme dans le message", () => {
   const response = makeResponse("5");
   const detail = JSON.stringify({ detail: "tpm exceeded" });
   const { limitType } = parseRateLimit429(response, detail);
   assert.strictEqual(limitType, "tokens/minute (tpm)");
 });
 
-test("limitType : tpd depuis 'tokens per day'", () => {
+test("limitType : tpd depuis « tokens per day »", () => {
   const response = makeResponse("5");
   const detail = JSON.stringify({ detail: "Limit: 100000 tokens per day" });
   const { limitType } = parseRateLimit429(response, detail);
   assert.strictEqual(limitType, "tokens/jour (tpd)");
 });
 
-test("limitType vide quand aucun motif reconnu", () => {
+test("limitType vide quand aucun motif n'est reconnu", () => {
   const response = makeResponse("5");
   const detail = JSON.stringify({ detail: "Some other error" });
   const { limitType } = parseRateLimit429(response, detail);
   assert.strictEqual(limitType, "");
+});
+
+/* --- Message affiché à l'utilisateur --- */
+
+test("Message : limite à la minute avec type identifié", () => {
+  const response = makeResponse("30");
+  const detail = JSON.stringify({
+    detail: "Limit exceeded: 50 requests per minute",
+  });
+  const { message } = parseRateLimit429(response, detail);
+  assert.strictEqual(message,
+    "Limite requêtes/minute (rpm) dépassée. Pause de 30s.");
+});
+
+test("Message : limite sans type identifié", () => {
+  const response = makeResponse("30");
+  const detail = JSON.stringify({ detail: "Some other error" });
+  const { message } = parseRateLimit429(response, detail);
+  assert.strictEqual(message, "Limite de débit dépassée. Pause de 30s.");
+});
+
+test("Message : quota journalier avec type identifié", () => {
+  const response = makeResponse(null);
+  const detail = JSON.stringify({ detail: "Limit: 1000 requests per day" });
+  const { message } = parseRateLimit429(response, detail);
+  assert.ok(message.startsWith("Quota requêtes/jour (rpd) épuisé."),
+    `message inattendu : ${message}`);
+  assert.ok(message.includes("minuit UTC"));
+});
+
+test("Message : marqueur rpd seul, message bien formé", () => {
+  const response = makeResponse(null);
+  const detail = JSON.stringify({ detail: "rpd" });
+  const { limitType, message } = parseRateLimit429(response, detail);
+  assert.strictEqual(limitType, "requêtes/jour (rpd)");
+  assert.ok(!message.includes("  "), `double espace dans : ${message}`);
+});
+
+test("Tout marqueur journalier produit un message bien formé", () => {
+  /* Invariant à préserver : les mêmes marqueurs pilotent isDailyLimit et
+     limitType, donc un quota journalier porte toujours un type et le
+     message ne peut pas se réduire à « Quota  épuisé. ». Ce test échoue
+     si un futur marqueur journalier est ajouté sans son libellé. */
+  const response = makeResponse(null);
+  const marqueurs = [
+    "rpd", "tpd", "requests per day", "tokens per day",
+    "RPD", "Limit exceeded: 1000 requests per day",
+  ];
+  for (const marqueur of marqueurs) {
+    const { message } = parseRateLimit429(
+      response, JSON.stringify({ detail: marqueur })
+    );
+    assert.ok(message.startsWith("Quota "),
+      `message non journalier pour « ${marqueur} » : ${message}`);
+    assert.ok(!message.includes("  "),
+      `double espace pour « ${marqueur} » : ${message}`);
+    assert.ok(!message.startsWith("Quota  "),
+      `type manquant pour « ${marqueur} » : ${message}`);
+  }
 });
 
 /* --- Filets de sécurité --- */
@@ -224,7 +281,7 @@ test("Corps non-JSON : pris comme texte brut pour limitType", () => {
   const detail = "Limit exceeded: 25 requests per minute";
   const { retryAfter, limitType } = parseRateLimit429(response, detail);
   assert.strictEqual(limitType, "requêtes/minute (rpm)");
-  /* 60 / 25 = 2.4 -> 3 */
+  /* 60 / 25 = 2,4 -> 3 */
   assert.strictEqual(retryAfter, 3);
 });
 
@@ -242,7 +299,7 @@ test("Champ message à la place de detail (variante)", () => {
   });
   const { limitType, retryAfter } = parseRateLimit429(response, detail);
   assert.strictEqual(limitType, "requêtes/minute (rpm)");
-  /* 60 / 100 = 0.6 -> plancher 2 */
+  /* 60 / 100 = 0,6 -> plancher 2 */
   assert.strictEqual(retryAfter, 2);
 });
 

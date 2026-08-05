@@ -1,55 +1,76 @@
-/* Tests -- Logique de selection du modele recommande et libelles. */
+/*
+ * test-model-selection.js
+ * Tests : choix de l'identifiant affiché pour un modèle, libellé du
+ * sélecteur et présélection du modèle recommandé.
+ *
+ * Les fonctions de production sont chargées depuis popup-models.js,
+ * jamais recopiées : la copie précédente avait divergé sur trois points
+ * à la fois (modèle recommandé, séparateur du libellé, résolution par
+ * alias qui n'existe plus), si bien que la suite validait un
+ * comportement que la popup n'avait plus.
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 
 const assert = require("assert");
+const fs = require("fs");
+const path = require("path");
 
-const RECOMMENDED_MODEL = "openweight-large";
+/* ---------------------------------------------------------------
+ * DOM minimal : popup-models.js récupère deux éléments et pose un
+ * écouteur au chargement. On fournit juste de quoi l'évaluer.
+ * --------------------------------------------------------------- */
 
-const MODEL_DESCRIPTIONS = {
-  "openweight-large": "Complexe (120B)",
-  "openweight-medium": "Modéré (24B)",
-  "openweight-small": "Simple (8B)",
-};
-
-/**
- * Reproduit la logique de modelLabel() dans popup-models.js.
- */
-function modelLabel(id, aliasToId, recommendedId) {
-  let desc = MODEL_DESCRIPTIONS[id];
-  if (!desc) {
-    for (const [alias, target] of Object.entries(aliasToId)) {
-      if (target === id && MODEL_DESCRIPTIONS[alias]) {
-        desc = MODEL_DESCRIPTIONS[alias];
-        break;
-      }
-    }
-  }
-  const parts = [id];
-  if (desc) parts.push(`\u2014 ${desc}`);
-  if (id === recommendedId) parts.push("(recommandé)");
-  return parts.join(" ");
+function elementFactice() {
+  return {
+    innerHTML: "",
+    addEventListener() {},
+    appendChild() {},
+  };
 }
 
-/**
- * Résout le modèle recommandé : id direct ou via alias.
- */
-function resolveRecommended(models, aliasToId) {
-  if (models.includes(RECOMMENDED_MODEL)) return RECOMMENDED_MODEL;
-  return aliasToId[RECOMMENDED_MODEL] || "";
+function chargerPopupModels() {
+  const racine = path.join(__dirname, "..", "sources-commun");
+  const alias = fs.readFileSync(
+    path.join(racine, "util", "model-aliases.js"), "utf8"
+  );
+  const models = fs.readFileSync(
+    path.join(racine, "popup-configuration", "popup-models.js"), "utf8"
+  );
+  const contexte = {
+    document: {
+      getElementById: () => elementFactice(),
+      createElement: () => elementFactice(),
+    },
+    browser: { storage: { local: { get: async () => ({}) } } },
+    showStatus: () => {},
+  };
+  const usine = new Function(
+    "document", "browser", "showStatus",
+    alias + "\n" + models
+    + "\nreturn { RECOMMENDED_MODEL, MODEL_DESCRIPTIONS, modelLabel,"
+    + " preferredIdFor };"
+  );
+  return usine(contexte.document, contexte.browser, contexte.showStatus);
 }
 
-/**
- * Reproduit la logique de selection dans popup-models.js.
- */
-function buildModelOptions(models, savedModel, aliasToId) {
-  const a2i = aliasToId || {};
-  const savedAvailable = savedModel && models.includes(savedModel);
-  const recommendedId = resolveRecommended(models, a2i);
-  return models.map((id) => ({
+const { RECOMMENDED_MODEL, MODEL_DESCRIPTIONS, modelLabel, preferredIdFor } =
+  chargerPopupModels();
+
+/* Reproduit les trois lignes de sélection de loadModels() : le modèle
+   enregistré s'il est disponible, sinon le recommandé s'il est présent. */
+function construireOptions(modeles, modeleEnregistre) {
+  const enregistreDisponible = modeleEnregistre
+    && modeles.includes(modeleEnregistre);
+  const recommande = modeles.includes(RECOMMENDED_MODEL)
+    ? RECOMMENDED_MODEL
+    : "";
+  return modeles.map((id) => ({
     id,
-    label: modelLabel(id, a2i, recommendedId),
-    selected: savedAvailable
-      ? id === savedModel
-      : id === recommendedId,
+    label: modelLabel(id, recommande),
+    selected: enregistreDisponible ? id === modeleEnregistre : id === recommande,
   }));
 }
 
@@ -59,172 +80,117 @@ let failed = 0;
 function test(name, fn) {
   try {
     fn();
-    console.log(`  \u2713 ${name}`);
+    console.log(`  ✓ ${name}`);
     passed++;
   } catch (e) {
-    console.log(`  \u2717 ${name}`);
+    console.log(`  ✗ ${name}`);
     console.log(`    ${e.message}`);
     failed++;
   }
 }
 
-console.log("Selection du modele recommande et libelles :");
+console.log("Sélection du modèle recommandé et libellés :");
 
-/* Modeles avec openweight-large comme id direct. */
-const MODELS_DIRECT = [
-  "mistralai/Ministral-3-8B-Instruct-2512",
-  "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-  "openai/gpt-oss-120b",
-  "openweight-large",
-  "openweight-small",
-];
+/* --- Garde-fou contre une nouvelle divergence test / production --- */
 
-/* Modeles reels de l'API : openweight-large est un alias. */
-const MODELS_API = [
-  "Qwen/Qwen3-Coder-30B-A3B-Instruct",
-  "mistralai/Ministral-3-8B-Instruct-2512",
-  "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-  "openai/gpt-oss-120b",
-];
-
-const ALIAS_API = {
-  "openweight-code": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
-  "openweight-small": "mistralai/Ministral-3-8B-Instruct-2512",
-  "openweight-medium": "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-  "albert-large": "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
-  "openweight-large": "openai/gpt-oss-120b",
-};
-
-/* -- Modele sauvegarde disponible -- */
-
-test("Modele sauvegarde disponible --- il est selectionne", () => {
-  const opts = buildModelOptions(MODELS_DIRECT, "openweight-small");
-  const selected = opts.filter((o) => o.selected);
-  assert.strictEqual(selected.length, 1);
-  assert.strictEqual(selected[0].id, "openweight-small");
+test("Le modèle recommandé est lu depuis la production", () => {
+  assert.ok(typeof RECOMMENDED_MODEL === "string" && RECOMMENDED_MODEL.length > 0);
+  assert.ok(RECOMMENDED_MODEL in MODEL_DESCRIPTIONS,
+    `le modèle recommandé « ${RECOMMENDED_MODEL} » n'a pas de description`);
 });
 
-test("Modele sauvegarde disponible --- le recommande n'est pas selectionne", () => {
-  const opts = buildModelOptions(MODELS_DIRECT, "openweight-small");
-  const rec = opts.find((o) => o.id === "openweight-large");
-  assert.strictEqual(rec.selected, false);
+/* --- Identifiant préféré pour une entrée de /v1/models --- */
+
+test("Alias documenté préféré à l'identifiant canonique", () => {
+  const entree = {
+    id: "openai/gpt-oss-120b",
+    aliases: ["openweight-large"],
+  };
+  assert.strictEqual(preferredIdFor(entree), "openweight-large");
 });
 
-/* -- Modele sauvegarde absent ou vide -- */
-
-test("Pas de modele sauvegarde --- le recommande est selectionne", () => {
-  const opts = buildModelOptions(MODELS_DIRECT, "");
-  const selected = opts.filter((o) => o.selected);
-  assert.strictEqual(selected.length, 1);
-  assert.strictEqual(selected[0].id, "openweight-large");
+test("Alias openweight non documenté accepté en repli", () => {
+  const entree = {
+    id: "editeur/modele-futur",
+    aliases: ["OpenWeight-Futur"],
+  };
+  assert.strictEqual(preferredIdFor(entree), "openweight-futur");
 });
 
-test("Modele sauvegarde inexistant --- le recommande est selectionne", () => {
-  const opts = buildModelOptions(MODELS_DIRECT, "modele-supprime");
-  const selected = opts.filter((o) => o.selected);
-  assert.strictEqual(selected.length, 1);
-  assert.strictEqual(selected[0].id, "openweight-large");
+test("Sans alias : l'identifiant canonique est conservé", () => {
+  const entree = { id: "editeur/modele-sans-alias" };
+  assert.strictEqual(preferredIdFor(entree), "editeur/modele-sans-alias");
 });
 
-/* -- Recommande absent de la liste -- */
-
-test("Recommande absent de la liste sans alias --- aucun modele preselectionne", () => {
-  const sansRec = MODELS_DIRECT.filter((m) => m !== "openweight-large");
-  const opts = buildModelOptions(sansRec, "");
-  const selected = opts.filter((o) => o.selected);
-  assert.strictEqual(selected.length, 0);
+test("Alias hors convention ignoré", () => {
+  const entree = { id: "editeur/modele", aliases: ["autre-nom"] };
+  assert.strictEqual(preferredIdFor(entree), "editeur/modele");
 });
 
-test("Recommande absent + sauvegarde disponible --- sauvegarde selectionne", () => {
-  const sansRec = MODELS_DIRECT.filter((m) => m !== "openweight-large");
-  const opts = buildModelOptions(sansRec, "openweight-small");
-  const selected = opts.filter((o) => o.selected);
-  assert.strictEqual(selected.length, 1);
-  assert.strictEqual(selected[0].id, "openweight-small");
-});
+/* --- Libellés --- */
 
-/* -- Resolution par alias (cas reel de l'API) -- */
-
-test("Recommande via alias --- gpt-oss-120b preselectionne", () => {
-  const opts = buildModelOptions(MODELS_API, "", ALIAS_API);
-  const selected = opts.filter((o) => o.selected);
-  assert.strictEqual(selected.length, 1);
-  assert.strictEqual(selected[0].id, "openai/gpt-oss-120b");
-});
-
-test("Recommande via alias + sauvegarde disponible --- sauvegarde prioritaire", () => {
-  const opts = buildModelOptions(MODELS_API, "mistralai/Mistral-Small-3.2-24B-Instruct-2506", ALIAS_API);
-  const selected = opts.filter((o) => o.selected);
-  assert.strictEqual(selected.length, 1);
-  assert.strictEqual(selected[0].id, "mistralai/Mistral-Small-3.2-24B-Instruct-2506");
-});
-
-test("Recommande via alias + sauvegarde absente --- recommande selectionne", () => {
-  const opts = buildModelOptions(MODELS_API, "modele-disparu", ALIAS_API);
-  const selected = opts.filter((o) => o.selected);
-  assert.strictEqual(selected.length, 1);
-  assert.strictEqual(selected[0].id, "openai/gpt-oss-120b");
-});
-
-/* -- Libelles avec descriptions -- */
-
-test("Modele recommande direct --- description + (recommandé)", () => {
-  const label = modelLabel("openweight-large", {}, "openweight-large");
-  assert.strictEqual(label, "openweight-large \u2014 Complexe (120B) (recommandé)");
-});
-
-test("Modele connu medium --- description sans suffixe", () => {
-  const label = modelLabel("openweight-medium", {}, "openweight-large");
-  assert.strictEqual(label, "openweight-medium \u2014 Modéré (24B)");
-});
-
-test("Modele connu small --- description", () => {
-  const label = modelLabel("openweight-small", {}, "openweight-large");
-  assert.strictEqual(label, "openweight-small \u2014 Simple (8B)");
-});
-
-test("Modele inconnu --- libelle brut", () => {
-  const label = modelLabel("mon-modele-custom", {}, "openweight-large");
-  assert.strictEqual(label, "mon-modele-custom");
-});
-
-/* -- Libelles via alias (cas reel) -- */
-
-test("Alias large resolu comme recommande --- description + (recommandé)", () => {
-  const recId = resolveRecommended(MODELS_API, ALIAS_API);
-  const label = modelLabel("openai/gpt-oss-120b", ALIAS_API, recId);
+test("Libellé : identifiant, description et mention recommandé", () => {
+  const label = modelLabel(RECOMMENDED_MODEL, RECOMMENDED_MODEL);
   assert.strictEqual(
     label,
-    "openai/gpt-oss-120b \u2014 Complexe (120B) (recommandé)"
+    `${RECOMMENDED_MODEL} - ${MODEL_DESCRIPTIONS[RECOMMENDED_MODEL]} (recommandé)`
   );
 });
 
-test("Alias medium --- description retrouvee", () => {
-  const label = modelLabel("mistralai/Mistral-Small-3.2-24B-Instruct-2506", ALIAS_API, "");
-  assert.strictEqual(
-    label,
-    "mistralai/Mistral-Small-3.2-24B-Instruct-2506 \u2014 Modéré (24B)"
-  );
+test("Libellé : séparateur en tiret simple, pas en tiret cadratin", () => {
+  const label = modelLabel("openweight-medium", RECOMMENDED_MODEL);
+  assert.ok(label.includes(" - "), `séparateur inattendu dans : ${label}`);
+  assert.ok(!label.includes("—"), `tiret cadratin dans : ${label}`);
 });
 
-test("Alias small --- description retrouvee", () => {
-  const label = modelLabel("mistralai/Ministral-3-8B-Instruct-2512", ALIAS_API, "");
-  assert.strictEqual(
-    label,
-    "mistralai/Ministral-3-8B-Instruct-2512 \u2014 Simple (8B)"
-  );
+test("Libellé : pas de mention recommandé pour les autres modèles", () => {
+  const label = modelLabel("openweight-small", RECOMMENDED_MODEL);
+  assert.ok(!label.includes("(recommandé)"));
 });
 
-test("Modele code sans description connue --- libelle brut", () => {
-  const label = modelLabel("Qwen/Qwen3-Coder-30B-A3B-Instruct", ALIAS_API, "");
-  assert.strictEqual(label, "Qwen/Qwen3-Coder-30B-A3B-Instruct");
+test("Libellé : identifiant brut si aucune description connue", () => {
+  const label = modelLabel("editeur/modele-inconnu", RECOMMENDED_MODEL);
+  assert.strictEqual(label, "editeur/modele-inconnu");
 });
 
-/* -- Cas limite : liste vide -- */
+/* --- Présélection dans le sélecteur --- */
 
-test("Liste vide --- aucune option", () => {
-  const opts = buildModelOptions([], "openweight-large");
-  assert.strictEqual(opts.length, 0);
+const MODELES = ["openweight-large", "openweight-medium", "openweight-small"];
+
+test("Modèle enregistré disponible : il est présélectionné", () => {
+  const options = construireOptions(MODELES, "openweight-medium");
+  const choisi = options.find((o) => o.selected);
+  assert.strictEqual(choisi.id, "openweight-medium");
+});
+
+test("Aucun modèle enregistré : le recommandé est présélectionné", () => {
+  const options = construireOptions(MODELES, "");
+  const choisi = options.find((o) => o.selected);
+  assert.strictEqual(choisi.id, RECOMMENDED_MODEL);
+});
+
+test("Modèle enregistré indisponible : repli sur le recommandé", () => {
+  const options = construireOptions(MODELES, "openweight-disparu");
+  const choisi = options.find((o) => o.selected);
+  assert.strictEqual(choisi.id, RECOMMENDED_MODEL);
+});
+
+test("Recommandé absent de la liste : aucune présélection", () => {
+  const modeles = ["openweight-medium", "openweight-small"];
+  const options = construireOptions(modeles, "");
+  assert.strictEqual(options.filter((o) => o.selected).length, 0);
+});
+
+test("Une seule option sélectionnée dans tous les cas", () => {
+  for (const enregistre of ["", "openweight-small", "inexistant"]) {
+    const options = construireOptions(MODELES, enregistre);
+    assert.ok(options.filter((o) => o.selected).length <= 1,
+      `plusieurs options sélectionnées pour « ${enregistre} »`);
+  }
+});
+
+test("Liste vide : aucune option", () => {
+  assert.strictEqual(construireOptions([], "").length, 0);
 });
 
 console.log(`\n${passed} passé(s), ${failed} échoué(s)`);

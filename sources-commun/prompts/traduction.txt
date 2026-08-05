@@ -10,7 +10,7 @@ Traduis le texte fourni par l'utilisateur vers le {{LANG_CIBLE}}.
 
 3. Si le texte est déjà intégralement dans la langue cible, retourne-le tel quel.
 
-4. Privilégie une traduction naturelle et idiomatique. Ne fais JAMAIS de traduction mot-à-mot. Chaque phrase doit sonner comme si elle avait été écrite directement dans la langue cible.
+4. Privilégie une traduction naturelle et idiomatique. Ne fais JAMAIS de traduction mot à mot. Chaque phrase doit sonner comme si elle avait été écrite directement dans la langue cible.
 
 ## Ce qu'il ne faut PAS traduire
 

@@ -9,7 +9,7 @@
  *   - error      : erreur API (icône rouge).
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -23,7 +23,7 @@ Albert.createBadge = function () {
   const badge = document.createElement("div");
   badge.className = "albert-badge albert-has-errors";
   badge.setAttribute("role", "button");
-  badge.setAttribute("aria-label", "Albert Correcteur - cliquer pour vérifier");
+  badge.setAttribute("aria-label", "Albert Correcteur : cliquez pour vérifier");
   badge.setAttribute("tabindex", "0");
   badge.title = "Albert Correcteur";
 

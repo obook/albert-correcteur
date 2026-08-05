@@ -12,7 +12,7 @@
  * le temps avant le prochain slot disponible.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -43,7 +43,10 @@ Albert.loadLimits = async function () {
   if (limits && limits.rpm) {
     const interval = Math.ceil(60000 / (limits.rpm * 0.4));
     Albert.DEBOUNCE_SHORT = Math.max(1500, interval);
-    Albert.DEBOUNCE_MAX = Albert.DEBOUNCE_SHORT * 2.5;
+    /* Plancher de 4 s aligné sur la version Firefox : sans lui, un compte
+       à rpm élevé ramène le timer long à 3750 ms, soit un comportement
+       différent entre les deux extensions sans raison. */
+    Albert.DEBOUNCE_MAX = Math.max(4000, Albert.DEBOUNCE_SHORT * 2.5);
     Albert.log("loadLimits : rpm=", limits.rpm, "→ DEBOUNCE_SHORT=", Albert.DEBOUNCE_SHORT, "ms, DEBOUNCE_MAX=", Albert.DEBOUNCE_MAX, "ms");
   } else {
     Albert.log("loadLimits : pas de limites retournées par le service worker (défauts conservés)");

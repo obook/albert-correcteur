@@ -22,7 +22,7 @@
  *     { retryAfter, limitType, message }.
  *
  * Auteur : O. Booklage
- * Date : Mai 2026
+ * Date : mai 2026
  * Licence : MIT
  */
 
@@ -67,7 +67,13 @@ function formatRateLimitMessage(limitType, retryAfter, isDailyLimit) {
     const reset = new Date(Date.now() + secondsUntilNextUtcMidnight() * 1000);
     const hh = reset.getHours().toString().padStart(2, "0");
     const mm = reset.getMinutes().toString().padStart(2, "0");
-    return `Quota ${limitType} épuisé. Réinitialisation à minuit UTC `
+    /* En l'état, une limite journalière détectée porte toujours un
+       limitType : les deux se déduisent des mêmes marqueurs. Le repli
+       protège le découplage voulu plus bas (isDailyLimit ne dépend pas
+       du libellé) : si les deux jeux de marqueurs divergent un jour, le
+       message reste lisible au lieu de devenir « Quota  épuisé. ». */
+    const quota = limitType || "journalier";
+    return `Quota ${quota} épuisé. Réinitialisation à minuit UTC `
       + `(≈ ${hh}:${mm} heure locale).`;
   }
   if (limitType) {

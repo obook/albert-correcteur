@@ -54,7 +54,7 @@ L'extension Albert Correcteur est en **conformité partielle** avec le RGAA 4.1 
 | Critère | Statut | Détail |
 |---------|--------|--------|
 | 7.1 Scripts compatibles technologies d'assistance | Conforme | `role="dialog"`, `aria-label`, `aria-live="polite"`, `aria-atomic` |
-| 7.3 Scripts accessibles au clavier | Conforme | Badge : Enter/Space. Popups : Tab/Shift+Tab/Escape. Navigation erreurs : boutons |
+| 7.3 Scripts accessibles au clavier | Conforme | Badge : Entrée/Espace. Popups : Tab/Maj+Tab/Échap. Navigation erreurs : boutons |
 
 ### Structure (thème 9)
 

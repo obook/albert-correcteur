@@ -15,7 +15,7 @@
  * (point d'entrée) en dernier.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -25,16 +25,18 @@ const COMPOSE_JS = [
   "compose/compose-state.js",
   "compose/compose-utils.js",
   "util/inner-text.js",
+  "util/lang-names.js",
+  "notification/toast.js",
   "compose/compose-badge.js",
   "compose/compose-overlay.js",
   "compose/compose-render.js",
+  "util/popup-focus.js",
   "compose/compose-popup-utils.js",
   "compose/compose-popup-correction.js",
   "compose/compose-popup-reformulation.js",
   "compose/compose-popup-traduction.js",
   "compose/compose-popup-messages.js",
   "compose/compose-apply.js",
-  "compose/compose-toast.js",
   "verification/rolling-window.js",
   "compose/compose-limites.js",
   "compose/compose-debounce.js",
@@ -43,6 +45,7 @@ const COMPOSE_JS = [
 ];
 
 const COMPOSE_CSS = [
+  "css/badge-base.css",
   "css/badge.css",
   "css/overlay.css",
   "css/popup-dark.css",
@@ -56,7 +59,7 @@ async function injectComposeScripts(tabId) {
   if (injectedTabs.has(tabId)) return;
   injectedTabs.add(tabId);
 
-  console.log("[Albert] Injection des scripts dans le compose tab", tabId);
+  AlbertLog.log("Injection des scripts dans l'onglet de composition", tabId);
 
   try {
     for (const file of COMPOSE_CSS) {
@@ -71,9 +74,9 @@ async function injectComposeScripts(tabId) {
         if (!e.message.includes("non-structured-clonable")) throw e;
       }
     }
-    console.log("[Albert] Scripts injectés avec succès dans tab", tabId);
+    AlbertLog.log("Scripts injectés dans l'onglet", tabId);
   } catch (err) {
-    console.error("[Albert] Erreur injection compose scripts :", err);
+    AlbertLog.error("Injection des compose scripts impossible :", err);
     injectedTabs.delete(tabId);
   }
 }

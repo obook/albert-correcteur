@@ -11,7 +11,7 @@
  * Contient également triggerManualCheck() pour le clic sur le badge.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -30,8 +30,7 @@ Albert.applySuggestion = function (correction, suggestion) {
       '[data-correction-index="' + correction.index + '"]'
     );
     if (marks.length > 0) {
-      /* Redonner le focus au body éditable avant la manipulation */
-      const body = Albert.getComposeBody();
+      /* Redonner le focus au corps éditable avant la manipulation */
       body.focus();
 
       const range = document.createRange();
@@ -128,7 +127,7 @@ Albert.triggerManualCheck = function () {
   if (state === "error") {
     const last = Albert.lastError;
     if (last && last.message) {
-      Albert.showToast("Dernière erreur : " + last.message + " - nouvelle tentative…");
+      Albert.showToast("Dernière erreur : " + last.message + ". Nouvelle tentative…");
     } else {
       Albert.showToast("Nouvelle tentative de vérification…");
     }

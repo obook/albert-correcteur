@@ -1,3 +1,11 @@
+/*
+ * test-debounce-rpm.js
+ * Tests unitaires.
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 /* Tests --- Calcul du debounce adaptatif depuis le rpm du compte. */
 
 const assert = require("assert");
@@ -43,14 +51,14 @@ console.log("Calcul du debounce adaptatif (updateDebounceFromRpm) :");
 
 /* --- Sans limites --- */
 
-test("Pas de limites --- valeurs par défaut inchangées", () => {
+test("Pas de limites : valeurs par défaut inchangées", () => {
   const A = createAlbert();
   A.updateDebounceFromRpm();
   assert.strictEqual(A.DEBOUNCE_MS, 3000);
   assert.strictEqual(A.MAX_DEBOUNCE_MS, 10000);
 });
 
-test("Limites sans rpm --- valeurs par défaut inchangées", () => {
+test("Limites sans rpm : valeurs par défaut inchangées", () => {
   const A = createAlbert();
   A.limits = { rpd: 1000 };
   A.updateDebounceFromRpm();
@@ -59,7 +67,7 @@ test("Limites sans rpm --- valeurs par défaut inchangées", () => {
 
 /* --- rpm 10 (compte limité) --- */
 
-test("rpm 10 --- debounce >= 3000ms", () => {
+test("rpm 10 : debounce >= 3000ms", () => {
   const A = createAlbert();
   A.limits = { rpm: 10 };
   A.updateDebounceFromRpm();
@@ -67,14 +75,14 @@ test("rpm 10 --- debounce >= 3000ms", () => {
   assert.ok(A.DEBOUNCE_MS <= 6000, `${A.DEBOUNCE_MS} devrait être <= 6000`);
 });
 
-test("rpm 10 --- max debounce = 3x debounce", () => {
+test("rpm 10 : max debounce = 3x debounce", () => {
   const A = createAlbert();
   A.limits = { rpm: 10 };
   A.updateDebounceFromRpm();
   assert.strictEqual(A.MAX_DEBOUNCE_MS, A.DEBOUNCE_MS * 3);
 });
 
-test("rpm 10 --- throttle debounce >= 6000ms", () => {
+test("rpm 10 : throttle debounce >= 6000ms", () => {
   const A = createAlbert();
   A.limits = { rpm: 10 };
   A.updateDebounceFromRpm();
@@ -83,7 +91,7 @@ test("rpm 10 --- throttle debounce >= 6000ms", () => {
 
 /* --- rpm 30 --- */
 
-test("rpm 30 --- debounce = 5000ms", () => {
+test("rpm 30 : debounce = 5000ms", () => {
   const A = createAlbert();
   A.limits = { rpm: 30 };
   A.updateDebounceFromRpm();
@@ -92,14 +100,14 @@ test("rpm 30 --- debounce = 5000ms", () => {
 
 /* --- rpm 60 --- */
 
-test("rpm 60 --- debounce = 2500ms", () => {
+test("rpm 60 : debounce = 2500ms", () => {
   const A = createAlbert();
   A.limits = { rpm: 60 };
   A.updateDebounceFromRpm();
   assert.strictEqual(A.DEBOUNCE_MS, 2500);
 });
 
-test("rpm 60 --- max debounce = 7500ms", () => {
+test("rpm 60 : max debounce = 7500ms", () => {
   const A = createAlbert();
   A.limits = { rpm: 60 };
   A.updateDebounceFromRpm();
@@ -108,21 +116,21 @@ test("rpm 60 --- max debounce = 7500ms", () => {
 
 /* --- rpm 100+ (compte premium) --- */
 
-test("rpm 100 --- debounce plafonné à 1500ms", () => {
+test("rpm 100 : debounce plafonné à 1500ms", () => {
   const A = createAlbert();
   A.limits = { rpm: 100 };
   A.updateDebounceFromRpm();
   assert.strictEqual(A.DEBOUNCE_MS, 1500);
 });
 
-test("rpm 100 --- max debounce plancher à 4500ms", () => {
+test("rpm 100 : max debounce plancher à 4500ms", () => {
   const A = createAlbert();
   A.limits = { rpm: 100 };
   A.updateDebounceFromRpm();
   assert.strictEqual(A.MAX_DEBOUNCE_MS, 4500);
 });
 
-test("rpm 200 --- debounce toujours 1500ms (plancher)", () => {
+test("rpm 200 : debounce toujours 1500ms (plancher)", () => {
   const A = createAlbert();
   A.limits = { rpm: 200 };
   A.updateDebounceFromRpm();
@@ -131,14 +139,14 @@ test("rpm 200 --- debounce toujours 1500ms (plancher)", () => {
 
 /* --- Throttle --- */
 
-test("rpm 100 --- throttle debounce >= 2x debounce", () => {
+test("rpm 100 : throttle debounce >= 2x debounce", () => {
   const A = createAlbert();
   A.limits = { rpm: 100 };
   A.updateDebounceFromRpm();
   assert.ok(A.THROTTLE_DEBOUNCE_MS >= A.DEBOUNCE_MS * 2);
 });
 
-test("rpm 100 --- throttle max debounce >= 15000ms", () => {
+test("rpm 100 : throttle max debounce >= 15000ms", () => {
   const A = createAlbert();
   A.limits = { rpm: 100 };
   A.updateDebounceFromRpm();

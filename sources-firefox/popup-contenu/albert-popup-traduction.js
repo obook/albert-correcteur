@@ -20,26 +20,32 @@
  *   - albert-toast.js         (showToast, pour les erreurs)
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
 "use strict";
 
-const TRANSLATE_LANGS = [
-  { code: "fr", label: "Français" },
-  { code: "en", label: "Anglais" },
-  { code: "es", label: "Espagnol" },
-  { code: "de", label: "Allemand" },
-];
+/* Langues proposées dans le sélecteur, dérivées de la table partagée
+   util/lang-names.js pour éviter une quatrième copie. */
+const TRANSLATE_LANGS = Object.entries(Albert.LANG_LABELS)
+  .map(([code, label]) => ({ code, label }));
 
-const LANG_LABELS = { fr: "Français", en: "Anglais", es: "Espagnol", de: "Allemand" };
-
-/* Dernière langue sélectionnée (persistée dans storage). */
-Albert.lastTranslateLang = "en";
-browser.storage.local.get("lastTranslateLang").then((r) => {
-  if (r.lastTranslateLang) Albert.lastTranslateLang = r.lastTranslateLang;
-});
+/* Dernière langue sélectionnée (persistée dans storage).
+   La clé est la même que côté Thunderbird pour que la préférence soit
+   commune aux deux extensions. lastTranslateLang est l'ancien nom,
+   relu une seule fois pour ne pas perdre le choix des utilisateurs
+   installés avant l'harmonisation. */
+Albert.lastTranslationLang = "en";
+browser.storage.local.get(["lastTranslationLang", "lastTranslateLang"])
+  .then((r) => {
+    const langue = r.lastTranslationLang || r.lastTranslateLang;
+    if (langue) Albert.lastTranslationLang = langue;
+    if (!r.lastTranslationLang && r.lastTranslateLang) {
+      browser.storage.local.set({ lastTranslationLang: r.lastTranslateLang });
+      browser.storage.local.remove("lastTranslateLang");
+    }
+  });
 
 /* Lance la traduction et met à jour la popup. */
 Albert.doTranslate = async function (originalText, targetLang, resultDiv, copyBtn, loadingMsg, langInfoEl) {
@@ -48,8 +54,8 @@ Albert.doTranslate = async function (originalText, targetLang, resultDiv, copyBt
   resultDiv.style.display = "none";
   copyBtn.style.display = "none";
 
-  Albert.lastTranslateLang = targetLang;
-  browser.storage.local.set({ lastTranslateLang: targetLang });
+  Albert.lastTranslationLang = targetLang;
+  browser.storage.local.set({ lastTranslationLang: targetLang });
 
   const response = await browser.runtime.sendMessage({
     type: "translate",
@@ -65,8 +71,8 @@ Albert.doTranslate = async function (originalText, targetLang, resultDiv, copyBt
 
   if (loadingMsg) loadingMsg.textContent = "";
   if (langInfoEl && response.langSource) {
-    const srcLabel = LANG_LABELS[response.langSource] || response.langSource;
-    const tgtLabel = LANG_LABELS[targetLang] || targetLang;
+    const srcLabel = Albert.nomLangue(response.langSource, true);
+    const tgtLabel = Albert.nomLangue(targetLang, true);
     langInfoEl.textContent = srcLabel + " → " + tgtLabel;
   }
   resultDiv.textContent = response.translation;
@@ -99,7 +105,7 @@ Albert.showTranslationPopup = function (originalText) {
     const opt = document.createElement("option");
     opt.value = l.code;
     opt.textContent = l.label;
-    if (l.code === Albert.lastTranslateLang) opt.selected = true;
+    if (l.code === Albert.lastTranslationLang) opt.selected = true;
     langSelect.appendChild(opt);
   });
   headerLeft.appendChild(langSelect);
@@ -174,5 +180,5 @@ Albert.showTranslationPopup = function (originalText) {
   });
 
   /* Traduction automatique à l'ouverture */
-  Albert.doTranslate(originalText, Albert.lastTranslateLang, resultDiv, copyBtn, loadingMsg, langInfoEl);
+  Albert.doTranslate(originalText, Albert.lastTranslationLang, resultDiv, copyBtn, loadingMsg, langInfoEl);
 };

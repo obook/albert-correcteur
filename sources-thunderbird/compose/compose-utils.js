@@ -6,23 +6,37 @@
  *   - getBodyText()             : texte brut du corps.
  *   - filterIgnoredCorrections() : filtre par dictionnaire personnel.
  *   - getPopupThemeClass()      : classe CSS du thème actif.
- *   - escapeHtml()              : échappement HTML.
  *   - findRealOffset()          : recherche d'un mot dans le texte.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
 "use strict";
 
+/**
+ * Renvoie l'élément éditable du message en cours de composition.
+ *
+ * Le compose script est injecté directement dans le document de
+ * l'éditeur : son corps est la zone éditable. L'accès passe malgré tout
+ * par cet accesseur, seul point à reprendre si Thunderbird venait à
+ * placer l'éditeur dans un cadre imbriqué, comme le font certaines
+ * versions en mode texte brut.
+ *
+ * @returns {HTMLElement} Corps du message.
+ */
 Albert.getComposeBody = function () {
   return document.body;
 };
 
+/**
+ * Renvoie le texte brut du message en cours de composition.
+ *
+ * @returns {string} Contenu textuel, tel que innerText le restitue.
+ */
 Albert.getBodyText = function () {
-  const body = Albert.getComposeBody();
-  return body ? body.innerText : "";
+  return Albert.getComposeBody().innerText;
 };
 
 Albert.filterIgnoredCorrections = function (corrections) {
@@ -34,12 +48,6 @@ Albert.filterIgnoredCorrections = function (corrections) {
 
 Albert.getPopupThemeClass = function () {
   return Albert.popupTheme === "light" ? "albert-theme-light" : "";
-};
-
-Albert.escapeHtml = function (str) {
-  const div = document.createElement("div");
-  div.appendChild(document.createTextNode(str));
-  return div.innerHTML;
 };
 
 Albert.findRealOffset = function (text, word, apiOffset) {

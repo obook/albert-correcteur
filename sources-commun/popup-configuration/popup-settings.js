@@ -8,9 +8,11 @@
  *     par le correcteur).
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
+
+"use strict";
 
 document.getElementById("back-btn").addEventListener("click", (e) => {
   e.preventDefault();

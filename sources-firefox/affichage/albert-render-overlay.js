@@ -23,7 +23,7 @@
  *   - albert-popup-correction.js (showPopup, au clic sur un span)
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 

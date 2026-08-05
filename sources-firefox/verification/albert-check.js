@@ -24,7 +24,7 @@
  *   - albert-render.js   (renderCorrections, clearCorrections)
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -53,9 +53,9 @@ Albert.clearBadgeApiError = function (el) {
   state.lastError = null;
   if (!state.badge) return;
   state.badge.classList.remove("albert-api-error");
-  state.badge.title = "Albert Correcteur - Cliquez pour vérifier";
+  state.badge.title = "Albert Correcteur : cliquez pour vérifier";
   state.badge.setAttribute(
-    "aria-label", "Albert Correcteur - Cliquez pour vérifier"
+    "aria-label", "Albert Correcteur : cliquez pour vérifier"
   );
 };
 

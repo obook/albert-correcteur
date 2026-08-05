@@ -1,3 +1,11 @@
+/*
+ * test-personas.js
+ * Tests unitaires.
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 /* Tests - Intégrité du catalogue de personas (util/personas.js). */
 
 const assert = require("assert");

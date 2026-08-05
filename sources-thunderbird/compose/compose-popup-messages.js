@@ -3,12 +3,12 @@
  *
  * Écoute les messages envoyés par le service worker (service-menus.js)
  * et les dispatche vers la bonne popup dans la fenêtre de composition :
- *   - reformulateLoading   → toast "Reformulation en cours..."
+ *   - reformulateLoading   → toast « Reformulation en cours… »
  *   - reformulateResult    → showReformulationPopup()
  *   - translateGetSelection → showTranslationPopup()
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 

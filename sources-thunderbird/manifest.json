@@ -49,6 +49,7 @@
       "service/service-rate-limit.js",
       "verification/regles-locales.js",
       "service/service-api.js",
+      "service/service-dispatch.js",
       "service/service-menus.js",
       "service/service-compose-scripts.js",
       "service/service-compose-cleanup.js"

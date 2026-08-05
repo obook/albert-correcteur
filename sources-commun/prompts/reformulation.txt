@@ -36,11 +36,11 @@ Retourne UNIQUEMENT le JSON. Pas de commentaire, pas d'explication, pas de texte
 
 Texte : "Le projet qui a été lancé par la direction qui souhaitait moderniser le système qui était devenu obsolète a finalement été abandonné."
 Réponse :
-{"corrections": [{"offset": 0, "length": 128, "message": "Phrase trop longue avec trois relatives imbriquées", "suggestions": ["La direction avait lancé ce projet pour moderniser un système devenu obsolète. Il a finalement été abandonné.", "Le projet de modernisation du système obsolète, lancé par la direction, a finalement été abandonné."], "type": "style"}]}
+{"corrections": [{"offset": 0, "length": 133, "message": "Phrase trop longue avec trois relatives imbriquées", "suggestions": ["La direction avait lancé ce projet pour moderniser un système devenu obsolète. Il a finalement été abandonné.", "Le projet de modernisation du système obsolète, lancé par la direction, a finalement été abandonné."], "type": "style"}]}
 
 Texte : "Le résultat a été obtenu par les chercheurs après de longues recherches. Les chercheurs ont publié le résultat dans une revue."
 Réponse :
-{"corrections": [{"offset": 0, "length": 129, "message": "Passif inutile et répétitions de « chercheurs » et « résultat »", "suggestions": ["Les chercheurs ont obtenu ce résultat après de longues recherches, puis l'ont publié dans une revue.", "Après de longues recherches, les chercheurs ont obtenu ce résultat et l'ont publié dans une revue."], "type": "style"}]}
+{"corrections": [{"offset": 0, "length": 126, "message": "Passif inutile et répétitions de « chercheurs » et « résultat »", "suggestions": ["Les chercheurs ont obtenu ce résultat après de longues recherches, puis l'ont publié dans une revue.", "Après de longues recherches, les chercheurs ont obtenu ce résultat et l'ont publié dans une revue."], "type": "style"}]}
 
 Texte : "Le soleil brille. Les oiseaux chantent. La journée s'annonce agréable."
 Réponse :

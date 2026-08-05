@@ -5,7 +5,7 @@
  * inférieur droit de chaque champ texte. Il indique visuellement
  * l'état de la correction :
  *   - Icône normale       : aucune erreur détectée.
- *   - Icône erreur (rouge): des corrections sont disponibles.
+ *   - Icône erreur (rouge) : des corrections sont disponibles.
  *   - Animation radar     : vérification en cours (albert-loading).
  *   - Encart ambre        : panne API persistante (albert-api-error).
  *                           Le tooltip indique la cause et invite
@@ -23,7 +23,7 @@
  *   - albert-check.js  (triggerCheck)
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -48,9 +48,9 @@ Albert.ensureBadge = function (el) {
 
   const badge = document.createElement("div");
   badge.className = "albert-badge albert-has-errors";
-  badge.title = "Albert Correcteur - Cliquez pour vérifier";
+  badge.title = "Albert Correcteur : cliquez pour vérifier";
   badge.setAttribute("role", "button");
-  badge.setAttribute("aria-label", "Albert Correcteur - Cliquez pour vérifier");
+  badge.setAttribute("aria-label", "Albert Correcteur : cliquez pour vérifier");
   badge.setAttribute("tabindex", "0");
 
   const img = document.createElement("img");

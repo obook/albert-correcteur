@@ -1,4 +1,11 @@
-/* Tests -- Pluralisation française (pluralForm de regles-locales.js). */
+/*
+ * test-pluriel.js
+ * Tests : Pluralisation française (pluralForm de regles-locales.js).
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 
 const assert = require("assert");
 const fs = require("fs");

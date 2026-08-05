@@ -1,4 +1,11 @@
-/* Tests -- Fusion des limites API (regroupement par type, valeur minimale). */
+/*
+ * test-merge-limits.js
+ * Tests : Fusion des limites API (regroupement par type, valeur minimale).
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 
 const assert = require("assert");
 

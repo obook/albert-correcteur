@@ -11,7 +11,7 @@
  * document.execCommand("insertText") pour préserver l'undo natif.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -89,7 +89,7 @@ Albert.showReformulationPopup = function (originalText, result, personaLabel) {
   const corrections = (result && result.corrections) || [];
 
   /* Calculer le nombre réel de boutons générés : un block sans
-     suggestion (peut arriver si la coercition côté worker a vidé le
+     suggestion (peut arriver si la conversion côté worker a vidé le
      tableau) ne doit pas masquer le message "aucune proposition". */
   let totalSuggestions = 0;
 
@@ -188,7 +188,7 @@ Albert.showReformulationPopup = function (originalText, result, personaLabel) {
 
 Albert.replaceSelection = function (text) {
   /* Restaurer la sélection d'origine dans le compose body : la popup
-     vient de la collapser en prenant le focus. Sans ce restauration,
+     vient de la collapser en prenant le focus. Sans cette restauration,
      execCommand("insertText") opère sur le bouton de la popup au lieu
      du corps du mail et l'insertion est silencieusement perdue. */
   const range = Albert.reformulationSavedRange;

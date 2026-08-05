@@ -25,7 +25,7 @@
  * une analyse contextuelle plus fine et restent à la charge du modèle.
  *
  * Auteur : O. Booklage
- * Date : Mai 2026
+ * Date : mai 2026
  * Licence : MIT
  */
 
@@ -37,7 +37,8 @@ const DETERMINANTS_PLURIELS = "les|mes|tes|ses|nos|vos|leurs|ces";
  * Liste de verbes après lesquels "sa" est presque toujours une erreur
  * pour "ça" (le possessif "sa" attend un nom, pas un verbe conjugué).
  * On reste sur des verbes très usuels pour éviter les faux positifs sur
- * des cas tordus ("sa varicelle" - pas matché car "va" colle "ricelle").
+ * des cas ambigus : « sa varicelle » n'est pas signalé, car « va » y est
+ * immédiatement suivi de « ricelle » et non d'une limite de mot.
  */
 const VERBES_APRES_CA = "va|vient|fait|marche|ira|fera|donne|reste|tient|tombe";
 
@@ -100,24 +101,24 @@ const EXCEPTIONS_AL_ALS = new Set([
  * orthographiques standard, ou null si le mot est déjà au pluriel ou
  * s'il sort du champ couvert (mot mixte avec apostrophe, etc.).
  *
- * @param {string} word - Forme singulier supposée.
+ * @param {string} word - Forme au singulier supposée.
  * @returns {string|null}
  */
 function pluralForm(word) {
   if (!word || !/^[a-zàâçéèêëîïôûùüÿ]+$/i.test(word)) return null;
-  // Mots se terminant par s, x, z : déjà au pluriel, invariables.
+  /* Mots se terminant par s, x, z : déjà au pluriel, invariables. */
   if (/[sxz]$/i.test(word)) return null;
   const lower = word.toLowerCase();
-  // -eau, -au -> +x (sauf exceptions au/aux).
+  /* -eau, -au -> +x (sauf exceptions au/aux). */
   if (/eau$/i.test(word)) return word + "x";
   if (/au$/i.test(word) && !EXCEPTIONS_AU_AUX.has(lower)) return word + "x";
-  // -eu -> +x (sauf bleu, pneu, émeu).
+  /* -eu -> +x (sauf bleu, pneu, émeu). */
   if (/eu$/i.test(word) && !EXCEPTIONS_EU_EUX.has(lower)) return word + "x";
-  // -al -> -aux (sauf bal, carnaval, chacal, festival, récital, régal).
+  /* -al -> -aux (sauf bal, carnaval, chacal, festival, récital, régal). */
   if (/al$/i.test(word) && !EXCEPTIONS_AL_ALS.has(lower)) {
     return word.slice(0, -2) + "aux";
   }
-  // Cas général.
+  /* Cas général. */
   return word + "s";
 }
 

@@ -1,4 +1,11 @@
-/* Tests -- Auto-fallback de modèle après 429 répétés. */
+/*
+ * test-auto-fallback.js
+ * Tests : Auto-fallback de modèle après 429 répétés.
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 
 const assert = require("assert");
 

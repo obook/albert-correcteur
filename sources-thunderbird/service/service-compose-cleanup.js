@@ -24,7 +24,7 @@
  * subsister isolés sur leur ligne.
  *
  * Auteur : O. Booklage
- * Date : Mai 2026
+ * Date : mai 2026
  * Licence : MIT
  */
 

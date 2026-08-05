@@ -1,3 +1,11 @@
+/*
+ * test-inner-text-segments.js
+ * Tests unitaires.
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 /* Tests -- Correspondance innerText <-> nœuds texte (inner-text.js).
  *
  * Les valeurs attendues ne sont pas déduites de la spécification : elles
@@ -173,7 +181,7 @@ test("Long courriel : le dernier paragraphe reste aligné", () => {
      d'une dizaine de paragraphes, findRealOffset ne compensait plus et
      les erreurs de fin de message n'étaient plus soulignées. */
   const contenus = [];
-  for (let i = 0; i < 12; i++) contenus.push("Paragraphe numero " + i);
+  for (let i = 0; i < 12; i++) contenus.push("Paragraphe numéro " + i);
   const segments = construireSegmentsInnerText(
     element("div", contenus.map((c) => element("p", [texte(c)])))
   );
@@ -181,7 +189,7 @@ test("Long courriel : le dernier paragraphe reste aligné", () => {
   const dernier = segments[segments.length - 1];
   assert.strictEqual(
     innerText.slice(dernier.start, dernier.end),
-    "Paragraphe numero 11"
+    "Paragraphe numéro 11"
   );
   /* Chaque paragraphe précédent occupe sa longueur plus deux sauts de ligne. */
   const attendu = contenus

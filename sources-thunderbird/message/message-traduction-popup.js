@@ -11,7 +11,7 @@
  * La traduction est lancée automatiquement à l'ouverture.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -34,7 +34,7 @@
   }
 
   async function doTranslate(targetLang) {
-    resultDiv.textContent = "Traduction en cours...";
+    resultDiv.textContent = "Traduction en cours…";
     langInfo.textContent = "";
     await browser.storage.local.set({ lastTranslationLang: targetLang });
 
@@ -49,8 +49,8 @@
         resultDiv.textContent = result.error;
       } else {
         resultDiv.textContent = result.translation;
-        const langNames = { fr: "français", en: "anglais", es: "espagnol", de: "allemand" };
-        langInfo.textContent = "Langue détectée : " + (langNames[result.langSource] || result.langSource);
+        langInfo.textContent = "Langue détectée : "
+          + Albert.nomLangue(result.langSource);
       }
     } catch (err) {
       resultDiv.textContent = "Erreur : " + err.message;

@@ -5,14 +5,14 @@
  * reformulation et traduction :
  *   - Thème : détection du thème (sombre, clair, système).
  *   - Fermeture : closePopup() avec restauration du focus.
- *   - Piège de focus : trapFocus() pour l'accessibilité RGAA
- *     (la navigation Tab reste dans la popup).
+ *   - Piège de focus et restauration : délégués à
+ *     util/popup-focus.js, partagé entre les cibles.
  *   - Fermeture par Échap ou clic en dehors de la popup.
  *   - Sauvegarde de la sélection avant le menu contextuel
  *     (nécessaire pour la reformulation et la traduction).
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -42,7 +42,6 @@ browser.storage.onChanged.addListener((changes) => {
 /* --- Fermeture --- */
 
 Albert.popupPosition = null;
-Albert._previousFocus = null;
 
 Albert.closePopup = function () {
   if (Albert.activePopup) {
@@ -55,46 +54,7 @@ Albert.closePopup = function () {
     Albert.activePopupIdx = -1;
     Albert.popupPosition = null;
   }
-  if (Albert._previousFocus && Albert._previousFocus.focus) {
-    Albert._previousFocus.focus();
-    Albert._previousFocus = null;
-  }
-};
-
-/* --- Focus trap (accessibilité RGAA) --- */
-
-Albert.trapFocus = function (popup) {
-  if (!Albert._previousFocus) {
-    const prev = document.activeElement;
-    Albert._previousFocus = (prev && prev !== document.body) ? prev : null;
-  }
-  const focusables = popup.querySelectorAll(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-  );
-  if (focusables.length === 0) return;
-  const first = focusables[0];
-  const last = focusables[focusables.length - 1];
-  first.focus();
-  popup._focusTrapHandler = function (e) {
-    if (e.key !== "Tab") return;
-    const current = popup.querySelectorAll(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    const f = current[0];
-    const l = current[current.length - 1];
-    if (e.shiftKey) {
-      if (document.activeElement === f) {
-        e.preventDefault();
-        l.focus();
-      }
-    } else {
-      if (document.activeElement === l) {
-        e.preventDefault();
-        f.focus();
-      }
-    }
-  };
-  popup.addEventListener("keydown", popup._focusTrapHandler);
+  Albert.restoreFocus();
 };
 
 /* --- Fermeture par Échap ou clic en dehors --- */

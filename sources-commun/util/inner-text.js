@@ -22,14 +22,14 @@
  * Concrètement, "<p>a</p><p>b</p>" donne "a\n\nb" et non "a\nb", et
  * "<p><br></p><p>texte</p>" donne "\n\n\ntexte". Compter un seul saut
  * de ligne par bloc décalait tous les offsets suivants, d'autant plus
- * que le texte comptait de paragraphes.
+ * fortement que le texte comptait de paragraphes.
  *
  * Utilisé par :
  *   - Firefox     : albert-apply-segments.js, albert-apply-rich.js
  *   - Thunderbird : compose-overlay.js
  *
  * Auteur : O. Booklage
- * Date : Août 2026
+ * Date : août 2026
  * Licence : MIT
  */
 

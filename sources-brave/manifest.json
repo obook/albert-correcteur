@@ -60,9 +60,11 @@
         "etat/albert-offsets.js",
         "etat/albert-utils.js",
         "affichage/albert-badge.js",
+        "util/lang-names.js",
         "affichage/albert-render-arialive.js",
         "affichage/albert-render-overlay.js",
         "affichage/albert-render.js",
+        "util/popup-focus.js",
         "popup-contenu/albert-popup-common.js",
         "popup-contenu/albert-popup-layout.js",
         "popup-contenu/albert-popup-correction.js",
@@ -73,7 +75,7 @@
         "correction/albert-apply-segments.js",
         "correction/albert-apply-rich.js",
         "correction/albert-apply.js",
-        "notification/albert-toast.js",
+        "notification/toast.js",
         "verification/rolling-window.js",
         "verification/albert-limites.js",
         "verification/albert-debounce.js",
@@ -81,6 +83,7 @@
         "demarrage/albert-main.js"
       ],
       "css": [
+        "css/badge-base.css",
         "css/badge.css",
         "css/overlay.css",
         "css/popup-dark.css",

@@ -19,7 +19,7 @@
  *   - dans popup.html et popup-settings.html via <script src="...">
  *
  * Auteur : O. Booklage
- * Date : Mai 2026
+ * Date : mai 2026
  * Licence : MIT
  */
 

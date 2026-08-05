@@ -13,7 +13,7 @@
  * via MutationObserver quand la popup est supprimée du DOM.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 

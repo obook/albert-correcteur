@@ -1,13 +1,13 @@
 /*
- * rolling-window.js - Compteur d'évènements sur une fenêtre glissante.
+ * rolling-window.js - Compteur d'événements sur une fenêtre glissante.
  *
  * Petite structure utilitaire pour suivre les requêtes (rpm) ou les
  * tokens (tpm) consommés sur les 60 dernières secondes. Inspirée de
  * la classe RollingWindow d'AlbertCode (Python), portée en JavaScript.
  *
  * API :
- *   - add(count = 1)            ajoute un évènement (1 requête, N tokens).
- *   - total()                   somme des évènements toujours dans la fenêtre.
+ *   - add(count = 1)            ajoute un événement (1 requête, N tokens).
+ *   - total()                   somme des événements toujours dans la fenêtre.
  *   - secondsUntilNextSlot()    secondes avant qu'un slot ne se libère.
  *   - reset()                   vide la fenêtre.
  *
@@ -23,7 +23,7 @@
  * (albert-state.js côté Firefox, compose-state.js côté Thunderbird).
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -40,7 +40,7 @@ Albert.RollingWindow = class RollingWindow {
   }
 
   /**
-   * Ajoute un évènement daté de maintenant.
+   * Ajoute un événement daté de maintenant.
    *
    * @param {number} count - Quantité (1 pour une requête, N pour tokens).
    */
@@ -49,7 +49,7 @@ Albert.RollingWindow = class RollingWindow {
   }
 
   /**
-   * Total des évènements toujours dans la fenêtre.
+   * Total des événements toujours dans la fenêtre.
    */
   total() {
     this._evict();
@@ -73,7 +73,7 @@ Albert.RollingWindow = class RollingWindow {
     this._events = [];
   }
 
-  /** Évince les évènements sortis de la fenêtre. */
+  /** Évince les événements sortis de la fenêtre. */
   _evict() {
     const cutoff = Date.now() - this._windowMs;
     while (this._events.length && this._events[0].ts < cutoff) {

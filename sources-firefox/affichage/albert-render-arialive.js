@@ -13,7 +13,7 @@
  *   - La zone utilise role="status" et aria-atomic="true".
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -52,8 +52,7 @@ Albert._ensureAriaLive = function () {
  */
 Albert._announceErrors = function (count, lang) {
   Albert._ensureAriaLive();
-  const langLabel =
-    { fr: "français", en: "anglais", es: "espagnol", de: "allemand" }[lang] || "";
+  const langLabel = Albert.nomLangue(lang);
   if (count === 0) {
     Albert._ariaLive.textContent =
       "Albert : aucune erreur détectée" + (langLabel ? ` (${langLabel})` : "");

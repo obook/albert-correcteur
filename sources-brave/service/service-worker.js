@@ -38,5 +38,6 @@ importScripts(
   "service-rate-limit.js",
   "../verification/regles-locales.js",
   "service-api.js",
+  "service-dispatch.js",
   "service-menus.js"
 );

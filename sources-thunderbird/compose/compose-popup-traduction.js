@@ -6,10 +6,12 @@
  * à l'ouverture, bouton "Copier".
  *
  * La dernière langue utilisée est mémorisée dans
- * Albert.lastTranslationLang (non persistée entre sessions).
+ * Albert.lastTranslationLang et persistée sous la clé de storage du
+ * même nom, partagée avec la popup de traduction en lecture de message
+ * et avec l'extension Firefox.
  *
  * Auteur : O. Booklage
- * Date : Avril 2026
+ * Date : avril 2026
  * Licence : MIT
  */
 
@@ -17,6 +19,11 @@
 
 Albert.translationPopup = null;
 Albert.lastTranslationLang = "en";
+
+/* Relire la préférence enregistrée au chargement du compose script. */
+browser.storage.local.get("lastTranslationLang").then((r) => {
+  if (r.lastTranslationLang) Albert.lastTranslationLang = r.lastTranslationLang;
+});
 
 Albert.closeTranslationPopup = function () {
   if (Albert.translationPopup) {
@@ -56,8 +63,7 @@ Albert.showTranslationPopup = function (text) {
   const langSelect = document.createElement("select");
   langSelect.className = "albert-popup-lang-select";
   langSelect.setAttribute("aria-label", "Langue cible");
-  const langs = { fr: "Français", en: "Anglais", es: "Espagnol", de: "Allemand" };
-  for (const [code, name] of Object.entries(langs)) {
+  for (const [code, name] of Object.entries(Albert.LANG_LABELS)) {
     const opt = document.createElement("option");
     opt.value = code;
     opt.textContent = name;
@@ -79,7 +85,7 @@ Albert.showTranslationPopup = function (text) {
 
   const resultDiv = document.createElement("div");
   resultDiv.className = "albert-popup-translation-result";
-  resultDiv.textContent = "Traduction en cours...";
+  resultDiv.textContent = "Traduction en cours…";
   popup.appendChild(resultDiv);
 
   const langInfo = document.createElement("div");
@@ -122,7 +128,8 @@ Albert.showTranslationPopup = function (text) {
 
   const doTranslate = async (targetLang) => {
     Albert.lastTranslationLang = targetLang;
-    resultDiv.textContent = "Traduction en cours...";
+    browser.storage.local.set({ lastTranslationLang: targetLang });
+    resultDiv.textContent = "Traduction en cours…";
     copyBtn.style.display = "none";
     const result = await browser.runtime.sendMessage({
       type: "translate",
@@ -134,8 +141,8 @@ Albert.showTranslationPopup = function (text) {
     } else {
       resultDiv.textContent = result.translation;
       resultDiv.setAttribute("lang", targetLang);
-      const langNames = { fr: "français", en: "anglais", es: "espagnol", de: "allemand" };
-      langInfo.textContent = "Langue détectée : " + (langNames[result.langSource] || result.langSource);
+      langInfo.textContent = "Langue détectée : "
+        + Albert.nomLangue(result.langSource);
       copyBtn.style.display = "";
     }
   };

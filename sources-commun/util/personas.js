@@ -31,7 +31,7 @@
  * prompt et d'example affiché en UI vient de chez lui.
  *
  * Auteur : O. Booklage
- * Date : Mai 2026
+ * Date : mai 2026
  * Licence : MIT
  */
 
@@ -76,7 +76,7 @@ const PERSONAS = [
   {
     id: "concis",
     label: "Concis et factuel",
-    description: "Notes courtes, comptes-rendus, mémos.",
+    description: "Notes courtes, comptes rendus, mémos.",
     tone: "Registre factuel et concis. Phrases courtes, voix active, pas de circonlocutions ni de formules de politesse étoffées. Aller à l'essentiel sans devenir sec : viser l'efficacité informative.",
     example: "Bonjour, point sur le projet en cours souhaité cette semaine. Proposer un créneau.",
   },

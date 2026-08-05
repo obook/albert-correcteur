@@ -1,4 +1,11 @@
-/* Tests -- Vérification des limites de débit (rate limiting). */
+/*
+ * test-rate-limit.js
+ * Tests : Vérification des limites de débit (rate limiting).
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
 
 const assert = require("assert");
 
@@ -133,7 +140,7 @@ test("rpd non atteint : OK", () => {
   assert.strictEqual(checkRateLimit(state), null);
 });
 
-test("Évènements expirés (>60 s) : éjectés", () => {
+test("Événements expirés (>60 s) : éjectés", () => {
   let now = 1000;
   const state = createState(() => now);
   state.limits = { rpm: 3, rpd: 100 };
@@ -178,7 +185,7 @@ test("Calcul du temps d'attente quand rpm atteint", () => {
   now += 30000;
   recordRequest(state);
   assert.strictEqual(checkRateLimit(state), "rpm");
-  /* L'évènement le plus ancien date de t=1000, fenêtre 60 s :
+  /* L'événement le plus ancien date de t=1000, fenêtre 60 s :
      il sortira dans 30 s. */
   const wait = Math.ceil(state.requestWindow.secondsUntilNextSlot());
   assert.strictEqual(wait, 30);
