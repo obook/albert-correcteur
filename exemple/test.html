@@ -105,7 +105,7 @@
   </style>
 </head>
 <body>
-  <button id="theme-toggle" onclick="document.body.classList.toggle('dark'); this.textContent = document.body.classList.contains('dark') ? 'Clair' : 'Sombre';">Sombre</button>
+  <button type="button" id="theme-toggle" onclick="document.body.classList.toggle('dark'); this.textContent = document.body.classList.contains('dark') ? 'Clair' : 'Sombre';">Sombre</button>
   <h1>Test Albert Correcteur</h1>
 
   <div class="section">
@@ -125,7 +125,7 @@
 
   <div class="section">
     <label>Contenteditable (FR)</label>
-    <div contenteditable="true">Je pence que sa va marcher. Les faute d'ortographe seront detectées.</div>
+    <div contenteditable="true" role="textbox" aria-label="Champ contenteditable (français)">Je pence que sa va marcher. Les faute d'ortographe seront detectées.</div>
   </div>
 
   <h1>Test champs EXCLUS (badge attendu : aucun)</h1>
@@ -149,7 +149,7 @@
     <textarea id="tiny-ta" class="tiny-textarea">Voici un texte avec une faute d'ortografe.</textarea>
 
     <label for="tiny-ce" style="margin-top: 10px;">&lt;div contenteditable&gt; trop petit (120×18px)</label>
-    <div id="tiny-ce" class="tiny-editable" contenteditable="true">Petit champ avec faute d'ortografe.</div>
+    <div id="tiny-ce" class="tiny-editable" contenteditable="true" role="textbox" aria-label="Champ contenteditable trop petit">Petit champ avec faute d'ortografe.</div>
 
     <p style="font-size: 13px; color: #e74c3c; margin: 20px 0 0;">Champs d'authentification (déjà exclus par isLoginField) :</p>
     <form autocomplete="on">
@@ -185,14 +185,14 @@
     <label>Draft.js (structure x.com)</label>
     <div class="DraftEditor-root">
       <div class="DraftEditor-editorContainer">
-        <div contenteditable="true" data-contents="true" role="textbox" class="draft-editor">Je suis contant de vous revoir. Cet exemple et fait pour tester l'extention Albert sur x.com.</div>
+        <div contenteditable="true" data-contents="true" role="textbox" aria-label="Editeur Draft.js (simulation x.com)" class="draft-editor">Je suis contant de vous revoir. Cet exemple et fait pour tester l'extention Albert sur x.com.</div>
       </div>
     </div>
   </div>
 
   <div class="section">
     <label>Lexical (successeur de Draft.js)</label>
-    <div data-lexical-editor="true" contenteditable="true" role="textbox" class="lexical-editor">Bonnjour a tous, je pence que sa va marcher avec Lexical.</div>
+    <div data-lexical-editor="true" contenteditable="true" role="textbox" aria-label="Editeur Lexical (simulation x.com)" class="lexical-editor">Bonnjour a tous, je pence que sa va marcher avec Lexical.</div>
   </div>
 
   <script src="test-react-editors.js"></script>

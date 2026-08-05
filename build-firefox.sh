@@ -8,7 +8,7 @@ COMMON_DIR="$SCRIPT_DIR/sources-commun"
 FIREFOX_DIR="$SCRIPT_DIR/sources-firefox"
 OUT_DIR="$SCRIPT_DIR/firefox-release"
 BUILD_DIR="$SCRIPT_DIR/.build-firefox"
-OUT="$OUT_DIR/albert-correcteur.xpi"
+OUT="$OUT_DIR/albert-correcteur-firefox.xpi"
 
 # Vérifier que les dossiers source existent
 if [ ! -d "$COMMON_DIR" ]; then
@@ -45,4 +45,4 @@ echo ""
 echo "Pour installer dans Firefox :"
 echo "  1. Ouvrir about:addons"
 echo "  2. Roue dentée -> Installer un module depuis un fichier..."
-echo "  3. Sélectionner albert-correcteur.xpi"
+echo "  3. Sélectionner albert-correcteur-firefox.xpi"

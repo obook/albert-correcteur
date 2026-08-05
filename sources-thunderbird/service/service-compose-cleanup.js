@@ -1,22 +1,27 @@
 /*
  * service-compose-cleanup.js - Nettoyage du courriel avant envoi.
  *
- * Le badge Albert et les soulignements d'erreurs sont injectés dans
- * le DOM du corps du message (document.body du compose). Sans cette
- * intervention, ils partiraient avec le courriel envoyé :
+ * Le badge Albert, les soulignements d'erreurs et la zone aria-live
+ * sont injectés dans le DOM du corps du message (document.body du
+ * compose). Sans cette intervention, ils partiraient avec le courriel
+ * envoyé :
  *   - le destinataire verrait le mot « Albert » (alt de l'image du
  *     badge) en fin de message ;
  *   - des balises <span class="albert-error"> resteraient autour
- *     des mots erronés non corrigés.
+ *     des mots erronés non corrigés ;
+ *   - le texte d'annonce aux lecteurs d'écran (« 1 erreur détectée. »)
+ *     issu du div.albert-aria-live apparaîtrait à la fin du message.
  *
  * Ce module écoute l'événement compose.onBeforeSend (déclenché juste
  * avant l'envoi) et retire :
  *   - le badge complet (div.albert-badge) ;
+ *   - la zone d'annonce aux lecteurs d'écran (div.albert-aria-live) ;
  *   - les spans de soulignement (span.albert-error), en conservant
  *     leur contenu textuel.
  *
  * Le nettoyage s'applique aussi à plainTextBody (mode texte brut),
- * où le mot « Albert » peut subsister isolé sur sa ligne.
+ * où le mot « Albert » et les lignes d'annonce d'erreurs peuvent
+ * subsister isolés sur leur ligne.
  *
  * Auteur : O. Booklage
  * Date : Mai 2026
@@ -25,8 +30,14 @@
 
 "use strict";
 
-/* Nettoie le HTML d'un courriel : retire le badge Albert et déballe
- * les spans de soulignement en conservant le texte qu'ils entourent.
+/* Repère une ligne d'annonce produite par compose-render.js, par
+ * exemple « Aucune erreur détectée. », « 1 erreur détectée. » ou
+ * « 3 erreurs détectées. ». */
+const REGEX_ANNONCE_ERREURS = /^(Aucune erreur détectée\.|\d+ erreurs? détectées?\.)$/;
+
+/* Nettoie le HTML d'un courriel : retire le badge Albert, la zone
+ * aria-live d'annonce, et déballe les spans de soulignement en
+ * conservant le texte qu'ils entourent.
  *
  * Si le HTML ne contient aucun marqueur Albert, il est renvoyé tel
  * quel pour éviter de re-sérialiser le document (préserve la fidélité
@@ -64,12 +75,18 @@ function nettoyerCorpsHtml(html) {
 
 /* Nettoie la version texte brut : supprime les lignes ne contenant
  * que le mot « Albert » (provenant du alt de l'image du badge lors
- * de la conversion HTML → texte effectuée par Thunderbird). */
+ * de la conversion HTML → texte effectuée par Thunderbird) ou une
+ * annonce d'erreurs produite par la zone aria-live. */
 function nettoyerCorpsTexte(texte) {
   if (!texte) return texte;
   return texte
     .split("\n")
-    .filter((ligne) => ligne.trim() !== "Albert")
+    .filter((ligne) => {
+      const ligneSimplifiee = ligne.trim();
+      if (ligneSimplifiee === "Albert") return false;
+      if (REGEX_ANNONCE_ERREURS.test(ligneSimplifiee)) return false;
+      return true;
+    })
     .join("\n");
 }
 

@@ -126,7 +126,17 @@
   100% { transform: translateX(-50%) rotate(360deg); }
 }
 
-/* Masquer les badges quand une modale Bootstrap est ouverte (EcoleDirecte) */
+/* Masquer les badges des champs d'arrière-plan quand une modale Bootstrap
+   est ouverte (EcoleDirecte), tout en conservant ceux qui se trouvent
+   à l'intérieur de la modale active (CKEditor du Cahier de texte, etc.).
+   On utilise visibility plutôt que display pour ne pas écraser le
+   display:flex / display:none posé en style inline par updateBadgeVisibility. */
 body.modal-open .albert-badge {
-  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+body.modal-open .modal.show .albert-badge,
+body.modal-open .modal.in .albert-badge {
+  visibility: visible !important;
+  pointer-events: auto !important;
 }

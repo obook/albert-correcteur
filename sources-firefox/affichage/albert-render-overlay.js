@@ -170,6 +170,23 @@ Albert.syncOverlayStyle = function (el, overlay) {
   props.forEach((p) => { overlay.style[p] = cs[p]; });
 
   /*
+   * Cas particulier des <input> mono-ligne : le contrôle rend toujours
+   * son texte sur une seule ligne qui défile horizontalement, quel que
+   * soit son white-space calculé (le plus souvent "normal"). Copier ce
+   * white-space sur l'overlay (un simple <div>) le ferait replier sur
+   * plusieurs lignes : les soulignements tomberaient au mauvais endroit
+   * et, faute de débordement horizontal, la synchro
+   * overlay.scrollLeft = el.scrollLeft deviendrait inopérante (le texte
+   * ne suivrait plus le défilement aux flèches gauche/droite).
+   * On force donc une ligne unique pour reproduire le rendu de l'input.
+   */
+  if (el.tagName === "INPUT") {
+    overlay.style.whiteSpace = "pre";
+    overlay.style.wordBreak = "normal";
+    overlay.style.overflowWrap = "normal";
+  }
+
+  /*
    * Éditeurs riches (CKEditor, etc.) : le contenu est dans des éléments
    * bloc (<p>, <div>) qui ont des marges verticales. L'overlay est du texte
    * plat sans ces marges, donc il commence plus haut que le texte réel.

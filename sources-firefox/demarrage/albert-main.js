@@ -153,6 +153,22 @@ Albert.attachField = function (el) {
     });
     state.resizeObserver.observe(el);
   }
+
+  /* Cas EcoleDirecte (CKEditor 5) et autres SPA : le contenteditable
+     est greffé dynamiquement après le clic de l'utilisateur, ou bien
+     son rect ne franchit le seuil isTextField qu'au moment du focus.
+     Quand attachField est appelé par notre listener focusin de secours,
+     l'événement focus natif est déjà passé sur l'élément ; le listener
+     ci-dessus ne se redéclenchera qu'au prochain focus, obligeant
+     l'utilisateur à cliquer ailleurs puis à revenir pour voir le badge.
+     Si l'élément est déjà actif au moment où on l'attache, on simule
+     manuellement le passage focus pour créer le badge immédiatement. */
+  if (document.activeElement === el && !state.focused) {
+    state.focused = true;
+    Albert.ensureBadge(el);
+    if (state.badge) Albert.positionBadge(el, state.badge);
+    Albert.scheduleCheck(el);
+  }
 };
 
 // ===============================================================

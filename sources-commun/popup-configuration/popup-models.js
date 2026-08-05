@@ -18,12 +18,12 @@
 
 "use strict";
 
-/* openweight-small : meilleur compromis pour un usage quotidien
-   (latence faible, quota tpd ample, qualité 94 % sur le corpus de
-   référence grâce aux regex locales et au prompt étoffé). Le large
-   reste préférable pour les textes longs et critiques mais sature
-   vite (quota tpd EXP de 1,28 M). */
-const RECOMMENDED_MODEL = "openweight-small";
+/* openweight-large : recommandé tant qu'une amélioration durable de la
+   détection sur medium et small n'est pas trouvée. Sur ces deux derniers
+   modèles, le prompt étoffé ne suffit pas à compenser les faiblesses
+   constatées en pratique ; le large reste fiable au prix d'un quota tpd
+   EXP plus serré (1,28 M). */
+const RECOMMENDED_MODEL = "openweight-large";
 
 const MODEL_DESCRIPTIONS = {
   "openweight-large": "Complexe (120B)",

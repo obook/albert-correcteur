@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Albert Correcteur",
-  "version": "0.3.0",
+  "version": "0.5.2",
   "description": "Extension de correction orthographique, grammaticale et de traduction pour Thunderbird, propulsée par l'API Albert (DINUM).",
   "author": "Olivier Booklage",
   "homepage_url": "https://forge.apps.education.fr/booklageolivier/albert-correcteur",
@@ -40,6 +40,7 @@
     "scripts": [
       "util/model-aliases.js",
       "util/personas.js",
+      "service/service-update.js",
       "service/service-config.js",
       "service/service-langue.js",
       "service/service-prompts.js",

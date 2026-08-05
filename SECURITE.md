@@ -1,6 +1,6 @@
 # Fiche de sécurité - Albert Correcteur
 
-**Date de mise à jour :** 2026-05-03
+**Date de mise à jour :** 2026-06-07
 **Référentiel :** Guide ANSSI de développement sécurisé
 
 ## Surface d'attaque
@@ -26,7 +26,7 @@
 
 ### Stockage
 
-- **Moteur :** `browser.storage.local` (chiffré par Firefox/Thunderbird)
+- **Moteur :** `browser.storage.local` (protégé par Firefox, Thunderbird ou Brave selon la cible)
 - **Données stockées :** clé API, URL du serveur, modèle, thème, mots ignorés, dernière langue de traduction
 - **Aucune donnée synchronisée** (`browser.storage.sync` non utilisé)
 
@@ -37,14 +37,16 @@
 | Injection de code (XSS) | Utilisation systématique de `textContent` et `document.createTextNode()`. Fonction `escapeHtml()` testée (7 cas). Aucun `innerHTML` sur des données utilisateur. Aucun `eval()` ni `Function()`. |
 | Réponse API malformée ou compromise | Validation structurelle des réponses JSON avant exploitation. Rejet avec message utilisateur si format inattendu. |
 | Interception réseau (MITM) | HTTPS imposé par le manifest. Clé API transmise via en-tête Authorization (pas dans l'URL). |
-| Extension malveillante tierce | Content Security Policy : `script-src 'self'; object-src 'none'`. Aucun script inline. |
-| Accès non autorisé aux données | Permissions minimales. Pas d'accès `<all_urls>` côté API. Stockage local chiffré par le navigateur. |
+| Extension malveillante tierce | Content Security Policy : `script-src 'self'` (`object-src 'none'` sous Firefox, `object-src 'self'` sous Brave). Aucun script inline. |
+| Accès non autorisé aux données | Permissions minimales. Pas d'accès `<all_urls>` côté API. Stockage local protégé par le navigateur. Sous Brave, seules les trois icônes SVG du badge sont déclarées dans `web_accessible_resources` (aucune donnée exposée). |
+| Détection de l'extension par les sites (fingerprinting) | Sous Brave, les ressources exposées utilisent `use_dynamic_url: true` : leur URL est un jeton tournant, ce qui empêche un site de sonder leur présence pour identifier l'utilisateur. |
 | Abus de l'API (rate limiting) | Détection du code HTTP 429, lecture du Retry-After dans l'en-tête HTTP et dans le corps de la réponse, fenêtre glissante 60 s (`Albert.RollingWindow`), auto-fallback de modèle après deux 429 consécutifs (large -> medium -> small pendant 60 s), affichage du délai et du type de limite (rpm/rpd/tpm/tpd) à l'utilisateur. |
 
 ## Politique CSP
 
 ```
-script-src 'self'; object-src 'none'
+script-src 'self'; object-src 'none'    (Firefox, Thunderbird)
+script-src 'self'; object-src 'self'     (Brave)
 ```
 
 - Interdit l'exécution de scripts inline et de scripts chargés depuis des domaines tiers
@@ -52,7 +54,7 @@ script-src 'self'; object-src 'none'
 
 ## Pratiques de développement
 
-- **Zéro dépendance externe** : aucun `npm install`, aucune bibliothèque tierce
+- **Zéro dépendance externe** : aucun `npm install`, aucune bibliothèque tierce. Sous Brave, l'accès à l'API `browser.*` repose sur un alias maison d'une ligne vers `chrome.*` (`sources-brave/lib/browser-shim.js`), pas sur une bibliothèque externe.
 - **Échappement systématique** : `textContent`, `createTextNode`, `escapeHtml()`
 - **Pas de code dynamique** : aucun `eval()`, `Function()`, `setTimeout(string)`
 - **Validation d'entrée** : vérification du type et de la structure des réponses API

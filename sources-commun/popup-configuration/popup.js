@@ -52,15 +52,29 @@ form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const apiKey = apiKeyInput.value.trim();
-  const model = modelSelect.value;
   const apiBase = apiBaseInput.value.trim() || DEFAULT_API_BASE;
 
   if (!apiKey) {
     showStatus("La clé API est obligatoire.", "err");
     return;
   }
+
+  let model = modelSelect.value;
+
+  /* Aucun modèle sélectionné (cas typique après changement de clé : la
+     liste chargée avec l'ancienne clé a échoué). Tenter un chargement
+     avec la clé saisie avant de renoncer, sinon la nouvelle clé ne
+     serait jamais enregistrée. */
   if (!model) {
-    showStatus("Sélectionnez un modèle.", "err");
+    await fetchModels();
+    model = modelSelect.value;
+  }
+
+  if (!model) {
+    showStatus(
+      "Impossible de charger les modèles avec cette clé. Vérifiez la clé API.",
+      "err"
+    );
     return;
   }
 

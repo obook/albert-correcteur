@@ -30,7 +30,12 @@ Albert.createBadge = function () {
   /* Utiliser la vraie icône du projet (identique à Firefox) */
   const img = document.createElement("img");
   img.src = browser.runtime.getURL("icons/icon-error.svg");
-  img.alt = "Albert";
+  /* alt vide : l'image est décorative (aria-label porté par le parent,
+   * aria-hidden sur l'image). Un alt non vide fuit dans le courriel
+   * envoyé : si le nettoyage onBeforeSend échoue ou n'est pas exécuté,
+   * Thunderbird sérialise l'image avec son alt et le destinataire voit
+   * « Albert » en fin de message. */
+  img.alt = "";
   img.setAttribute("aria-hidden", "true");
   badge.appendChild(img);
 

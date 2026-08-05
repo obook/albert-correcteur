@@ -37,6 +37,20 @@ Albert.renderCorrections = function (el) {
     Albert.renderOverlay(el, state);
   }
 
+  /* Greffe paresseuse du badge : si un cycle de vérification a abouti
+     sans que le champ ait jamais reçu d'événement focus dans notre
+     listener (autofocus HTML, focus programmatique d'un éditeur riche
+     déclenché avant l'installation des listeners, champ pré-rempli
+     jamais cliqué), le badge n'existe pas encore. Idem si le badge a
+     été détaché du DOM entre-temps (conteneur reconstruit, modale
+     fermée puis rouverte). On le (re)crée ici afin que l'utilisateur
+     voie l'icône dès que des corrections sont prêtes. */
+  if ((!state.badge || !document.contains(state.badge))
+    && Albert.isTextField(el)) {
+    state.badge = null;
+    Albert.ensureBadge(el);
+  }
+
   if (state.badge) {
     const hasErrors = state.corrections.length > 0;
     const langLabel = { fr: "FR", en: "EN", es: "ES", de: "DE" }[state.lang] || "";

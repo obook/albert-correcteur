@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
+  <title>Albert Correcteur - Configuration</title>
   <link rel="stylesheet" href="popup-theme.css">
   <link rel="stylesheet" href="popup.css">
   <script src="popup-theme.js"></script>
@@ -31,7 +32,7 @@
     <div id="status" class="status"></div>
   </form>
 
-  <details id="limits-section" class="limits-section" style="display: none;">
+  <details id="limits-section" class="limits-section" hidden>
     <summary>Limites du compte</summary>
     <div id="limits-info" class="limits-info"></div>
   </details>
@@ -45,6 +46,15 @@
   </div>
   <div class="credits">
     Développé par Olivier Booklage - <a href="https://forge.apps.education.fr/booklageolivier/albert-correcteur" target="_blank">forge.apps.education.fr</a>
+  </div>
+
+  <div class="donate">
+    <div class="donate-title">☕ Soutenir le développement</div>
+    <img src="qrcode.png" alt="QR code PayPal pour soutenir Albert Correcteur" class="donate-qr">
+    <p class="donate-help">
+      Albert Correcteur est un logiciel libre et gratuit. Si l'extension vous est utile,
+      vous pouvez scanner le QR code avec votre téléphone pour faire un don via PayPal.
+    </p>
   </div>
 
   <script src="../util/model-aliases.js"></script>

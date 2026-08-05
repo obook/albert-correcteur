@@ -70,6 +70,14 @@ Albert.isTextField = function (el) {
 
   if (!candidate) return false;
 
+  /* Éditeurs riches reconnus (CKEditor, TinyMCE, Quill, ProseMirror,
+     Draft.js, Lexical, Element/Matrix) : la classe ou l'attribut
+     signature suffit, on n'applique pas le seuil de taille. Sinon
+     un composer Tchap vide (hauteur ~24 px) ou un éditeur CKEditor
+     dans une modale fermée serait écarté à tort, et ne serait jamais
+     attaché même quand l'utilisateur commence à le remplir. */
+  if (el.isContentEditable && Albert.isRichEditor(el)) return true;
+
   /* Seuil visuel : un champ trop petit n'est pas destiné à du texte rédigé */
   const rect = el.getBoundingClientRect();
   if (rect.width < Albert.MIN_FIELD_WIDTH_PX) return false;

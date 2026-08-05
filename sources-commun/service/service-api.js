@@ -112,6 +112,10 @@ async function checkText(text, mode, personaId) {
         AlbertLog.warn("checkText:", mode, "429 (" + (limitType || "rate") + "), pause", retryAfter + "s");
         return { error: message, retryAfter };
       }
+      if (response.status === 401 || response.status === 403) {
+        AlbertLog.error("checkText:", mode, "API", response.status, "-", detail.slice(0, 500));
+        return { error: `Clé API invalide ou non autorisée (${response.status}). Cliquez sur l'icône Albert pour vérifier la clé.` };
+      }
       AlbertLog.error("checkText:", mode, "API", response.status, "-", detail.slice(0, 500));
       return { error: `Erreur API (${response.status}). Voir la console du service worker pour le détail.` };
     }
@@ -267,6 +271,10 @@ async function translateText(text, targetLang) {
         const { retryAfter, limitType, message } = parseRateLimit429(response, detail);
         AlbertLog.warn("translateText: 429 (" + (limitType || "rate") + "), pause", retryAfter + "s");
         return { error: message, retryAfter };
+      }
+      if (response.status === 401 || response.status === 403) {
+        AlbertLog.error("translateText: API", response.status, "-", detail.slice(0, 500));
+        return { error: `Clé API invalide ou non autorisée (${response.status}). Cliquez sur l'icône Albert pour vérifier la clé.` };
       }
       AlbertLog.error("translateText: API", response.status, "-", detail.slice(0, 500));
       return { error: `Erreur API (${response.status}). Voir la console du service worker pour le détail.` };

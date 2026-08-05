@@ -33,7 +33,17 @@ classés en lots indépendants, exécutables dans l'ordre proposé.
 
 Chaque tâche indique les fichiers, l'action précise et le critère de
 validation. Après chaque lot : `bash tests/run-all.sh`, puis
-`./build-firefox.sh` et `./build-thunderbird.sh` doivent passer.
+`./build-firefox.sh`, `./build-thunderbird.sh` et `./build-brave.sh`
+doivent passer.
+
+Contrainte transverse depuis l'arrivée de la cible Brave : le build Brave
+réassemble `sources-commun/` et `sources-firefox/` sous un manifest MV3
+propre (`sources-brave/manifest.json`) et un service worker à
+`importScripts` (`sources-brave/service/service-worker.js`). Ces deux
+listes de scripts sont des copies de celles de Firefox : toute tâche qui
+ajoute, supprime ou déplace un fichier chargé (notamment le lot 4) doit
+être répercutée dans les deux fichiers Brave, sous peine de casser cette
+cible en silence.
 
 ### LOT 1, bugs fonctionnels (à faire en premier)
 
@@ -97,12 +107,13 @@ sinon relecture croisée ; `tests/test-prompt-templates.js` doit passer.
 
 ### LOT 3, tests divergents et chaîne de build
 
-**3.1 `tests/test-model-selection.js:5`** déclare
-`RECOMMENDED_MODEL = "openweight-large"` alors que la production
-(`popup-models.js:26`) recommande `"openweight-small"` depuis la v0.3.0. Le
-libellé attendu utilise aussi un tiret cadratin que la production ne produit
-pas. Vérifié : divergence réelle.
-Action : aligner la constante et les assertions sur la production.
+**3.1 `tests/test-model-selection.js`** : depuis la fusion de main
+(retour du modèle recommandé à `openweight-large`), la constante du test
+correspond de nouveau à la production. Il reste à vérifier l'assertion sur
+le libellé (le test attend un tiret cadratin, la production produit "- ")
+et à ajouter un garde-fou : le test doit lire la constante depuis
+`popup-models.js` plutôt que la dupliquer, pour que la prochaine bascule
+small/large ne les désynchronise pas encore une fois.
 
 **3.2 `tests/test-parse-rate-limit-429.js:38-51`** : la copie de
 `parseRateLimit429` omet les branches `isDailyLimit` de la production. Le
