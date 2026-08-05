@@ -125,8 +125,14 @@ Albert._trimSuggestion = function (suggestion, correction, fullText) {
 
 /* --- Application de la correction --- */
 
-/* Point d'entrée : applique une suggestion de correction dans le champ. */
-Albert.applySuggestion = function (el, correction, suggestion) {
+/*
+ * Point d'entrée : applique une suggestion de correction dans le champ.
+ *
+ * Asynchrone parce que l'insertion dans un éditeur riche est différée :
+ * attendre sa fin garantit que les offsets des corrections restantes sont
+ * recalculés sur le texte réellement modifié.
+ */
+Albert.applySuggestion = async function (el, correction, suggestion) {
   Albert.applyingCorrection = true;
   const tag = el.tagName.toLowerCase();
   const state = Albert.getOrCreateState(el);
@@ -138,28 +144,17 @@ Albert.applySuggestion = function (el, correction, suggestion) {
   if (tag === "textarea" || tag === "input") {
     if (!Albert._applyInTextarea(el, correction, suggestion, state)) return;
   } else if (el.isContentEditable) {
-    if (!Albert._applyInContentEditable(el, correction, suggestion, state)) return;
+    if (!await Albert._applyInContentEditable(el, correction, suggestion, state)) return;
   }
 
   /* Retirer la correction appliquée et ajuster les offsets des suivantes */
   Albert._updateRemainingCorrections(state, correction, suggestion);
 
-  /*
-   * Re-rendre l'overlay (avec délai pour les éditeurs riches,
-   * après la chaîne beforeinput → execCommand qui prend ~30ms)
-   */
-  if (el.isContentEditable && Albert.isRichEditor(el)) {
-    setTimeout(() => Albert.renderCorrections(el), 60);
-  } else {
-    Albert.renderCorrections(el);
-  }
+  /* Le texte est à jour dans tous les cas : re-rendre immédiatement. */
+  Albert.renderCorrections(el);
 
   /* Invalider le cache pour forcer une revérification */
   state.lastCheckedText = "";
-  /*
-   * Remettre le flag après un délai suffisant
-   * (couvre la chaîne complète : 30ms sélection + insertion + 60ms re-rendu)
-   */
   setTimeout(() => { Albert.applyingCorrection = false; }, 120);
   Albert.scheduleCheck(el);
 };
@@ -171,7 +166,7 @@ Albert._applyInTextarea = function (el, correction, suggestion, state) {
   const realOffset = Albert.findRealOffset(el.value, correction, state.checkedText || el.value);
   if (realOffset === -1) {
     Albert.applyingCorrection = false;
-    Albert.showToast("Correction impossible : le texte a changé.", 3);
+    Albert.showToast("Correction impossible : le texte a changé.", 3000);
     return false;
   }
   const wordLen = (correction.word || "").length || correction.length;
@@ -186,19 +181,19 @@ Albert._applyInTextarea = function (el, correction, suggestion, state) {
 };
 
 /* Contenteditable (simple ou riche) */
-Albert._applyInContentEditable = function (el, correction, suggestion, state) {
+Albert._applyInContentEditable = async function (el, correction, suggestion, state) {
   if (Albert.isRichEditor(el)) {
     /* Éditeur riche : via Selection + chaîne d'événements (albert-apply-rich.js) */
-    if (!Albert.applyViaSelection(el, correction, suggestion)) {
+    if (!await Albert.applyViaSelection(el, correction, suggestion)) {
       Albert.applyingCorrection = false;
-      Albert.showToast("Correction impossible : le texte a changé.", 3);
+      Albert.showToast("Correction impossible : le texte a changé.", 3000);
       return false;
     }
   } else {
     /* Contenteditable simple : Range + execCommand immédiat (pas de setTimeout) */
     if (!Albert._applyInSimpleContentEditable(el, correction, suggestion, state)) {
       Albert.applyingCorrection = false;
-      Albert.showToast("Correction impossible : le texte a changé.", 3);
+      Albert.showToast("Correction impossible : le texte a changé.", 3000);
       return false;
     }
   }

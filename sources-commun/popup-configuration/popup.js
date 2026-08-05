@@ -23,7 +23,8 @@
 
 "use strict";
 
-const DEFAULT_API_BASE = "https://albert.api.etalab.gouv.fr";
+/* DEFAULT_API_BASE est déclarée dans util/model-aliases.js, chargé
+   avant ce script dans popup.html. */
 
 const form = document.getElementById("config-form");
 const apiKeyInput = document.getElementById("api-key");

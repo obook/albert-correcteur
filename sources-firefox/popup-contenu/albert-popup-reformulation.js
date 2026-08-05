@@ -134,9 +134,17 @@ Albert.applyReformulation = function (originalText, replacement) {
 
   if (saved && saved.type === "input") {
     const el = saved.el;
-    const idx = el.value.indexOf(originalText, Math.max(0, saved.start - 10));
+    /* La position sauvegardée fait foi : un indexOf prioritaire
+       remplacerait la mauvaise occurrence quand le même texte apparaît
+       plusieurs fois dans le champ (formules de politesse, listes). */
+    let idx = saved.start;
+    if (el.value.slice(saved.start, saved.start + originalText.length) !== originalText) {
+      const trouve = el.value.indexOf(originalText, saved.start);
+      idx = (trouve !== -1) ? trouve : -1;
+    }
     if (idx !== -1) {
-      el.value = el.value.slice(0, idx) + replacement + el.value.slice(idx + originalText.length);
+      el.value = el.value.slice(0, idx) + replacement
+        + el.value.slice(idx + originalText.length);
       el.selectionStart = el.selectionEnd = idx + replacement.length;
     } else {
       el.value = el.value.slice(0, saved.start) + replacement + el.value.slice(saved.end);
@@ -145,13 +153,24 @@ Albert.applyReformulation = function (originalText, replacement) {
     el.focus();
     el.dispatchEvent(new Event("input", { bubbles: true }));
   } else if (saved && saved.type === "range") {
-    const range = saved.range;
+    const host = saved.host;
     const sel = window.getSelection();
+    if (host) host.focus();
     sel.removeAllRanges();
-    sel.addRange(range);
-    range.deleteContents();
-    range.insertNode(document.createTextNode(replacement));
-    sel.collapseToEnd();
+    sel.addRange(saved.range);
+    /* Passer par la chaîne d'événements complète (beforeinput,
+       textInput, execCommand, repli paste). Une manipulation DOM
+       directe laisse le modèle interne de Draft.js, Lexical, CKEditor
+       ou ProseMirror désynchronisé : l'éditeur restaure alors l'ancien
+       texte au rendu suivant. */
+    if (host) {
+      Albert._insertTextInEditor(host, replacement);
+    } else {
+      const range = saved.range;
+      range.deleteContents();
+      range.insertNode(document.createTextNode(replacement));
+      sel.collapseToEnd();
+    }
   }
 
   Albert.savedSelection = null;

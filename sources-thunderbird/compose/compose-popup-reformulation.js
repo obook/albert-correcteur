@@ -211,9 +211,7 @@ Albert.replaceSelection = function (text) {
   }
 };
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") Albert.closeReformulationPopup();
-});
+/* La fermeture par Échap est centralisée dans compose-popup-utils.js. */
 document.addEventListener("mousedown", (e) => {
   if (Albert.reformulationPopup && !Albert.reformulationPopup.contains(e.target)) {
     Albert.closeReformulationPopup();

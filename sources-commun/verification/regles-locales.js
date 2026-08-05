@@ -86,7 +86,10 @@ const REGLES_LOCALES = [
  * Source : Grevisse, règles standard.
  */
 const EXCEPTIONS_AU_AUX = new Set(["landau", "sarrau"]);
-const EXCEPTIONS_EU_EUX = new Set(["bleu", "pneu", "émeu", "lieu"]);
+/* « lieu » suit la règle générale et fait « lieux ». Seul le poisson du
+   même nom fait « lieus », un sens trop rare pour justifier de traiter
+   le mot en exception. */
+const EXCEPTIONS_EU_EUX = new Set(["bleu", "pneu", "émeu"]);
 const EXCEPTIONS_AL_ALS = new Set([
   "bal", "carnaval", "chacal", "festival",
   "récital", "régal", "cérémonial",
@@ -108,7 +111,7 @@ function pluralForm(word) {
   // -eau, -au -> +x (sauf exceptions au/aux).
   if (/eau$/i.test(word)) return word + "x";
   if (/au$/i.test(word) && !EXCEPTIONS_AU_AUX.has(lower)) return word + "x";
-  // -eu -> +x (sauf bleu, pneu, émeu, lieu).
+  // -eu -> +x (sauf bleu, pneu, émeu).
   if (/eu$/i.test(word) && !EXCEPTIONS_EU_EUX.has(lower)) return word + "x";
   // -al -> -aux (sauf bal, carnaval, chacal, festival, récital, régal).
   if (/al$/i.test(word) && !EXCEPTIONS_AL_ALS.has(lower)) {

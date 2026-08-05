@@ -38,7 +38,16 @@ async function loadPromptTemplate(name) {
   if (promptCache[name]) return promptCache[name];
   const url = browser.runtime.getURL(`prompts/${name}.txt`);
   const response = await fetch(url);
+  /* Sans ce contrôle, un fichier absent ou renommé fournit une chaîne
+     vide qui part en cache et sert d'instruction système : l'extension
+     paraît fonctionner mais les corrections deviennent absurdes. */
+  if (!response.ok) {
+    throw new Error(`Prompt "${name}" introuvable (${response.status}).`);
+  }
   const text = await response.text();
+  if (!text.trim()) {
+    throw new Error(`Prompt "${name}" vide.`);
+  }
   promptCache[name] = text;
   return text;
 }

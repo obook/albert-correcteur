@@ -24,6 +24,7 @@
 const COMPOSE_JS = [
   "compose/compose-state.js",
   "compose/compose-utils.js",
+  "util/inner-text.js",
   "compose/compose-badge.js",
   "compose/compose-overlay.js",
   "compose/compose-render.js",
@@ -77,11 +78,30 @@ async function injectComposeScripts(tabId) {
   }
 }
 
-/* Injection dans les nouveaux onglets de composition */
+/* Injection dans les nouveaux onglets de composition.
+ *
+ * Le document de composition est prêt quand son chargement est terminé.
+ * Un simple délai fixe ne suffisait pas : sur une réponse à un courriel
+ * volumineux (fil de discussion, images intégrées, plusieurs niveaux de
+ * citation), Thunderbird met plus longtemps à monter l'éditeur, si bien
+ * que l'injection tombait sur un corps encore vide. La vérification
+ * initiale du texte déjà présent était alors sautée, et l'utilisateur
+ * devait taper un caractère pour déclencher la première analyse.
+ *
+ * injectedTabs empêche la double injection, onUpdated pouvant se
+ * déclencher plusieurs fois pour un même onglet. */
+browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  if (tab.type !== "messageCompose") return;
+  if (changeInfo.status !== "complete") return;
+  injectComposeScripts(tabId);
+});
+
+/* Repli pour les versions de Thunderbird qui ne signalent pas la fin de
+   chargement d'un onglet de composition : injecter après un délai, sans
+   effet si onUpdated a déjà fait le travail. */
 browser.tabs.onCreated.addListener((tab) => {
   if (tab.type === "messageCompose") {
-    /* Attendre que l'éditeur soit prêt */
-    setTimeout(() => injectComposeScripts(tab.id), 500);
+    setTimeout(() => injectComposeScripts(tab.id), 1500);
   }
 });
 

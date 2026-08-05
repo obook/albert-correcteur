@@ -91,7 +91,7 @@ window.Albert = {
   //  LIMITES API
   // ===============================================================
 
-  limits: null,            /* { rpm, rpd, tpm, tpd } depuis /v1/me/info */
+  limits: undefined,            /* { rpm, rpd, tpm, tpd } depuis /v1/me/info */
   requestCountToday: 0,    /* compteur de requêtes du jour */
   requestDayStart: 0,      /* début de la journée courante (timestamp ms) */
 };

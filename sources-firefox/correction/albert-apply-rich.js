@@ -60,7 +60,13 @@ Albert._muteEvents = function (el) {
 /*
  * Applique une correction dans un éditeur riche (CKEditor, TinyMCE, etc.)
  * via Selection + chaîne d'événements complète.
- * Retourne true si la correction a pu être appliquée, false sinon.
+ *
+ * L'insertion est différée de 30 ms pour laisser l'éditeur enregistrer la
+ * sélection : la promesse retournée n'est résolue qu'une fois le texte
+ * réellement remplacé, afin que l'appelant recalcule les offsets sur le
+ * contenu à jour.
+ *
+ * @returns {Promise<boolean>} true si la correction a été appliquée.
  */
 Albert.applyViaSelection = function (el, correction, suggestion) {
   el.focus();
@@ -79,45 +85,21 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
     || checkedText.slice(correction.offset, correction.offset + correction.length);
 
   const realOffset = Albert.findRealOffset(currentText, correction, checkedText);
-  if (realOffset === -1) return false;
+  if (realOffset === -1) return Promise.resolve(false);
 
   const errEnd = realOffset + expectedWord.length;
 
   /* Localiser les nœuds texte de début et fin */
   const startPos = Albert.findSegmentAt(segments, realOffset);
   const endPos = Albert.findSegmentAt(segments, errEnd);
-  if (!startPos || !endPos) return false;
+  if (!startPos || !endPos) return Promise.resolve(false);
 
   /* Créer le Range couvrant le texte erroné */
   const range = document.createRange();
   range.setStart(startPos.node, startPos.offset);
   range.setEnd(endPos.node, endPos.offset);
 
-  /* --- Diagnostic (temporaire, à retirer après validation) --- */
-  const segText = segments.map((s) => s.node.textContent).join("");
-  if (segText.length !== currentText.length) {
-    console.warn("[Albert] Segment/innerText mismatch!",
-      "segments.len=" + segText.length, "innerText.len=" + currentText.length);
-    /* Chercher le premier caractère divergent */
-    for (let i = 0; i < Math.max(segText.length, currentText.length); i++) {
-      if (segText[i] !== currentText[i]) {
-        console.warn("[Albert]   divergence at", i,
-          "seg=" + JSON.stringify(segText.slice(Math.max(0, i - 5), i + 5)),
-          "inner=" + JSON.stringify(currentText.slice(Math.max(0, i - 5), i + 5)));
-        break;
-      }
-    }
-  }
-  console.log("[Albert] applyViaSelection:",
-    "word=" + JSON.stringify(correction.word),
-    "offset=" + correction.offset, "length=" + correction.length,
-    "realOffset=" + realOffset, "errEnd=" + errEnd,
-    "range=" + JSON.stringify(range.toString()),
-    "expected=" + JSON.stringify(expectedWord),
-    "match=" + (range.toString() === expectedWord));
-  /* --- Fin diagnostic (temporaire) --- */
-
-  if (range.toString() !== expectedWord) return false;
+  if (range.toString() !== expectedWord) return Promise.resolve(false);
 
   /*
    * Coordonnées séparées pour début et fin :
@@ -150,48 +132,53 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
   Albert._simulateMouseEvent(endPos.node.parentElement || el, "mouseup", endRect);
 
   /*
-   * Muter les événements au niveau document pour empêcher l'éditeur
-   * de modifier sa sélection interne pendant la phase d'insertion.
-   */
-  const unmute = Albert._muteEvents(el);
-
-  /*
    * Délai pour que l'éditeur enregistre la sélection,
-   * puis insertion via chaîne d'événements complète
+   * puis insertion via chaîne d'événements complète.
    */
-  setTimeout(() => {
-    try {
+  return new Promise((resolve) => {
+    setTimeout(() => {
       /*
-       * Certains éditeurs (Lexical/WhatsApp) effacent la sélection pendant
-       * le délai. On la reconstruit depuis les segments actuels du DOM
-       * (qui ont pu être modifiés par l'éditeur).
+       * Muter les événements souris et pointeur uniquement pendant
+       * l'insertion : les muter dès maintenant avalerait aussi les clics
+       * de l'utilisateur pendant les 30 ms d'attente.
        */
-      const freshSegments = Albert.buildInnerTextSegments(el);
-      const freshStart = Albert.findSegmentAt(freshSegments, realOffset);
-      const freshEnd = Albert.findSegmentAt(freshSegments, errEnd);
-      if (freshStart && freshEnd) {
+      const unmute = Albert._muteEvents(el);
+      try {
+        /*
+         * Certains éditeurs (Lexical/WhatsApp) effacent la sélection pendant
+         * le délai. On la reconstruit depuis les segments actuels du DOM
+         * (qui ont pu être modifiés par l'éditeur).
+         */
+        const freshSegments = Albert.buildInnerTextSegments(el);
+        const freshStart = Albert.findSegmentAt(freshSegments, realOffset);
+        const freshEnd = Albert.findSegmentAt(freshSegments, errEnd);
+        if (!freshStart || !freshEnd) {
+          /* Le DOM de l'éditeur a changé : sans sélection fiable,
+             l'insertion se ferait à la position courante du curseur,
+             donc au mauvais endroit. Mieux vaut ne rien faire. */
+          Albert.warn("applyViaSelection : sélection introuvable après le "
+            + "délai, insertion annulée pour éviter un remplacement "
+            + "au mauvais endroit.");
+          resolve(false);
+          return;
+        }
+
         const freshRange = document.createRange();
         freshRange.setStart(freshStart.node, freshStart.offset);
         freshRange.setEnd(freshEnd.node, freshEnd.offset);
 
-        /* Diagnostic (temporaire, à retirer) */
-        console.log("[Albert] re-selection before insert:",
-          JSON.stringify(freshRange.toString()),
-          "expected:", JSON.stringify(expectedWord));
-
         const freshSel = window.getSelection();
         freshSel.removeAllRanges();
         freshSel.addRange(freshRange);
+
+        Albert._insertTextInEditor(el, suggestion);
+        state.checkedText = el.innerText || "";
+        resolve(true);
+      } finally {
+        unmute();
       }
-
-      Albert._insertTextInEditor(el, suggestion);
-      state.checkedText = el.innerText || "";
-    } finally {
-      unmute();
-    }
-  }, 30);
-
-  return true;
+    }, 30);
+  });
 };
 
 /* --- Simulation d'événements --- */

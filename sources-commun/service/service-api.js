@@ -35,6 +35,28 @@
 
 "use strict";
 
+/* Délai maximal d'attente d'une réponse de l'API. Sans cette limite, une
+   requête acceptée mais jamais servie laisse le badge en chargement
+   pendant plusieurs minutes (timeout TCP du navigateur). */
+const API_TIMEOUT_MS = 30000;
+
+/**
+ * Traduit une exception en message affichable par l'utilisateur.
+ *
+ * @param {Error} err - Exception levée pendant l'appel.
+ * @returns {string} Message destiné à l'utilisateur.
+ */
+function messageErreurReseau(err) {
+  if (!err) return "Erreur inconnue.";
+  if (err.name === "TimeoutError" || err.name === "AbortError") {
+    return "Délai dépassé : l'API Albert n'a pas répondu en "
+      + (API_TIMEOUT_MS / 1000) + " secondes.";
+  }
+  /* fetch signale une panne réseau par une TypeError. */
+  if (err.name === "TypeError") return `Erreur réseau : ${err.message}`;
+  return err.message || "Erreur inconnue.";
+}
+
 /**
  * Envoie un texte à l'API Albert pour correction ou reformulation.
  *
@@ -54,9 +76,12 @@ async function checkText(text, mode, personaId) {
   }
 
   const lang = detectLanguage(text);
-  const systemPrompt = await buildPrompt(mode, lang, config.model, personaId);
 
   try {
+    /* Dans le try : le chargement du prompt échoue si le fichier est
+       absent, et l'erreur doit remonter à l'utilisateur plutôt que de
+       partir en rejet non géré du service worker. */
+    const systemPrompt = await buildPrompt(mode, lang, config.model, personaId);
     const effectiveModel = selectEffectiveModel(config.model);
     const body = {
       model: effectiveModel,
@@ -76,6 +101,7 @@ async function checkText(text, mode, personaId) {
         Accept: "application/json",
       },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(API_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -190,7 +216,7 @@ async function checkText(text, mode, personaId) {
     return { corrections, lang };
   } catch (err) {
     AlbertLog.error("checkText:", mode, "exception:", err);
-    return { error: `Erreur réseau : ${err.message}` };
+    return { error: messageErreurReseau(err) };
   }
 }
 
@@ -208,10 +234,9 @@ async function translateText(text, targetLang) {
   }
 
   const langSource = detectLanguage(text);
-  const systemPrompt =
-    await buildTranslationPrompt(langSource, targetLang);
 
   try {
+    const systemPrompt = await buildTranslationPrompt(langSource, targetLang);
     const effectiveModel = selectEffectiveModel(config.model);
     const body = {
       model: effectiveModel,
@@ -232,6 +257,7 @@ async function translateText(text, targetLang) {
         Accept: "application/json",
       },
       body: JSON.stringify(body),
+      signal: AbortSignal.timeout(API_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -272,6 +298,6 @@ async function translateText(text, targetLang) {
     };
   } catch (err) {
     AlbertLog.error("translateText: exception:", err);
-    return { error: `Erreur réseau : ${err.message}` };
+    return { error: messageErreurReseau(err) };
   }
 }

@@ -103,7 +103,9 @@ Albert.attachField = function (el) {
     if (st.corrections && st.corrections.length > 0 && oldText) {
       st.corrections = Albert.migrateCorrections(st.corrections, oldText, newText);
       st.checkedText = newText;
-      st.lastCheckedText = newText;
+      /* Ne pas toucher à st.lastCheckedText : c'est la garde de
+         déduplication de triggerCheck. L'écraser ici bloquerait
+         définitivement les vérifications suivantes. */
       /* Re-rendre avec les offsets migrés */
       if (st.corrections.length > 0) {
         Albert.renderCorrections(el);
@@ -138,6 +140,19 @@ Albert.attachField = function (el) {
     }
     if (st.badge) Albert.positionBadge(el, st.badge);
   });
+
+  /* La géométrie de l'overlay n'est calculée qu'au rendu. Un textarea qui
+     s'agrandit à la frappe (GitHub, LinkedIn) désaligne donc les
+     soulignements dès la deuxième ligne : les recalculer à chaque
+     changement de taille du champ. */
+  if (typeof ResizeObserver === "function") {
+    state.resizeObserver = new ResizeObserver(() => {
+      const st = Albert.getOrCreateState(el);
+      if (st.overlay) Albert.renderCorrections(el);
+      if (st.badge) Albert.positionBadge(el, st.badge);
+    });
+    state.resizeObserver.observe(el);
+  }
 };
 
 // ===============================================================
@@ -159,14 +174,27 @@ Albert.scanFields = function () {
  * (badge, overlay, popup) pour éviter les boucles infinies.
  */
 let scanTimer = null;
+
+/* Vrai si le nœud provient d'Albert : élément portant une classe
+   "albert-", ou nœud texte inséré dans l'un de ces éléments. La
+   reconstruction de l'overlay crée surtout des nœuds texte ; sans ce
+   second cas, chaque frappe reprogrammait un scan complet de la page. */
+function estNoeudAlbert(node) {
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    return typeof node.className === "string"
+      && node.className.startsWith("albert-");
+  }
+  if (node.nodeType === Node.TEXT_NODE) {
+    const parent = node.parentElement;
+    return !!(parent && parent.closest("[class^='albert-'], [class*=' albert-']"));
+  }
+  return false;
+}
+
 const observer = new MutationObserver((mutations) => {
   const isAlbertOnly = mutations.every((m) => {
     for (const node of m.addedNodes) {
-      if (node.nodeType === Node.ELEMENT_NODE && node.className
-        && typeof node.className === "string"
-        && node.className.startsWith("albert-")) {
-        continue;
-      }
+      if (estNoeudAlbert(node)) continue;
       return false;
     }
     return m.addedNodes.length > 0;

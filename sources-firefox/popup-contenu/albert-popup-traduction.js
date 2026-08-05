@@ -58,7 +58,7 @@ Albert.doTranslate = async function (originalText, targetLang, resultDiv, copyBt
   });
 
   if (response.error) {
-    Albert.showToast(response.error, 5);
+    Albert.showToast(response.error, 5000);
     if (loadingMsg) loadingMsg.textContent = "";
     return;
   }

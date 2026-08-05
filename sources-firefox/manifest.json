@@ -70,6 +70,7 @@
         "popup-contenu/albert-popup-reformulation.js",
         "popup-contenu/albert-popup-traduction.js",
         "popup-contenu/albert-popup-messages.js",
+        "util/inner-text.js",
         "correction/albert-apply-segments.js",
         "correction/albert-apply-rich.js",
         "correction/albert-apply.js",

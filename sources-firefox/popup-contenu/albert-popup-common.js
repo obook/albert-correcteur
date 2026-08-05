@@ -131,9 +131,17 @@ document.addEventListener("contextmenu", (e) => {
     };
   } else if (sel.rangeCount > 0 && !sel.isCollapsed) {
     const range = sel.getRangeAt(0);
+    /* Mémoriser l'élément éditable qui contient la sélection : le
+       remplacement doit lui adresser la chaîne d'événements
+       (beforeinput, textInput) attendue par les éditeurs riches. */
+    const ancestor = range.commonAncestorContainer;
+    const startEl = ancestor.nodeType === Node.ELEMENT_NODE
+      ? ancestor
+      : ancestor.parentElement;
     Albert.savedSelection = {
       type: "range",
       range: range.cloneRange(),
+      host: startEl ? startEl.closest("[contenteditable]") : null,
       text: sel.toString(),
       clickPos,
     };

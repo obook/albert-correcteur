@@ -25,10 +25,18 @@ browser.runtime.onMessage.addListener((message) => {
   }
 
   if (message.type === "translateGetSelection") {
-    const selection = document.getSelection();
-    const text = selection ? selection.toString().trim() : "";
+    /* La sélection transmise par le menu contextuel fait foi : la lire
+       ici échouerait si Thunderbird l'a déjà réduite à néant en fermant
+       le menu, et la popup ne s'ouvrirait pas, sans aucun retour. */
+    let text = (message.selectionText || "").trim();
+    if (!text) {
+      const selection = document.getSelection();
+      text = selection ? selection.toString().trim() : "";
+    }
     if (text.length >= 3) {
       Albert.showTranslationPopup(text);
+    } else {
+      Albert.showToast("Sélectionnez au moins trois caractères à traduire.");
     }
   }
 });

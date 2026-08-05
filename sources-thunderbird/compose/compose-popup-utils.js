@@ -67,9 +67,16 @@ Albert.closeCorrectionPopup = function () {
   Albert.restoreFocus();
 };
 
-/* Fermeture par Escape ou clic en dehors */
+/* Fermeture par Escape ou clic en dehors.
+ *
+ * Un seul écouteur pour les trois popups : chacune avait le sien, tous
+ * exécutés à chaque touche frappée dans le compose, et chacun ignorait
+ * les deux autres popups. */
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") Albert.closeCorrectionPopup();
+  if (e.key !== "Escape") return;
+  Albert.closeCorrectionPopup();
+  if (Albert.closeReformulationPopup) Albert.closeReformulationPopup();
+  if (Albert.closeTranslationPopup) Albert.closeTranslationPopup();
 });
 document.addEventListener("mousedown", (e) => {
   if (

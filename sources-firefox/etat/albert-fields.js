@@ -163,5 +163,36 @@ Albert.isRichEditor = function (el) {
      un contenteditable natif n'a pas besoin de role="textbox",
      sa présence indique un éditeur géré par un framework. */
   if (el.getAttribute("role") === "textbox") return true;
+  /* CKEditor 4 et TinyMCE en mode iframe : le content script est injecté
+     dans l'iframe (all_frames), où l'éditeur se réduit à un <body
+     contenteditable> dépourvu des marqueurs ci-dessus. Sans ce test, le
+     remplacement passerait par la voie « contenteditable simple » et
+     corromprait le modèle interne de l'éditeur. */
+  if (Albert._estCorpsIframeEditable(el)) return true;
   return false;
+};
+
+/**
+ * Détecte le corps éditable d'une iframe d'éditeur riche.
+ *
+ * @param {HTMLElement} el - Élément contenteditable à tester.
+ * @returns {boolean} true si l'élément est le <body> éditable d'une iframe d'éditeur.
+ */
+Albert._estCorpsIframeEditable = function (el) {
+  if (el.tagName !== "BODY") return false;
+  const vue = el.ownerDocument && el.ownerDocument.defaultView;
+  if (!vue || vue.top === vue) return false;
+  /* Un éditeur expose son objet global dans l'iframe ou dans la page
+     parente ; à défaut, un <body> éditable seul dans son document est
+     déjà le cas d'usage d'un éditeur en iframe. */
+  try {
+    if (vue.CKEDITOR || vue.tinymce || vue.tinyMCE) return true;
+    if (vue.parent && (vue.parent.CKEDITOR || vue.parent.tinymce)) return true;
+  } catch (_) {
+    /* Iframe d'origine différente : accès au parent refusé, on retombe
+       sur l'heuristique ci-dessous. */
+  }
+  return el.hasAttribute("data-id")
+    || el.id === "tinymce"
+    || el.ownerDocument.documentElement.childElementCount <= 2;
 };

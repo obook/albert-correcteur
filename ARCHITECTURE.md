@@ -28,6 +28,11 @@ albert-ext/
     verification/                         <- Logique partagée Firefox + Thunderbird
       rolling-window.js                   <- Classe Albert.RollingWindow (fenêtre glissante 60 s)
 
+    util/                                 <- Utilitaires partagés
+      model-aliases.js                    <- Table canonique -> alias, DEFAULT_API_BASE
+      personas.js                         <- Personas de reformulation
+      inner-text.js                       <- Correspondance offsets innerText <-> noeuds texte
+
     prompts/                              <- Prompts éditables (fichiers texte)
       correction.txt                      <- Prompt Correcteur (placeholder {{LANG}})
       reformulation.txt                   <- Prompt Reformuler (placeholder {{LANG}})
@@ -66,7 +71,7 @@ albert-ext/
     correction/                           <- Application des corrections dans le texte
       albert-apply.js                     <- Orchestration, findRealOffset, dispatch par type
       albert-apply-rich.js                <- Éditeurs riches : sélection, événements, fallback
-      albert-apply-segments.js            <- Mapping innerText <-> noeuds DOM
+      albert-apply-segments.js            <- Recherche d'un noeud texte par offset (findSegmentAt)
 
     affichage/                            <- Rendu visuel
       albert-badge.js                     <- Badge (icône dans le coin des champs, ARIA)
@@ -418,7 +423,7 @@ Les content scripts partagent le namespace `window.Albert` et sont chargés dans
 | 9 | `albert-popup-reformulation.js` | `popup-contenu/` | Popup de reformulation |
 | 10 | `albert-popup-traduction.js` | `popup-contenu/` | Popup de traduction |
 | 11 | `albert-popup-messages.js` | `popup-contenu/` | Dispatch des messages du script de fond |
-| 12 | `albert-apply-segments.js` | `correction/` | Mapping innerText <-> noeuds DOM |
+| 12 | `inner-text.js` (commun) + `albert-apply-segments.js` | `util/`, `correction/` | Correspondance offsets innerText <-> noeuds texte |
 | 13 | `albert-apply-rich.js` | `correction/` | Éditeurs riches : sélection, événements, fallback |
 | 14 | `albert-apply.js` | `correction/` | Orchestration des corrections |
 | 15 | `albert-toast.js` | `notification/` | Notification toast |

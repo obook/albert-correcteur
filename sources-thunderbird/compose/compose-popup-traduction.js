@@ -91,9 +91,22 @@ Albert.showTranslationPopup = function (text) {
   copyBtn.textContent = "Copier";
   copyBtn.style.display = "none";
   copyBtn.addEventListener("click", () => {
-    navigator.clipboard.writeText(resultDiv.textContent);
-    copyBtn.textContent = "Copié !";
-    setTimeout(() => { copyBtn.textContent = "Copier"; }, 1500);
+    /* Le repli par textarea couvre le cas où l'API presse-papiers est
+       refusée : sans lui, l'échec passait inaperçu et le bouton
+       annonçait « Copié ! » alors que rien ne l'était. */
+    navigator.clipboard.writeText(resultDiv.textContent).then(() => {
+      copyBtn.textContent = "Copié !";
+      setTimeout(() => { copyBtn.textContent = "Copier"; }, 1500);
+    }).catch(() => {
+      const zone = document.createElement("textarea");
+      zone.value = resultDiv.textContent;
+      document.body.appendChild(zone);
+      zone.select();
+      const copie = document.execCommand("copy");
+      zone.remove();
+      copyBtn.textContent = copie ? "Copié !" : "Copie impossible";
+      setTimeout(() => { copyBtn.textContent = "Copier"; }, 1500);
+    });
   });
   popup.appendChild(copyBtn);
 
@@ -131,9 +144,7 @@ Albert.showTranslationPopup = function (text) {
   doTranslate(Albert.lastTranslationLang);
 };
 
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") Albert.closeTranslationPopup();
-});
+/* La fermeture par Échap est centralisée dans compose-popup-utils.js. */
 document.addEventListener("mousedown", (e) => {
   if (Albert.translationPopup && !Albert.translationPopup.contains(e.target)) {
     Albert.closeTranslationPopup();

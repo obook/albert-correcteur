@@ -20,10 +20,14 @@
  * avant d'afficher le nouveau. Le toast comporte une icône Albert,
  * le message et un bouton de fermeture.
  *
- * @param {string} message     - Texte à afficher.
- * @param {number} durationSec - Durée d'affichage en secondes (défaut : 10).
+ * @param {string} message    - Texte à afficher.
+ * @param {number} durationMs - Durée d'affichage en millisecondes
+ *                              (défaut : 10000). Même unité que la
+ *                              version Thunderbird, pour qu'un portage
+ *                              de code d'une cible à l'autre ne produise
+ *                              pas un toast invisible ou interminable.
  */
-Albert.showToast = function (message, durationSec) {
+Albert.showToast = function (message, durationMs) {
   /* Supprimer un toast existant */
   const existing = document.querySelector(".albert-toast");
   if (existing) existing.remove();
@@ -57,7 +61,7 @@ Albert.showToast = function (message, durationSec) {
   requestAnimationFrame(() => toast.classList.add("albert-toast-visible"));
 
   /* Disparition automatique */
-  const ms = (durationSec || 10) * 1000;
+  const ms = durationMs || 10000;
   setTimeout(() => {
     if (document.contains(toast)) {
       toast.classList.remove("albert-toast-visible");

@@ -22,14 +22,14 @@ browser.runtime.onMessage.addListener((message) => {
     window.top !== window ? "(iframe " + location.href + ")" : "");
 
   if (message.type === "reformulateLoading") {
-    Albert.showToast("Reformulation en cours\u2026", 30);
+    Albert.showToast("Reformulation en cours\u2026", 30000);
     return;
   }
 
   if (message.type === "reformulateResult") {
     if (message.result.error) {
       Albert.warn("reformulateResult avec erreur:", message.result.error);
-      Albert.showToast(message.result.error, 5);
+      Albert.showToast(message.result.error, 5000);
       return;
     }
     const suggestions = message.result.corrections || [];
@@ -47,7 +47,7 @@ browser.runtime.onMessage.addListener((message) => {
     const saved = Albert.savedSelection;
     const fullText = saved ? saved.text : window.getSelection().toString();
     if (!fullText || fullText.trim().length < 3) {
-      Albert.showToast("Sélectionnez du texte à traduire.", 3);
+      Albert.showToast("Sélectionnez du texte à traduire.", 3000);
       return;
     }
     const textToTranslate = fullText.length > 2000 ? fullText.slice(0, 2000) : fullText;

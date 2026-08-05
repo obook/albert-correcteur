@@ -60,14 +60,20 @@ browser.menus.onClicked.addListener(async (info, tab) => {
     const personaId = info.menuItemId.slice(REFORMULATE_PREFIX.length);
     const persona = getPersonaById(personaId);
     browser.storage.local.set({ lastReformulationPersona: persona.id });
-    browser.tabs.sendMessage(tab.id, { type: "reformulateLoading" });
+    /* Sans .catch(), l'échec de l'envoi (compose script non injecté,
+       fenêtre fermée entre-temps) devient un rejet silencieux : le
+       résultat de la reformulation est calculé puis perdu sans trace. */
+    browser.tabs.sendMessage(tab.id, { type: "reformulateLoading" })
+      .catch((err) => console.error("[Albert Tb] reformulateLoading :",
+        err && err.message));
     const result = await checkText(text, "reformulation", persona.id);
     browser.tabs.sendMessage(tab.id, {
       type: "reformulateResult",
       originalText: text,
       personaLabel: persona.label,
       result,
-    });
+    }).catch((err) => console.error("[Albert Tb] reformulateResult perdu :",
+      err && err.message, "- le toast de chargement va rester affiché."));
     return;
   }
 
@@ -75,8 +81,14 @@ browser.menus.onClicked.addListener(async (info, tab) => {
     /* Déterminer si on est dans un compose ou dans un affichage de message */
     const tabInfo = await browser.tabs.get(tab.id);
     if (tabInfo.type === "messageCompose") {
-      /* Dans le compose : envoyer au compose script */
-      browser.tabs.sendMessage(tab.id, { type: "translateGetSelection" });
+      /* Dans le compose : envoyer au compose script. La sélection est
+         transmise car Thunderbird la réduit parfois à néant en fermant
+         le menu contextuel, avant que le script ne puisse la relire. */
+      browser.tabs.sendMessage(tab.id, {
+        type: "translateGetSelection",
+        selectionText: text,
+      }).catch((err) => console.error("[Albert Tb] translateGetSelection :",
+        err && err.message));
     } else {
       /* Dans la lecture de mail : ouvrir une fenêtre popup de traduction */
       const encodedText = encodeURIComponent(text);

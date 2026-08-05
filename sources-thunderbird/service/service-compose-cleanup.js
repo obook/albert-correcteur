@@ -33,15 +33,21 @@
  * du HTML d'origine, notamment les commentaires conditionnels). */
 function nettoyerCorpsHtml(html) {
   if (!html) return html;
-  if (!html.includes("albert-badge") && !html.includes("albert-error")) {
+  if (!html.includes("albert-")) {
     return html;
   }
 
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
 
-  /* Retirer complètement le badge (image et tous ses attributs). */
-  doc.querySelectorAll(".albert-badge").forEach((node) => node.remove());
+  /* Retirer complètement les éléments injectés par Albert dans le corps
+   * du compose : badge, popups (correction, reformulation, traduction),
+   * notifications et zone d'annonce pour les lecteurs d'écran. Sans ce
+   * nettoyage, un envoi effectué pendant qu'une popup est ouverte
+   * expédierait son HTML au destinataire. */
+  doc.querySelectorAll(
+    ".albert-badge, .albert-popup, .albert-toast, .albert-aria-live"
+  ).forEach((node) => node.remove());
 
   /* Déballer les spans de soulignement : déplacer leurs enfants
    * juste avant le span, puis supprimer le span lui-même. */

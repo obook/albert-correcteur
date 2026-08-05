@@ -19,6 +19,7 @@
     "storage",
     "menus",
     "activeTab",
+    "clipboardWrite",
     "https://albert.api.etalab.gouv.fr/*"
   ],
   "icons": {
