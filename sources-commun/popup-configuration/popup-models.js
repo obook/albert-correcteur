@@ -51,6 +51,19 @@ const MODEL_DESCRIPTIONS = {
  */
 const CHAT_TYPES = new Set(["text-generation", "image-text-to-text"]);
 
+/*
+ * Modèles écartés malgré un type accepté.
+ *
+ * Les modèles de reconnaissance de texte dans l'image sont annoncés
+ * comme "image-text-to-text", exactement comme les modèles de chat
+ * multimodaux : rien dans la réponse de l'API ne les distingue, et ils
+ * encombraient la liste sans pouvoir servir à la correction.
+ *
+ * ponytail: filtrage sur le nom, à remplacer le jour où l'API expose
+ * une capacité par modèle.
+ */
+const MODELES_HORS_SUJET = /ocr/i;
+
 const modelSelect = document.getElementById("model");
 const refreshBtn = document.getElementById("refresh-models");
 
@@ -136,6 +149,10 @@ async function fetchModels() {
      * éventuel changement de nomenclature côté API).
      */
     const rawModels = (data.data || []).filter((m) => {
+      const noms = [m.id].concat(Array.isArray(m.aliases) ? m.aliases : []);
+      if (noms.some((n) => typeof n === "string" && MODELES_HORS_SUJET.test(n))) {
+        return false;
+      }
       if (CHAT_TYPES.has(m.type)) return true;
       if (Array.isArray(m.aliases)) {
         return m.aliases.some((a) => a in MODEL_DESCRIPTIONS);
