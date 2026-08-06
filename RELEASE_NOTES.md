@@ -1,30 +1,21 @@
-## Albert Correcteur v0.6.0
+## Albert Correcteur v0.6.1
 
-Cette version corrige plusieurs défauts qui interrompaient la correction en cours d'utilisation, et améliore la qualité des suggestions renvoyées par le modèle.
+Version corrective centrée sur Thunderbird, avec un correctif Firefox pour les éditeurs riches. Aucune nouvelle fonctionnalité, aucune rupture.
 
 ### Corrections
 
-- **La vérification s'arrêtait dès qu'une correction était affichée.** Un repère interne, destiné à éviter les requêtes en double, était écrasé à chaque frappe : plus aucune analyse ne partait tant que le champ n'était pas vidé. C'était la cause principale du comportement « ça fonctionne, puis ça s'arrête ».
-- **Le badge pouvait rester en chargement plusieurs minutes.** Les appels à l'API ont désormais un délai maximal de 30 secondes, avec un message explicite si l'API ne répond pas.
-- **Thunderbird : du contenu de l'extension pouvait partir dans le courriel.** Les popups, notifications et annonces destinées aux lecteurs d'écran sont maintenant retirées du corps du message avant l'envoi.
-- **Thunderbird : après application d'une suggestion**, le mot corrigé restait souligné en rouge et les boutons de navigation entre erreurs ne répondaient plus.
-- **Reformulation dans les éditeurs riches** (Draft.js, Lexical, CKEditor, ProseMirror) : le texte d'origine réapparaissait après le remplacement. La reformulation emprunte désormais le même chemin que la correction.
-- **Soulignements décalés dans les longs textes.** Le calcul des positions suit maintenant le comportement réel du moteur de rendu, mesuré et non supposé. Sur un courriel de plusieurs paragraphes, les erreurs des derniers paragraphes n'étaient plus signalées.
-- **Traduction dans Thunderbird** : la sélection était parfois perdue à la fermeture du menu contextuel, et la popup ne s'ouvrait pas.
-- **Réponse à un courriel volumineux** : l'extension s'activait avant la fin du chargement du message et sautait la première vérification.
-- Le bouton « Copier » de la traduction signale un échec au lieu d'annoncer une copie qui n'a pas eu lieu.
-- Les mots à cheval sur plusieurs balises (une portion en gras, un lien) sont soulignés en entier et cliquables sur toute leur longueur.
-- Le pluriel de « lieu » est de nouveau « lieux ».
-
-### Améliorations
-
-- **Qualité des suggestions.** Les exemples de référence transmis au modèle contenaient des positions et des longueurs erronées, ainsi qu'une règle de grammaire que son propre exemple contredisait. Leur correction améliore directement la pertinence des corrections proposées.
-- **Préférence de langue de traduction commune** à Firefox et Thunderbird. La valeur déjà enregistrée est reprise automatiquement.
-- Code partagé entre les trois cibles au lieu d'être dupliqué, ce qui réduit le risque qu'une correction ne soit appliquée que d'un côté.
+- **Thunderbird : l'extension ne démarrait plus dans la fenêtre de composition** ("Albert.buildInnerTextSegments is not a function"). Les modules partagés avec Firefox s'accrochaient à un objet global différent de celui du compose.
+- **Thunderbird : cadre autour du badge et icône absente.** L'icône est maintenant posée par la feuille de style, plus fiable qu'une image pointant vers une ressource interne de l'extension.
+- **Thunderbird : le badge disparaissait** après une sélection totale suivie d'une suppression, une annulation ou le rechargement d'un brouillon. L'interface de l'extension (badge, popups, notifications) vit désormais hors du corps éditable du message, ce qui supprime toute la famille de problèmes liée à sa présence dans le texte.
+- **Soulignements et corrections décalés sur les longues réponses.** La correspondance entre le texte analysé et le document est mesurée sur le rendu réel au lieu d'être calculée par règles : sur un courriel avec citations, l'écart atteignait des dizaines de caractères et les remplacements tombaient à côté du mot.
+- **Thunderbird : "Index or size is negative..."** interrompait l'affichage des soulignements quand l'API signalait deux corrections qui se chevauchent, et le clic sur le badge semblait mort.
+- **Un remplacement incertain est refusé.** Si la position calculée ne couvre plus exactement le mot erroné (texte modifié entre-temps), l'extension affiche "Le texte a changé, relancez la vérification" au lieu d'écrire au mauvais endroit.
+- **Firefox : sur x.com, la suggestion s'insérait en fin de texte** au lieu de remplacer le mot. L'insertion attend désormais que l'éditeur ait pris connaissance de la sélection, et vérifie qu'elle couvre bien le mot avant d'écrire.
+- **Configuration : les modèles OCR ne figurent plus dans la liste des modèles**, ils ne peuvent pas servir à la correction.
 
 ### À noter lors de la mise à jour
 
-L'extension Thunderbird demande une nouvelle autorisation, l'écriture dans le presse-papiers, nécessaire au bouton « Copier » de la popup de traduction.
+Fermer les fenêtres de composition Thunderbird avant de réinstaller : une fenêtre restée ouverte garde les scripts de l'ancienne version.
 
 ### Téléchargements
 

@@ -5,6 +5,42 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.6.1] - 2026-08-06
+
+### Corrigé
+- Thunderbird : l'extension était morte au chargement du compose avec
+  l'erreur "Albert.buildInnerTextSegments is not a function". L'objet
+  Albert, déclaré en constante lexicale, n'existait pas sur window, et les
+  modules partagés avec Firefox s'accrochaient à un second objet isolé.
+- Thunderbird : un cadre clair entourait le badge. L'icône passait par une
+  balise img dont la source moz-extension:// restait vide dans la fenêtre
+  de composition ; elle est désormais posée en image de fond par la feuille
+  de style.
+- Thunderbird : le badge disparaissait quand le corps du message était vidé
+  (sélection totale puis suppression, annulation, brouillon rechargé). Le
+  badge, les popups et les notifications vivent maintenant dans un
+  conteneur accroché à la racine du document, hors du corps éditable, et un
+  observateur reconstruit le badge s'il disparaît malgré tout.
+- Soulignements et remplacements décalés de plusieurs dizaines de
+  caractères sur les longues réponses avec citation. La table de
+  correspondance entre le texte analysé et les nœuds du document comptait
+  les retours à la ligne de mise en forme du HTML sérialisé, que le rendu
+  ignore. Elle est désormais mesurée sur le texte réel, plus rien n'est
+  supposé.
+- Thunderbird : l'erreur "Index or size is negative..." interrompait tout
+  le rendu des soulignements quand deux corrections se chevauchaient, et le
+  clic sur le badge semblait sans effet.
+- Thunderbird : un remplacement dont la position ne couvre plus exactement
+  le mot erroné est refusé avec un message, au lieu d'écrire au mauvais
+  endroit.
+- Firefox : sur x.com, la suggestion cliquée s'insérait en fin de texte au
+  lieu de remplacer le mot. Les éditeurs à modèle interne (Draft.js)
+  synchronisent leur curseur après coup : l'insertion attend cette
+  synchronisation et vérifie que la sélection couvre bien le mot.
+- Configuration : les modèles de reconnaissance de texte dans l'image
+  (OCR), inutilisables pour la correction, n'apparaissent plus dans la
+  liste des modèles.
+
 ## [0.6.0] - 2026-08-05
 
 ### Corrigé

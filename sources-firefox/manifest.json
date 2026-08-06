@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Albert Correcteur",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Extension expérimentale de correction orthographique, grammaticale et de traduction française propulsée par l'API Albert (DINUM).",
   "author": "Olivier Booklage",
   "homepage_url": "https://forge.apps.education.fr/booklageolivier/albert-correcteur",
