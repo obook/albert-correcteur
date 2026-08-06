@@ -1,8 +1,8 @@
 # Plan des corrections, analyse complète du code (5 août 2026)
 
 Analyse croisée de `sources-commun/`, `sources-firefox/` et `sources-thunderbird/`,
-avec comparaison au mécanisme de remplacement de LanguageTool (voir `ANALYSE.md`
-dans le coffre Obsidian et la copie de l'extension installée dans `languagetool-last/`).
+avec comparaison au mécanisme de remplacement d'une extension de correction
+tierce (voir `ANALYSE.md` dans le coffre Obsidian).
 
 Les 18 suites de tests existantes passent (257 tests OK) : les bugs se situent
 dans ce que les tests ne couvrent pas, c'est-à-dire le DOM, l'injection des
@@ -69,8 +69,8 @@ source avant d'être retenu.
   `beforeinput` ni `input`. Draft.js, Lexical, CKEditor et ProseMirror
   maintiennent un modèle interne : au prochain rendu, ils restaurent l'ancien
   texte ou produisent un contenu mélangé. C'est exactement le mécanisme que
-  documente `ANALYSE.md` sur LanguageTool (sélection, événements simulés,
-  `beforeinput`, `execCommand`, paste simulé).
+  documente `ANALYSE.md` sur l'extension tierce étudiée (sélection, événements
+  simulés, `beforeinput`, `execCommand`, paste simulé).
 - Correction : router le remplacement par le même chemin que
   `applyViaSelection` / `_insertTextInEditor` (déjà présents dans
   `albert-apply-rich.js`), en distinguant le type de champ comme le fait
