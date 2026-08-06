@@ -138,45 +138,76 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
   return new Promise((resolve) => {
     setTimeout(() => {
       /*
-       * Muter les événements souris et pointeur uniquement pendant
-       * l'insertion : les muter dès maintenant avalerait aussi les clics
-       * de l'utilisateur pendant les 30 ms d'attente.
+       * Certains éditeurs (Lexical/WhatsApp) effacent la sélection pendant
+       * le délai. On la reconstruit depuis les segments actuels du DOM
+       * (qui ont pu être modifiés par l'éditeur).
        */
-      const unmute = Albert._muteEvents(el);
-      try {
-        /*
-         * Certains éditeurs (Lexical/WhatsApp) effacent la sélection pendant
-         * le délai. On la reconstruit depuis les segments actuels du DOM
-         * (qui ont pu être modifiés par l'éditeur).
-         */
-        const freshSegments = Albert.buildInnerTextSegments(el);
-        const freshStart = Albert.findSegmentAt(freshSegments, realOffset);
-        const freshEnd = Albert.findSegmentAt(freshSegments, errEnd);
-        if (!freshStart || !freshEnd) {
-          /* Le DOM de l'éditeur a changé : sans sélection fiable,
-             l'insertion se ferait à la position courante du curseur,
-             donc au mauvais endroit. Mieux vaut ne rien faire. */
-          Albert.warn("applyViaSelection : sélection introuvable après le "
-            + "délai, insertion annulée pour éviter un remplacement "
-            + "au mauvais endroit.");
-          resolve(false);
-          return;
-        }
-
-        const freshRange = document.createRange();
-        freshRange.setStart(freshStart.node, freshStart.offset);
-        freshRange.setEnd(freshEnd.node, freshEnd.offset);
-
-        const freshSel = window.getSelection();
-        freshSel.removeAllRanges();
-        freshSel.addRange(freshRange);
-
-        Albert._insertTextInEditor(el, suggestion);
-        state.checkedText = el.innerText || "";
-        resolve(true);
-      } finally {
-        unmute();
+      const freshSegments = Albert.buildInnerTextSegments(el);
+      const freshStart = Albert.findSegmentAt(freshSegments, realOffset);
+      const freshEnd = Albert.findSegmentAt(freshSegments, errEnd);
+      if (!freshStart || !freshEnd) {
+        /* Le DOM de l'éditeur a changé : sans sélection fiable,
+           l'insertion se ferait à la position courante du curseur,
+           donc au mauvais endroit. Mieux vaut ne rien faire. */
+        Albert.warn("applyViaSelection : sélection introuvable après le "
+          + "délai, insertion annulée pour éviter un remplacement "
+          + "au mauvais endroit.");
+        resolve(false);
+        return;
       }
+
+      const freshRange = document.createRange();
+      freshRange.setStart(freshStart.node, freshStart.offset);
+      freshRange.setEnd(freshEnd.node, freshEnd.offset);
+
+      /* Même garde-fou que le contenteditable simple : si la sélection
+         reconstruite ne couvre pas exactement le mot erroné, insérer
+         reviendrait à écrire au mauvais endroit. */
+      if (freshRange.toString() !== expectedWord) {
+        Albert.warn("applyViaSelection : la sélection reconstruite ne "
+          + "couvre pas le mot attendu, insertion annulée.");
+        resolve(false);
+        return;
+      }
+
+      const freshSel = window.getSelection();
+      freshSel.removeAllRanges();
+      freshSel.addRange(freshRange);
+
+      /*
+       * Laisser le selectionchange de cette sélection être délivré avant
+       * d'émettre les événements d'insertion. Les éditeurs à modèle
+       * interne (Draft.js sur x.com notamment) ne lisent pas la sélection
+       * DOM au moment du beforeinput : ils utilisent leur propre état,
+       * synchronisé par selectionchange. Insérer dans le même tour de
+       * boucle leur faisait écrire à l'ancienne position du curseur,
+       * typiquement en fin de texte.
+       */
+      setTimeout(() => {
+        /*
+         * Muter les événements souris et pointeur uniquement pendant
+         * l'insertion : les muter plus tôt avalerait aussi les clics de
+         * l'utilisateur pendant l'attente.
+         */
+        const unmute = Albert._muteEvents(el);
+        try {
+          /* Un éditeur peut avoir effacé la sélection pendant l'attente
+             (Lexical) : la reposer juste avant l'insertion. Sans bouger,
+             c'est un no-op et le selectionchange déjà délivré reste
+             valable. */
+          const selCourante = window.getSelection();
+          if (selCourante.rangeCount === 0
+            || selCourante.getRangeAt(0).toString() !== expectedWord) {
+            selCourante.removeAllRanges();
+            selCourante.addRange(freshRange);
+          }
+          Albert._insertTextInEditor(el, suggestion);
+          state.checkedText = el.innerText || "";
+          resolve(true);
+        } finally {
+          unmute();
+        }
+      }, 30);
     }, 30);
   });
 };
