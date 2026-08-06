@@ -6,3 +6,26 @@
   top: 8px;
   right: 8px;
 }
+
+/* --- Icône --- */
+/* Contrairement à Firefox, l'icône n'est pas une balise <img> : une
+   source en moz-extension:// restait vide dans la fenêtre de
+   composition et Thunderbird n'affichait que le cadre de l'image
+   manquante. Une feuille de style injectée par l'extension atteint ses
+   propres ressources sans difficulté. */
+.albert-badge {
+  background: url("../icons/icon-error.svg") center / contain no-repeat;
+}
+
+.albert-badge.albert-ok {
+  background-image: url("../icons/icon-ok.svg");
+}
+
+.albert-badge.albert-loading {
+  background-image: url("../icons/icon.svg");
+}
+
+/* Sans <img> à griser, la mise en veille porte sur le badge lui-même. */
+.albert-badge.albert-rate-limited {
+  filter: grayscale(1) opacity(0.5);
+}

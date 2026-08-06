@@ -168,7 +168,7 @@ Albert.showCorrectionPopup = function (correction, markEl) {
   }
 
   /* --- Positionnement sous le mot --- */
-  document.body.appendChild(popup);
+  Albert.uiRoot().appendChild(popup);
   const rect = markEl.getBoundingClientRect();
   popup.style.top = (rect.bottom + 4) + "px";
   popup.style.left = rect.left + "px";
@@ -202,6 +202,12 @@ Albert.navigateError = function (direction) {
   );
   if (mark) {
     mark.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    Albert.showCorrectionPopup(state.corrections[newIdx], mark);
+    /* Les corrections stockées dans composeState n'ont pas de champ index :
+       sans lui, applySuggestion ne retrouve pas le span souligné et
+       retombe sur le repli par offset. */
+    Albert.showCorrectionPopup(
+      Object.assign({}, state.corrections[newIdx], { index: newIdx }),
+      mark
+    );
   }
 };

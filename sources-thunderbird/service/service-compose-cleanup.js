@@ -1,10 +1,12 @@
 /*
  * service-compose-cleanup.js - Nettoyage du courriel avant envoi.
  *
- * Le badge Albert, les soulignements d'erreurs et la zone aria-live
- * sont injectés dans le DOM du corps du message (document.body du
- * compose). Sans cette intervention, ils partiraient avec le courriel
- * envoyé :
+ * Les soulignements d'erreurs entourent des mots du message et vivent
+ * donc dans son corps. Le badge, les popups et la zone aria-live ont
+ * rejoint un conteneur accroché à <html> (util/ui-root.js), hors du
+ * corps, mais restent nettoyés ici : un brouillon enregistré avant ce
+ * changement peut encore en contenir. Sans cette intervention, ils
+ * partiraient avec le courriel envoyé :
  *   - le destinataire verrait le mot « Albert » (alt de l'image du
  *     badge) en fin de message ;
  *   - des balises <span class="albert-error"> resteraient autour

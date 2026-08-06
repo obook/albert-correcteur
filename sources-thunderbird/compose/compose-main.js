@@ -34,6 +34,7 @@
   await Albert.loadLimits();
 
   Albert.createBadge();
+  Albert.watchBadge();
 
   const body = Albert.getComposeBody();
   if (!body) return;
@@ -50,12 +51,8 @@
     Albert.closeCorrectionPopup();
     Albert.clearUnderlines();
 
-    /* Recréer le badge s'il a été supprimé (select all + delete efface tout le body) */
-    if (!document.contains(Albert.badge)) {
-      Albert.badge = null;
-      Albert.createBadge();
-    }
-
+    /* La reconstruction du badge supprimé est prise en charge par
+       Albert.watchBadge(), quel que soit le chemin de suppression. */
     Albert.setBadgeState(null);
     Albert.scheduleCheck();
   });

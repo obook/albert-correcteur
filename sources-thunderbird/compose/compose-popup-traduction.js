@@ -106,7 +106,7 @@ Albert.showTranslationPopup = function (text) {
     }).catch(() => {
       const zone = document.createElement("textarea");
       zone.value = resultDiv.textContent;
-      document.body.appendChild(zone);
+      Albert.uiRoot().appendChild(zone);
       zone.select();
       const copie = document.execCommand("copy");
       zone.remove();
@@ -116,7 +116,7 @@ Albert.showTranslationPopup = function (text) {
   });
   popup.appendChild(copyBtn);
 
-  document.body.appendChild(popup);
+  Albert.uiRoot().appendChild(popup);
   popup.style.position = "fixed";
   popup.style.left = "50%";
   popup.style.top = "30%";

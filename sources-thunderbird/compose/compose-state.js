@@ -60,6 +60,13 @@ Albert.error = function (...args) {
   console.error("[Albert]", ...args);
 };
 
+/* Les modules partagés avec Firefox (util/inner-text.js, util/lang-names.js)
+   s'accrochent à window.Albert. Une déclaration "const" ne crée pas de
+   propriété sur window : sans cette ligne, ces modules construisaient un
+   second objet Albert isolé, et le compose voyait
+   "Albert.buildInnerTextSegments is not a function". */
+window.Albert = Albert;
+
 /* Charger les mots ignorés et le thème au démarrage */
 (async () => {
   const data = await browser.storage.local.get(["ignoredWords", "popupTheme"]);

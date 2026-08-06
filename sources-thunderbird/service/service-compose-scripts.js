@@ -14,6 +14,11 @@
  * (objet global) doit être chargé en premier, et compose-main.js
  * (point d'entrée) en dernier.
  *
+ * ponytail: browser.composeScripts.register() ferait le même travail
+ * sans guet ni délai, mais l'essai s'est soldé par une extension
+ * silencieuse et n'a pas pu être diagnostiqué à distance. À reprendre
+ * avec un Thunderbird sous la main.
+ *
  * Auteur : O. Booklage
  * Date : avril 2026
  * Licence : MIT
@@ -24,6 +29,7 @@
 const COMPOSE_JS = [
   "compose/compose-state.js",
   "compose/compose-utils.js",
+  "util/ui-root.js",
   "util/inner-text.js",
   "util/lang-names.js",
   "notification/toast.js",

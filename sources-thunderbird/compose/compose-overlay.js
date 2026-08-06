@@ -85,10 +85,13 @@ Albert.applyUnderlines = function (corrections) {
     const portions = [];
     for (const info of textNodes) {
       if (info.end <= realOffset || info.start >= finErreur) continue;
+      /* nodeStart : décalage du segment dans son nœud quand des blancs
+         de tête ont été effondrés par le rendu (util/inner-text.js). */
+      const base = info.nodeStart || 0;
       portions.push({
         node: info.node,
-        debut: Math.max(realOffset, info.start) - info.start,
-        fin: Math.min(finErreur, info.end) - info.start,
+        debut: Math.max(realOffset, info.start) - info.start + base,
+        fin: Math.min(finErreur, info.end) - info.start + base,
       });
     }
     if (portions.length === 0) continue;
@@ -97,12 +100,16 @@ Albert.applyUnderlines = function (corrections) {
        situées avant lui. */
     for (let i = portions.length - 1; i >= 0; i--) {
       const portion = portions[i];
-      const range = document.createRange();
-      range.setStart(portion.node, portion.debut);
-      range.setEnd(portion.node, portion.fin);
-
       const span = Albert.createUnderlineSpan(correction, correction.index);
       try {
+        /* setStart/setEnd sont dans le try : quand deux corrections se
+           chevauchent (API bavarde, même mot signalé deux fois), le
+           surroundContents de la première scinde le nœud et les offsets
+           de la seconde dépassent sa nouvelle longueur. Hors du try,
+           l'IndexSizeError interrompait tout le rendu. */
+        const range = document.createRange();
+        range.setStart(portion.node, portion.debut);
+        range.setEnd(portion.node, portion.fin);
         range.surroundContents(span);
       } catch (err) {
         /* Le nœud a changé depuis la construction de la table :

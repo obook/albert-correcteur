@@ -23,7 +23,7 @@ Albert.ensureAriaLive = function () {
   div.setAttribute("aria-live", "polite");
   div.className = "albert-aria-live";
   div.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);";
-  document.body.appendChild(div);
+  Albert.uiRoot().appendChild(div);
   Albert.ariaLive = div;
   return div;
 };

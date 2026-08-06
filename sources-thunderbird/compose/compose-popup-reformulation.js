@@ -144,7 +144,7 @@ Albert.showReformulationPopup = function (originalText, result, personaLabel) {
     popup.appendChild(noneDiv);
   }
 
-  document.body.appendChild(popup);
+  Albert.uiRoot().appendChild(popup);
   popup.style.position = "fixed";
   popup.style.left = "50%";
   popup.style.top = "50%";

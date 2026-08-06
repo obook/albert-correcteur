@@ -41,7 +41,10 @@ Albert.applySuggestion = function (correction, suggestion) {
       sel.addRange(range);
 
       /* insertText peut échouer en designMode, fallback sur DOM direct */
-      if (!document.execCommand("insertText", false, suggestion)) {
+      /* Une suggestion vide correspond à un mot en trop à supprimer. Sur
+         Gecko, execCommand("insertText") avec une chaîne vide annonce
+         une réussite sans rien retirer : passer directement par le DOM. */
+      if (suggestion === "" || !document.execCommand("insertText", false, suggestion)) {
         range.deleteContents();
         range.insertNode(document.createTextNode(suggestion));
         body.normalize();
@@ -50,48 +53,65 @@ Albert.applySuggestion = function (correction, suggestion) {
       const text = body.innerText;
       const realOffset = Albert.findRealOffset(text, correction.word, correction.offset);
       if (realOffset === -1) return;
+      const finErreur = realOffset + correction.word.length;
 
-      const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, null);
-      let node;
-      let offset = 0;
-      let startNode = null;
-      let startOffset = 0;
-      let endNode = null;
-      let endOffset = 0;
+      /* Les offsets viennent de innerText, qui insère des sauts de ligne
+         entre les blocs. Un parcours qui se contente d'additionner la
+         longueur des nœuds texte ignore ces sauts et vise donc un endroit
+         décalé d'autant de caractères qu'il y a de paragraphes : le
+         remplacement tombait à côté du mot, et sur un mot en fin de
+         message la suggestion venait s'ajouter au lieu de le remplacer
+         (« Olivi » corrigé donnait « OliviOlivier »). La table de
+         correspondance partagée avec les soulignements tient compte des
+         sauts de ligne. */
+      const segments = Albert.buildInnerTextSegments(body);
+      const debut = segments.find((s) => s.start <= realOffset && realOffset < s.end);
+      const fin = segments.find((s) => s.start < finErreur && finErreur <= s.end);
+      if (!debut || !fin) return;
 
-      while ((node = walker.nextNode())) {
-        const nodeEnd = offset + node.textContent.length;
-        if (!startNode && realOffset < nodeEnd) {
-          startNode = node;
-          startOffset = realOffset - offset;
-        }
-        if (startNode && realOffset + correction.word.length <= nodeEnd) {
-          endNode = node;
-          endOffset = realOffset + correction.word.length - offset;
-          break;
-        }
-        offset = nodeEnd;
+      body.focus();
+      const range = document.createRange();
+      try {
+        range.setStart(debut.node, realOffset - debut.start + (debut.nodeStart || 0));
+        range.setEnd(fin.node, finErreur - fin.start + (fin.nodeStart || 0));
+      } catch (err) {
+        /* Nœud plus court que la table (DOM modifié entre-temps) :
+           refuser plutôt que planter. */
+        Albert.warn("applySuggestion : position invalide, remplacement annulé -", err && err.message);
+        Albert.showToast("Le texte a changé, relancez la vérification.");
+        return;
       }
 
-      if (startNode && endNode) {
-        body.focus();
-        const range = document.createRange();
-        range.setStart(startNode, startOffset);
-        range.setEnd(endNode, endOffset);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-        if (!document.execCommand("insertText", false, suggestion)) {
-          range.deleteContents();
-          range.insertNode(document.createTextNode(suggestion));
-          body.normalize();
-        }
+      /* Dernier contrôle avant de toucher au texte : si la sélection ne
+         couvre pas exactement le mot erroné (texte modifié depuis la
+         vérification, table dépassée), un remplacement raté est bien
+         pire qu'un remplacement refusé. */
+      if (range.toString() !== correction.word) {
+        Albert.warn("applySuggestion : le texte sous l'offset ne correspond plus, remplacement annulé");
+        Albert.showToast("Le texte a changé, relancez la vérification.");
+        return;
+      }
+
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      /* Une suggestion vide correspond à un mot en trop à supprimer. Sur
+         Gecko, execCommand("insertText") avec une chaîne vide annonce
+         une réussite sans rien retirer : passer directement par le DOM. */
+      if (suggestion === "" || !document.execCommand("insertText", false, suggestion)) {
+        range.deleteContents();
+        range.insertNode(document.createTextNode(suggestion));
+        body.normalize();
       }
     }
 
     const state = Albert.composeState;
     if (state && state.corrections) {
-      state.corrections = state.corrections.filter((c) => c !== correction);
+      /* correction est une copie enrichie d'un index (compose-overlay.js),
+         jamais l'objet stocké dans composeState : une comparaison par
+         identité ne retirait donc rien, et le mot corrigé était aussitôt
+         re-souligné comme erroné. */
+      state.corrections = state.corrections.filter((c, i) => i !== correction.index);
       state.checkedText = null;
     }
   } finally {
