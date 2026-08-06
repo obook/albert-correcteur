@@ -73,7 +73,7 @@ Albert.showToast = function (message, durationMs) {
   boutonFermer.addEventListener("click", () => fermerToast(toast));
   toast.appendChild(boutonFermer);
 
-  document.body.appendChild(toast);
+  Albert.uiRoot().appendChild(toast);
 
   /* Animation d'entrée : la classe est posée au cadre suivant pour que
      la transition CSS parte bien de l'état initial. */
