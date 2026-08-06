@@ -8,9 +8,15 @@
  */
 /* Tests -- Correspondance innerText <-> nœuds texte (inner-text.js).
  *
- * Les valeurs attendues ne sont pas déduites de la spécification : elles
- * ont été mesurées dans Firefox sur un élément contenteditable réel.
+ * L'algorithme aligne les nœuds texte sur le innerText réel de la
+ * racine : chaque cas fournit donc l'arbre ET le innerText mesuré dans
+ * Firefox sur un élément contenteditable réel (il n'est pas déduit).
  * Exemple : "<p>a</p><p>b</p>" donne "a\n\nb" et non "a\nb".
+ *
+ * Invariants vérifiés :
+ *   - chaque segment retrouve exactement son texte des deux côtés
+ *     (innerText[start..end] == node.textContent[nodeStart..]) ;
+ *   - tout caractère non blanc de innerText est couvert par un segment.
  */
 
 const assert = require("assert");
@@ -42,16 +48,7 @@ function element(tagName, enfants, options) {
 const { construireSegmentsInnerText } =
   require(path.join(__dirname, "..", "sources-commun", "util", "inner-text.js"));
 
-/* Reconstitue le texte que innerText produirait, à partir des segments :
-   chaque segment est posé à son offset, les trous sont des sauts de ligne. */
-function texteReconstitue(segments) {
-  let sortie = "";
-  for (const seg of segments) {
-    sortie += "\n".repeat(Math.max(0, seg.start - sortie.length));
-    sortie += seg.node.textContent;
-  }
-  return sortie;
-}
+const BLANC = /[ \t\n\r\u00A0]/;
 
 let passed = 0;
 let failed = 0;
@@ -68,19 +65,28 @@ function test(name, fn) {
   }
 }
 
-/* Vérifie que la structure produit exactement le innerText mesuré. */
-function verifier(nom, racine, innerTextAttendu) {
-  test(nom + " --- " + JSON.stringify(innerTextAttendu), () => {
+/* Construit la table sur l'arbre et vérifie les deux invariants. */
+function verifier(nom, racine, innerTextMesure) {
+  test(nom + " --- " + JSON.stringify(innerTextMesure), () => {
+    racine.innerText = innerTextMesure;
     const segments = construireSegmentsInnerText(racine);
-    assert.strictEqual(texteReconstitue(segments), innerTextAttendu);
-    /* Chaque segment doit retrouver son propre texte à son offset. */
+
+    const couverts = new Array(innerTextMesure.length).fill(false);
     for (const seg of segments) {
+      const longueur = seg.end - seg.start;
       assert.strictEqual(
-        innerTextAttendu.slice(seg.start, seg.end),
-        seg.node.textContent,
+        innerTextMesure.slice(seg.start, seg.end),
+        seg.node.textContent.substr(seg.nodeStart, longueur),
         `segment @${seg.start} désaligné`
       );
+      for (let i = seg.start; i < seg.end; i++) couverts[i] = true;
     }
+    for (let i = 0; i < innerTextMesure.length; i++) {
+      if (!BLANC.test(innerTextMesure[i])) {
+        assert.ok(couverts[i], `caractère non couvert @${i} (${JSON.stringify(innerTextMesure[i])})`);
+      }
+    }
+    return segments;
   });
 }
 
@@ -176,22 +182,99 @@ verifier(
   "a"
 );
 
+/* --- Cas du bug du 6 août : blancs de mise en forme du HTML --- */
+
+verifier(
+  "Nœuds texte de mise en forme entre les blocs",
+  /* HTML sérialisé d'une réponse : retours à la ligne et indentation
+     entre les <div>, absents de innerText mais comptés par l'ancien
+     algorithme (dérive d'un caractère ou plus par bloc). */
+  element("div", [
+    texte("\n  "),
+    element("div", [texte("a")]),
+    texte("\n  "),
+    element("div", [texte("b")]),
+    texte("\n"),
+  ]),
+  "a\nb"
+);
+
+verifier(
+  "Citation indentée dans une réponse",
+  element("div", [
+    element("div", [texte("Voici ma réponse.")]),
+    texte("\n"),
+    element("blockquote", [
+      texte("\n  "),
+      element("div", [texte("Texte cité.")]),
+      texte("\n"),
+    ]),
+  ]),
+  "Voici ma réponse.\nTexte cité."
+);
+
+test("Blancs de tête effondrés : nodeStart pointe le premier caractère rendu", () => {
+  const noeud = texte("\n    Texte");
+  const racine = element("div", [element("p", [noeud])]);
+  racine.innerText = "Texte";
+  const segments = construireSegmentsInnerText(racine);
+  assert.strictEqual(segments.length, 1);
+  assert.strictEqual(segments[0].start, 0);
+  assert.strictEqual(segments[0].end, 5);
+  assert.strictEqual(segments[0].nodeStart, 5);
+  /* La conversion globale -> locale doit viser le "T" du nœud. */
+  assert.strictEqual(noeud.textContent[0 - segments[0].start + segments[0].nodeStart], "T");
+});
+
+test("Blanc intérieur effondré : le nœud produit deux segments exacts", () => {
+  const racine = element("div", [texte("a\n b")]);
+  racine.innerText = "a b";
+  const segments = construireSegmentsInnerText(racine);
+  for (const seg of segments) {
+    assert.strictEqual(
+      racine.innerText.slice(seg.start, seg.end),
+      seg.node.textContent.substr(seg.nodeStart, seg.end - seg.start)
+    );
+  }
+  /* "a" puis " b" : le "b" reste adressable à son offset réel. */
+  const dernier = segments[segments.length - 1];
+  assert.strictEqual(racine.innerText.slice(dernier.start, dernier.end).includes("b"), true);
+});
+
+verifier(
+  "Espace insécable conservé tel quel",
+  element("div", [element("p", [texte("mot\u00A0suivant")])]),
+  "mot\u00A0suivant"
+);
+
+test("Nœud entièrement effondré : aucun segment", () => {
+  const racine = element("div", [
+    texte("\n   \n"),
+  ]);
+  racine.innerText = "";
+  assert.strictEqual(construireSegmentsInnerText(racine).length, 0);
+});
+
 test("Long courriel : le dernier paragraphe reste aligné", () => {
-  /* Le défaut corrigé décalait d'un caractère par paragraphe : au-delà
-     d'une dizaine de paragraphes, findRealOffset ne compensait plus et
-     les erreurs de fin de message n'étaient plus soulignées. */
+  /* Le défaut historique décalait la table d'un caractère ou plus par
+     bloc : au-delà d'une dizaine de paragraphes, les erreurs de fin de
+     message n'étaient plus soulignées au bon endroit. Les nœuds de mise
+     en forme intercalés reproduisent le HTML sérialisé d'un compose. */
   const contenus = [];
   for (let i = 0; i < 12; i++) contenus.push("Paragraphe numéro " + i);
-  const segments = construireSegmentsInnerText(
-    element("div", contenus.map((c) => element("p", [texte(c)])))
-  );
-  const innerText = texteReconstitue(segments);
+  const enfants = [];
+  for (const c of contenus) {
+    enfants.push(texte("\n  "));
+    enfants.push(element("p", [texte(c)]));
+  }
+  const racine = element("div", enfants);
+  racine.innerText = contenus.join("\n\n");
+  const segments = construireSegmentsInnerText(racine);
   const dernier = segments[segments.length - 1];
   assert.strictEqual(
-    innerText.slice(dernier.start, dernier.end),
+    racine.innerText.slice(dernier.start, dernier.end),
     "Paragraphe numéro 11"
   );
-  /* Chaque paragraphe précédent occupe sa longueur plus deux sauts de ligne. */
   const attendu = contenus
     .slice(0, 11)
     .reduce((total, c) => total + c.length + 2, 0);

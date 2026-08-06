@@ -24,7 +24,10 @@
 Albert.findSegmentAt = function (segments, globalOffset) {
   for (const seg of segments) {
     if (globalOffset >= seg.start && globalOffset <= seg.end) {
-      return { node: seg.node, offset: globalOffset - seg.start };
+      /* nodeStart : offset du premier caractère aligné du segment dans
+         son nœud, non nul quand des blancs de tête ont été effondrés
+         par le rendu (voir util/inner-text.js). */
+      return { node: seg.node, offset: globalOffset - seg.start + (seg.nodeStart || 0) };
     }
   }
   return null;
