@@ -5,6 +5,12 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.6.3] - 2026-08-25
+
+### Modifié
+- Configuration : l'URL de l'API passe avant la clé, et le libellé "Clé API
+  Albert" devient "Clé de l'API" puisque l'URL peut viser un autre serveur.
+
 ## [0.6.2] - 2026-08-24
 
 ### Corrigé
