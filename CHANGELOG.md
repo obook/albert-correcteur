@@ -5,6 +5,15 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.6.2] - 2026-08-24
+
+### Corrigé
+- Configuration : la liste des modèles restait vide quand l'URL de l'API
+  pointait sur un proxy local compatible OpenAI. Le filtre réclamait le
+  type de tâche ("text-generation") que seule l'API Albert publie ; une
+  entrée sans ce champ est maintenant retenue. Les modèles de
+  reconnaissance de texte dans l'image restent écartés.
+
 ## [0.6.1] - 2026-08-06
 
 ### Corrigé
