@@ -64,6 +64,29 @@ const CHAT_TYPES = new Set(["text-generation", "image-text-to-text"]);
  */
 const MODELES_HORS_SUJET = /ocr/i;
 
+/**
+ * Indique si une entrée de /v1/models est utilisable pour la correction.
+ *
+ * Le type de tâche est propre à Albert. Un endpoint compatible OpenAI,
+ * proxy local ou autre, n'annonce rien de tel : ses entrées portent au
+ * mieux `type: "model"`, et il ne sert que des modèles de conversation.
+ *
+ * @param {{id: string, type?: string, aliases?: string[]}} m
+ * @returns {boolean}
+ */
+function estModeleDeChat(m) {
+  const noms = [m.id].concat(Array.isArray(m.aliases) ? m.aliases : []);
+  if (noms.some((n) => typeof n === "string" && MODELES_HORS_SUJET.test(n))) {
+    return false;
+  }
+  if (CHAT_TYPES.has(m.type)) return true;
+  if (!m.type || m.type === "model") return true;
+  if (Array.isArray(m.aliases)) {
+    return m.aliases.some((a) => a in MODEL_DESCRIPTIONS);
+  }
+  return false;
+}
+
 const modelSelect = document.getElementById("model");
 const refreshBtn = document.getElementById("refresh-models");
 
@@ -143,22 +166,7 @@ async function fetchModels() {
     }
 
     const data = await response.json();
-    /*
-     * Garde un modèle si son type est un type de chat reconnu, ou s'il
-     * porte un alias openweight-* connu (filet de sécurité face à un
-     * éventuel changement de nomenclature côté API).
-     */
-    const rawModels = (data.data || []).filter((m) => {
-      const noms = [m.id].concat(Array.isArray(m.aliases) ? m.aliases : []);
-      if (noms.some((n) => typeof n === "string" && MODELES_HORS_SUJET.test(n))) {
-        return false;
-      }
-      if (CHAT_TYPES.has(m.type)) return true;
-      if (Array.isArray(m.aliases)) {
-        return m.aliases.some((a) => a in MODEL_DESCRIPTIONS);
-      }
-      return false;
-    });
+    const rawModels = (data.data || []).filter(estModeleDeChat);
 
     /* Déduplique au cas où plusieurs entrées partageraient le même alias. */
     const seen = new Set();

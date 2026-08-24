@@ -51,13 +51,15 @@ function chargerPopupModels() {
     "document", "browser", "showStatus",
     alias + "\n" + models
     + "\nreturn { RECOMMENDED_MODEL, MODEL_DESCRIPTIONS, modelLabel,"
-    + " preferredIdFor };"
+    + " preferredIdFor, estModeleDeChat };"
   );
   return usine(contexte.document, contexte.browser, contexte.showStatus);
 }
 
-const { RECOMMENDED_MODEL, MODEL_DESCRIPTIONS, modelLabel, preferredIdFor } =
-  chargerPopupModels();
+const {
+  RECOMMENDED_MODEL, MODEL_DESCRIPTIONS, modelLabel, preferredIdFor,
+  estModeleDeChat,
+} = chargerPopupModels();
 
 /* Reproduit les trois lignes de sélection de loadModels() : le modèle
    enregistré s'il est disponible, sinon le recommandé s'il est présent. */
@@ -191,6 +193,31 @@ test("Une seule option sélectionnée dans tous les cas", () => {
 
 test("Liste vide : aucune option", () => {
   assert.strictEqual(construireOptions([], "").length, 0);
+});
+
+/* --- Filtrage des entrées de /v1/models --- */
+
+test("Type de tâche Albert : chat gardé, embeddings écarté", () => {
+  assert.ok(estModeleDeChat({ id: "openai/gpt-oss-120b", type: "text-generation" }));
+  assert.ok(!estModeleDeChat({ id: "BAAI/bge-m3", type: "text-embeddings-inference" }));
+});
+
+/* Réponse d'un proxy local : type "model", et un modèle hors catalogue
+   Albert qui doit sortir dans la liste comme les autres. */
+test("Endpoint compatible OpenAI : entrées sans type de tâche gardées", () => {
+  const reponse = [
+    { id: "anthropic-albert/openweight-large", type: "model",
+      aliases: ["openweight-large"] },
+    { id: "anthropic-albert/deepseek-v4-flash", type: "model",
+      aliases: ["deepseek-v4-flash"] },
+    { id: "anthropic-albert/openweight-ocr", type: "model",
+      aliases: ["openweight-ocr"] },
+    { id: "gpt-4o-mini" },
+  ];
+  assert.deepStrictEqual(
+    reponse.filter(estModeleDeChat).map(preferredIdFor),
+    ["openweight-large", "anthropic-albert/deepseek-v4-flash", "gpt-4o-mini"]
+  );
 });
 
 console.log(`\n${passed} passé(s), ${failed} échoué(s)`);
