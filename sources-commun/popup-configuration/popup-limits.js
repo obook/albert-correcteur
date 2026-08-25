@@ -9,9 +9,10 @@
  *
  *   2. Usage journalier réel (depuis /v1/me/usage)
  *      Compte les requêtes et tokens consommés depuis minuit UTC
- *      pour le modèle sélectionné. La résolution d'alias en id
- *      canonique est faite via /v1/models pour faire correspondre les
- *      événements d'usage qui portent toujours l'id canonique.
+ *      pour le modèle sélectionné, en paginant jusqu'à épuisement.
+ *      Les événements portent l'identifiant amont : /v1/models fournit
+ *      tous les noms du modèle, et l'appariement se fait sur cet
+ *      ensemble, ce qui vaut aussi derrière un proxy qui renomme.
  *
  *   3. Paliers documentés EXP/PROD pour le modèle sélectionné
  *      Lus dans la table DOCUMENTED_MODEL_LIMITS. Permet de
@@ -116,80 +117,121 @@ function buildTierRow(title, tier) {
 }
 
 /**
- * Récupère la map { alias serveur -> id canonique } via l'API.
- * Utilisée pour résoudre l'identifiant sélectionné dans le <select>
- * en celui qui apparaît dans /v1/me/usage.
+ * Renvoie tous les noms (id et alias, en minuscules) que /v1/models
+ * attache au modèle sélectionné.
  *
- * @param {string} apiBase - URL de base de l'API.
- * @param {string} apiKey  - Clé API.
- * @returns {Promise<Object>}
+ * Les événements de /v1/me/usage portent l'identifiant amont, qui n'est
+ * pas forcément celui du <select> : l'API Albert sert son id canonique,
+ * un proxy sert le sien, préfixé. Comparer à l'ensemble des noms évite
+ * de parier sur un espace de noms plutôt qu'un autre.
+ *
+ * @param {string} apiBase       - URL de base de l'API.
+ * @param {string} apiKey        - Clé API.
+ * @param {string} selectedModel - Identifiant choisi dans le <select>.
+ * @returns {Promise<Set<string>>}
  */
-async function fetchModelAliases(apiBase, apiKey) {
+async function fetchModelNames(apiBase, apiKey, selectedModel) {
+  const choisi = selectedModel.toLowerCase();
+  const noms = new Set([choisi]);
   try {
     const response = await fetch(`${apiBase}/v1/models`, {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
-    if (!response.ok) return {};
+    if (!response.ok) return noms;
     const data = await response.json();
-    const aliases = {};
     for (const m of data.data || []) {
-      if (!m.id || !Array.isArray(m.aliases)) continue;
-      for (const a of m.aliases) {
-        if (typeof a === "string" && a) aliases[a] = m.id;
+      const entree = [m.id]
+        .concat(Array.isArray(m.aliases) ? m.aliases : [])
+        .filter((n) => typeof n === "string" && n)
+        .map((n) => n.toLowerCase());
+      if (entree.includes(choisi)) {
+        for (const n of entree) noms.add(n);
       }
     }
-    return aliases;
   } catch {
-    return {};
+    /* Le nom sélectionné seul suffit quand l'API sert le même
+       espace de noms que ses événements d'usage. */
   }
+  return noms;
 }
+
+/* Maximum accepté par /v1/me/usage. Sans paramètre, l'API n'en renvoie
+   que 10, ce qui faisait afficher un usage journalier tronqué. */
+const USAGE_PAGE_SIZE = 100;
+
+/* ponytail: 20 pages, soit 2000 événements par jour. Au-delà le
+   compteur sous-estime ; paginer jusqu'au bout si un compte y arrive. */
+const USAGE_MAX_PAGES = 20;
 
 /**
  * Calcule l'usage journalier (rpd, tpd) pour un modèle depuis /v1/me/usage.
  * Renvoie null si l'endpoint n'est pas disponible.
  *
- * @param {string} apiBase    - URL de base de l'API.
- * @param {string} apiKey     - Clé API.
- * @param {string} canonicalId - Id canonique du modèle.
+ * @param {string} apiBase - URL de base de l'API.
+ * @param {string} apiKey  - Clé API.
+ * @param {Set<string>} noms - Noms du modèle, en minuscules.
  * @returns {Promise<{rpdUsed: number, tpdUsed: number} | null>}
  */
-async function fetchDailyUsageForModel(apiBase, apiKey, canonicalId) {
-  if (!canonicalId) return null;
+async function fetchDailyUsageForModel(apiBase, apiKey, noms) {
+  if (!noms || noms.size === 0) return null;
+
+  const maintenant = new Date();
+  const utcMidnight = Math.floor(
+    Date.UTC(
+      maintenant.getUTCFullYear(),
+      maintenant.getUTCMonth(),
+      maintenant.getUTCDate()
+    ) / 1000
+  );
+
+  let rpdUsed = 0;
+  let tpdUsed = 0;
   try {
-    const response = await fetch(`${apiBase}/v1/me/usage`, {
-      headers: { Authorization: `Bearer ${apiKey}` },
-    });
-    if (!response.ok) return null;
+    for (let page = 0; page < USAGE_MAX_PAGES; page++) {
+      const url = `${apiBase}/v1/me/usage?start_time=${utcMidnight}`
+        + `&limit=${USAGE_PAGE_SIZE}&offset=${page * USAGE_PAGE_SIZE}`;
+      const response = await fetch(url, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+      if (!response.ok) return page === 0 ? null : { rpdUsed, tpdUsed };
 
-    const data = await response.json();
-    const events = Array.isArray(data.data) ? data.data : [];
-    const utcMidnight = Math.floor(
-      Date.UTC(
-        new Date().getUTCFullYear(),
-        new Date().getUTCMonth(),
-        new Date().getUTCDate()
-      ) / 1000
-    );
-
-    let rpdUsed = 0;
-    let tpdUsed = 0;
-    for (const ev of events) {
-      if (!ev || ev.model !== canonicalId) continue;
-      if (typeof ev.created !== "number" || ev.created < utcMidnight) continue;
-      rpdUsed += 1;
-      /* Le quota tpd côté Albert couvre prompt + completion. Sommer les
-         deux pour ne pas sous-évaluer l'usage affiché. */
-      const usage = ev.usage || {};
-      const promptTokens = typeof usage.prompt_tokens === "number"
-        ? usage.prompt_tokens : 0;
-      const completionTokens = typeof usage.completion_tokens === "number"
-        ? usage.completion_tokens : 0;
-      tpdUsed += promptTokens + completionTokens;
+      const data = await response.json();
+      const events = Array.isArray(data.data) ? data.data : [];
+      for (const ev of events) {
+        if (!ev || typeof ev.model !== "string") continue;
+        if (!noms.has(ev.model.toLowerCase())) continue;
+        /* Filet si start_time est ignoré en amont. */
+        if (typeof ev.created === "number" && ev.created < utcMidnight) continue;
+        rpdUsed += 1;
+        /* Le quota tpd côté Albert couvre prompt + completion. Sommer les
+           deux pour ne pas sous-évaluer l'usage affiché. */
+        const usage = ev.usage || {};
+        const promptTokens = typeof usage.prompt_tokens === "number"
+          ? usage.prompt_tokens : 0;
+        const completionTokens = typeof usage.completion_tokens === "number"
+          ? usage.completion_tokens : 0;
+        tpdUsed += promptTokens + completionTokens;
+      }
+      if (events.length < USAGE_PAGE_SIZE) break;
     }
     return { rpdUsed, tpdUsed };
   } catch {
     return null;
   }
+}
+
+/**
+ * Affiche un message unique dans la section, et la déplie.
+ *
+ * Un échec muet était indiscernable d'une extension cassée : la section
+ * disparaissait sans dire pourquoi.
+ *
+ * @param {string} texte - Motif de l'absence de limites.
+ */
+function showLimitsMessage(texte) {
+  limitsInfo.textContent = texte;
+  limitsSection.hidden = false;
+  limitsSection.open = true;
 }
 
 /**
@@ -208,11 +250,21 @@ async function fetchAndShowLimits() {
     const response = await fetch(`${apiBase}/v1/me/info`, {
       headers: { Authorization: `Bearer ${apiKey}` },
     });
-    if (!response.ok) return;
+    if (!response.ok) {
+      /* /v1/me/info est propre à Albert : un endpoint compatible OpenAI
+         répond 404 sans que rien ne soit en panne. */
+      showLimitsMessage(response.status === 404
+        ? "Cet endpoint ne publie pas les limites du compte."
+        : `Limites indisponibles (HTTP ${response.status}).`);
+      return;
+    }
 
     const data = await response.json();
     const rawLimits = data.limits || [];
-    if (rawLimits.length === 0) return;
+    if (rawLimits.length === 0) {
+      showLimitsMessage("Aucune limite déclarée pour ce compte.");
+      return;
+    }
 
     /*
      * Regrouper par type et garder la valeur
@@ -258,9 +310,8 @@ async function fetchAndShowLimits() {
      * d'usage sont indexés par id canonique.
      */
     if (selectedModel) {
-      const aliases = await fetchModelAliases(apiBase, apiKey);
-      const canonical = aliases[selectedModel] || selectedModel;
-      const usage = await fetchDailyUsageForModel(apiBase, apiKey, canonical);
+      const noms = await fetchModelNames(apiBase, apiKey, selectedModel);
+      const usage = await fetchDailyUsageForModel(apiBase, apiKey, noms);
       if (usage) {
         const usageTitle = document.createElement("div");
         usageTitle.className = "tier-section-title";
@@ -298,8 +349,10 @@ async function fetchAndShowLimits() {
       limitsInfo.appendChild(buildTierRow("Production", tiers.prod));
     }
 
-    limitsSection.style.display = "block";
-  } catch {
-    /* Silencieux si l'endpoint n'est pas disponible */
+    /* La section porte l'attribut hidden : la lever par style.display
+       ne suffit pas, la règle UA [hidden] est en !important. */
+    limitsSection.hidden = false;
+  } catch (err) {
+    showLimitsMessage(`Limites indisponibles : ${err.message}`);
   }
 }

@@ -48,10 +48,10 @@ async function loadIgnoredWords() {
 
   ignoredWordsDiv.innerHTML = "";
   if (words.length === 0) {
-    noWordsMsg.style.display = "block";
+    noWordsMsg.hidden = false;
     return;
   }
-  noWordsMsg.style.display = "none";
+  noWordsMsg.hidden = true;
 
   for (const word of words.sort()) {
     const tag = document.createElement("span");
