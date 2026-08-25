@@ -5,6 +5,22 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.6.4] - 2026-08-25
+
+### Corrigé
+- Configuration : le bloc "Limites du compte" ne s'affichait plus. La section
+  porte l'attribut `hidden` depuis la mise en conformité HTML, et le style en
+  ligne qui servait à la révéler ne peut pas passer devant.
+- Paramètres : le message "Aucun mot ignoré" avait disparu pour la même raison.
+- Configuration : l'usage du jour restait à zéro dès que l'URL de l'API pointait
+  sur un proxy, qui renomme les modèles. La correspondance se fait maintenant
+  sur tous les noms d'un modèle, pas sur un seul identifiant.
+- Configuration : l'usage du jour s'arrêtait à dix requêtes, l'API n'en renvoie
+  pas davantage sans paramètre. Les événements sont maintenant paginés depuis
+  minuit UTC.
+- Configuration : quand les limites ne sont pas disponibles, la raison est
+  affichée au lieu d'un bloc qui disparaît sans rien dire.
+
 ## [0.6.3] - 2026-08-25
 
 ### Modifié
