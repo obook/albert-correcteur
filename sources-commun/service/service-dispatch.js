@@ -40,4 +40,20 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     translateText(message.text, message.targetLang).then(sendResponse);
     return true;
   }
+  /* Copie depuis le script de fond : dans le compose Thunderbird, le
+     document injecté ne peut pas écrire dans le presse-papiers, ni par
+     navigator.clipboard ni par execCommand. Le fond en a le droit avec
+     la permission clipboardWrite. Sans elle (Firefox, Brave), l'appel
+     échoue et le script appelant reçoit ok: false. */
+  if (message.type === "copyToClipboard") {
+    const clipboard = navigator.clipboard;
+    if (!clipboard || !clipboard.writeText) {
+      sendResponse({ ok: false });
+      return;
+    }
+    clipboard.writeText(message.text)
+      .then(() => sendResponse({ ok: true }))
+      .catch((err) => sendResponse({ ok: false, error: err && err.message }));
+    return true;
+  }
 });
