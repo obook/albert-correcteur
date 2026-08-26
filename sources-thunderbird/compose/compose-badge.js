@@ -18,7 +18,16 @@
 Albert.badge = null;
 
 Albert.createBadge = function () {
-  if (Albert.badge) return Albert.badge;
+  if (Albert.badge && document.contains(Albert.badge)) return Albert.badge;
+
+  /* Le DOM fait foi, pas Albert.badge. Une seconde injection des compose
+     scripts dans la même fenêtre repart d'un objet Albert neuf, dont le
+     badge est null alors que celui de la première vague est toujours
+     affiché : deux badges se superposaient. Les écouteurs du précédent
+     pilotent un état devenu inaccessible, donc le retirer. */
+  Albert.uiRoot()
+    .querySelectorAll(".albert-badge")
+    .forEach((precedent) => precedent.remove());
 
   const badge = document.createElement("div");
   badge.className = "albert-badge albert-has-errors";
@@ -85,6 +94,14 @@ Albert.removeBadge = function () {
 Albert.watchBadge = function () {
   const observateur = new MutationObserver(() => {
     if (Albert.badge && document.contains(Albert.badge)) return;
+    /* Une seconde injection installe un second observateur, resté lié à
+       l'état précédent. Sans cette adoption du badge déjà présent, il en
+       recréerait un à chaque fois que l'autre vague renouvelle le sien. */
+    const present = Albert.uiRoot().querySelector(".albert-badge");
+    if (present) {
+      Albert.badge = present;
+      return;
+    }
     const etat = Albert.badgeState;
     Albert.removeBadge();
     Albert.createBadge();
