@@ -3,18 +3,18 @@
     "albert-correcteur@ac-bordeaux.fr": {
       "updates": [
         {
-          "version": "0.6.4",
-          "update_link": "https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/jobs/artifacts/v0.6.4/raw/albert-correcteur-firefox_0.6.4.xpi?job=sign",
-          "update_hash": "sha256:97e97760c93c0983860545e0907fb90658310c36f58d9763f8a34821f927d02a"
+          "version": "0.6.5",
+          "update_link": "https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/jobs/artifacts/v0.6.5/raw/albert-correcteur-firefox_0.6.5.xpi?job=sign",
+          "update_hash": "sha256:29f98d75858737e8c702995b5a86bd099c57ffc6da2146b36a76dfa9190c3b76"
         }
       ]
     },
     "albert-correcteur-thunderbird@ac-bordeaux.fr": {
       "updates": [
         {
-          "version": "0.6.4",
-          "update_link": "https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/jobs/artifacts/v0.6.4/raw/albert-correcteur-thunderbird_0.6.4.xpi?job=build-thunderbird",
-          "update_hash": "sha256:1b1852af3f6c43759aab67b9a74b2ba7e5960b338cf784dd584b6176d8386b36"
+          "version": "0.6.5",
+          "update_link": "https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/jobs/artifacts/v0.6.5/raw/albert-correcteur-thunderbird_0.6.5.xpi?job=build-thunderbird",
+          "update_hash": "sha256:84ebd779af8e388546c116ccb7b47790736de49de36d8b247e7abee5cb03bd2f"
         }
       ]
     }
