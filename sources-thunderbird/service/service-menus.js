@@ -8,7 +8,7 @@
  *    - "Reformuler avec Albert" (contexte : compose_body).
  *    - "Traduire avec Albert" (contexte : compose_body + selection).
  *      Dans le compose → envoie au compose script.
- *      En lecture de mail → ouvre une fenêtre popup de traduction.
+ *      En lecture de mail → envoie au script d'affichage.
  *
  * Le routage des messages reçus par le script de fond est assuré
  * par service-dispatch.js, partagé entre les cibles.
@@ -86,14 +86,14 @@ browser.menus.onClicked.addListener(async (info, tab) => {
       }).catch((err) => AlbertLog.error("sendMessage translateGetSelection a échoué :",
         err && err.message));
     } else {
-      /* Dans la lecture de mail : ouvrir une fenêtre popup de traduction */
-      const encodedText = encodeURIComponent(text);
-      browser.windows.create({
-        url: "message/message-traduction.html?text=" + encodedText,
-        type: "popup",
-        width: 480,
-        height: 320,
-      });
+      /* En lecture : mettre les scripts en place dans le message, puis
+         demander la popup, la même que dans le compose. */
+      if (!await injecterScriptsMessage(tab.id)) return;
+      browser.tabs.sendMessage(tab.id, {
+        type: "translateSelection",
+        selectionText: text,
+      }).catch((err) => AlbertLog.error("sendMessage translateSelection a échoué :",
+        err && err.message));
     }
   }
 });

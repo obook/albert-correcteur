@@ -16,6 +16,7 @@
   "permissions": [
     "compose",
     "messagesRead",
+    "messagesModify",
     "storage",
     "menus",
     "activeTab",
@@ -27,10 +28,11 @@
     "96": "icons/icon-96.png",
     "128": "icons/icon-128.png"
   },
-  "compose_action": {
+  "browser_action": {
     "default_icon": "icons/icon-48.png",
     "default_popup": "popup-configuration/popup.html",
-    "default_title": "Albert Correcteur"
+    "default_title": "Albert",
+    "default_area": "maintoolbar"
   },
   "options_ui": {
     "page": "popup-configuration/popup-settings.html",
@@ -50,6 +52,7 @@
       "verification/regles-locales.js",
       "service/service-api.js",
       "service/service-dispatch.js",
+      "service/service-message-scripts.js",
       "service/service-menus.js",
       "service/service-compose-scripts.js",
       "service/service-compose-cleanup.js"
