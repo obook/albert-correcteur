@@ -5,7 +5,6 @@
  *   - getComposeBody()          : accès au body éditable.
  *   - getBodyText()             : texte brut du corps.
  *   - filterIgnoredCorrections() : filtre par dictionnaire personnel.
- *   - getPopupThemeClass()      : classe CSS du thème actif.
  *   - findRealOffset()          : recherche d'un mot dans le texte.
  *
  * Auteur : O. Booklage
@@ -46,9 +45,9 @@ Albert.filterIgnoredCorrections = function (corrections) {
   );
 };
 
-Albert.getPopupThemeClass = function () {
-  return Albert.popupTheme === "light" ? "albert-theme-light" : "";
-};
+/* getPopupThemeClass vit dans util/popup-base.js : la version d'ici
+   ignorait le thème "automatique" et restait sombre sous un système
+   clair. */
 
 Albert.findRealOffset = function (text, word, apiOffset) {
   const idx = text.indexOf(word, Math.max(0, apiOffset - 10));

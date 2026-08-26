@@ -37,10 +37,14 @@
   gap: 6px;
 }
 
+/* L'icône est un fond et non une balise <img> : dans la fenêtre de
+   composition de Thunderbird, une source en moz-extension:// reste
+   vide. Une feuille de style injectée atteint ses propres ressources. */
 .albert-popup-icon {
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+  background: url("../icons/icon.svg") center / contain no-repeat;
 }
 
 /* Menu mode (Correcteur / Reformuler) */
@@ -245,28 +249,35 @@
 }
 
 /* --- Traduction --- */
-.albert-popup-lang-select {
-  padding: 3px 6px;
+/* Un bouton par langue cible ; le bouton pressé (aria-pressed) reprend
+   la couleur d'action. */
+.albert-popup-langues {
+  display: flex;
+  gap: 4px;
+}
+
+.albert-popup-langue {
+  padding: 3px 8px;
   border: 1px solid #4a4a5a;
   border-radius: 4px;
   background: #272738;
   color: #e0e0e0;
-  font-size: 12px;
-  font-family: inherit;
-}
-
-.albert-popup-translate-btn {
-  background: #3b82f6;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 3px 10px;
   cursor: pointer;
   font-size: 12px;
   font-family: inherit;
 }
 
-.albert-popup-translate-btn:hover {
+.albert-popup-langue:hover {
+  background: #3a3a4a;
+}
+
+.albert-popup-langue[aria-pressed="true"] {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
+}
+
+.albert-popup-langue[aria-pressed="true"]:hover {
   background: #2563eb;
 }
 

@@ -46,6 +46,12 @@ window.Albert.uiRoot = function () {
     /* Balise inconnue donc en ligne par défaut : la passer en position
        fixe et de taille nulle évite qu'elle n'occupe une ligne. */
     conteneur.style.cssText = "position:fixed;top:0;left:0;width:0;height:0;";
+    /* La fenêtre de composition de Thunderbird met tout le document en
+       designMode, y compris ce qui est accroché à <html>. Sans ce
+       garde, les popups deviennent du contenu à éditer : un clic sur un
+       sélecteur ou sur un bouton déplace le curseur au lieu d'agir.
+       L'attribut vaut pour toute la descendance. */
+    conteneur.contentEditable = "false";
     document.documentElement.appendChild(conteneur);
   }
   return conteneur;

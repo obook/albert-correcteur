@@ -20,12 +20,8 @@
 
 /* --- Thème --- */
 
-Albert.getPopupThemeClass = function () {
-  const theme = Albert.popupTheme || "dark";
-  if (theme === "dark") return "";
-  if (theme === "light") return "albert-theme-light";
-  return window.matchMedia("(prefers-color-scheme: light)").matches ? "albert-theme-light" : "";
-};
+/* getPopupThemeClass vit dans util/popup-base.js, partagé avec
+   Thunderbird. */
 
 Albert.loadPopupTheme = async function () {
   const result = await browser.storage.local.get("popupTheme");

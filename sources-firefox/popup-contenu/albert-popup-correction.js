@@ -16,8 +16,9 @@
  * pour rester visible dans la fenêtre.
  *
  * Dépendances :
- *   - albert-popup-common.js  (closePopup, trapFocus, getPopupThemeClass)
- *   - albert-popup-layout.js  (initPopupDrag, createPopupHeader)
+ *   - albert-popup-common.js  (closePopup, trapFocus)
+ *   - util/popup-base.js      (getPopupThemeClass)
+ *   - popup-contenu/popup-layout.js (initPopupDrag, createPopupHeader)
  *   - albert-apply.js         (applySuggestion)
  *   - albert-utils.js         (ignoreWord, filterIgnoredCorrections)
  *

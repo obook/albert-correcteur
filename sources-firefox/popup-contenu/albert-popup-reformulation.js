@@ -12,8 +12,8 @@
  *
  * Dépendances :
  *   - albert-popup-common.js  (savedSelection, closePopup, trapFocus)
- *   - albert-popup-layout.js  (positionPopupAtClick, initPopupDrag,
- *                               createPopupHeader)
+ *   - popup-contenu/popup-layout.js (positionPopupAtClick,
+ *                               initPopupDrag, createPopupHeader)
  *
  * Auteur : O. Booklage
  * Date : avril 2026

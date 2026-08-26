@@ -61,6 +61,7 @@
         "<all_urls>"
       ],
       "js": [
+        "util/ui-root.js",
         "etat/albert-state.js",
         "etat/albert-fields.js",
         "etat/albert-paragraphes.js",
@@ -72,11 +73,12 @@
         "affichage/albert-render-overlay.js",
         "affichage/albert-render.js",
         "util/popup-focus.js",
+        "util/popup-base.js",
         "popup-contenu/albert-popup-common.js",
-        "popup-contenu/albert-popup-layout.js",
+        "popup-contenu/popup-layout.js",
         "popup-contenu/albert-popup-correction.js",
         "popup-contenu/albert-popup-reformulation.js",
-        "popup-contenu/albert-popup-traduction.js",
+        "popup-contenu/popup-traduction.js",
         "popup-contenu/albert-popup-messages.js",
         "util/inner-text.js",
         "correction/albert-apply-segments.js",

@@ -83,10 +83,20 @@
 }
 
 /* --- Traduction thème clair --- */
-.albert-theme-light .albert-popup-lang-select {
+.albert-theme-light .albert-popup-langue {
   background: #fff;
   border-color: #ddd;
   color: #333;
+}
+
+.albert-theme-light .albert-popup-langue:hover {
+  background: #eee;
+}
+
+.albert-theme-light .albert-popup-langue[aria-pressed="true"] {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
 }
 
 .albert-theme-light .albert-popup-translation-result {
