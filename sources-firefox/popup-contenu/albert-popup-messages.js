@@ -22,7 +22,7 @@ browser.runtime.onMessage.addListener((message) => {
     window.top !== window ? "(iframe " + location.href + ")" : "");
 
   if (message.type === "reformulateLoading") {
-    Albert.showToast("Reformulation en cours\u2026", 30000);
+    Albert.showToast("Reformulation en cours\u2026", 300000);
     return;
   }
 

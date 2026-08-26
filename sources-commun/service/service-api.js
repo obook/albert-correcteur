@@ -37,8 +37,11 @@
 
 /* Délai maximal d'attente d'une réponse de l'API. Sans cette limite, une
    requête acceptée mais jamais servie laisse le badge en chargement
-   pendant plusieurs minutes (timeout TCP du navigateur). */
-const API_TIMEOUT_MS = 30000;
+   pendant plusieurs minutes (timeout TCP du navigateur).
+   300 s et non 30 : openweight-large dépasse régulièrement 30 s, et la
+   valeur s'aligne sur ALBERT_TIMEOUT_SECS de llm-proxy pour que le
+   client n'abandonne pas pendant que le proxy attend encore. */
+const API_TIMEOUT_MS = 300000;
 
 /**
  * Traduit une exception en message affichable par l'utilisateur.
