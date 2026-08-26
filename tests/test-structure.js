@@ -238,6 +238,72 @@ test("Ancien dossier toast/ supprimé", () => {
   assert.ok(!fs.existsSync(path.join(FIREFOX, "toast")), "Le dossier toast/ ne devrait plus exister");
 });
 
+/* -- Popups partagées entre les cibles -- */
+
+test("util/popup-base.js et util/ui-root.js sont communs aux cibles", () => {
+  assert.ok(fs.existsSync(path.join(SHARED, "util", "popup-base.js")));
+  assert.ok(fs.existsSync(path.join(SHARED, "util", "ui-root.js")));
+});
+
+test("Plus aucune copie de la popup de traduction par cible", () => {
+  assert.ok(!fs.existsSync(path.join(FIREFOX, "popup-contenu", "albert-popup-traduction.js")));
+  assert.ok(!fs.existsSync(path.join(THUNDERBIRD, "compose", "compose-popup-traduction.js")));
+  assert.ok(!fs.existsSync(path.join(THUNDERBIRD, "message", "message-traduction.html")));
+});
+
+/* -- Manifest Thunderbird : tout ce qui est déclaré existe.
+   Les compose scripts et les scripts de message ne passent pas par le
+   manifest ; leurs listes vivent dans deux fichiers du service. Un
+   fichier manquant n'y serait vu qu'au chargement de l'extension. -- */
+
+function fichiersListes(fichierService, nomListe) {
+  const source = fs.readFileSync(path.join(THUNDERBIRD, "service", fichierService), "utf-8");
+  const bloc = source.match(new RegExp(nomListe + "\\s*=\\s*\\[([^\\]]*)\\]"));
+  assert.ok(bloc, `${nomListe} introuvable dans ${fichierService}`);
+  return [...bloc[1].matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+}
+
+function existeDansThunderbird(fichier) {
+  return fs.existsSync(path.join(THUNDERBIRD, fichier))
+    || fs.existsSync(path.join(SHARED, fichier));
+}
+
+test("manifest Thunderbird - tous les scripts de fond existent", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(THUNDERBIRD, "manifest.json"), "utf-8"));
+  for (const js of manifest.background.scripts) {
+    assert.ok(existeDansThunderbird(js), `Manquant : ${js}`);
+  }
+});
+
+test("manifest Thunderbird - un seul bouton, dans la barre principale", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(THUNDERBIRD, "manifest.json"), "utf-8"));
+  assert.ok(manifest.browser_action, "browser_action manquant");
+  assert.ok(!manifest.compose_action, "compose_action ne devrait plus exister");
+});
+
+test("manifest Thunderbird - messagesModify pour les scripts de message", () => {
+  const manifest = JSON.parse(fs.readFileSync(path.join(THUNDERBIRD, "manifest.json"), "utf-8"));
+  assert.ok(manifest.permissions.includes("messagesModify"));
+});
+
+test("Thunderbird - tous les compose scripts et leurs CSS existent", () => {
+  for (const f of fichiersListes("service-compose-scripts.js", "COMPOSE_JS")) {
+    assert.ok(existeDansThunderbird(f), `Manquant : ${f}`);
+  }
+  for (const f of fichiersListes("service-compose-scripts.js", "COMPOSE_CSS")) {
+    assert.ok(existeDansThunderbird(f), `Manquant : ${f}`);
+  }
+});
+
+test("Thunderbird - tous les scripts de message et leurs CSS existent", () => {
+  for (const f of fichiersListes("service-message-scripts.js", "MESSAGE_JS")) {
+    assert.ok(existeDansThunderbird(f), `Manquant : ${f}`);
+  }
+  for (const f of fichiersListes("service-message-scripts.js", "MESSAGE_CSS")) {
+    assert.ok(existeDansThunderbird(f), `Manquant : ${f}`);
+  }
+});
+
 /* -- Manifest : permissions -- */
 
 test("manifest.json - permission contextMenus", () => {
@@ -305,8 +371,12 @@ test("popup-contenu/albert-popup-reformulation.js existe", () => {
   assert.ok(fs.existsSync(path.join(FIREFOX, "popup-contenu", "albert-popup-reformulation.js")));
 });
 
-test("popup-contenu/albert-popup-traduction.js existe", () => {
-  assert.ok(fs.existsSync(path.join(FIREFOX, "popup-contenu", "albert-popup-traduction.js")));
+test("popup-contenu/popup-traduction.js est commun aux cibles", () => {
+  assert.ok(fs.existsSync(path.join(SHARED, "popup-contenu", "popup-traduction.js")));
+});
+
+test("popup-contenu/popup-layout.js est commun aux cibles", () => {
+  assert.ok(fs.existsSync(path.join(SHARED, "popup-contenu", "popup-layout.js")));
 });
 
 test("popup-contenu/albert-popup-messages.js existe", () => {
