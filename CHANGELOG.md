@@ -5,6 +5,15 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.6.6] - 2026-08-26
+
+### Corrigé
+- Configuration : le champ "Clé de l'API" affichait un mot de passe enregistré
+  dans le navigateur à la place de la clé chargée depuis le stockage.
+  Enregistrer depuis ce panneau remplaçait alors la vraie clé. Firefox et
+  Thunderbird ignorent `autocomplete="off"` sur un champ de mot de passe, le
+  champ utilise maintenant `new-password`.
+
 ## [0.6.5] - 2026-08-26
 
 ### Corrigé
