@@ -5,6 +5,17 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.6.5] - 2026-08-26
+
+### Corrigé
+- Le délai d'attente d'une réponse de l'API passe de 30 à 300 secondes.
+  openweight-large dépasse souvent 30 secondes, et derrière un proxy l'attente
+  peut aller plus loin. Les messages "Reformulation en cours" durent aussi
+  longtemps.
+- Thunderbird : deux badges pouvaient se superposer dans la fenêtre de
+  composition. Une seconde injection des scripts repartait d'un état neuf et
+  ajoutait un badge alors que le premier était toujours affiché.
+
 ## [0.6.4] - 2026-08-25
 
 ### Corrigé

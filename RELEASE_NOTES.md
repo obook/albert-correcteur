@@ -1,8 +1,8 @@
-## Albert Correcteur v0.6.4
+## Albert Correcteur v0.6.5
 
-Le bloc "Limites du compte" de la page de configuration ne s'affichait plus, ainsi que le message "Aucun mot ignoré" des paramètres. Les deux sont rétablis.
+Le délai d'attente d'une réponse passe de 30 à 300 secondes. Les gros modèles comme openweight-large dépassent souvent 30 secondes, et derrière un proxy l'attente peut aller plus loin : la requête était abandonnée alors que la réponse arrivait.
 
-L'usage du jour est corrigé : il restait à zéro derrière un proxy, et il s'arrêtait à dix requêtes contre l'API Albert. Quand les limites ne sont pas disponibles, la raison est maintenant affichée.
+Dans Thunderbird, deux badges pouvaient se superposer dans la fenêtre de composition. Un seul reste affiché.
 
 ### Téléchargements
 
