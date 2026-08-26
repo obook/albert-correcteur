@@ -3,12 +3,17 @@
  *
  * Affiche les propositions de reformulation renvoyées par l'API
  * après un clic sur "Reformuler avec Albert" dans le menu
- * contextuel du compose. La popup est déplaçable (drag via le
- * header), centrée à l'ouverture, et fermable par Escape ou
- * clic en dehors.
+ * contextuel du compose. Centrée à l'ouverture, fermable par Escape
+ * ou clic en dehors. Le bandeau, la poignée de déplacement et le
+ * bornage à la fenêtre viennent de popup-contenu/popup-layout.js.
  *
  * Le remplacement du texte sélectionné utilise
  * document.execCommand("insertText") pour préserver l'undo natif.
+ *
+ * Dépendances (injectées avant ce fichier) :
+ *   - util/popup-base.js            (getPopupThemeClass)
+ *   - util/popup-focus.js           (trapFocus, restoreFocus)
+ *   - popup-contenu/popup-layout.js (createPopupHeader, initPopupDrag)
  *
  * Auteur : O. Booklage
  * Date : avril 2026
@@ -40,7 +45,9 @@ Albert.closeReformulationPopup = function () {
 Albert.showReformulationPopup = function (originalText, result, personaLabel) {
   Albert.closeReformulationPopup();
   Albert.closeCorrectionPopup();
-  Albert.closeTranslationPopup();
+  /* La popup de traduction est un script à part : garder l'ouverture
+     possible si son injection a échoué. */
+  if (Albert.closeTranslationPopup) Albert.closeTranslationPopup();
   const loadingToast = document.querySelector(".albert-toast");
   if (loadingToast) loadingToast.remove();
 
@@ -51,8 +58,9 @@ Albert.showReformulationPopup = function (originalText, result, personaLabel) {
     ? sel.getRangeAt(0).cloneRange()
     : null;
 
+  const theme = Albert.getPopupThemeClass();
   const popup = document.createElement("div");
-  popup.className = "albert-popup " + Albert.getPopupThemeClass();
+  popup.className = "albert-popup" + (theme ? " " + theme : "");
   popup.setAttribute("role", "dialog");
   popup.setAttribute("aria-label", "Reformulation");
   popup.setAttribute("aria-modal", "true");
@@ -61,25 +69,16 @@ Albert.showReformulationPopup = function (originalText, result, personaLabel) {
   h2.textContent = "Reformulation";
   popup.appendChild(h2);
 
-  const header = document.createElement("div");
-  header.className = "albert-popup-header";
-  header.style.cursor = "grab";
+  /* Bandeau commun : même icône, même poignée et même croix que les
+     popups de correction et de traduction, et un déplacement borné
+     aux limites de la fenêtre. */
+  const { headerLeft, handle } =
+    Albert.createPopupHeader(popup, Albert.closeReformulationPopup);
 
   const title = document.createElement("span");
   title.className = "albert-popup-type";
   title.textContent = personaLabel ? "Reformulation : " + personaLabel : "Reformulation";
-  header.appendChild(title);
-
-  const closeBtn = document.createElement("button");
-  closeBtn.className = "albert-popup-close";
-  closeBtn.textContent = "\u00D7";
-  closeBtn.setAttribute("aria-label", "Fermer");
-  closeBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    Albert.closeReformulationPopup();
-  });
-  header.appendChild(closeBtn);
-  popup.appendChild(header);
+  headerLeft.appendChild(title);
 
   const origDiv = document.createElement("div");
   origDiv.className = "albert-popup-message";
@@ -153,34 +152,10 @@ Albert.showReformulationPopup = function (originalText, result, personaLabel) {
   popup.style.overflowY = "auto";
   popup.style.zIndex = "2147483647";
 
-  /* Drag via le header */
-  let isDragging = false;
-  let startX, startY, origLeft, origTop;
-  header.addEventListener("mousedown", (e) => {
-    if (e.target === closeBtn) return;
-    e.preventDefault();
-    isDragging = true;
-    startX = e.clientX;
-    startY = e.clientY;
-    const rect = popup.getBoundingClientRect();
-    origLeft = rect.left;
-    origTop = rect.top;
-    popup.style.transform = "none";
-    popup.style.left = rect.left + "px";
-    popup.style.top = rect.top + "px";
-    header.style.cursor = "grabbing";
-  });
-  document.addEventListener("mousemove", (e) => {
-    if (!isDragging) return;
-    popup.style.left = (origLeft + e.clientX - startX) + "px";
-    popup.style.top = (origTop + e.clientY - startY) + "px";
-  });
-  document.addEventListener("mouseup", () => {
-    if (isDragging) {
-      isDragging = false;
-      header.style.cursor = "grab";
-    }
-  });
+  /* Le déplacement à la souris était réécrit ici avec deux écouteurs
+     anonymes sur document, jamais retirés : après N reformulations,
+     2N écouteurs tournaient à chaque mouvement de souris. */
+  Albert.initPopupDrag(popup, handle);
 
   Albert.trapFocus(popup);
   Albert.reformulationPopup = popup;

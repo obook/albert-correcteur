@@ -22,14 +22,17 @@
 Albert.showCorrectionPopup = function (correction, markEl) {
   Albert.closeCorrectionPopup();
   Albert.closeReformulationPopup();
-  Albert.closeTranslationPopup();
+  /* La popup de traduction est un script à part : garder l'ouverture
+     possible si son injection a échoué. */
+  if (Albert.closeTranslationPopup) Albert.closeTranslationPopup();
 
   const state = Albert.composeState;
   const idx = correction.index != null ? correction.index : 0;
   Albert.activePopupIdx = idx;
 
+  const theme = Albert.getPopupThemeClass();
   const popup = document.createElement("div");
-  popup.className = "albert-popup " + Albert.getPopupThemeClass();
+  popup.className = "albert-popup" + (theme ? " " + theme : "");
   popup.setAttribute("role", "dialog");
   popup.setAttribute("aria-label", "Correction suggérée");
   popup.setAttribute("aria-modal", "true");
