@@ -13,12 +13,16 @@
     <h1>Albert Correcteur</h1>
   </div>
 
-  <form id="config-form">
+  <form id="config-form" autocomplete="off">
     <label for="api-base">URL de l'API</label>
     <input type="url" id="api-base" placeholder="https://albert.api.etalab.gouv.fr">
 
     <label for="api-key">Clé de l'API</label>
-    <input type="password" id="api-key" placeholder="sk-..." autocomplete="off">
+    <!-- new-password et non off : Firefox et Thunderbird ignorent
+         autocomplete="off" sur un champ de mot de passe, et le
+         gestionnaire d'identifiants écrasait la clé chargée depuis le
+         stockage par un mot de passe enregistré. -->
+    <input type="password" id="api-key" placeholder="sk-..." autocomplete="new-password">
 
     <label for="model">Modèle</label>
     <div class="model-row">
