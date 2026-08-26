@@ -5,6 +5,34 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.7.0] - 2026-08-26
+
+### Modifié
+- Thunderbird : "Traduire avec Albert" en lecture de message affiche la popup
+  dans le message lui-même, au lieu d'ouvrir une fenêtre à part. L'extension
+  demande la permission "lire et modifier vos courriels tels qu'ils vous sont
+  présentés", nécessaire à cette injection.
+- Thunderbird : un seul bouton "Albert", dans la barre principale. Le bouton
+  de la fenêtre de rédaction ouvrait le même panneau de configuration ; le
+  badge et les menus contextuels y restent.
+- Une seule popup de traduction pour Firefox, Brave et Thunderbird. Chaque
+  cible avait la sienne, avec des écarts : bandeau, thème automatique ignoré,
+  langues recopiées, pas de déplacement à la souris côté Thunderbird.
+- Traduction : le choix de la langue se fait par des boutons. Dans la fenêtre
+  de rédaction de Thunderbird, une liste déroulante ne s'ouvrait pas au clic.
+
+### Corrigé
+- Les popups ne peuvent plus être déplacées hors de la fenêtre, et ne sautent
+  plus d'une demi-largeur quand on saisit la poignée.
+- Thunderbird : le bouton "Copier" de la traduction ne copiait rien depuis la
+  fenêtre de rédaction. La copie passe par le script de fond.
+- Thunderbird : dans la fenêtre de rédaction, les boutons et listes des
+  popups déplaçaient le curseur d'édition au lieu d'agir.
+- Thunderbird : chaque reformulation laissait deux écouteurs de souris actifs
+  jusqu'à la fermeture de la fenêtre.
+- Traduction : si Albert ne répond pas, "Traduction en cours" ne reste plus
+  affiché sans fin.
+
 ## [0.6.6] - 2026-08-26
 
 ### Corrigé

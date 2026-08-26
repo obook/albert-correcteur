@@ -1,8 +1,10 @@
-## Albert Correcteur v0.6.6
+## Albert Correcteur v0.7.0
 
-Le champ "Clé de l'API" pouvait afficher un mot de passe enregistré dans le navigateur à la place de la vraie clé, et un clic sur Enregistrer remplaçait alors la bonne clé par celle-là. Le champ refuse maintenant le remplissage automatique.
+Une seule popup de traduction pour Firefox, Brave et Thunderbird, là où chaque cible avait la sienne. Elle se déplace à la souris sans pouvoir sortir de la fenêtre, suit le thème choisi, et la langue se choisit par des boutons.
 
-Si le cas s'est produit, supprimez l'entrée `moz-extension://` de vos mots de passe enregistrés, puis ressaisissez votre clé.
+Dans Thunderbird, traduire depuis un message lu affiche la popup dans le message, plus de fenêtre à part. Cela demande une permission supplémentaire à la mise à jour : lire et modifier vos courriels tels qu'ils vous sont présentés. Le bouton de la fenêtre de rédaction disparaît, il reste celui de la barre principale, le badge et les menus contextuels.
+
+Corrigé aussi dans Thunderbird : le bouton "Copier" de la traduction, les boutons des popups qui déplaçaient le curseur au lieu d'agir, et une fuite d'écouteurs à chaque reformulation.
 
 ### Téléchargements
 
