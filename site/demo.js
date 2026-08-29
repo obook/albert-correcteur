@@ -82,6 +82,7 @@
   var type = document.querySelector("[data-type]");
   var explication = document.querySelector("[data-explication]");
   var suggestion = document.querySelector("[data-suggestion]");
+  var badge = document.querySelector("[data-badge]");
   var marques = FAUTES.map(function (f) {
     return document.querySelector("[data-faute=\"" + f.cle + "\"]");
   });
@@ -127,6 +128,7 @@
       suggestion.textContent = f.corrige;
       suggestion.classList.remove("invisible");
       panneau.classList.remove("efface");
+      if (badge) badge.classList.remove("ok");
     }
 
     /* Plus rien à proposer : le mot suggéré garde sa place mais ne
@@ -136,6 +138,7 @@
       type.className = "suggestion-type";
       explication.textContent = FINAL.explication;
       suggestion.classList.add("invisible");
+      if (badge) badge.classList.add("ok");
     }
 
     function corriger(index) {
