@@ -107,6 +107,8 @@
 <body>
   <button type="button" id="theme-toggle" onclick="document.body.classList.toggle('dark'); this.textContent = document.body.classList.contains('dark') ? 'Clair' : 'Sombre';">Sombre</button>
   <h1>Test Albert Correcteur</h1>
+  <p>Champs en iframe (webmails, éditeurs riches, isolation de l'interface) :
+    <a href="test-iframes.html">test-iframes.html</a>.</p>
 
   <div class="section">
     <label for="ta1">Textarea (texte avec erreurs)</label>
@@ -186,6 +188,15 @@
     <div class="DraftEditor-root">
       <div class="DraftEditor-editorContainer">
         <div contenteditable="true" data-contents="true" role="textbox" aria-label="Editeur Draft.js (simulation x.com)" class="draft-editor">Je suis contant de vous revoir. Cet exemple et fait pour tester l'extention Albert sur x.com.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <label>Draft.js, trois paragraphes (structure x.com)</label>
+    <div class="DraftEditor-root">
+      <div class="DraftEditor-editorContainer">
+        <div contenteditable="true" data-contents="true" role="textbox" aria-label="Editeur Draft.js multi-paragraphes" class="draft-editor" id="draft-multi"><div data-block="true"><div data-offset-key="a-0-0"><span data-offset-key="a-0-0">Bonjour je sui tres content de vous ecrire ce message.</span></div></div><div data-block="true"><div data-offset-key="b-0-0"><span data-offset-key="b-0-0">Le deuxieme paragraphe contient lui aussi des fautes evidente.</span></div></div><div data-block="true"><div data-offset-key="c-0-0"><span data-offset-key="c-0-0">Et un troisieme pour verifier la derive sur la fin du texte.</span></div></div></div>
       </div>
     </div>
   </div>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Banc d'essai : champs, iframes et interface</title>
+<!--
+  Banc d'essai des formes de champ que l'on rencontre dans les webmails
+  et les éditeurs riches, et des situations qui mettent l'interface en
+  difficulté. Chaque cas a servi à isoler un bug reel : Roundcube et
+  Zimbra montent leur zone de rédaction dans une iframe, tantot
+  about:blank, tantot en designMode, avec le texte dans des paragraphes
+  à marges.
+
+  Complète exemple/test.html, qui couvre les champs d'une page ordinaire
+  (textarea, input, éditeurs riches, langues, champs exclus).
+
+  Usage : servir le dossier en HTTP, sinon les cas 3 à 6 et 9 à 11
+  chargent en file:// et le content script ne s'y injecte pas.
+
+      ./exemple/servir-test.sh
+      http://localhost:8899/test-iframes.html
+
+  Lecture : chaque titre porte ce qu'il faut observer. Un cas est vert
+  quand le badge apparait et que les soulignements tombent sous les
+  mots fautifs.
+
+  La page se recharge elle-même dans ses propres iframes, le fragment
+  d'URL choisit le mode : #ce, #dm, #p, #multi, #riche, #defil,
+  #hostile.
+-->
+<style>
+  body { font: 14px sans-serif; margin: 20px; }
+  h2 { font-size: 14px; margin: 24px 0 2px; }
+  p.note { margin: 0 0 6px; color: #555; font-size: 12px; }
+  textarea, iframe, .zone { width: 600px; height: 140px; border: 1px solid #888; }
+  .zone { display: block; overflow: auto; padding: 4px; }
+  /* Un conteneur transformé devient le bloc contenant des éléments
+     positionnés : le badge et les marques doivent le suivre. */
+  .transforme { transform: translateY(0) scale(1); position: relative; }
+  /* Reproduit la mise en page du corps TinyMCE : marge de body,
+     contenu dans un p à marges verticales. */
+  body.mce-content-body { margin: 4px 8px; font: 16px/1.2 serif; }
+  body.mce-content-body p { margin: 1em 0; }
+  /* Cas 11 : page qui impose son style à tout ce qu'elle contient.
+     Les popups sont dans un shadow DOM et doivent rester intactes. */
+  body.hostile * {
+    font-size: 22px !important;
+    color: #0a0 !important;
+    border-radius: 0 !important;
+  }
+</style>
+</head>
+<body>
+<script>
+"use strict";
+
+var PHRASE = "Bonjour je sui tres content de vous ecrire ce message.";
+var LONG = "Le texte long sert a faire defiler la zone. ";
+
+var CAS = [
+  ["textarea", "1. Temoin : textarea simple", ""],
+  ["blank", "2. Iframe about:blank, body contenteditable",
+   "Forme Roundcube et TinyMCE : iframe sans src. Exige match_about_blank."],
+  ["ce", "3. Iframe http, body contenteditable", ""],
+  ["dm", "4. Iframe http, designMode",
+   "Forme Zimbra classique : le body est editable sans attribut contenteditable."],
+  ["p", "5. Iframe http, corps TinyMCE (texte dans un p a marges)",
+   "Les marges du p s'echappent du body : la boite du body ne fait qu'une ligne."],
+  ["multi", "6. Iframe http, trois paragraphes",
+   "Les trois paragraphes doivent etre soulignes, pas seulement le premier."],
+  ["srcdoc", "7. Iframe srcdoc", ""],
+  ["blob", "8. Iframe blob:", "Exige match_origin_as_fallback."],
+  ["riche", "9. Iframe http, gras, lien et paragraphe indente",
+   "Le balisage en ligne change la largeur du texte : les marques doivent suivre."],
+  ["defil", "10. Iframe http, texte plus haut que la zone",
+   "Faire defiler dans l'iframe : les marques doivent rester sur leurs mots."],
+  ["hostile", "11. Iframe http, page au style agressif",
+   "La popup vit dans un shadow DOM, elle doit garder sa taille et ses couleurs."],
+  ["transforme", "12. Champ dans un conteneur transforme",
+   "Le conteneur devient le bloc contenant : badge et marques doivent y rester."],
+];
+
+/* Corps editable a afficher dans une iframe, selon le fragment d'URL. */
+function rendreEditeur(mode) {
+  var corps = document.body;
+
+  if (mode === "multi") {
+    corps.innerHTML = "<p>" + PHRASE + "</p>"
+      + "<p>Le deuxieme paragraphe contient lui aussi des fautes evidente.</p>"
+      + "<p>Et un troisieme pour verifier la derive sur la fin du texte.</p>";
+  } else if (mode === "p") {
+    corps.innerHTML = "<p>" + PHRASE + "</p>";
+  } else if (mode === "riche") {
+    corps.innerHTML =
+      "<p>Un debut <b>en gras assez long</b> puis je sui tres content.</p>"
+      + "<p style='margin-left:40px'>Un <a href='#'>lien</a> puis vous"
+      + " ecrire un message evidente.</p>";
+  } else if (mode === "defil") {
+    /* Texte plus haut que l'iframe : le contenu defile, les marques
+       doivent suivre leurs mots. */
+    corps.innerHTML = "<p>" + LONG.repeat(12) + "</p><p>" + PHRASE + "</p>";
+  } else if (mode === "hostile") {
+    corps.className = "hostile";
+    corps.textContent = PHRASE;
+  } else {
+    corps.textContent = PHRASE;
+  }
+
+  if (mode === "dm") {
+    document.designMode = "on";
+    return;
+  }
+  corps.id = "tinymce";
+  corps.contentEditable = "true";
+  if (mode === "p" || mode === "multi" || mode === "riche" || mode === "defil") {
+    corps.classList.add("mce-content-body");
+  }
+}
+
+function ajouterTitre(titre, note) {
+  var h = document.createElement("h2");
+  h.textContent = titre;
+  document.body.appendChild(h);
+  var p = document.createElement("p");
+  p.className = "note";
+  p.textContent = note;
+  document.body.appendChild(p);
+}
+
+function creerIframe(id) {
+  var f = document.createElement("iframe");
+  f.id = id;
+  document.body.appendChild(f);
+  return f;
+}
+
+/* Champ editable pose dans un conteneur transforme, sans iframe. */
+function ajouterTransforme() {
+  var boite = document.createElement("div");
+  boite.className = "transforme";
+  var zone = document.createElement("div");
+  zone.className = "zone";
+  zone.id = "transforme";
+  zone.contentEditable = "true";
+  zone.textContent = PHRASE;
+  boite.appendChild(zone);
+  document.body.appendChild(boite);
+}
+
+function rendreBanc() {
+  CAS.forEach(function (cas) {
+    var id = cas[0];
+    ajouterTitre(cas[1], cas[2]);
+
+    if (id === "textarea") {
+      var t = document.createElement("textarea");
+      t.id = "temoin";
+      t.value = PHRASE;
+      document.body.appendChild(t);
+      return;
+    }
+
+    if (id === "transforme") { ajouterTransforme(); return; }
+
+    if (id === "srcdoc") {
+      creerIframe(id).srcdoc =
+        "<body id='tinymce' contenteditable='true'>" + PHRASE + "</body>";
+      return;
+    }
+
+    if (id === "blob") {
+      var html = "<body id='tinymce' contenteditable='true'>" + PHRASE + "</body>";
+      creerIframe(id).src =
+        URL.createObjectURL(new Blob([html], { type: "text/html" }));
+      return;
+    }
+
+    if (id === "blank") {
+      /* Iframe sans src : son document reste about:blank, comme celui
+         que TinyMCE construit pour sa zone d'edition. */
+      var f = creerIframe(id);
+      var d = f.contentDocument;
+      d.open();
+      d.write("<body id='tinymce' contenteditable='true'>" + PHRASE + "</body>");
+      d.close();
+      return;
+    }
+
+    /* Cas restants : la page se recharge dans l'iframe, en mode editeur. */
+    creerIframe(id).src = location.pathname + "#" + id;
+  });
+}
+
+var mode = location.hash.slice(1);
+document.addEventListener("DOMContentLoaded", function () {
+  if (mode) rendreEditeur(mode);
+  else rendreBanc();
+});
+</script>
+</body>
+</html>
