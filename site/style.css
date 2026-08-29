@@ -146,15 +146,17 @@ h1 {
   line-height: 1.4;
 }
 
-/* Pastilles grises et non tricolores : le rouge, l'orange et le vert
-   entreraient en concurrence avec les trois couleurs de faute. */
+/* Pastilles en teintes pastel : assez lavées pour ne pas concurrencer
+   les trois couleurs de faute, qui sont franches, juste en dessous. */
 .pastilles { display: flex; gap: 6px; flex: none; }
 .pastilles i {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #d3d3dd;
 }
+.pastilles i:nth-child(1) { background: #f0b7b3; }
+.pastilles i:nth-child(2) { background: #f3d9a4; }
+.pastilles i:nth-child(3) { background: #b6dcbb; }
 
 .titre {
   color: var(--encre-doux);
