@@ -177,14 +177,17 @@ h1 {
    L'opacité seule : le panneau garde sa place, la carte ne bouge pas. */
 .suggestion.efface { opacity: 0; }
 
+/* Le libellé prend la couleur du type de faute traité. */
 .suggestion-type {
   display: inline-block;
   font-size: 12px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ortho);
   margin-bottom: 6px;
 }
+.type-ortho { color: var(--ortho); }
+.type-gram  { color: var(--gram); }
+.type-style { color: var(--style); }
 .suggestion p { margin: 0 0 12px; color: var(--encre-doux); }
 .suggestion-mot {
   display: inline-block;
