@@ -40,6 +40,7 @@
   },
   "background": {
     "scripts": [
+      "util/blancs.js",
       "util/model-aliases.js",
       "util/personas.js",
       "service/service-update.js",

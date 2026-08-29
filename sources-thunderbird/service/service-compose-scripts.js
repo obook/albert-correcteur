@@ -28,6 +28,9 @@
 
 const COMPOSE_JS = [
   "compose/compose-state.js",
+  /* Après compose-state.js : celui-ci remplace l'objet Albert en entier
+     et effacerait les fonctions publiées ici. */
+  "util/blancs.js",
   "compose/compose-utils.js",
   "util/ui-root.js",
   "util/inner-text.js",

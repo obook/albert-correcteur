@@ -86,7 +86,7 @@ Albert.applySuggestion = function (correction, suggestion) {
          couvre pas exactement le mot erroné (texte modifié depuis la
          vérification, table dépassée), un remplacement raté est bien
          pire qu'un remplacement refusé. */
-      if (range.toString() !== correction.word) {
+      if (!Albert.memeTexte(range.toString(), correction.word)) {
         Albert.warn("applySuggestion : le texte sous l'offset ne correspond plus, remplacement annulé");
         Albert.showToast("Le texte a changé, relancez la vérification.");
         return;

@@ -91,20 +91,27 @@ Albert.migrateCorrections = function (corrections, oldText, newText) {
  * @returns {Array} Corrections avec offsets recalibrés.
  */
 Albert.recalibrateOffsets = function (corrections, text) {
+  /* Recherche sur des copies normalisées : innerText garde les espaces
+     insécables du DOM là où le modèle rend un espace ordinaire. La
+     substitution est de un caractère pour un, les offsets obtenus
+     valent donc pour text (cf. util/blancs.js). */
+  const texteNorme = Albert.normaliserBlancs(text);
+
   return corrections.map((c) => {
     const word = c.word || text.slice(c.offset, c.offset + c.length);
-    const atOffset = text.slice(c.offset, c.offset + word.length);
+    const mot = Albert.normaliserBlancs(word);
+    const atOffset = texteNorme.slice(c.offset, c.offset + mot.length);
 
     /* L'offset est déjà correct */
-    if (atOffset === word) {
+    if (atOffset === mot) {
       return { ...c, offset: c.offset, length: word.length };
     }
 
     /* Chercher l'occurrence la plus proche de l'offset du LLM */
     let bestIdx = -1;
     let searchFrom = 0;
-    while (searchFrom < text.length) {
-      const idx = text.indexOf(word, searchFrom);
+    while (searchFrom < texteNorme.length) {
+      const idx = texteNorme.indexOf(mot, searchFrom);
       if (idx === -1) break;
       if (bestIdx === -1 || Math.abs(idx - c.offset) < Math.abs(bestIdx - c.offset)) {
         bestIdx = idx;

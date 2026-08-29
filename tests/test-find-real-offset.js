@@ -8,19 +8,24 @@
  */
 
 const assert = require("assert");
+const { normaliserBlancs } = require("../sources-commun/util/blancs.js");
 
 /* Reproduire la fonction telle qu'elle est dans albert-apply.js */
 function findRealOffset(currentText, correction, checkedText) {
-  const originalWord = checkedText.slice(correction.offset, correction.offset + correction.length);
+  const originalWord = correction.word
+    || checkedText.slice(correction.offset, correction.offset + correction.length);
 
-  if (currentText.slice(correction.offset, correction.offset + correction.length) === originalWord) {
+  const texte = normaliserBlancs(currentText);
+  const mot = normaliserBlancs(originalWord);
+
+  if (texte.slice(correction.offset, correction.offset + mot.length) === mot) {
     return correction.offset;
   }
 
   let bestIdx = -1;
   let searchFrom = 0;
-  while (searchFrom < currentText.length) {
-    const idx = currentText.indexOf(originalWord, searchFrom);
+  while (searchFrom < texte.length) {
+    const idx = texte.indexOf(mot, searchFrom);
     if (idx === -1) break;
     if (bestIdx === -1 || Math.abs(idx - correction.offset) < Math.abs(bestIdx - correction.offset)) {
       bestIdx = idx;
@@ -126,6 +131,20 @@ test("Mot d'un seul caractère dupliqué - proximité", () => {
   /* offsets de "a" : 0, 4, 8 */
   const correction = { offset: 4, length: 1 };
   assert.strictEqual(findRealOffset(text, correction, text), 4);
+});
+
+test("Insécable du texte contre espace ordinaire du modèle", () => {
+  /* innerText garde l'insécable, le modèle rend un espace ordinaire. */
+  const texte = "Il en reste vingt ; c'est peu";
+  const correction = { offset: 12, length: 7, word: "vingt ;" };
+  assert.strictEqual(findRealOffset(texte, correction, texte), 12);
+});
+
+test("Insécable et mot déplacé - occurrence retrouvée", () => {
+  const checked = "On a vingt ; puis trente";
+  const current = "On avait vingt ; puis trente";
+  const correction = { offset: 5, length: 7, word: "vingt ;" };
+  assert.strictEqual(findRealOffset(current, correction, checked), 9);
 });
 
 test("Correction de longueur 0 - offset exact", () => {

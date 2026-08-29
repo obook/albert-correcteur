@@ -27,6 +27,7 @@
 importScripts(
   "../lib/browser-shim.js",
 
+  "../util/blancs.js",
   "../util/model-aliases.js",
   "../util/personas.js",
   "service-update.js",

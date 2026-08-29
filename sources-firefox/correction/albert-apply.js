@@ -83,16 +83,23 @@ Albert.findRealOffset = function (currentText, correction, checkedText) {
   const originalWord = correction.word
     || checkedText.slice(correction.offset, correction.offset + correction.length);
 
+  /* Chercher sur des copies normalisées : innerText garde les espaces
+     insécables du DOM, le modèle rend un espace ordinaire dans word.
+     La normalisation étant de un caractère pour un, les offsets trouvés
+     restent valables dans currentText (cf. util/blancs.js). */
+  const texte = Albert.normaliserBlancs(currentText);
+  const mot = Albert.normaliserBlancs(originalWord);
+
   /* Vérifier d'abord à l'offset original */
-  if (currentText.slice(correction.offset, correction.offset + originalWord.length) === originalWord) {
+  if (texte.slice(correction.offset, correction.offset + mot.length) === mot) {
     return correction.offset;
   }
 
   /* Sinon, chercher le mot dans le texte actuel (occurrence la plus proche de l'offset original) */
   let bestIdx = -1;
   let searchFrom = 0;
-  while (searchFrom < currentText.length) {
-    const idx = currentText.indexOf(originalWord, searchFrom);
+  while (searchFrom < texte.length) {
+    const idx = texte.indexOf(mot, searchFrom);
     if (idx === -1) break;
     if (bestIdx === -1 || Math.abs(idx - correction.offset) < Math.abs(bestIdx - correction.offset)) {
       bestIdx = idx;
@@ -140,15 +147,18 @@ Albert.applySuggestion = async function (el, correction, suggestion) {
   /* Nettoyer la suggestion */
   suggestion = Albert._trimSuggestion(suggestion, correction, Albert.getTextContent(el));
 
-  /* Appliquer selon le type de champ */
+  /* Appliquer selon le type de champ. Les stratégies rendent l'offset
+     où le remplacement a eu lieu, ou -1 si elles ont renoncé. */
+  let realOffset = -1;
   if (tag === "textarea" || tag === "input") {
-    if (!Albert._applyInTextarea(el, correction, suggestion, state)) return;
+    realOffset = Albert._applyInTextarea(el, correction, suggestion, state);
   } else if (el.isContentEditable) {
-    if (!await Albert._applyInContentEditable(el, correction, suggestion, state)) return;
+    realOffset = await Albert._applyInContentEditable(el, correction, suggestion, state);
   }
+  if (realOffset === -1) return;
 
   /* Retirer la correction appliquée et ajuster les offsets des suivantes */
-  Albert._updateRemainingCorrections(state, correction, suggestion);
+  Albert._updateRemainingCorrections(state, correction, suggestion, realOffset);
 
   /* Le texte est à jour dans tous les cas : re-rendre immédiatement. */
   Albert.renderCorrections(el);
@@ -161,13 +171,14 @@ Albert.applySuggestion = async function (el, correction, suggestion) {
 
 /* --- Stratégies par type de champ --- */
 
-/* Textarea / input : remplacement de .value avec pile undo manuelle (CTRL+Z). */
+/* Textarea / input : remplacement de .value avec pile undo manuelle (CTRL+Z).
+   Rend l'offset du remplacement, ou -1 si le mot est introuvable. */
 Albert._applyInTextarea = function (el, correction, suggestion, state) {
   const realOffset = Albert.findRealOffset(el.value, correction, state.checkedText || el.value);
   if (realOffset === -1) {
     Albert.applyingCorrection = false;
     Albert.showToast("Correction impossible : le texte a changé.", 3000);
-    return false;
+    return -1;
   }
   const wordLen = (correction.word || "").length || correction.length;
   Albert._pushUndo(el);
@@ -177,30 +188,26 @@ Albert._applyInTextarea = function (el, correction, suggestion, state) {
   el.setSelectionRange(realOffset + suggestion.length, realOffset + suggestion.length);
   state.checkedText = el.value;
   el.dispatchEvent(new Event("input", { bubbles: true }));
-  return true;
+  return realOffset;
 };
 
-/* Contenteditable (simple ou riche) */
+/* Contenteditable (simple ou riche). Rend l'offset du remplacement, ou -1. */
 Albert._applyInContentEditable = async function (el, correction, suggestion, state) {
-  if (Albert.isRichEditor(el)) {
+  const realOffset = Albert.isRichEditor(el)
     /* Éditeur riche : via Selection + chaîne d'événements (albert-apply-rich.js) */
-    if (!await Albert.applyViaSelection(el, correction, suggestion)) {
-      Albert.applyingCorrection = false;
-      Albert.showToast("Correction impossible : le texte a changé.", 3000);
-      return false;
-    }
-  } else {
+    ? await Albert.applyViaSelection(el, correction, suggestion)
     /* Contenteditable simple : Range + execCommand immédiat (pas de setTimeout) */
-    if (!Albert._applyInSimpleContentEditable(el, correction, suggestion, state)) {
-      Albert.applyingCorrection = false;
-      Albert.showToast("Correction impossible : le texte a changé.", 3000);
-      return false;
-    }
+    : Albert._applyInSimpleContentEditable(el, correction, suggestion, state);
+
+  if (realOffset === -1) {
+    Albert.applyingCorrection = false;
+    Albert.showToast("Correction impossible : le texte a changé.", 3000);
   }
-  return true;
+  return realOffset;
 };
 
-/* Contenteditable simple : sélection via Range puis execCommand immédiat. */
+/* Contenteditable simple : sélection via Range puis execCommand immédiat.
+   Rend l'offset du remplacement, ou -1. */
 Albert._applyInSimpleContentEditable = function (el, correction, suggestion, state) {
   el.focus();
 
@@ -211,17 +218,19 @@ Albert._applyInSimpleContentEditable = function (el, correction, suggestion, sta
     || checkedText.slice(correction.offset, correction.offset + correction.length);
 
   const realOffset = Albert.findRealOffset(currentText, correction, checkedText);
-  if (realOffset === -1) return false;
+  if (realOffset === -1) return -1;
 
   const errEnd = realOffset + expectedWord.length;
   const startPos = Albert.findSegmentAt(segments, realOffset);
   const endPos = Albert.findSegmentAt(segments, errEnd);
-  if (!startPos || !endPos) return false;
+  if (!startPos || !endPos) return -1;
 
   const range = document.createRange();
   range.setStart(startPos.node, startPos.offset);
   range.setEnd(endPos.node, endPos.offset);
-  if (range.toString() !== expectedWord) return false;
+  /* Comparaison indifférente à la nature des espaces : le DOM peut
+     porter une insécable là où le modèle a rendu un espace ordinaire. */
+  if (!Albert.memeTexte(range.toString(), expectedWord)) return -1;
 
   const sel = window.getSelection();
   sel.removeAllRanges();
@@ -237,18 +246,28 @@ Albert._applyInSimpleContentEditable = function (el, correction, suggestion, sta
   }
 
   state.checkedText = el.innerText || "";
-  return true;
+  return realOffset;
 };
 
 /* --- Mise à jour des offsets --- */
 
-/* Retire la correction appliquée et ajuste les offsets des corrections restantes. */
-Albert._updateRemainingCorrections = function (state, correction, suggestion) {
-  const delta = suggestion.length - correction.length;
+/*
+ * Retire la correction appliquée et ajuste les offsets des corrections
+ * restantes.
+ *
+ * Le décalage se calcule sur ce qui a réellement été remplacé, pas sur
+ * ce que le modèle avait annoncé : findRealOffset a pu déplacer le
+ * remplacement, et correction.length diffère parfois de la longueur de
+ * correction.word. Prendre les valeurs annoncées décalait toutes les
+ * corrections suivantes, et le clic d'après tombait à côté.
+ */
+Albert._updateRemainingCorrections = function (state, correction, suggestion, realOffset) {
+  const wordLen = (correction.word || "").length || correction.length;
+  const delta = suggestion.length - wordLen;
   state.corrections = state.corrections
     .filter((c) => c !== correction)
     .map((c) => {
-      if (c.offset > correction.offset) {
+      if (c.offset > realOffset) {
         return Object.assign({}, c, { offset: c.offset + delta });
       }
       return c;

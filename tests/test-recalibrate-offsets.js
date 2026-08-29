@@ -8,22 +8,25 @@
  */
 
 const assert = require("assert");
+const { normaliserBlancs } = require("../sources-commun/util/blancs.js");
 
 /**
  * Reproduit la logique de recalibrage dans service-api.js.
  * Corrige offset et length à partir du champ word si nécessaire.
  */
 function recalibrateCorrections(corrections, text) {
+  const texteNorme = normaliserBlancs(text);
   for (const c of corrections) {
     if (!c.word || typeof c.offset !== "number") continue;
-    const atOffset = text.slice(c.offset, c.offset + c.word.length);
-    if (atOffset === c.word) {
+    const mot = normaliserBlancs(c.word);
+    const atOffset = texteNorme.slice(c.offset, c.offset + mot.length);
+    if (atOffset === mot) {
       c.length = c.word.length;
     } else {
       let bestIdx = -1;
       let from = 0;
-      while (from < text.length) {
-        const idx = text.indexOf(c.word, from);
+      while (from < texteNorme.length) {
+        const idx = texteNorme.indexOf(mot, from);
         if (idx === -1) break;
         if (bestIdx === -1
           || Math.abs(idx - c.offset) < Math.abs(bestIdx - c.offset)) {
@@ -152,6 +155,16 @@ test("Correction sans offset : ignorée", () => {
   const c = [{ word: "pence", length: 5, suggestions: ["pense"] }];
   recalibrateCorrections(c, TEXT);
   assert.strictEqual(c[0].length, 5);
+});
+
+test("Insécable du texte contre espace ordinaire du modèle", () => {
+  /* Le corps du message porte une insécable devant le point-virgule,
+     le modèle renvoie le même passage avec un espace ordinaire. */
+  const texte = "Il en reste vingt ; c'est peu";
+  const c = [{ offset: 12, length: 5, word: "vingt ;", suggestions: ["vingt ;"] }];
+  recalibrateCorrections(c, texte);
+  assert.strictEqual(c[0].offset, 12);
+  assert.strictEqual(c[0].length, 7);
 });
 
 console.log(`\n${passed} passé(s), ${failed} échoué(s)`);

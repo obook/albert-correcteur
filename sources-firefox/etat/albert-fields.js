@@ -187,6 +187,36 @@ Albert.isRichEditor = function (el) {
 };
 
 /**
+ * Délai à laisser à un éditeur riche entre la pose de la sélection et
+ * l'insertion du texte.
+ *
+ * Les éditeurs à modèle interne synchronisé par événement (Draft.js,
+ * Lexical, et les composeurs qui se signalent par role="textbox") ne
+ * lisent pas la sélection du DOM au moment de l'insertion : ils
+ * attendent d'avoir traité l'événement de changement de sélection.
+ * Insérer trop tôt les fait écrire à l'ancienne position du curseur,
+ * en général la fin du texte.
+ *
+ * Les éditeurs qui travaillent sur le DOM (CKEditor, TinyMCE, Quill,
+ * ProseMirror) n'ont besoin que d'un tour de boucle. Attendre plus leur
+ * laisse le temps de déplacer leur curseur et fait échouer les
+ * garde-fous, la correction est alors refusée.
+ *
+ * @param {HTMLElement} el - Éditeur riche visé.
+ * @returns {number} Délai en millisecondes.
+ */
+Albert.editorInsertDelay = function (el) {
+  if (el.classList.contains("DraftEditor-editorContainer")) return 200;
+  if (el.classList.contains("public-DraftEditor-content")) return 200;
+  if (el.closest(".DraftEditor-root")) return 200;
+  if (el.hasAttribute("data-contents")) return 200;
+  if (el.hasAttribute("data-lexical-editor")) return 200;
+  if (el.closest("[data-lexical-editor]")) return 200;
+  if (el.getAttribute("role") === "textbox") return 200;
+  return 10;
+};
+
+/**
  * Détecte le corps éditable d'une iframe d'éditeur riche.
  *
  * @param {HTMLElement} el - Élément contenteditable à tester.

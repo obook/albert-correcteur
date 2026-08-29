@@ -56,6 +56,7 @@
         "lib/browser-shim.js",
         "util/ui-root.js",
         "etat/albert-state.js",
+        "util/blancs.js",
         "etat/albert-fields.js",
         "etat/albert-paragraphes.js",
         "etat/albert-offsets.js",

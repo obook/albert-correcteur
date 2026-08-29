@@ -49,8 +49,14 @@ Albert.filterIgnoredCorrections = function (corrections) {
    ignorait le thème "automatique" et restait sombre sous un système
    clair. */
 
+/* Recherche sur des copies normalisées : innerText garde les espaces
+   insécables du corps du message là où le modèle rend un espace
+   ordinaire dans word. La substitution valant un caractère pour un, les
+   offsets obtenus restent valables dans text (cf. util/blancs.js). */
 Albert.findRealOffset = function (text, word, apiOffset) {
-  const idx = text.indexOf(word, Math.max(0, apiOffset - 10));
+  const texte = Albert.normaliserBlancs(text);
+  const mot = Albert.normaliserBlancs(word);
+  const idx = texte.indexOf(mot, Math.max(0, apiOffset - 10));
   if (idx !== -1) return idx;
-  return text.indexOf(word);
+  return texte.indexOf(mot);
 };

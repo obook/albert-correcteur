@@ -36,10 +36,13 @@
  * interne. On mute ces événements en phase de capture au niveau du document
  * pour éviter toute interférence.
  */
+/* selectionchange ne figure pas dans cette liste : c'est par lui que
+   les éditeurs à modèle interne apprennent où insérer. Le museler
+   revenait à leur demander d'écrire à l'ancienne position du curseur. */
 const _MUTED_EVENTS = [
   "mousedown", "mouseup", "mousemove", "mouseover", "mouseout",
   "pointerdown", "pointerup", "pointermove", "pointerover", "pointerout",
-  "click", "dblclick", "selectionchange"
+  "click", "dblclick"
 ];
 
 Albert._muteEvents = function (el) {
@@ -85,21 +88,23 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
     || checkedText.slice(correction.offset, correction.offset + correction.length);
 
   const realOffset = Albert.findRealOffset(currentText, correction, checkedText);
-  if (realOffset === -1) return Promise.resolve(false);
+  if (realOffset === -1) return Promise.resolve(-1);
 
   const errEnd = realOffset + expectedWord.length;
 
   /* Localiser les nœuds texte de début et fin */
   const startPos = Albert.findSegmentAt(segments, realOffset);
   const endPos = Albert.findSegmentAt(segments, errEnd);
-  if (!startPos || !endPos) return Promise.resolve(false);
+  if (!startPos || !endPos) return Promise.resolve(-1);
 
   /* Créer le Range couvrant le texte erroné */
   const range = document.createRange();
   range.setStart(startPos.node, startPos.offset);
   range.setEnd(endPos.node, endPos.offset);
 
-  if (range.toString() !== expectedWord) return Promise.resolve(false);
+  /* Comparaison indifférente à la nature des espaces : le DOM peut
+     porter une insécable là où le modèle a rendu un espace ordinaire. */
+  if (!Albert.memeTexte(range.toString(), expectedWord)) return Promise.resolve(-1);
 
   /*
    * Coordonnées séparées pour début et fin :
@@ -132,9 +137,15 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
   Albert._simulateMouseEvent(endPos.node.parentElement || el, "mouseup", endRect);
 
   /*
-   * Délai pour que l'éditeur enregistre la sélection,
-   * puis insertion via chaîne d'événements complète.
+   * Délai pour que l'éditeur enregistre la sélection, puis insertion via
+   * chaîne d'événements complète. Le délai dépend de la famille
+   * d'éditeur (albert-fields.js) : une valeur unique était trop longue
+   * pour les éditeurs qui travaillent sur le DOM, dont elle faisait
+   * échouer les garde-fous, et trop courte pour ceux à modèle interne,
+   * qui écrivaient alors en fin de texte.
    */
+  const attente = Albert.editorInsertDelay(el);
+
   return new Promise((resolve) => {
     setTimeout(() => {
       /*
@@ -152,7 +163,7 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
         Albert.warn("applyViaSelection : sélection introuvable après le "
           + "délai, insertion annulée pour éviter un remplacement "
           + "au mauvais endroit.");
-        resolve(false);
+        resolve(-1);
         return;
       }
 
@@ -163,10 +174,10 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
       /* Même garde-fou que le contenteditable simple : si la sélection
          reconstruite ne couvre pas exactement le mot erroné, insérer
          reviendrait à écrire au mauvais endroit. */
-      if (freshRange.toString() !== expectedWord) {
+      if (!Albert.memeTexte(freshRange.toString(), expectedWord)) {
         Albert.warn("applyViaSelection : la sélection reconstruite ne "
           + "couvre pas le mot attendu, insertion annulée.");
-        resolve(false);
+        resolve(-1);
         return;
       }
 
@@ -182,33 +193,30 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
        * synchronisé par selectionchange. Insérer dans le même tour de
        * boucle leur faisait écrire à l'ancienne position du curseur,
        * typiquement en fin de texte.
+       *
+       * Les événements souris sont muselés pendant cette attente
+       * seulement, et démuselés avant l'insertion : c'est le curseur
+       * déplacé par une souris parasite qu'il faut empêcher, pas
+       * l'insertion elle-même.
        */
+      const unmute = Albert._muteEvents(el);
       setTimeout(() => {
-        /*
-         * Muter les événements souris et pointeur uniquement pendant
-         * l'insertion : les muter plus tôt avalerait aussi les clics de
-         * l'utilisateur pendant l'attente.
-         */
-        const unmute = Albert._muteEvents(el);
-        try {
-          /* Un éditeur peut avoir effacé la sélection pendant l'attente
-             (Lexical) : la reposer juste avant l'insertion. Sans bouger,
-             c'est un no-op et le selectionchange déjà délivré reste
-             valable. */
-          const selCourante = window.getSelection();
-          if (selCourante.rangeCount === 0
-            || selCourante.getRangeAt(0).toString() !== expectedWord) {
-            selCourante.removeAllRanges();
-            selCourante.addRange(freshRange);
-          }
-          Albert._insertTextInEditor(el, suggestion);
-          state.checkedText = el.innerText || "";
-          resolve(true);
-        } finally {
-          unmute();
+        unmute();
+        /* Un éditeur peut avoir effacé la sélection pendant l'attente
+           (Lexical) : la reposer juste avant l'insertion. Sans bouger,
+           c'est un no-op et le selectionchange déjà délivré reste
+           valable. */
+        const selCourante = window.getSelection();
+        if (selCourante.rangeCount === 0
+          || !Albert.memeTexte(selCourante.getRangeAt(0).toString(), expectedWord)) {
+          selCourante.removeAllRanges();
+          selCourante.addRange(freshRange);
         }
-      }, 30);
-    }, 30);
+        Albert._insertTextInEditor(el, suggestion);
+        state.checkedText = el.innerText || "";
+        resolve(realOffset);
+      }, attente);
+    }, attente);
   });
 };
 

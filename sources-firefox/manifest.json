@@ -40,6 +40,7 @@
   },
   "background": {
     "scripts": [
+      "util/blancs.js",
       "util/model-aliases.js",
       "util/personas.js",
       "service/service-update.js",
@@ -63,6 +64,7 @@
       "js": [
         "util/ui-root.js",
         "etat/albert-state.js",
+        "util/blancs.js",
         "etat/albert-fields.js",
         "etat/albert-paragraphes.js",
         "etat/albert-offsets.js",

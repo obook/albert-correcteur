@@ -143,19 +143,25 @@ async function checkText(text, mode, personaId) {
       return { error: "Réponse API invalide : corrections manquantes." };
     }
     /* Recalibrer les offsets : certains modèles retournent un offset
-       ou un length qui ne correspond pas exactement au champ "word". */
+       ou un length qui ne correspond pas exactement au champ "word".
+       Comparaison et recherche sur des copies normalisées : le texte
+       vient de innerText et garde ses espaces insécables, que le modèle
+       rend en espaces ordinaires. La substitution valant un caractère
+       pour un, les offsets obtenus valent pour text (util/blancs.js). */
+    const texteNorme = normaliserBlancs(text);
     for (const c of parsed.corrections) {
       if (!c.word || typeof c.offset !== "number") continue;
-      const atOffset = text.slice(c.offset, c.offset + c.word.length);
-      if (atOffset === c.word) {
+      const mot = normaliserBlancs(c.word);
+      const atOffset = texteNorme.slice(c.offset, c.offset + mot.length);
+      if (atOffset === mot) {
         /* Le word est bien à l'offset indiqué : fiabiliser le length */
         c.length = c.word.length;
       } else {
         /* Chercher le word dans le texte, occurrence la plus proche */
         let bestIdx = -1;
         let from = 0;
-        while (from < text.length) {
-          const idx = text.indexOf(c.word, from);
+        while (from < texteNorme.length) {
+          const idx = texteNorme.indexOf(mot, from);
           if (idx === -1) break;
           if (bestIdx === -1
             || Math.abs(idx - c.offset) < Math.abs(bestIdx - c.offset)) {
