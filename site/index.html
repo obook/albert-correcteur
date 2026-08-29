@@ -185,6 +185,38 @@ h1 {
   background: var(--papier-2);
 }
 
+/* Seconde carte : la traduction d'une selection, avec ses quatre langues. */
+.demo + .demo { margin-top: 16px; }
+
+.langues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--sans);
+  font-size: 14px;
+}
+.langues li {
+  border: 1px solid var(--trait);
+  border-radius: 4px;
+  padding: 5px 12px;
+  color: var(--encre-doux);
+}
+.langues .choisie {
+  border-color: var(--bleu);
+  background: var(--bleu);
+  color: #fff;
+  font-weight: 600;
+}
+
+.traduction {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--trait);
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -249,7 +281,9 @@ h2 {
 .cibles {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  /* 12rem tient les trois cibles sur une ligne dans la mesure du texte,
+     au lieu de laisser la troisieme seule sur un second rang. */
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
   margin: 0;
   padding: 0;
   list-style: none;
@@ -316,6 +350,10 @@ footer p { margin: 0; }
 
 @media (max-width: 34rem) {
   .heros { padding: 48px 0 44px; }
+  /* L'adresse passe a la ligne sous cette largeur : la barre fixe est
+     deux fois plus haute, la reserve du body suit. */
+  body { padding-bottom: 96px; }
+  .barre-auteur .licence { margin-left: 0; }
   /* Trop etroit pour trois mentions : la version reste lisible sur la
      page des releases, la mention "experimental" est plus utile ici. */
   .version { display: none; }
@@ -341,9 +379,10 @@ footer p { margin: 0; }
 <main>
   <div class="heros">
     <div class="enveloppe">
-      <h1>Corrige vos textes là où vous les écrivez.</h1>
+      <h1>Corrigez vos textes là où vous les écrivez.</h1>
       <p class="chapeau">Une extension pour Firefox, Thunderbird et Brave. Elle souligne les fautes
-        dans les champs de saisie et remplace le mot d'un clic.</p>
+        dans les champs de saisie et traduit n'importe quelle sélection en quatre langues.
+        Un clic remplace le mot.</p>
 
       <div class="demo">
         <span class="demo-etiquette">Champ de saisie d'une page web</span>
@@ -356,6 +395,20 @@ footer p { margin: 0; }
           <p>"contant" ne s'écrit pas ainsi quand on parle d'être satisfait.</p>
           <span class="suggestion-mot">content</span>
         </div>
+      </div>
+
+      <div class="demo">
+        <span class="demo-etiquette">Texte sélectionné, clic droit</span>
+        <p style="margin:0">Le rapport doit être remis avant vendredi.</p>
+
+        <ul class="langues">
+          <li>Français</li>
+          <li class="choisie">Anglais</li>
+          <li>Espagnol</li>
+          <li>Allemand</li>
+        </ul>
+
+        <p class="traduction" style="margin:0">The report must be submitted before Friday.</p>
       </div>
 
       <div class="actions">
@@ -378,8 +431,9 @@ footer p { margin: 0; }
           <span>Rouge pour l'orthographe, orange pour la grammaire, bleu pour le style. Un clic sur le mot ouvre la suggestion.</span>
         </li>
         <li>
-          <strong>Elle reformule et elle traduit</strong>
-          <span>Par le clic droit, sur une sélection. Français, anglais, espagnol, allemand.</span>
+          <strong>Elle traduit et elle reformule</strong>
+          <span>Par le clic droit sur une sélection. Quatre langues au choix : français, anglais,
+            espagnol, allemand. La langue de départ est reconnue toute seule.</span>
         </li>
       </ul>
     </div>
@@ -435,7 +489,8 @@ footer p { margin: 0; }
 
 <div class="barre-auteur">
   <div class="enveloppe">
-    <span><strong>Olivier Booklage</strong></span>
+    <span>Auteur <strong>Olivier Booklage</strong>
+      (<a href="mailto:olivier.booklage@ac-bordeaux.fr">olivier.booklage@ac-bordeaux.fr</a>)</span>
     <span class="licence">Licence MIT</span>
   </div>
 </div>
