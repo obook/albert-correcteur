@@ -170,12 +170,15 @@ h1 {
   font-family: var(--sans);
   font-size: 15px;
   line-height: 1.45;
-  transition: opacity 0.35s ease;
 }
 
-/* Panneau effacé après le remplacement du mot, par la boucle de demo.js.
-   L'opacité seule : le panneau garde sa place, la carte ne bouge pas. */
-.suggestion.efface { opacity: 0; }
+/*
+ * Estompage d'un bloc pendant que demo.js en change le contenu.
+ * L'opacité seule : le bloc garde sa place, la carte ne bouge pas.
+ */
+.suggestion,
+.traduction { transition: opacity 0.35s ease; }
+.efface { opacity: 0; }
 
 /* Le libellé prend la couleur du type de faute traité. */
 .suggestion-type {
@@ -209,11 +212,14 @@ h1 {
   font-family: var(--sans);
   font-size: 14px;
 }
+/* La sélection glisse d'un bouton à l'autre au lieu de sauter : le
+   bouton quitté perd sa couleur pendant que le suivant la prend. */
 .langues li {
   border: 1px solid var(--trait);
   border-radius: 4px;
   padding: 5px 12px;
   color: var(--encre-doux);
+  transition: background-color 0.35s ease, border-color 0.35s ease, color 0.35s ease;
 }
 .langues .choisie {
   border-color: var(--bleu);

@@ -214,9 +214,15 @@
       traduction.textContent = LANGUES[index].texte;
     }
 
+    /* La traduction change pendant qu'elle est invisible, la couleur des
+       boutons glisse au même moment par la transition de style.css. */
     function suivante() {
-      afficher((courante + 1) % LANGUES.length);
-      minuteur = setTimeout(suivante, PAR_LANGUE_MS);
+      traduction.classList.add("efface");
+      minuteur = setTimeout(function () {
+        afficher((courante + 1) % LANGUES.length);
+        traduction.classList.remove("efface");
+        minuteur = setTimeout(suivante, PAR_LANGUE_MS);
+      }, FONDU_MS);
     }
 
     function demarrer() {
