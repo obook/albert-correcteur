@@ -38,13 +38,17 @@ const LIMIT_LABELS = {
 
 /*
  * Paliers documentés Albert par modèle (source : page tarifs publique
- * https://albert.sites.beta.gouv.fr/prices/).
+ * https://ia.numerique.gouv.fr/outils-ia/albert-api/tarifs-et-limites/,
+ * page lue le 2026-08-29).
  *
  * Indexés uniquement par alias serveur. Toute entrée reçue sous forme
  * d'id canonique est convertie en alias par normalizeModelId() (cf.
  * popup-models.js) avant le lookup.
  *
  * Une valeur null représente un quota "illimité" selon la documentation.
+ *
+ * Correspondance openweight-code -> Qwen/Qwen3-Coder-30B-A3B-Instruct
+ * relevée sur /v1/models le 2026-08-29.
  */
 const DOCUMENTED_MODEL_LIMITS = {
   "openweight-large": {
@@ -56,6 +60,10 @@ const DOCUMENTED_MODEL_LIMITS = {
     prod: { rpm: 100, rpd: 50000, tpm: 246000, tpd: null },
   },
   "openweight-small": {
+    exp:  { rpm: 50,  rpd: 1000,  tpm: 128000, tpd: 2460000 },
+    prod: { rpm: 100, rpd: 50000, tpm: 246000, tpd: null },
+  },
+  "openweight-code": {
     exp:  { rpm: 50,  rpd: 1000,  tpm: 128000, tpd: 2460000 },
     prod: { rpm: 100, rpd: 50000, tpm: 246000, tpd: null },
   },
