@@ -125,25 +125,87 @@ h1 {
   border-radius: 6px;
   background: var(--papier);
   box-shadow: 0 1px 2px rgba(27, 27, 34, 0.04), 0 12px 32px rgba(27, 27, 34, 0.07);
-  padding: 22px 24px 26px;
+  overflow: hidden;
   font-family: var(--serif);
   font-size: 1.2rem;
   line-height: 1.75;
 }
 .demo + .demo { margin-top: 16px; }
 
+/* Barre de fenêtre : pastilles, titre, croix. Tout est inerte, c'est un
+   décor qui dit "ceci se passe dans une page", pas une interface. */
+.barre {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--papier-2);
+  border-bottom: 1px solid var(--trait);
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* Pastilles grises et non tricolores : le rouge, l'orange et le vert
+   entreraient en concurrence avec les trois couleurs de faute. */
+.pastilles { display: flex; gap: 6px; flex: none; }
+.pastilles i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d3d3dd;
+}
+
+.titre {
+  color: var(--encre-doux);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.croix {
+  flex: none;
+  margin-left: auto;
+  width: 12px;
+  height: 12px;
+  stroke: #a5a5b4;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+/*
+ * Corps de la fenêtre. L'ascenseur factice est dessiné par les deux
+ * pseudo-éléments : le rail sur toute la hauteur, le curseur court en
+ * haut, qui suggère une page plus longue que ce qu'on en voit.
+ */
+.contenu {
+  position: relative;
+  padding: 22px 38px 26px 24px;
+}
+.contenu::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 11px;
+  background: var(--papier-2);
+  border-left: 1px solid var(--trait);
+}
+.contenu::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  top: 8px;
+  right: 2px;
+  width: 7px;
+  height: 32%;
+  border-radius: 4px;
+  background: #c9c9d4;
+}
+
 /* Le texte de la démonstration occupe la carte sans marge propre. */
 .phrase { margin: 0; }
-
-.demo-etiquette {
-  display: block;
-  font-family: var(--sans);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--encre-doux);
-  margin-bottom: 10px;
-}
 
 /* Soulignement pointillé, identique à overlay.css. */
 .faute {
