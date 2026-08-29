@@ -170,7 +170,12 @@ h1 {
   font-family: var(--sans);
   font-size: 15px;
   line-height: 1.45;
+  transition: opacity 0.35s ease;
 }
+
+/* Panneau effacé après le remplacement du mot, par la boucle de demo.js.
+   L'opacité seule : le panneau garde sa place, la carte ne bouge pas. */
+.suggestion.efface { opacity: 0; }
 
 .suggestion-type {
   display: inline-block;

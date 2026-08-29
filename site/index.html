@@ -7,6 +7,7 @@
 <meta name="description" content="Extension Firefox, Thunderbird et Brave qui souligne les fautes dans les champs de saisie et propose la correction en un clic, via l'API Albert de l'État.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' rx='8' fill='%232845C1'/></svg>">
 <link rel="stylesheet" href="style.css">
+<script src="demo.js" defer></script>
 </head>
 <body>
 
@@ -32,11 +33,11 @@
 
       <div class="demo">
         <span class="demo-etiquette">Champ de saisie d'une page web</span>
-        <p class="phrase">Je suis <span class="faute faute-ortho">contant</span> de vous revoir.
+        <p class="phrase">Je suis <span class="faute faute-ortho" data-mot>contant</span> de vous revoir.
           <span class="faute faute-style">Au jour d'aujourd'hui</span>, cet exemple
           <span class="faute faute-gram">et</span> prêt.</p>
 
-        <div class="suggestion" role="note">
+        <div class="suggestion" role="note" data-panneau>
           <span class="suggestion-type">Orthographe</span>
           <p>"contant" ne s'écrit pas ainsi quand on parle d'être satisfait.</p>
           <span class="suggestion-mot">content</span>
