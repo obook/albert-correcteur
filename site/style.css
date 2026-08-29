@@ -1,0 +1,367 @@
+/*
+ * style.css - Feuille de style du site de présentation.
+ *
+ * Palette et soulignements repris de l'extension elle-même : bleu et
+ * rouge du logo, trois couleurs d'erreur de sources-commun/css/overlay.css.
+ * Aucune police distante, aucune ressource distante : la page ne
+ * contacte aucun service tiers.
+ *
+ * Auteur : O. Booklage
+ * Date : août 2026
+ * Licence : MIT
+ */
+
+:root {
+  --encre: #1b1b22;
+  --encre-doux: #55555f;
+  --papier: #ffffff;
+  --papier-2: #f5f5f8;
+  --trait: #e2e2ea;
+  --bleu: #2845c1;
+  --rouge: #c83f49;
+  --ortho: #e3342f;
+  --gram: #b45309;
+  --style: #3490dc;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, "Times New Roman", serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mesure: 42rem;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  /* Place réservée à la barre d'auteur fixée en bas. */
+  padding-bottom: 46px;
+  background: var(--papier);
+  color: var(--encre);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--bleu); }
+a:focus-visible, button:focus-visible {
+  outline: 3px solid var(--bleu);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.enveloppe {
+  max-width: var(--mesure);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* --- En-tête --- */
+
+/* Collé en haut : la marque et le numéro de version restent lisibles
+   pendant le défilement. */
+.entete {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--papier);
+  border-bottom: 1px solid var(--trait);
+}
+.entete .enveloppe {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+.entete svg { display: block; width: 26px; height: 26px; }
+.marque {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Mention discrète mais toujours visible : l'extension est expérimentale. */
+.experimental {
+  margin-left: auto;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--encre-doux);
+  border: 1px solid var(--trait);
+  border-radius: 3px;
+  padding: 2px 8px;
+}
+.version {
+  font-size: 14px;
+  color: var(--encre-doux);
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Héros --- */
+
+.heros { padding: 72px 0 64px; }
+
+h1 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: clamp(2.1rem, 6vw, 3.1rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  margin: 0 0 20px;
+}
+
+.chapeau {
+  font-size: 1.15rem;
+  color: var(--encre-doux);
+  margin: 0 0 40px;
+  max-width: 34rem;
+}
+
+/*
+ * Les deux démonstrations : un champ de saisie où le texte porte les
+ * vrais soulignements de l'extension et sa vraie popup de suggestion,
+ * puis la traduction d'une sélection.
+ */
+.demo {
+  border: 1px solid var(--trait);
+  border-radius: 6px;
+  background: var(--papier);
+  box-shadow: 0 1px 2px rgba(27, 27, 34, 0.04), 0 12px 32px rgba(27, 27, 34, 0.07);
+  padding: 22px 24px 26px;
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  line-height: 1.75;
+}
+.demo + .demo { margin-top: 16px; }
+
+/* Le texte de la démonstration occupe la carte sans marge propre. */
+.phrase { margin: 0; }
+
+.demo-etiquette {
+  display: block;
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--encre-doux);
+  margin-bottom: 10px;
+}
+
+/* Soulignement pointillé, identique à overlay.css. */
+.faute {
+  background-repeat: repeat-x;
+  background-position: bottom;
+  background-size: 4px 2px;
+  border-radius: 1px;
+}
+.faute-ortho { background-image: linear-gradient(to right, var(--ortho) 50%, transparent 50%); }
+.faute-gram  { background-image: linear-gradient(to right, var(--gram) 50%, transparent 50%); }
+.faute-style { background-image: linear-gradient(to right, var(--style) 50%, transparent 50%); }
+
+/*
+ * Panneau de suggestion, calqué sur la popup de l'extension. Il reste
+ * dans le flux : en position absolue, la place à lui réserver dépendait
+ * d'une marge fixe que d'autres métriques de police feraient déborder
+ * sur les boutons.
+ */
+.suggestion {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--trait);
+  max-width: 22rem;
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.suggestion-type {
+  display: inline-block;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ortho);
+  margin-bottom: 6px;
+}
+.suggestion p { margin: 0 0 12px; color: var(--encre-doux); }
+.suggestion-mot {
+  display: inline-block;
+  border: 1px solid var(--trait);
+  border-radius: 4px;
+  padding: 5px 12px;
+  font-weight: 600;
+  background: var(--papier-2);
+}
+
+/* Les quatre langues de traduction, rendues comme les boutons de la popup. */
+.langues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--sans);
+  font-size: 14px;
+}
+.langues li {
+  border: 1px solid var(--trait);
+  border-radius: 4px;
+  padding: 5px 12px;
+  color: var(--encre-doux);
+}
+.langues .choisie {
+  border-color: var(--bleu);
+  background: var(--bleu);
+  color: #fff;
+  font-weight: 600;
+}
+
+.traduction {
+  margin: 18px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--trait);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  margin-top: 32px;
+}
+
+.bouton {
+  display: inline-block;
+  background: var(--bleu);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 13px 22px;
+  border-radius: 4px;
+}
+.bouton:hover { background: #1c34a0; }
+
+.lien-discret {
+  color: var(--encre-doux);
+  text-decoration: none;
+  border-bottom: 1px solid var(--trait);
+}
+.lien-discret:hover { color: var(--encre); border-bottom-color: var(--encre); }
+
+/* --- Sections --- */
+
+section { padding: 56px 0; border-top: 1px solid var(--trait); }
+
+h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 1.7rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 28px;
+}
+
+/* Le filet de gauche reprend la couleur du type de faute décrit. */
+.points { margin: 0; padding: 0; list-style: none; }
+.points li {
+  padding: 16px 0 16px 20px;
+  border-left: 3px solid var(--trait);
+  margin-bottom: 4px;
+}
+.points li:nth-child(1) { border-left-color: var(--ortho); }
+.points li:nth-child(2) { border-left-color: var(--gram); }
+.points li:nth-child(3) { border-left-color: var(--style); }
+.points strong { display: block; font-weight: 600; }
+.points span { color: var(--encre-doux); }
+
+/* Encadré de la clé API : c'est le prérequis bloquant, il se voit. */
+.encadre {
+  background: var(--papier-2);
+  border-left: 3px solid var(--rouge);
+  padding: 22px 24px;
+  border-radius: 0 6px 6px 0;
+}
+.encadre h2 { margin-bottom: 10px; font-size: 1.35rem; }
+.encadre p { margin: 0 0 14px; color: var(--encre-doux); }
+.encadre p:last-child { margin-bottom: 0; }
+
+.cibles {
+  display: grid;
+  gap: 14px;
+  /* 12rem tient les trois cibles sur une ligne dans la mesure du texte,
+     au lieu de laisser la troisième seule sur un second rang. */
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cible {
+  border: 1px solid var(--trait);
+  border-radius: 6px;
+  padding: 18px 20px;
+}
+.cible h3 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+.cible p {
+  margin: 0 0 12px;
+  font-size: 15px;
+  color: var(--encre-doux);
+}
+.cible a { font-weight: 600; text-decoration: none; }
+.cible a:hover { text-decoration: underline; }
+
+/* --- Pied --- */
+
+footer {
+  border-top: 1px solid var(--trait);
+  padding: 36px 0 40px;
+  font-size: 15px;
+  color: var(--encre-doux);
+}
+footer ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 22px;
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+}
+footer a { text-decoration: none; }
+footer a:hover { text-decoration: underline; }
+footer p { margin: 0; }
+
+/* Barre d'auteur, fixée en bas de la fenêtre. */
+.barre-auteur {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10;
+  background: var(--papier);
+  border-top: 1px solid var(--trait);
+  padding: 12px 0;
+  font-size: 13px;
+  color: var(--encre-doux);
+}
+.barre-auteur .enveloppe {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  align-items: baseline;
+}
+.barre-auteur strong { font-weight: 600; color: var(--encre); }
+.barre-auteur .licence { margin-left: auto; }
+
+/* --- Petits écrans --- */
+
+@media (max-width: 34rem) {
+  .heros { padding: 48px 0 44px; }
+  /* L'adresse passe à la ligne sous cette largeur : la barre fixe est
+     deux fois plus haute, la réserve du body suit. */
+  body { padding-bottom: 96px; }
+  .barre-auteur .licence { margin-left: 0; }
+  /* Trop étroit pour trois mentions : la version reste lisible sur la
+     page des releases, la mention "expérimental" est plus utile ici. */
+  .version { display: none; }
+  .marque { white-space: nowrap; }
+}
