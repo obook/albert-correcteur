@@ -62,10 +62,20 @@
     }
   ];
 
-  /* Temps de lecture du panneau, et durée du fondu pendant lequel le
-     mot est remplacé. Le fondu doit valoir la transition de style.css. */
+  /* État montré une fois les trois fautes reprises : la pause laisse le
+     temps de lire la phrase entièrement corrigée. Le panneau reste
+     rempli pendant ce temps, sans quoi la carte se viderait. */
+  var FINAL = {
+    type: "Terminé",
+    explication: "Les trois fautes sont reprises, le texte est corrigé."
+  };
+
+  /* Temps de lecture du panneau, durée du fondu pendant lequel le mot
+     est remplacé, et pause finale. Le fondu doit valoir la transition
+     déclarée dans style.css. */
   var LECTURE_MS = 2800;
   var FONDU_MS = 350;
+  var PAUSE_MS = 3400;
 
   var phrase = document.querySelector("[data-phrase]");
   var panneau = document.querySelector("[data-panneau]");
@@ -101,7 +111,7 @@
 
       explication.style.minHeight = "";
       var maxi = 0;
-      FAUTES.forEach(function (f) {
+      FAUTES.concat(FINAL).forEach(function (f) {
         explication.textContent = f.explication;
         maxi = Math.max(maxi, explication.offsetHeight);
       });
@@ -115,7 +125,17 @@
       type.className = "suggestion-type type-" + f.cle;
       explication.textContent = f.explication;
       suggestion.textContent = f.corrige;
+      suggestion.classList.remove("invisible");
       panneau.classList.remove("efface");
+    }
+
+    /* Plus rien à proposer : le mot suggéré garde sa place mais ne
+       s'affiche pas, la carte ne change donc pas de hauteur. */
+    function afficherFinal() {
+      type.textContent = FINAL.type;
+      type.className = "suggestion-type";
+      explication.textContent = FINAL.explication;
+      suggestion.classList.add("invisible");
     }
 
     function corriger(index) {
@@ -140,20 +160,34 @@
      * contenu d'un bout à l'autre du cycle.
      */
     function jouer(index) {
-      var suivant = index + 1 < FAUTES.length ? index + 1 : 0;
       plusTard(function () {
         panneau.classList.add("efface");
         plusTard(function () {
           corriger(index);
-          if (suivant === 0) {
-            reinitialiser();
+          if (index + 1 < FAUTES.length) {
+            afficher(index + 1);
+            panneau.classList.remove("efface");
+            jouer(index + 1);
           } else {
-            afficher(suivant);
+            afficherFinal();
+            panneau.classList.remove("efface");
+            pause();
           }
-          panneau.classList.remove("efface");
-          jouer(suivant);
         }, FONDU_MS);
       }, LECTURE_MS);
+    }
+
+    /* Phrase entièrement corrigée sous les yeux du visiteur, puis
+       retour à l'état de départ pour un nouveau tour. */
+    function pause() {
+      plusTard(function () {
+        panneau.classList.add("efface");
+        plusTard(function () {
+          reinitialiser();
+          panneau.classList.remove("efface");
+          jouer(0);
+        }, FONDU_MS);
+      }, PAUSE_MS);
     }
 
     function demarrer() {

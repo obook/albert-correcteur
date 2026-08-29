@@ -265,6 +265,10 @@ h1 {
   background: var(--papier-2);
 }
 
+/* Rien à proposer pendant la pause finale : le mot garde sa place mais
+   ne s'affiche pas, la carte ne change donc pas de hauteur. */
+.suggestion-mot.invisible { visibility: hidden; }
+
 /* Les quatre langues de traduction, rendues comme les boutons de la popup. */
 .langues {
   display: flex;
