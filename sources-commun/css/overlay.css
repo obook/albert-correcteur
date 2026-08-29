@@ -11,6 +11,16 @@
   border: none !important;
 }
 
+/* Conteneur des marques mesurées (champs à DOM) : simple repère de
+   coordonnées, sans texte, il ne doit rien rogner. */
+.albert-marques {
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  overflow: visible;
+}
+
 /* --- Marques d'erreur --- */
 .albert-error {
   position: relative;

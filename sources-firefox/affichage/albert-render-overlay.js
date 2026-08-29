@@ -50,6 +50,12 @@ Albert.renderOverlay = function (el, state) {
     return;
   }
 
+  /* Champ à DOM : mesurer plutôt que reproduire la mise en page. */
+  if (el.isContentEditable) {
+    Albert.renderMarquesRange(el, state);
+    return;
+  }
+
   /* Créer le div overlay et copier les styles du champ cible */
   const overlay = document.createElement("div");
   overlay.className = "albert-overlay";
@@ -64,7 +70,7 @@ Albert.renderOverlay = function (el, state) {
    * Si le parent est en position static, le passer en relative
    * pour que le positionnement absolu de l'overlay fonctionne.
    */
-  const parent = el.offsetParent || document.body;
+  const parent = Albert.positionedParent(el);
   if (getComputedStyle(parent).position === "static") {
     parent.style.position = "relative";
   }
@@ -108,6 +114,118 @@ Albert.renderOverlay = function (el, state) {
   });
 };
 
+/**
+ * Renvoie la plage DOM couvrant une erreur, ou null si la table des
+ * segments ne permet pas de la situer.
+ *
+ * Même chemin que le remplacement (albert-apply.js) : ce qui n'est pas
+ * situable n'est ni soulignable ni remplaçable, les deux restent donc
+ * cohérents.
+ *
+ * @param {HTMLElement} el         - Champ contenteditable.
+ * @param {Object} correction      - Correction renvoyée par l'API.
+ * @param {string} texte           - innerText courant du champ.
+ * @param {string} verifie         - Texte sur lequel l'API a travaillé.
+ * @param {Array} segments         - Table offsets innerText -> nœuds.
+ * @returns {Range|null} Plage couvrant le mot fautif.
+ */
+Albert.plageErreur = function (el, correction, texte, verifie, segments) {
+  const attendu = correction.word
+    || verifie.slice(correction.offset, correction.offset + correction.length);
+  const offset = Albert.findRealOffset(texte, correction, verifie);
+  if (offset === -1) return null;
+  const debut = Albert.findSegmentAt(segments, offset);
+  const fin = Albert.findSegmentAt(segments, offset + attendu.length);
+  if (!debut || !fin) return null;
+  const plage = el.ownerDocument.createRange();
+  try {
+    plage.setStart(debut.node, debut.offset);
+    plage.setEnd(fin.node, fin.offset);
+  } catch (err) {
+    /* Le DOM a changé depuis la construction de la table. */
+    return null;
+  }
+  return plage;
+};
+
+/**
+ * Souligne les erreurs d'un champ à DOM en mesurant leurs plages.
+ *
+ * L'overlay classique reproduit la mise en page du champ à partir d'un
+ * texte à plat. Sur un éditeur riche, cette copie dérive : les sauts de
+ * ligne de innerText s'effondrent sous le white-space du champ, les
+ * marges entre paragraphes ne sont comptées nulle part, et le gras ou
+ * un lien changent la largeur du texte. Sur un message de trois
+ * paragraphes, les soulignements du deuxième tombaient déjà à côté.
+ *
+ * Ici, aucune reproduction : chaque erreur est convertie en plage DOM,
+ * dont getClientRects() donne les rectangles réellement occupés, y
+ * compris quand le mot est coupé en fin de ligne. Un rectangle vide est
+ * posé sur chacun, la CSS des marques y trace le soulignement.
+ *
+ * @param {HTMLElement} el - Champ contenteditable.
+ * @param {Object} state   - État du champ.
+ */
+Albert.renderMarquesRange = function (el, state) {
+  const parent = Albert.positionedParent(el);
+  if (getComputedStyle(parent).position === "static") {
+    parent.style.position = "relative";
+  }
+
+  const conteneur = el.ownerDocument.createElement("div");
+  conteneur.className = "albert-overlay albert-marques";
+  parent.appendChild(conteneur);
+  state.overlay = conteneur;
+
+  /* Garder le focus dans le champ au clic sur un mot souligné : voir
+     le commentaire de même objet dans renderOverlay. */
+  conteneur.addEventListener("mousedown", (e) => e.preventDefault());
+
+  const placer = () => {
+    conteneur.textContent = "";
+    const parentRect = parent.getBoundingClientRect();
+    const texte = el.innerText || "";
+    const verifie = state.checkedText || texte;
+    const segments = Albert.buildInnerTextSegments(el);
+
+    state.corrections.forEach((correction, idx) => {
+      const plage = Albert.plageErreur(el, correction, texte, verifie, segments);
+      if (!plage) return;
+      for (const rect of plage.getClientRects()) {
+        if (!rect.width || !rect.height) continue;
+        const marque = el.ownerDocument.createElement("span");
+        marque.className = "albert-error albert-error-"
+          + (correction.type || "grammar");
+        marque.dataset.idx = idx;
+        marque.style.cssText = "position:absolute;"
+          + "left:" + (rect.left - parentRect.left) + "px;"
+          + "top:" + (rect.top - parentRect.top) + "px;"
+          + "width:" + rect.width + "px;"
+          + "height:" + rect.height + "px;";
+        marque.addEventListener("click", (e) => {
+          e.stopPropagation();
+          Albert.showPopup(el, correction, marque);
+        });
+        conteneur.appendChild(marque);
+      }
+    });
+  };
+
+  placer();
+
+  /* Un champ qui défile en interne emporte son texte sans que les
+     marques suivent : les replacer, une fois par frame au plus. */
+  let scrollRAF = null;
+  state.scrollHandler = () => {
+    if (scrollRAF) return;
+    scrollRAF = requestAnimationFrame(() => {
+      scrollRAF = null;
+      if (state.overlay === conteneur) placer();
+    });
+  };
+  el.addEventListener("scroll", state.scrollHandler, { passive: true });
+};
+
 /*
  * Copie le style du champ sur l'overlay pour un alignement pixel-perfect.
  * Le principe : l'overlay doit avoir exactement la même zone de contenu
@@ -117,7 +235,7 @@ Albert.renderOverlay = function (el, state) {
 Albert.syncOverlayStyle = function (el, overlay) {
   const cs = getComputedStyle(el);
   const rect = el.getBoundingClientRect();
-  const parentRect = (el.offsetParent || document.body).getBoundingClientRect();
+  const parentRect = Albert.positionedParent(el).getBoundingClientRect();
 
   /*
    * Positionner l'overlay au bord interne du champ (padding edge),
@@ -125,7 +243,7 @@ Albert.syncOverlayStyle = function (el, overlay) {
    * On utilise getBoundingClientRect() (fractionnaire) pour la position,
    * et on ajoute la bordure du champ pour entrer dans la zone de contenu.
    */
-  const parentCS = getComputedStyle(el.offsetParent || document.body);
+  const parentCS = getComputedStyle(Albert.positionedParent(el));
   const parentBorderTop = parseFloat(parentCS.borderTopWidth) || 0;
   const parentBorderLeft = parseFloat(parentCS.borderLeftWidth) || 0;
   const elBorderTop = parseFloat(cs.borderTopWidth) || 0;
@@ -193,20 +311,6 @@ Albert.syncOverlayStyle = function (el, overlay) {
     overlay.style.overflowWrap = "normal";
   }
 
-  /*
-   * Éditeurs riches (CKEditor, etc.) : le contenu est dans des éléments
-   * bloc (<p>, <div>) qui ont des marges verticales. L'overlay est du texte
-   * plat sans ces marges, donc il commence plus haut que le texte réel.
-   * On compense en ajoutant la marge du premier bloc comme padding-top.
-   */
-  if (Albert.isRichEditor(el)) {
-    const firstBlock = el.querySelector("p, div, h1, h2, h3, h4, h5, h6, li");
-    if (firstBlock) {
-      const blockCS = getComputedStyle(firstBlock);
-      const extraTop = parseFloat(blockCS.marginTop) || 0;
-      overlay.style.paddingTop = (parseFloat(cs.paddingTop) + extraTop) + "px";
-    }
-  }
 };
 
 /*
