@@ -5,6 +5,28 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.8.1] - 2026-08-30
+
+### Corrigé
+- Les webmails qui montent leur zone de rédaction dans une iframe sans URL
+  (Roundcube, Zimbra, TinyMCE) n'étaient pas pris en charge du tout : ni badge,
+  ni correction. Le script n'y était pas injecté.
+- Un corps de document en designMode, forme classique de Zimbra, n'était pas
+  reconnu comme champ texte.
+- Dans ces éditeurs, badge, soulignements, popups et zone ARIA étaient insérés
+  dans le corps du message : ils partaient avec le courriel, et l'overflow du
+  champ rognait les soulignements, invisibles.
+- Les soulignements dérivaient dès le deuxième paragraphe d'un message, et
+  tombaient à côté sur un mot en gras ou dans un lien.
+- La popup de correction remontait hors de l'écran quand l'éditeur était plus
+  petit qu'elle.
+
+### Ajouté
+- L'interface (popups, notifications) est isolée dans un shadow DOM. Les CSS
+  de la page ne peuvent plus la déformer.
+- Une page d'essai `exemple/test-iframes.html` couvre douze formes de champ en
+  iframe.
+
 ## [0.8.0] - 2026-08-29
 
 ### Ajouté
