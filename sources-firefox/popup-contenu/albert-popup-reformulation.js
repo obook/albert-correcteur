@@ -27,7 +27,7 @@ Albert.showReformulationPopup = function (originalText, suggestions, personaLabe
     "persona=" + (personaLabel || "(aucun)"),
     "originalText.length=" + originalText.length);
   Albert.closePopup();
-  const loadingToast = document.querySelector(".albert-toast");
+  const loadingToast = Albert.uiRoot().querySelector(".albert-toast");
   if (loadingToast) loadingToast.remove();
 
   const themeClass = Albert.getPopupThemeClass();
@@ -103,7 +103,7 @@ Albert.showReformulationPopup = function (originalText, suggestions, personaLabe
   }
 
   popup.appendChild(body);
-  document.body.appendChild(popup);
+  Albert.uiRoot().appendChild(popup);
 
   Albert.positionPopupAtClick(popup);
   Albert.initPopupDrag(popup, handle);

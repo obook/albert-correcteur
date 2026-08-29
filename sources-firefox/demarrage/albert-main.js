@@ -178,6 +178,12 @@ Albert.attachField = function (el) {
 /** Scanne la page pour trouver et attacher tous les champs texte existants. */
 Albert.scanFields = function () {
   const candidates = document.querySelectorAll(FIELD_SELECTOR);
+  /* Éditeur en iframe qui passe son document entier en designMode
+     (Zimbra, anciens CKEditor) : le <body> est éditable sans porter
+     l'attribut contenteditable, le sélecteur ne le voit donc jamais. */
+  if (document.designMode === "on" && document.body) {
+    Albert.attachField(document.body);
+  }
   Albert.log("scanFields:", candidates.length, "candidats trouvés",
     window.top !== window ? "(iframe " + location.href + ")" : "");
   candidates.forEach(Albert.attachField);
@@ -245,6 +251,8 @@ document.addEventListener("focusin", (e) => {
 Albert.scanFields();
 observer.observe(document.body, { childList: true, subtree: true });
 
-/* Première vérification rapide (1s après le chargement), puis cycle régulier */
-setTimeout(Albert.cycleCheckAll, 1000);
+/* Première vérification rapide (1s après le chargement), puis cycle régulier.
+   Le second scan rattrape les documents passés en designMode après
+   document_idle, qui ne déclenchent aucune mutation. */
+setTimeout(() => { Albert.scanFields(); Albert.cycleCheckAll(); }, 1000);
 setInterval(Albert.cycleCheckAll, Albert.CYCLE_INTERVAL_MS);

@@ -40,7 +40,7 @@ Albert._ensureAriaLive = function () {
   el.style.cssText =
     "position:absolute;width:1px;height:1px;overflow:hidden;"
     + "clip:rect(0,0,0,0);white-space:nowrap;border:0;";
-  document.body.appendChild(el);
+  Albert.uiRoot().appendChild(el);
   Albert._ariaLive = el;
 };
 

@@ -72,6 +72,24 @@ Albert.sleep = function (ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
+/**
+ * Renvoie l'élément où accrocher badge et overlay pour un champ donné.
+ *
+ * Un <body> n'a pas d'offsetParent. Quand le champ est le corps
+ * éditable d'une iframe d'éditeur (Zimbra, TinyMCE, CKEditor 4), le
+ * repli sur document.body désignait le champ lui-même : le badge et
+ * les soulignements atterrissaient dans le texte à corriger, rognés
+ * par son overflow. Les poser dans <html>, hors du contenu éditable.
+ *
+ * @param {HTMLElement} el - Champ de saisie.
+ * @returns {HTMLElement} Parent positionné à utiliser.
+ */
+Albert.positionedParent = function (el) {
+  if (el.offsetParent) return el.offsetParent;
+  const doc = el.ownerDocument;
+  return el === doc.body ? doc.documentElement : doc.body;
+};
+
 // ===============================================================
 //  DICTIONNAIRE PERSONNEL (MOTS IGNORÉS)
 // ===============================================================

@@ -205,7 +205,9 @@ Albert.showPopup = function (el, correction, markEl) {
     popup.appendChild(footer);
   }
 
-  document.body.appendChild(popup);
+  /* Pas document.body : dans une iframe d'éditeur, ce corps est le
+     texte à corriger, la popup s'y insérerait comme du contenu. */
+  Albert.uiRoot().appendChild(popup);
 
   /* --- Positionnement --- */
   if (Albert.popupPosition) {
@@ -221,7 +223,11 @@ Albert.showPopup = function (el, correction, markEl) {
         popup.style.left = (window.innerWidth - popupRect.width - 10) + "px";
       }
       if (popupRect.bottom > window.innerHeight - 10) {
-        popup.style.top = (markRect.top - popupRect.height - 4) + "px";
+        /* Bornée : dans une iframe d'éditeur, la fenêtre fait quelques
+           centaines de pixels, la remontée sortait par le haut. */
+        popup.style.top = Albert.bornerDansFenetre(
+          markRect.top - popupRect.height - 4,
+          popupRect.height, window.innerHeight) + "px";
       }
     });
   }

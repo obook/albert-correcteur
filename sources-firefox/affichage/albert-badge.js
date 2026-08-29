@@ -59,7 +59,7 @@ Albert.ensureBadge = function (el) {
   img.setAttribute("aria-hidden", "true");
   badge.appendChild(img);
 
-  const parent = el.offsetParent || document.body;
+  const parent = Albert.positionedParent(el);
   if (getComputedStyle(parent).position === "static") {
     parent.style.position = "relative";
   }
@@ -129,7 +129,7 @@ Albert.updateBadgeVisibility = function (el, badge) {
  */
 Albert.positionBadge = function (el, badge) {
   const rect = el.getBoundingClientRect();
-  const parentRect = (el.offsetParent || document.body).getBoundingClientRect();
+  const parentRect = Albert.positionedParent(el).getBoundingClientRect();
   const cs = getComputedStyle(el);
   const borderBottom = parseFloat(cs.borderBottomWidth) || 0;
   const borderRight = parseFloat(cs.borderRightWidth) || 0;
