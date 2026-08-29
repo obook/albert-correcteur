@@ -88,6 +88,9 @@ Albert.ensureBadge = function (el) {
   const handleActivate = () => {
     Albert.triggerCheck(el, true);
   };
+  /* Même raison que pour l'overlay : garder le focus dans le champ, un
+     champ qui s'agrandit au focus se replierait au clic sur le badge. */
+  badge.addEventListener("mousedown", (e) => e.preventDefault());
   badge.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();

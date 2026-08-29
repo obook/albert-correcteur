@@ -62,8 +62,17 @@ document.addEventListener("keydown", (e) => {
 });
 
 document.addEventListener("mousedown", (e) => {
-  if (Albert.activePopup && !Albert.activePopup.contains(e.target)) {
+  if (!Albert.activePopup) return;
+  if (!Albert.activePopup.contains(e.target)) {
     Albert.closePopup();
+    return;
+  }
+  /* Clic dans la popup : garder le focus dans le champ corrigé. Sans
+     cela, un champ qui s'agrandit au focus se replie au moment même où
+     l'utilisateur clique sur la suggestion. Les champs de saisie de la
+     popup gardent leur comportement normal. */
+  if (!e.target.closest("input, textarea, select, [contenteditable=\"true\"]")) {
+    e.preventDefault();
   }
 });
 

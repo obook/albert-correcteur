@@ -91,6 +91,13 @@ Albert.renderOverlay = function (el, state) {
   };
   el.addEventListener("scroll", state.scrollHandler, { passive: true });
 
+  /* Garder le focus dans le champ au clic sur un mot souligné. Sans
+     cela, un champ qui s'agrandit au focus (transition CSS) se replie
+     dès le mousedown, sous la popup qui vient de s'ouvrir. L'overlay
+     est en pointer-events: none, seules les marques d'erreur reçoivent
+     cet événement, la pose du curseur ailleurs n'est pas touchée. */
+  overlay.addEventListener("mousedown", (e) => e.preventDefault());
+
   /* Rendre chaque span d'erreur cliquable pour ouvrir la popup de correction */
   overlay.querySelectorAll(".albert-error").forEach((mark) => {
     mark.addEventListener("click", (e) => {
