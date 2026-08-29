@@ -2,7 +2,7 @@
 
 Analyse croisée de `sources-commun/`, `sources-firefox/` et `sources-thunderbird/`,
 avec comparaison au mécanisme de remplacement d'une extension de correction
-tierce (voir `ANALYSE.md` dans le coffre Obsidian).
+tierce.
 
 Les 18 suites de tests existantes passent (257 tests OK) : les bugs se situent
 dans ce que les tests ne couvrent pas, c'est-à-dire le DOM, l'injection des

@@ -2,10 +2,8 @@
 
 Plan d'exécution rédigé après la séance de débogage du 6 août.
 Il traite les deux bugs ouverts (décalage des corrections, clic sur le badge)
-et fixe la stratégie à suivre, éclairée par la lecture du code de l'extension
-de correction tierce décompressée dans le coffre Obsidian
-(`informatique/projets/albert-correcteur/languagetool-8.11.2-tb/`, dossier à
-renommer ou supprimer après usage, il porte le nom du produit).
+et fixe la stratégie à suivre, éclairée par la lecture du code d'une extension
+de correction tierce.
 
 ## 1. État des lieux
 
