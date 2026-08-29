@@ -6,6 +6,8 @@
 ![IA](badges/ia.svg)
 ![RGPD](badges/rgpd.svg)
 
+**Site de présentation** : [booklageolivier.forge.apps.education.fr/albert-correcteur](https://booklageolivier.forge.apps.education.fr/albert-correcteur/)
+
 **Extension expérimentale** de correction orthographique et grammaticale et de traduction pour Firefox, Thunderbird et Brave, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web (Firefox et Brave) et dans la fenêtre de composition de courriel (Thunderbird), propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné vers une des quatre langues au choix : français, anglais, espagnol, allemand.
 
 **Téléchargement .xpi (signé par Mozilla)** : [RELEASES](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases) | **Sécurité** : [SECURITE](SECURITE.md) | **Accessibilité** : [RGAA](ACCESSIBILITE.md)

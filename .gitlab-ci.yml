@@ -4,6 +4,25 @@ stages:
   - sign
   - release
   - update
+  - pages
+
+# ── Site de présentation (GitLab Pages, sur main) ──
+#
+# Le contenu vit dans site/. GitLab ne publie que le dossier public/,
+# d'où la copie. Le job tourne sur main et non sur les tags : la page
+# doit suivre le dépôt, pas attendre une release.
+
+pages:
+  stage: pages
+  image: alpine:latest
+  script:
+    - mkdir -p public
+    - cp -r site/. public/
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
 
 # ── Tests unitaires (uniquement sur les tags v*) ──
 
