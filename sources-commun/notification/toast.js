@@ -45,7 +45,9 @@ function fermerToast(toast) {
  *                                toast invisible ou interminable.
  */
 Albert.showToast = function (message, durationMs) {
-  const existant = document.querySelector(".albert-toast");
+  /* Chercher dans le conteneur, pas dans le document : sous shadow DOM
+     le toast n'est plus visible depuis document.querySelector. */
+  const existant = Albert.uiRoot().querySelector(".albert-toast");
   if (existant) existant.remove();
 
   const toast = document.createElement("div");

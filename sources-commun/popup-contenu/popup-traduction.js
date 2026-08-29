@@ -278,7 +278,10 @@ Albert.showTranslationPopup = function (texte) {
 /* Fermeture au clic en dehors. Thunderbird centralise Échap dans
    compose-popup-utils.js, Firefox dans albert-popup-common.js. */
 document.addEventListener("mousedown", (e) => {
-  if (Albert.translationPopup && !Albert.translationPopup.contains(e.target)) {
+  /* composedPath : sous shadow DOM, la cible vue du document est le
+     conteneur hôte, jamais la popup. */
+  if (Albert.translationPopup
+    && !e.composedPath().includes(Albert.translationPopup)) {
     Albert.closeTranslationPopup();
   }
 });

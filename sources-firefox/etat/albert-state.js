@@ -72,6 +72,12 @@ window.Albert = {
   //  ICÔNES
   // ===============================================================
 
+  /* Feuilles à réimporter dans le shadow DOM de l'interface : les CSS
+     déclarées par le manifest s'arrêtent à la frontière du shadow.
+     Définir cette liste est ce qui déclenche le shadow (util/ui-root.js),
+     Thunderbird ne la déclare pas et garde son interface en DOM clair. */
+  UI_CSS: ["css/popup-dark.css", "css/popup-light.css", "css/toast.css"],
+
   /* URLs des logos embarqués dans l'extension (résolues par le runtime) */
   ICON_URL: browser.runtime.getURL("icons/icon.svg"),
   ICON_OK_URL: browser.runtime.getURL("icons/icon-ok.svg"),

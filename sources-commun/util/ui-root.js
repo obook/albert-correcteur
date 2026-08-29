@@ -54,5 +54,20 @@ window.Albert.uiRoot = function () {
     conteneur.contentEditable = "false";
     document.documentElement.appendChild(conteneur);
   }
-  return conteneur;
+
+  /* Isolation par shadow DOM là où la liste des feuilles est fournie
+     (Firefox et Brave). Les sites aux CSS agressives ne peuvent plus
+     déformer badge, popups et notifications, et nos règles ne fuient
+     plus dans la page. Les feuilles déclarées par le manifest ne
+     franchissent pas cette frontière, il faut les réimporter. */
+  if (!conteneur.shadowRoot && Array.isArray(window.Albert.UI_CSS)) {
+    const racine = conteneur.attachShadow({ mode: "open" });
+    const style = document.createElement("style");
+    style.textContent = window.Albert.UI_CSS
+      .map((f) => "@import url(" + browser.runtime.getURL(f) + ");")
+      .join("\n");
+    racine.appendChild(style);
+  }
+
+  return conteneur.shadowRoot || conteneur;
 };

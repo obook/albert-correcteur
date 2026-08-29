@@ -51,12 +51,15 @@ Albert.trapFocus = function (popup) {
     if (courants.length === 0) return;
     const premier = courants[0];
     const dernier = courants[courants.length - 1];
+    /* Sous shadow DOM, document.activeElement vaut le conteneur hôte :
+       c'est la racine de la popup qui sait qui a le focus. */
+    const actif = popup.getRootNode().activeElement || document.activeElement;
     if (e.shiftKey) {
-      if (document.activeElement === premier) {
+      if (actif === premier) {
         e.preventDefault();
         dernier.focus();
       }
-    } else if (document.activeElement === dernier) {
+    } else if (actif === dernier) {
       e.preventDefault();
       premier.focus();
     }

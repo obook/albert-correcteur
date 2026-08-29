@@ -63,7 +63,10 @@ document.addEventListener("keydown", (e) => {
 
 document.addEventListener("mousedown", (e) => {
   if (!Albert.activePopup) return;
-  if (!Albert.activePopup.contains(e.target)) {
+  /* composedPath et non contains : la popup vit dans un shadow DOM, la
+     cible vue depuis le document est le conteneur hôte, jamais la
+     popup, et tout clic dedans passait pour un clic dehors. */
+  if (!e.composedPath().includes(Albert.activePopup)) {
     Albert.closePopup();
     return;
   }
@@ -71,7 +74,9 @@ document.addEventListener("mousedown", (e) => {
      cela, un champ qui s'agrandit au focus se replie au moment même où
      l'utilisateur clique sur la suggestion. Les champs de saisie de la
      popup gardent leur comportement normal. */
-  if (!e.target.closest("input, textarea, select, [contenteditable=\"true\"]")) {
+  const cible = e.composedPath()[0];
+  if (cible && cible.closest
+    && !cible.closest("input, textarea, select, [contenteditable=\"true\"]")) {
     e.preventDefault();
   }
 });
