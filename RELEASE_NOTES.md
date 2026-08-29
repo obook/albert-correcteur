@@ -1,10 +1,14 @@
-## Albert Correcteur v0.7.0
+## Albert Correcteur v0.8.0
 
-Une seule popup de traduction pour Firefox, Brave et Thunderbird, là où chaque cible avait la sienne. Elle se déplace à la souris sans pouvoir sortir de la fenêtre, suit le thème choisi, et la langue se choisit par des boutons.
+Version de correction, centrée sur les remplacements qui rataient leur cible.
 
-Dans Thunderbird, traduire depuis un message lu affiche la popup dans le message, plus de fenêtre à part. Cela demande une permission supplémentaire à la mise à jour : lire et modifier vos courriels tels qu'ils vous sont présentés. Le bouton de la fenêtre de rédaction disparaît, il reste celui de la barre principale, le badge et les menus contextuels.
+Une correction portant sur un passage à espace insécable était refusée avec "le texte a changé". Le texte de la page garde ces insécables, le modèle renvoie des espaces ordinaires, et la comparaison échouait sur ce seul caractère. Le cas est fréquent en français, devant ; : ! ? comme dans les guillemets et les séparateurs de milliers.
 
-Corrigé aussi dans Thunderbird : le bouton "Copier" de la traduction, les boutons des popups qui déplaçaient le curseur au lieu d'agir, et une fuite d'écouteurs à chaque reformulation.
+Sur x.com et les éditeurs de même famille, le remplacement s'écrivait parfois en fin de texte au lieu du mot visé. Le délai laissé à l'éditeur dépend maintenant de sa famille, et l'événement par lequel il apprend où écrire n'est plus muselé.
+
+Un champ qui s'agrandit au focus ne recevait jamais son badge, faute d'être mesuré au bon moment, et se repliait au clic sur un mot souligné ou sur le badge. Corrigé aussi : une correction appliquée décalait mal les suivantes, et le gestionnaire de mots de passe de Firefox se proposait sur le champ "URL de l'API".
+
+Le panneau des limites affiche enfin les paliers du modèle "code".
 
 ### Téléchargements
 

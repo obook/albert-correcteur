@@ -5,6 +5,30 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.8.0] - 2026-08-29
+
+### Ajouté
+- Les paliers documentés du modèle "code" (openweight-code) s'affichent dans
+  le panneau des limites, qui n'indiquait rien pour ce modèle.
+- Un lanceur `exemple/servir-test.sh` sert la page de test en HTTP et l'ouvre
+  dans le navigateur. Les extensions ne s'injectent pas dans une page ouverte
+  en file://.
+
+### Corrigé
+- Les corrections portant sur un passage à espace insécable étaient refusées
+  avec "le texte a changé". Le cas est fréquent en français, où l'insécable
+  précède ; : ! ? et habite les guillemets et les séparateurs de milliers.
+- Une correction appliquée décalait mal les suivantes quand le mot n'était pas
+  exactement là où le modèle l'annonçait. Le clic suivant tombait à côté.
+- Sur x.com et les éditeurs de même famille, le remplacement s'écrivait
+  parfois en fin de texte au lieu du mot visé.
+- Un champ qui s'agrandit au focus ne recevait jamais son badge : il était
+  mesuré trop tôt, avant son agrandissement.
+- Ce même champ se repliait au clic sur un mot souligné, sur le badge ou dans
+  la popup, qui lui prenaient le focus.
+- Configuration : le gestionnaire de mots de passe de Firefox se proposait sur
+  le champ "URL de l'API", qu'il prenait pour un identifiant.
+
 ## [0.7.0] - 2026-08-26
 
 ### Modifié
