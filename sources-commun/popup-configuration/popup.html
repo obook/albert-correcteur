@@ -15,7 +15,10 @@
 
   <form id="config-form" autocomplete="off">
     <label for="api-base">URL de l'API</label>
-    <input type="url" id="api-base" placeholder="https://albert.api.etalab.gouv.fr">
+    <!-- autocomplete="url" et non off : sans jeton explicite, Firefox prend
+         ce champ pour l'identifiant associé au mot de passe qui suit et
+         propose son gestionnaire d'identifiants. -->
+    <input type="url" id="api-base" placeholder="https://albert.api.etalab.gouv.fr" autocomplete="url">
 
     <label for="api-key">Clé de l'API</label>
     <!-- new-password et non off : Firefox et Thunderbird ignorent
