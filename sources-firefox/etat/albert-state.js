@@ -62,6 +62,11 @@ window.Albert = {
   MIN_TEXT_LENGTH: 10,
   CYCLE_INTERVAL_MS: 30000,
   SCAN_DEBOUNCE_MS: 500,
+  /* Délai avant de remesurer un champ rejeté au focus : un champ qui
+     s'agrandit au focus est encore à sa petite taille quand focusin
+     part, la transition CSS n'ayant pas commencé. 350 ms couvre les
+     transitions courantes (0,2 à 0,3 s) et les agrandissements JS. */
+  FOCUS_RETRY_MS: 350,
 
   // ===============================================================
   //  ICÔNES

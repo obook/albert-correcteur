@@ -227,6 +227,16 @@ document.addEventListener("focusin", (e) => {
   const el = e.target;
   if (!el || Albert.trackedFields.has(el)) return;
   Albert.attachField(el);
+
+  /* Un champ qui s'agrandit au focus est encore à sa petite taille au
+     moment où focusin part : isTextField le rejette sur ses seuils, et
+     comme il n'est jamais suivi, chaque focus suivant rejoue la même
+     course. Le champ ne recevait donc jamais son badge. Remesurer une
+     fois l'agrandissement fait. */
+  if (Albert.trackedFields.has(el)) return;
+  setTimeout(() => {
+    if (document.activeElement === el) Albert.attachField(el);
+  }, Albert.FOCUS_RETRY_MS);
 }, true);
 
 // ===============================================================
