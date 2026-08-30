@@ -175,8 +175,15 @@ Albert.isRichEditor = function (el) {
   if (el.classList.contains("mx_BasicMessageComposer_input")) return true;
   /* Éditeur avec role="textbox" (WhatsApp Web, Slack, etc.) :
      un contenteditable natif n'a pas besoin de role="textbox",
-     sa présence indique un éditeur géré par un framework. */
-  if (el.getAttribute("role") === "textbox") return true;
+     sa présence indique un éditeur géré par un framework.
+
+     Indice plus faible que les précédents : il ne nomme aucun éditeur
+     connu, et n'importe quel petit champ peut le porter. La largeur
+     reste donc mesurée, la hauteur non : un composeur est large même
+     vide, c'est sa hauteur qui suit le contenu. */
+  if (el.getAttribute("role") === "textbox") {
+    return el.getBoundingClientRect().width >= Albert.MIN_FIELD_WIDTH_PX;
+  }
   /* CKEditor 4 et TinyMCE en mode iframe : le content script est injecté
      dans l'iframe (all_frames), où l'éditeur se réduit à un <body
      contenteditable> dépourvu des marqueurs ci-dessus. Sans ce test, le
