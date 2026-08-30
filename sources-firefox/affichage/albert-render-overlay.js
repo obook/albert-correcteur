@@ -204,7 +204,12 @@ Albert.renderMarquesRange = function (el, state) {
           + "height:" + rect.height + "px;";
         marque.addEventListener("click", (e) => {
           e.stopPropagation();
-          Albert.showPopup(el, correction, marque);
+          /* Relire la correction au clic, ne pas garder celle capturée
+             au rendu : un remplacement recalibre les offsets des
+             corrections restantes, et un objet périmé ferait viser une
+             autre occurrence du même mot, ailleurs dans le texte. */
+          const courante = state.corrections[idx];
+          if (courante) Albert.showPopup(el, courante, marque);
         });
         conteneur.appendChild(marque);
       }

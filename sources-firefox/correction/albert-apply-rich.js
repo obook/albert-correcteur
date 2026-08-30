@@ -71,8 +71,62 @@ Albert._muteEvents = function (el) {
  *
  * @returns {Promise<boolean>} true si la correction a été appliquée.
  */
+/**
+ * Reconstruit la plage couvrant le mot erroné sur l'état actuel du DOM.
+ *
+ * Un Range gardé d'un tour de boucle précédent ne survit pas au
+ * re-rendu des nœuds texte par l'éditeur : ses bornes se replient sur
+ * le parent, et le poser en sélection donne une sélection vide.
+ *
+ * @param {HTMLElement} el      - Éditeur riche.
+ * @param {number} debut        - Offset du mot dans innerText.
+ * @param {number} fin          - Offset de fin du mot.
+ * @param {string} motAttendu   - Texte que la plage doit couvrir.
+ * @returns {Range|null} Plage vérifiée, ou null si le mot n'est plus situable.
+ */
+Albert._plageDuMot = function (el, debut, fin, motAttendu) {
+  const segments = Albert.buildInnerTextSegments(el);
+  const posDebut = Albert.findSegmentAt(segments, debut);
+  const posFin = Albert.findSegmentAt(segments, fin);
+  if (!posDebut || !posFin) return null;
+  const plage = el.ownerDocument.createRange();
+  try {
+    plage.setStart(posDebut.node, posDebut.offset);
+    plage.setEnd(posFin.node, posFin.offset);
+  } catch (err) {
+    return null;
+  }
+  return Albert.memeTexte(plage.toString(), motAttendu) ? plage : null;
+};
+
 Albert.applyViaSelection = function (el, correction, suggestion) {
   el.focus();
+
+  /*
+   * Laisser le focus produire ses effets avant de poser la sélection.
+   *
+   * Le focus n'est jamais dans l'éditeur quand on arrive ici : le piège
+   * de focus de la popup (popup-focus.js, exigé au clavier) l'a donné à
+   * son premier bouton. Or Draft.js ignore tout changement de sélection
+   * le temps de traiter son retour de focus. Posée dans le même tour,
+   * notre sélection ne l'atteignait pas : son curseur restait là où
+   * l'utilisateur l'avait laissé, et l'insertion partait dans ce bloc au
+   * lieu du mot visé, en y recopiant la ligne corrigée.
+   *
+   * Mesuré sur exemple/test-draftjs.html : sans cette attente, la
+   * sélection interne reste au bloc du curseur ; avec elle, elle suit le
+   * mot. L'attente vaut pour tous les éditeurs riches, le retard est
+   * celui de leur famille (10 ms hors modèle interne).
+   */
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      Albert._poserSelectionEtInserer(el, correction, suggestion).then(resolve);
+    }, Albert.editorInsertDelay(el));
+  });
+};
+
+/* Pose la sélection sur le mot erroné puis insère la suggestion. */
+Albert._poserSelectionEtInserer = function (el, correction, suggestion) {
   const state = Albert.getOrCreateState(el);
 
   const segments = Albert.buildInnerTextSegments(el);
@@ -202,19 +256,55 @@ Albert.applyViaSelection = function (el, correction, suggestion) {
       const unmute = Albert._muteEvents(el);
       setTimeout(() => {
         unmute();
-        /* Un éditeur peut avoir effacé la sélection pendant l'attente
-           (Lexical) : la reposer juste avant l'insertion. Sans bouger,
-           c'est un no-op et le selectionchange déjà délivré reste
-           valable. */
+        const inserer = () => {
+          Albert._insertTextInEditor(el, suggestion);
+          state.checkedText = el.innerText || "";
+          resolve(realOffset);
+        };
+
         const selCourante = window.getSelection();
-        if (selCourante.rangeCount === 0
-          || !Albert.memeTexte(selCourante.getRangeAt(0).toString(), expectedWord)) {
-          selCourante.removeAllRanges();
-          selCourante.addRange(freshRange);
+        const couvreLeMot = selCourante.rangeCount > 0
+          && Albert.memeTexte(selCourante.getRangeAt(0).toString(), expectedWord);
+
+        /* Sélection intacte : le selectionchange de la pose précédente a
+           déjà été délivré, l'éditeur sait où écrire. */
+        if (couvreLeMot) {
+          inserer();
+          return;
         }
-        Albert._insertTextInEditor(el, suggestion);
-        state.checkedText = el.innerText || "";
-        resolve(realOffset);
+
+        /* L'éditeur a déplacé la sélection pendant l'attente (Lexical
+           l'efface, Draft.js la ramène au curseur de son modèle). La
+           reposer puis insérer dans le même tour de boucle est le piège
+           décrit plus haut : le selectionchange part après beforeinput,
+           l'éditeur écrit donc à son ancienne position, et Draft.js y
+           recopie au passage la ligne où se trouve la sélection du DOM.
+           Reposer, laisser partir le selectionchange, revérifier. */
+        /* Plage reconstruite sur l'état courant du DOM : celle du tour
+           précédent s'est repliée sur son parent si l'éditeur a re-rendu
+           ses nœuds texte entre-temps, et la reposer donnerait une
+           sélection vide. */
+        const plageCourante = Albert._plageDuMot(el, realOffset, errEnd, expectedWord);
+        if (!plageCourante) {
+          Albert.warn("applyViaSelection : le mot n'est plus situable dans "
+            + "le DOM, insertion annulée.");
+          resolve(-1);
+          return;
+        }
+        selCourante.removeAllRanges();
+        selCourante.addRange(plageCourante);
+        setTimeout(() => {
+          const selFinale = window.getSelection();
+          if (selFinale.rangeCount === 0
+            || !Albert.memeTexte(selFinale.getRangeAt(0).toString(), expectedWord)) {
+            Albert.warn("applyViaSelection : l'éditeur reprend la sélection, "
+              + "insertion annulée pour éviter un remplacement au mauvais "
+              + "endroit.");
+            resolve(-1);
+            return;
+          }
+          inserer();
+        }, attente);
       }, attente);
     }, attente);
   });
