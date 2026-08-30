@@ -5,6 +5,24 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.8.2] - 2026-08-30
+
+### Corrigé
+- Sur x.com et les éditeurs de même famille, une correction s'écrivait dans le
+  paragraphe où l'utilisateur avait laissé son curseur, en y recopiant la ligne
+  corrigée. La sélection était posée trop tôt après le retour du focus dans
+  l'éditeur, qui l'ignorait.
+- Une correction appliquée après une autre pouvait viser une autre occurrence
+  du même mot : le soulignement gardait la correction telle qu'elle était au
+  moment du rendu, sans ses offsets recalibrés.
+- Un champ trop petit portant `role="textbox"` recevait un badge : cet attribut
+  dispensait du seuil de taille.
+
+### Ajouté
+- Une page d'essai `exemple/test-draftjs.html` monte un vrai Draft.js, avec
+  blocs vides et rendu concurrent, pour reproduire ce que la structure simulée
+  ne montre pas.
+
 ## [0.8.1] - 2026-08-30
 
 ### Corrigé
