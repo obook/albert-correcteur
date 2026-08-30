@@ -1,10 +1,8 @@
-## Albert Correcteur v0.8.2
+## Albert Correcteur v0.8.3
 
-Correction du remplacement au mauvais endroit sur x.com, apparu avec la 0.8.1.
+Un rectangle blanc apparaissait dans le coin haut gauche de la page, bien visible en thème sombre.
 
-Quand le message comptait plusieurs paragraphes séparés par une ligne vide, une correction pouvait s'écrire dans le paragraphe où le curseur avait été laissé, en y recopiant la ligne corrigée. La popup prend le focus à l'ouverture, pour rester utilisable au clavier, et l'éditeur de x.com ignore les changements de sélection le temps de traiter le retour de ce focus. La sélection est maintenant posée un tour plus tard, une fois qu'il peut l'entendre.
-
-Deux défauts voisins sont corrigés : une correction appliquée après une autre pouvait viser une autre occurrence du même mot, et un champ minuscule portant `role="textbox"` recevait un badge alors qu'il n'est un lieu de rédaction pour personne.
+Le conteneur qui accueille le badge et les popups porte l'attribut `contenteditable="false"`, nécessaire à la fenêtre de rédaction de Thunderbird. Les sites qui habillent leurs champs éditables avec un sélecteur `[contenteditable]` l'attrapaient au passage et lui donnaient un fond et un cadre. Il est maintenant isolé des styles de la page.
 
 ### Téléchargements
 

@@ -5,6 +5,15 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.8.3] - 2026-08-30
+
+### Corrigé
+- Un rectangle blanc apparaissait dans le coin haut gauche de la page. Le
+  conteneur des éléments d'interface porte `contenteditable="false"` pour
+  Thunderbird, et les sites qui habillent leurs champs éditables avec un
+  sélecteur `[contenteditable]` l'attrapaient au passage. Il est maintenant
+  isolé des styles de la page.
+
 ## [0.8.2] - 2026-08-30
 
 ### Corrigé

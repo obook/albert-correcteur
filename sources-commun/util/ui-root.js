@@ -44,8 +44,14 @@ window.Albert.uiRoot = function () {
   if (!conteneur) {
     conteneur = document.createElement("albert-ui");
     /* Balise inconnue donc en ligne par défaut : la passer en position
-       fixe et de taille nulle évite qu'elle n'occupe une ligne. */
-    conteneur.style.cssText = "position:fixed;top:0;left:0;width:0;height:0;";
+       fixe et de taille nulle évite qu'elle n'occupe une ligne.
+       "all:initial" d'abord, car l'attribut contenteditable posé plus
+       bas rend le conteneur cible de tout sélecteur [contenteditable]
+       de la page : un site qui donne à ses éditeurs un fond, un cadre
+       et une hauteur minimale peignait ainsi un rectangle dans le coin
+       haut gauche de la fenêtre. */
+    conteneur.style.cssText =
+      "all:initial;position:fixed;top:0;left:0;width:0;height:0;";
     /* La fenêtre de composition de Thunderbird met tout le document en
        designMode, y compris ce qui est accroché à <html>. Sans ce
        garde, les popups deviennent du contenu à éditer : un clic sur un
