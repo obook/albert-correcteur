@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Banc d'essai : vrai Draft.js</title>
+<!--
+  Un vrai éditeur Draft.js, avec son modèle interne, pour reproduire le
+  bug de x.com : un remplacement dans un paragraphe recopie sa ligne
+  dans le paragraphe où se trouve le curseur de l'utilisateur.
+
+  La structure simulée de test.html ne suffit pas : sans modèle interne,
+  la désynchronisation entre la sélection du DOM et celle de l'éditeur
+  ne peut pas se produire.
+
+  Usage : ./exemple/servir-test.sh puis
+          http://localhost:8899/test-draftjs.html
+
+  La console expose Etat.selection() qui renvoie la sélection interne de
+  l'éditeur (bloc et offset), à comparer avec la sélection du DOM.
+-->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/draft-js/0.11.7/Draft.min.css">
+<style>
+  body { font: 15px sans-serif; margin: 40px auto; max-width: 700px; }
+  #editeur {
+    border: 1px solid #888; border-radius: 6px; padding: 10px;
+    min-height: 120px; font-size: 16px; line-height: 1.4;
+  }
+  #etat { margin-top: 12px; font-family: monospace; font-size: 12px; color: #444; }
+</style>
+</head>
+<body>
+<h1>Vrai Draft.js</h1>
+<p>Trois paragraphes, chacun avec ses fautes. Placer le curseur dans le
+troisième, puis corriger un mot du premier.</p>
+
+<div id="editeur"></div>
+<div id="etat"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<!-- Draft.js attend Immutable en global, sans quoi il échoue sur OrderedMap. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/immutable/3.7.6/immutable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/draft-js/0.11.7/Draft.min.js"></script>
+<script>
+"use strict";
+
+/* Lignes vides entre les paragraphes : c'est la forme qui casse sur
+   x.com. Draft.js en fait des blocs vides, sans nœud texte, alors que
+   innerText y met un saut de ligne. Le mode sans lignes vides reste
+   accessible par #compact pour comparer. */
+var SEPARATEUR = location.hash === "#compact" ? "\n" : "\n\n";
+
+var TEXTE = [
+  "Bonjour je sui tres content de vous ecrire ce message.",
+  "Le deuxieme paragraphe contient lui aussi des fautes evidente.",
+  "Et un troisieme pour verifier la derive sur la fin du texte."
+].join(SEPARATEUR);
+
+var e = React.createElement;
+var editeurRef = null;
+
+function Composeur() {
+  var depart = Draft.EditorState.createWithContent(
+    Draft.ContentState.createFromText(TEXTE));
+  var etat = React.useState(depart);
+  var editorState = etat[0];
+  var setEditorState = etat[1];
+
+  /* Exposer l'état pour l'inspection depuis la console. */
+  window.Etat = {
+    selection: function () {
+      var s = editorState.getSelection();
+      return {
+        bloc: s.getAnchorKey(),
+        debut: s.getStartOffset(),
+        fin: s.getEndOffset(),
+        blocs: editorState.getCurrentContent().getBlocksAsArray()
+          .map(function (b) { return b.getKey() + " : " + b.getText().slice(0, 30); })
+      };
+    },
+    texte: function () {
+      return editorState.getCurrentContent().getPlainText("\n");
+    }
+  };
+
+  /* x.com passe son onChange par une transition : le rendu devient
+     concurrent et editOnSelect de Draft peut ignorer notre sélection
+     pendant que _latestEditorState diffère de props.editorState.
+     C'est la piste à reproduire, un rendu synchrone ne la montre pas. */
+  var majEtat = function (nouvel) {
+    React.startTransition(function () { setEditorState(nouvel); });
+  };
+
+  return e("div", { id: "cadre" },
+    e(Draft.Editor, {
+      editorState: editorState,
+      onChange: majEtat,
+      ref: function (r) { editeurRef = r; }
+    }));
+}
+
+ReactDOM.createRoot(document.getElementById("editeur")).render(e(Composeur));
+
+/* Rappel visible de l'état interne, rafraîchi à la demande. */
+document.addEventListener("selectionchange", function () {
+  if (!window.Etat) return;
+  var s = window.Etat.selection();
+  document.getElementById("etat").textContent =
+    "sélection interne : bloc " + s.bloc + ", " + s.debut + "-" + s.fin;
+});
+</script>
+</body>
+</html>
