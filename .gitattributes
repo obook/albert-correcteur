@@ -1,0 +1,13 @@
+# Fins de ligne imposées par type de fichier, indépendamment de la
+# configuration core.autocrlf du poste qui clone le dépôt.
+#
+# Les scripts .bat et .ps1 doivent arriver en CRLF : cmd.exe découpe un
+# fichier de commandes sur les CRLF et interprète de travers un fichier
+# livré en LF (variables tronquées, labels introuvables).
+#
+# Les scripts .sh doivent rester en LF : un shebang suivi d'un CR fait
+# échouer le lancement de l'interpréteur.
+
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+*.sh  text eol=lf
