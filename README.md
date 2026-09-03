@@ -78,7 +78,7 @@ Le `.xpi` est signé automatiquement par Mozilla (canal unlisted) lors du pipeli
 
 L'extension n'est pas encore publiée sur le Chrome Web Store. En attendant, on l'installe à la main :
 
-1. Récupérer le `.zip` Brave depuis les [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases), puis le décompresser ; ou bien le construire soi-même avec `./build-brave.sh`, ou `build-brave.bat` sous Windows (le dossier prêt à charger est alors `brave-release/albert-correcteur-brave/`)
+1. Récupérer le `.zip` Brave depuis les [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases), puis le décompresser ; ou bien le construire soi-même avec `./build.sh brave`, ou `build.bat brave` sous Windows (le dossier prêt à charger est alors `brave-release/albert-correcteur-brave/`)
 2. Ouvrir `brave://extensions`
 3. Activer le "Mode développeur" en haut à droite
 4. Cliquer sur "Charger l'extension non empaquetée" et sélectionner le dossier décompressé
@@ -126,7 +126,7 @@ Le fichier `.xpi` distribué est signé par Mozilla, mais pendant le développem
 
 Brave accepte les extensions Chromium sans signature, en mode développeur :
 
-1. Construire le paquet avec `./build-brave.sh` (ou `build-brave.bat` sous Windows)
+1. Construire le paquet avec `./build.sh brave` (ou `build.bat brave` sous Windows)
 2. Ouvrir `brave://extensions` et activer le "Mode développeur"
 3. Cliquer sur "Charger l'extension non empaquetée" et sélectionner le dossier `brave-release/albert-correcteur-brave/`
 4. Après chaque modification du code, relancer le build puis cliquer sur le bouton de rechargement de l'extension

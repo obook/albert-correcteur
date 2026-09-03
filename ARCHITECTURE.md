@@ -10,15 +10,16 @@ ces derniers existant en version Unix (`.sh`) et en version Windows (`.bat`) :
 - **`sources-thunderbird/`** - Code spécifique à Thunderbird (compose scripts, badge CSS, popup traduction lecture, manifest)
 - **`sources-brave/`** - Surcouche Brave/Chromium (manifest Manifest V3, service worker, shim `browser.*`). Les content scripts ne sont pas dupliqués : la cible Brave réutilise ceux de `sources-firefox/`, qui sont indépendants du navigateur.
 
-Chaque script de build assemble le code partagé avec le code spécifique :
+Le script `build.sh <cible>` assemble le code partagé avec le code spécifique :
 
-- **`build-firefox.sh`** - Copie `sources-commun/` + `sources-firefox/` dans un dossier temporaire, puis crée le `.xpi` Firefox
-- **`build-thunderbird.sh`** - Copie `sources-commun/` + `sources-thunderbird/` dans un dossier temporaire, puis crée le `.xpi` Thunderbird
-- **`build-brave.sh`** - Copie `sources-commun/` + `sources-firefox/` + `sources-brave/` (qui écrase le manifest), puis crée le `.zip` Brave
+- **`./build.sh firefox`** - Copie `sources-commun/` + `sources-firefox/` dans un dossier temporaire, puis crée le `.xpi` Firefox
+- **`./build.sh thunderbird`** - Copie `sources-commun/` + `sources-thunderbird/` dans un dossier temporaire, puis crée le `.xpi` Thunderbird
+- **`./build.sh brave`** - Copie `sources-commun/` + `sources-firefox/` + `sources-brave/` (qui écrase le manifest), puis crée le `.zip` Brave
+- **`./build.sh tout`** - Enchaîne les trois cibles ; c'est aussi ce que fait le script lancé sans argument
 
-Les scripts `build-firefox.bat`, `build-thunderbird.bat` et `build-brave.bat` sont les
-équivalents Windows des trois précédents et produisent des paquets identiques. Windows ne
-fournissant pas de commande `zip`, ils délèguent l'archivage à `creer-archive-zip.ps1`.
+Le script `build.bat` est l'équivalent Windows, avec les mêmes cibles, et produit des
+paquets identiques. Windows ne fournissant pas de commande `zip`, il délègue l'archivage
+à `creer-archive-zip.ps1`.
 
 ## Arborescence
 
@@ -163,13 +164,9 @@ albert-correcteur/
   LICENSE                                 <- Licence MIT
   updates.json                            <- Manifeste de mise à jour Firefox + Thunderbird
   .gitlab-ci.yml                          <- Pipeline CI/CD (tests, build, sign, release)
-  build-firefox.sh                        <- Script d'assemblage Firefox (.xpi)
-  build-thunderbird.sh                    <- Script d'assemblage Thunderbird (.xpi)
-  build-brave.sh                          <- Script d'assemblage Brave (.zip)
-  build-firefox.bat                       <- Équivalent Windows de build-firefox.sh
-  build-thunderbird.bat                   <- Équivalent Windows de build-thunderbird.sh
-  build-brave.bat                         <- Équivalent Windows de build-brave.sh
-  creer-archive-zip.ps1                   <- Archivage ZIP appelé par les scripts .bat
+  build.sh                                <- Script d'assemblage (firefox, thunderbird, brave ; tout par défaut)
+  build.bat                               <- Équivalent Windows de build.sh
+  creer-archive-zip.ps1                   <- Archivage ZIP appelé par build.bat
   .gitattributes                          <- Fins de ligne imposées (CRLF pour .bat, LF pour .sh)
 ```
 
