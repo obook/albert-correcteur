@@ -2,7 +2,8 @@
 
 ## Organisation générale
 
-Le projet est découpé en quatre répertoires de sources et trois scripts de build :
+Le projet est découpé en quatre répertoires de sources et trois scripts de build,
+ces derniers existant en version Unix (`.sh`) et en version Windows (`.bat`) :
 
 - **`sources-commun/`** - Code partagé entre toutes les cibles (service API, prompts, icônes, CSS communs, popup de configuration)
 - **`sources-firefox/`** - Code spécifique à Firefox (content scripts, overlays, popups, badge CSS, manifest)
@@ -14,6 +15,10 @@ Chaque script de build assemble le code partagé avec le code spécifique :
 - **`build-firefox.sh`** - Copie `sources-commun/` + `sources-firefox/` dans un dossier temporaire, puis crée le `.xpi` Firefox
 - **`build-thunderbird.sh`** - Copie `sources-commun/` + `sources-thunderbird/` dans un dossier temporaire, puis crée le `.xpi` Thunderbird
 - **`build-brave.sh`** - Copie `sources-commun/` + `sources-firefox/` + `sources-brave/` (qui écrase le manifest), puis crée le `.zip` Brave
+
+Les scripts `build-firefox.bat`, `build-thunderbird.bat` et `build-brave.bat` sont les
+équivalents Windows des trois précédents et produisent des paquets identiques. Windows ne
+fournissant pas de commande `zip`, ils délèguent l'archivage à `creer-archive-zip.ps1`.
 
 ## Arborescence
 
@@ -161,6 +166,11 @@ albert-correcteur/
   build-firefox.sh                        <- Script d'assemblage Firefox (.xpi)
   build-thunderbird.sh                    <- Script d'assemblage Thunderbird (.xpi)
   build-brave.sh                          <- Script d'assemblage Brave (.zip)
+  build-firefox.bat                       <- Équivalent Windows de build-firefox.sh
+  build-thunderbird.bat                   <- Équivalent Windows de build-thunderbird.sh
+  build-brave.bat                         <- Équivalent Windows de build-brave.sh
+  creer-archive-zip.ps1                   <- Archivage ZIP appelé par les scripts .bat
+  .gitattributes                          <- Fins de ligne imposées (CRLF pour .bat, LF pour .sh)
 ```
 
 ## Fonctionnement

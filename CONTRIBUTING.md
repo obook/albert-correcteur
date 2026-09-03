@@ -45,7 +45,9 @@ Le projet ne dépend d'aucune bibliothèque tierce et n'a pas d'étape de
 compilation : le code source JavaScript, HTML et CSS est chargé tel quel par le
 navigateur. Les seuls outils nécessaires sont :
 
-- `bash` et `zip` pour exécuter les scripts de construction ;
+- `bash` et `zip` pour exécuter les scripts de construction, ou, sous Windows, les
+  scripts `.bat` équivalents, qui n'exigent aucune installation puisqu'ils s'appuient
+  sur PowerShell ;
 - Firefox Developer Edition (ou Nightly) pour charger une version non signée ;
 - Thunderbird 128 ou supérieur pour la partie courriel ;
 - Brave (ou un autre navigateur Chromium récent) pour la partie navigateur Chromium.
@@ -64,6 +66,19 @@ spécifique à chaque plateforme :
 ./build-thunderbird.sh   # produit thunderbird-release/albert-correcteur-thunderbird.xpi
 ./build-brave.sh         # produit brave-release/albert-correcteur-brave.zip et le dossier à charger
 ```
+
+Sous Windows, lancer les scripts `.bat` de même nom, qui produisent exactement les mêmes
+paquets :
+
+```bat
+build-firefox.bat
+build-thunderbird.bat
+build-brave.bat
+```
+
+Un fichier `.gitattributes` impose les fins de ligne CRLF aux `.bat` et aux `.ps1`, et LF
+aux `.sh`. Ne pas convertir ces fichiers à la main : un `.bat` en LF est mal interprété
+par `cmd.exe`, et un `.sh` en CRLF empêche le lancement de l'interpréteur.
 
 Pour tester sous Firefox sans signature Mozilla, deux options :
 
