@@ -19,13 +19,24 @@
  * à côté.
  *
  * Marqueurs reconnus :
- *   - blockquote            : citation (Thunderbird pose type="cite",
- *                             les webmails s'en passent parfois) ;
- *   - moz-cite-prefix       : la ligne « Le ..., X a écrit : » ;
+ *   - blockquote[type=cite] : citation posée par le client de messagerie ;
  *   - moz-signature         : signature HTML ;
  *   - moz-txt-sig           : signature en composition texte brut ;
  *   - moz-forward-container : corps d'un message transféré ;
  *   - data-marker           : équivalents Zimbra.
+ *
+ * Deux marqueurs sont volontairement absents de cette liste.
+ *
+ * La ligne « Le ..., X a écrit : » (moz-cite-prefix) est un simple div
+ * d'une ligne, placé exactement là où l'on colle son texte quand on écrit
+ * au-dessus de la citation : Thunderbird range alors la frappe dans ce
+ * div, et l'écarter revenait à jeter tout le message rédigé. Les quelques
+ * dizaines de caractères qu'elle coûte valent mieux que ce silence.
+ *
+ * Un blockquote sans type="cite" n'est pas une citation de courriel mais
+ * un bloc collé depuis une page web, à corriger comme le reste. Les
+ * webmails qui citent sans cet attribut demanderont leurs propres
+ * sélecteurs, le jour où cette exclusion sera branchée côté Firefox.
  *
  * Utilisé par :
  *   - Thunderbird : compose-utils.js, compose-check.js
@@ -39,12 +50,11 @@
 
 /* Classes posées par Thunderbird sur les parties non rédigées. La liste
    vient de son propre code : cloudAttachmentLinkManager.js interroge
-   .moz-cite-prefix, .moz-signature et .moz-forward-container,
-   QuoteSanitizer.sys.mjs cible blockquote[type="cite"] et
-   .moz-forward-container, et messageQuotes.css style div.moz-txt-sig,
-   la forme que prend la signature en composition texte brut. */
+   .moz-signature et .moz-forward-container, QuoteSanitizer.sys.mjs cible
+   blockquote[type="cite"] et .moz-forward-container, et messageQuotes.css
+   style div.moz-txt-sig, la forme que prend la signature en composition
+   texte brut. */
 const CLASSES_CITATION = [
-  "moz-cite-prefix",
   "moz-signature",
   "moz-txt-sig",
   "moz-forward-container",
@@ -64,16 +74,18 @@ const MARQUEURS_CITATION = {
  * @returns {string|null} Marqueur reconnu, ou null si l'élément est neutre.
  */
 function motifCitation(el) {
-  if (el.tagName === "BLOCKQUOTE") return "citation";
+  /* getAttribute manque au DOM minimal des tests : son absence vaut
+     "pas d'attribut", pas une exception. */
+  const attribut = (nom) => (el.getAttribute ? el.getAttribute(nom) : null);
+
+  if (el.tagName === "BLOCKQUOTE" && attribut("type") === "cite") return "citation";
 
   const classes = " " + (el.className || "") + " ";
   for (const classe of CLASSES_CITATION) {
     if (classes.indexOf(" " + classe + " ") !== -1) return classe;
   }
 
-  /* getAttribute manque au DOM minimal des tests : son absence vaut
-     "pas de marqueur", pas une exception. */
-  const marqueur = el.getAttribute ? el.getAttribute("data-marker") : null;
+  const marqueur = attribut("data-marker");
   if (marqueur && MARQUEURS_CITATION[marqueur]) return marqueur;
 
   return null;
