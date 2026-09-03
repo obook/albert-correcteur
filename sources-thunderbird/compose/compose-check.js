@@ -76,7 +76,19 @@ Albert.requestCheck = function (text) {
 
     Albert.lastError = null;
     state.checkedText = text;
-    const filtered = Albert.filterIgnoredCorrections(result.corrections);
+
+    /* Les offsets valent pour le texte soumis, amputé des citations :
+       les ramener vers innerText avant tout affichage, sinon
+       soulignements et remplacements visent le mauvais mot. Le
+       découpage n'est utilisable que s'il correspond au texte envoyé ;
+       sinon les offsets sont pris tels quels, ce qui revient au
+       comportement d'avant l'exclusion des citations. */
+    const hors = Albert.horsCitation;
+    const corrections = (hors && hors.texte === text)
+      ? Albert.ramenerOffsets(result.corrections, hors.gardees)
+      : result.corrections;
+
+    const filtered = Albert.filterIgnoredCorrections(corrections);
     Albert.log("requestCheck : OK,", filtered.length, "correction(s) après filtrage (", (result.corrections || []).length, "brutes)");
     Albert.renderCorrections(filtered);
   }).catch((err) => {

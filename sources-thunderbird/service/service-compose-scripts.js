@@ -34,6 +34,7 @@ const COMPOSE_JS = [
   "compose/compose-utils.js",
   "util/ui-root.js",
   "util/inner-text.js",
+  "util/citations.js",
   "util/lang-names.js",
   "notification/toast.js",
   "compose/compose-badge.js",
