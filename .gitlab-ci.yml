@@ -45,17 +45,14 @@ build-firefox:
   stage: build
   image: alpine:latest
   before_script:
-    - apk add --no-cache zip
+    - apk add --no-cache bash zip
   script:
     - VERSION="${CI_COMMIT_TAG#v}"
     - XPI_NAME="albert-correcteur-firefox_${VERSION}.xpi"
-    - mkdir -p .build-firefox
-    - cp -r sources-commun/* .build-firefox/
-    - cp -r sources-firefox/* .build-firefox/
-    - cd .build-firefox
-    - zip -r "../${XPI_NAME}" . -x ".*"
-    - cd ..
-    - rm -rf .build-firefox
+    # Même script de construction qu'en local, puis renommage avec la version :
+    # c'est ce nom que référencent les artefacts, la release et updates.json.
+    - ./build.sh firefox
+    - mv firefox-release/albert-correcteur-firefox.xpi "${XPI_NAME}"
     - echo "XPI_NAME=${XPI_NAME}" > build.env
     - echo "VERSION=${VERSION}" >> build.env
     - echo "Extension Firefox packagée -> ${XPI_NAME}"
@@ -74,17 +71,12 @@ build-thunderbird:
   stage: build
   image: alpine:latest
   before_script:
-    - apk add --no-cache zip
+    - apk add --no-cache bash zip
   script:
     - VERSION="${CI_COMMIT_TAG#v}"
     - TB_XPI_NAME="albert-correcteur-thunderbird_${VERSION}.xpi"
-    - mkdir -p .build-thunderbird
-    - cp -r sources-commun/* .build-thunderbird/
-    - cp -r sources-thunderbird/* .build-thunderbird/
-    - cd .build-thunderbird
-    - zip -r "../${TB_XPI_NAME}" . -x ".*"
-    - cd ..
-    - rm -rf .build-thunderbird
+    - ./build.sh thunderbird
+    - mv thunderbird-release/albert-correcteur-thunderbird.xpi "${TB_XPI_NAME}"
     - echo "TB_XPI_NAME=${TB_XPI_NAME}" > build-thunderbird.env
     - echo "Extension Thunderbird packagée -> ${TB_XPI_NAME}"
   artifacts:
@@ -106,18 +98,12 @@ build-brave:
   stage: build
   image: alpine:latest
   before_script:
-    - apk add --no-cache zip
+    - apk add --no-cache bash zip
   script:
     - VERSION="${CI_COMMIT_TAG#v}"
     - BRAVE_ZIP_NAME="albert-correcteur-brave_${VERSION}.zip"
-    - mkdir -p .build-brave
-    - cp -r sources-commun/* .build-brave/
-    - cp -r sources-firefox/* .build-brave/
-    - cp -r sources-brave/* .build-brave/
-    - cd .build-brave
-    - zip -r "../${BRAVE_ZIP_NAME}" . -x ".*"
-    - cd ..
-    - rm -rf .build-brave
+    - ./build.sh brave
+    - mv brave-release/albert-correcteur-brave.zip "${BRAVE_ZIP_NAME}"
     - echo "BRAVE_ZIP_NAME=${BRAVE_ZIP_NAME}" > build-brave.env
     - echo "Extension Brave packagée -> ${BRAVE_ZIP_NAME}"
   artifacts:
@@ -140,14 +126,15 @@ sign:
     - job: build-firefox
       artifacts: true
   script:
-    - apk add --no-cache curl jq
+    - apk add --no-cache curl jq unzip
     - npm install -g web-ext@7.11.0
     - VERSION="${CI_COMMIT_TAG#v}"
     - XPI_NAME="albert-correcteur-firefox_${VERSION}.xpi"
     - ADDON_ID="albert-correcteur@ac-bordeaux.fr"
+    # web-ext veut un dossier : on décompresse le .xpi produit par build-firefox
+    # plutôt que de réassembler les sources, pour signer exactement ce paquet.
     - mkdir -p .build-firefox
-    - cp -r sources-commun/* .build-firefox/
-    - cp -r sources-firefox/* .build-firefox/
+    - unzip -q "${XPI_NAME}" -d .build-firefox
     - web-ext sign --source-dir=.build-firefox/ --channel=unlisted --api-key="${WEB_EXT_API_KEY}" --api-secret="${WEB_EXT_API_SECRET}" || true
     - rm -rf .build-firefox
     - SIGNED_XPI=$(ls web-ext-artifacts/*.xpi 2>/dev/null || true)

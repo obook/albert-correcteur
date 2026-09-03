@@ -58,22 +58,24 @@ réservée aux agents de la fonction publique d'État :
 
 ## Construire et tester l'extension
 
-Trois scripts assemblent le code partagé (`sources-commun/`) avec le code
-spécifique à chaque plateforme :
+Un script unique assemble le code partagé (`sources-commun/`) avec le code
+spécifique à la plateforme demandée :
 
 ```bash
-./build-firefox.sh       # produit firefox-release/albert-correcteur-firefox.xpi
-./build-thunderbird.sh   # produit thunderbird-release/albert-correcteur-thunderbird.xpi
-./build-brave.sh         # produit brave-release/albert-correcteur-brave.zip et le dossier à charger
+./build.sh firefox       # produit firefox-release/albert-correcteur-firefox.xpi
+./build.sh thunderbird   # produit thunderbird-release/albert-correcteur-thunderbird.xpi
+./build.sh brave         # produit brave-release/albert-correcteur-brave.zip et le dossier à charger
+./build.sh tout          # les trois d'affilée (idem sans argument)
 ```
 
-Sous Windows, lancer les scripts `.bat` de même nom, qui produisent exactement les mêmes
+Sous Windows, lancer `build.bat` avec la même cible, qui produit exactement les mêmes
 paquets :
 
 ```bat
-build-firefox.bat
-build-thunderbird.bat
-build-brave.bat
+build.bat firefox
+build.bat thunderbird
+build.bat brave
+build.bat tout           rem idem sans argument
 ```
 
 Un fichier `.gitattributes` impose les fins de ligne CRLF aux `.bat` et aux `.ps1`, et LF
