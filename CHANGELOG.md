@@ -7,6 +7,15 @@ et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
 ## [Non publié]
 
+### Corrigé
+- Des fautes n'étaient jamais signalées, sans trace ni dans la console ni dans
+  le badge. Une règle de filtrage exigeait qu'une suggestion garde le « s »
+  final du mot erroné, ce qui écartait toute correction consistant à le
+  retirer ou à le remplacer : les pluriels en -aux (« chevals » pour
+  « chevaux »), les composés à second élément invariable (« timbres-postes »
+  pour « timbres-poste ») et les mots invariables mal orthographiés
+  (« parmis », « malgrés »).
+
 ### Modifié
 - Thunderbird ne soumet plus le texte cité à l'API. Dans une réponse, la
   citation, la ligne « X a écrit : » et la signature représentent l'essentiel

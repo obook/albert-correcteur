@@ -61,6 +61,71 @@ function messageErreurReseau(err) {
 }
 
 /**
+ * Ramène une suggestion à une chaîne.
+ *
+ * Les petits modèles renvoient parfois un objet (ex. { text: "..." },
+ * { reformulation: "..." }) au lieu d'une chaîne, ce qui produit
+ * "[object Object]" côté interface. On essaie d'abord les clés connues,
+ * puis on tombe sur la première propriété chaînée non vide trouvée.
+ *
+ * @param {*} s - Suggestion telle que le modèle l'a renvoyée.
+ * @returns {string|null} Suggestion utilisable, ou null.
+ */
+function coerceSuggestion(s) {
+  if (typeof s === "string") return s;
+  if (s && typeof s === "object") {
+    const knownKeys = ["text", "suggestion", "content", "value",
+      "reformulation", "rephrasing", "rephrased", "output"];
+    for (const key of knownKeys) {
+      if (typeof s[key] === "string" && s[key].length > 0) return s[key];
+    }
+    /* Dernier recours : prendre la première propriété chaînée non vide. */
+    for (const v of Object.values(s)) {
+      if (typeof v === "string" && v.length > 0) return v;
+    }
+  }
+  return null;
+}
+
+/**
+ * Nettoie les suggestions d'une liste de corrections.
+ *
+ * Une suggestion identique au mot erroné ne corrige rien : elle est
+ * retirée, et une correction qui n'a plus de suggestion est écartée.
+ *
+ * Une seconde règle exigeait qu'une suggestion garde le "s" final du mot
+ * erroné, pour empêcher un modèle de dépluraliser à tort. Elle partait du
+ * principe qu'un mot terminé par "s" est un pluriel et que la forme
+ * corrigée finit forcément par "s" elle aussi : les deux sont faux. Elle
+ * rendait indétectables, sans rien dire ni dans la console ni dans le
+ * badge :
+ *   - les pluriels en -aux, -eux, -oux : "chevals" pour "chevaux",
+ *     "journals" pour "journaux", "travails" pour "travaux" ;
+ *   - les composés à second élément invariable : "timbres-postes" pour
+ *     "timbres-poste", "pommes de terres" ;
+ *   - les mots invariables mal orthographiés : "parmis", "malgrés",
+ *     "beaucoups".
+ * Une suggestion douteuse s'ignore d'un clic, une faute jamais signalée ne
+ * se rattrape pas.
+ *
+ * @param {Array<Object>} corrections - Corrections renvoyées par l'API.
+ * @returns {Array<Object>} Corrections dont les suggestions sont utilisables.
+ */
+function nettoyerSuggestions(corrections) {
+  return corrections.map((c) => {
+    if (Array.isArray(c.suggestions)) {
+      c.suggestions = c.suggestions
+        .map(coerceSuggestion)
+        .filter((s) => s !== null);
+    }
+    if (c.suggestions && c.word) {
+      c.suggestions = c.suggestions.filter((s) => s !== c.word);
+    }
+    return c;
+  }).filter((c) => !c.suggestions || c.suggestions.length > 0);
+}
+
+/**
  * Envoie un texte à l'API Albert pour correction ou reformulation.
  *
  * @param {string} text       - Texte à vérifier.
@@ -176,48 +241,7 @@ async function checkText(text, mode, personaId) {
       }
     }
 
-    /* Convertir chaque suggestion en chaîne. Les petits modèles renvoient
-       parfois un objet (ex. { text: "..." }, { reformulation: "..." })
-       au lieu d'une chaîne, ce qui produit "[object Object]" côté UI.
-       On essaie d'abord les clés connues, puis on tombe sur la
-       première propriété chaînée non vide trouvée. */
-    const coerceSuggestion = (s) => {
-      if (typeof s === "string") return s;
-      if (s && typeof s === "object") {
-        const knownKeys = ["text", "suggestion", "content", "value",
-          "reformulation", "rephrasing", "rephrased", "output"];
-        for (const key of knownKeys) {
-          if (typeof s[key] === "string" && s[key].length > 0) return s[key];
-        }
-        /* Dernier recours : prendre la première propriété chaînée non vide. */
-        for (const v of Object.values(s)) {
-          if (typeof v === "string" && v.length > 0) return v;
-        }
-      }
-      return null;
-    };
-
-    /* Filtrer les suggestions incorrectes */
-    const apiCorrections = parsed.corrections.map((c) => {
-      if (Array.isArray(c.suggestions)) {
-        c.suggestions = c.suggestions
-          .map(coerceSuggestion)
-          .filter((s) => s !== null);
-      }
-      if (c.suggestions && c.word) {
-        c.suggestions = c.suggestions.filter((s) => {
-          /* Supprimer les suggestions identiques au mot erroné */
-          if (s === c.word) return false;
-          /*
-           * Si le mot erroné finit par "s" (pluriel),
-           * la suggestion doit aussi finir par "s"
-           */
-          if (c.word.endsWith("s") && !s.endsWith("s")) return false;
-          return true;
-        });
-      }
-      return c;
-    }).filter((c) => !c.suggestions || c.suggestions.length > 0);
+    const apiCorrections = nettoyerSuggestions(parsed.corrections);
 
     /* Fusionner avec les corrections détectées localement par regex
        (filet de sécurité pour les patterns mécaniques que les petits
@@ -317,4 +341,10 @@ async function translateText(text, targetLang) {
     AlbertLog.error("translateText: exception:", err);
     return { error: messageErreurReseau(err) };
   }
+}
+
+/* Export pour les tests Node. Le service worker charge ce fichier comme
+   un script classique, où module est indéfini. */
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = { coerceSuggestion, nettoyerSuggestions };
 }
