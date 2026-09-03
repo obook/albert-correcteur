@@ -30,12 +30,23 @@ Albert.getComposeBody = function () {
 };
 
 /**
- * Renvoie le texte brut du message en cours de composition.
+ * Renvoie le texte à soumettre : le message sans les parties citées.
  *
- * @returns {string} Contenu textuel, tel que innerText le restitue.
+ * Citation, ligne « X a écrit : » et signature sont écartées
+ * (util/citations.js). Sur une réponse ordinaire elles représentent
+ * l'essentiel du corps, et les soumettre allongeait l'attente d'autant.
+ *
+ * Le découpage est mémorisé avec son texte : les offsets renvoyés par
+ * l'API valent pour ce texte réduit, et compose-check.js ne peut les
+ * ramener vers innerText que si les intervalles correspondent bien au
+ * texte soumis.
+ *
+ * @returns {string} Contenu textuel rédigé par l'utilisateur.
  */
 Albert.getBodyText = function () {
-  return Albert.getComposeBody().innerText;
+  const hors = Albert.texteHorsCitation(Albert.getComposeBody());
+  Albert.horsCitation = hors;
+  return hors.texte;
 };
 
 Albert.filterIgnoredCorrections = function (corrections) {

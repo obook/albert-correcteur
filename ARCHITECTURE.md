@@ -41,6 +41,7 @@ albert-correcteur/
       model-aliases.js                    <- Table canonique -> alias, DEFAULT_API_BASE
       personas.js                         <- Personas de reformulation
       inner-text.js                       <- Correspondance offsets innerText <-> nœuds texte
+      citations.js                        <- Repérage du texte cité, écarté de la vérification
       lang-names.js                       <- Noms affichables des langues (fr, en, es, de)
       popup-focus.js                      <- Piège de focus des popups (RGAA)
 
@@ -478,23 +479,24 @@ Thunderbird injecte les scripts dans la fenêtre de composition via `tabs.execut
 | 1 | `compose-state.js` | Constantes, état global, journalisation |
 | 2 | `compose-utils.js` | Accès au corps du message, dictionnaire personnel, utilitaires |
 | 3 | `inner-text.js` | Correspondance offsets innerText <-> nœuds texte (commun) |
-| 4 | `lang-names.js` | Noms affichables des langues (commun) |
-| 5 | `toast.js` | Notification toast, partagée entre les cibles (commun) |
-| 6 | `compose-badge.js` | Badge (icône fixée dans le coin de l'éditeur) |
-| 7 | `compose-overlay.js` | Soulignements insérés dans le corps du message |
-| 8 | `compose-render.js` | Orchestration du rendu des corrections |
-| 9 | `popup-focus.js` | Piège de focus des popups, RGAA (commun) |
-| 10 | `compose-popup-utils.js` | Fermeture des popups, écouteurs globaux |
-| 11 | `compose-popup-correction.js` | Popup de correction (suggestions) |
-| 12 | `compose-popup-reformulation.js` | Popup de reformulation |
-| 13 | `compose-popup-traduction.js` | Popup de traduction |
-| 14 | `compose-popup-messages.js` | Dispatch des messages du script de fond |
-| 15 | `compose-apply.js` | Application des corrections |
-| 16 | `rolling-window.js` | Classe `Albert.RollingWindow`, fenêtre glissante 60 s (commun) |
-| 17 | `compose-limites.js` | Limites rpm/rpd, debounce adaptatif |
-| 18 | `compose-debounce.js` | Double debounce et annulation (cancelDebounce) |
-| 19 | `compose-check.js` | requestCheck |
-| 20 | `compose-main.js` | Initialisation, MutationObserver, événements |
+| 4 | `citations.js` | Repérage du texte cité, écarté de la vérification (commun) |
+| 5 | `lang-names.js` | Noms affichables des langues (commun) |
+| 6 | `toast.js` | Notification toast, partagée entre les cibles (commun) |
+| 7 | `compose-badge.js` | Badge (icône fixée dans le coin de l'éditeur) |
+| 8 | `compose-overlay.js` | Soulignements insérés dans le corps du message |
+| 9 | `compose-render.js` | Orchestration du rendu des corrections |
+| 10 | `popup-focus.js` | Piège de focus des popups, RGAA (commun) |
+| 11 | `compose-popup-utils.js` | Fermeture des popups, écouteurs globaux |
+| 12 | `compose-popup-correction.js` | Popup de correction (suggestions) |
+| 13 | `compose-popup-reformulation.js` | Popup de reformulation |
+| 14 | `compose-popup-traduction.js` | Popup de traduction |
+| 15 | `compose-popup-messages.js` | Dispatch des messages du script de fond |
+| 16 | `compose-apply.js` | Application des corrections |
+| 17 | `rolling-window.js` | Classe `Albert.RollingWindow`, fenêtre glissante 60 s (commun) |
+| 18 | `compose-limites.js` | Limites rpm/rpd, debounce adaptatif |
+| 19 | `compose-debounce.js` | Double debounce et annulation (cancelDebounce) |
+| 20 | `compose-check.js` | requestCheck |
+| 21 | `compose-main.js` | Initialisation, MutationObserver, événements |
 
 ### États du badge
 

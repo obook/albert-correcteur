@@ -5,6 +5,17 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [Non publié]
+
+### Modifié
+- Thunderbird ne soumet plus le texte cité à l'API. Dans une réponse, la
+  citation, la ligne « X a écrit : » et la signature représentent l'essentiel
+  du corps : sur un fil ordinaire, 8 157 des 8 623 caractères envoyés à chaque
+  frappe. Le modèle mettait d'autant plus de temps à répondre, et le badge
+  tournait assez longtemps pour laisser croire que rien n'était corrigé. Seul
+  le texte rédigé part maintenant, et les offsets sont ramenés vers le corps du
+  message avant l'affichage des soulignements.
+
 ## [0.8.3] - 2026-08-30
 
 ### Corrigé
