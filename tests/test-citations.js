@@ -36,13 +36,15 @@ function texte(contenu) {
 }
 
 function element(tagName, enfants, options) {
+  const attributs = options || {};
   const el = Object.assign({
     nodeType: ELEMENT_NODE,
     tagName: tagName.toUpperCase(),
     childNodes: enfants || [],
     className: "",
     hidden: false,
-  }, options || {});
+    getAttribute: (nom) => (nom in attributs ? attributs[nom] : null),
+  }, attributs);
   for (const enfant of el.childNodes) enfant.parentNode = el;
   return el;
 }
@@ -125,14 +127,48 @@ function reponseZimbra() {
 
 console.log("Exclusion du texte cité :");
 
-test("réponse au-dessus : seule la réponse est soumise", () => {
+/* La ligne « X a écrit : » reste soumise : Thunderbird y range le texte
+   collé au-dessus de la citation, et l'écarter revenait à tout perdre. */
+test("réponse au-dessus : la citation est écartée, la réponse soumise", () => {
   const { texte: soumis } = texteHorsCitation(reponseAuDessus());
-  assert.strictEqual(soumis, "Bonjour, voici ma reponse.");
+  assert.ok(soumis.startsWith("Bonjour, voici ma reponse."), soumis);
+  assert.ok(soumis.indexOf("Texte cite") === -1, "citation soumise : " + soumis);
 });
 
-test("réponse en dessous : seule la réponse est soumise", () => {
+test("réponse en dessous : la citation est écartée, la réponse soumise", () => {
   const { texte: soumis } = texteHorsCitation(reponseEnDessous());
-  assert.strictEqual(soumis, "Ma reponse ecrite en dessous.");
+  assert.ok(soumis.indexOf("Ma reponse ecrite en dessous.") !== -1, soumis);
+  assert.ok(soumis.indexOf("Texte cite") === -1, "citation soumise : " + soumis);
+});
+
+test("texte collé dans la ligne « X a écrit : » reste soumis", () => {
+  const racine = element("BODY", [
+    element("DIV", [
+      texte("Pour adresser ses voeux a ceux qu'elle avait eus a cotoyer."),
+      texte("Le 03/09/2026, Untel a ecrit :"),
+    ], { className: "moz-cite-prefix" }),
+    element("BLOCKQUOTE", [element("DIV", [texte("Texte cite du message.")])], { type: "cite" }),
+  ]);
+  racine.innerText = "Pour adresser ses voeux a ceux qu'elle avait eus a cotoyer."
+    + "Le 03/09/2026, Untel a ecrit :\n\nTexte cite du message.";
+  for (const enfant of racine.childNodes) enfant.parentNode = racine;
+
+  const { texte: soumis } = texteHorsCitation(racine);
+  assert.ok(soumis.indexOf("Pour adresser ses voeux") !== -1,
+    "le texte collé a été perdu : " + JSON.stringify(soumis));
+  assert.ok(soumis.indexOf("Texte cite") === -1, "citation soumise : " + soumis);
+});
+
+test("un blockquote sans type=cite est du texte rédigé, pas une citation", () => {
+  const racine = element("BODY", [
+    element("BLOCKQUOTE", [texte("Bloc colle depuis une page web.")]),
+    element("BLOCKQUOTE", [texte("Vraie citation.")], { type: "cite" }),
+  ]);
+  racine.innerText = "Bloc colle depuis une page web.\nVraie citation.";
+  for (const enfant of racine.childNodes) enfant.parentNode = racine;
+
+  const { texte: soumis } = texteHorsCitation(racine);
+  assert.strictEqual(soumis, "Bloc colle depuis une page web.");
 });
 
 test("Zimbra : le bloc data-marker est écarté", () => {
@@ -167,7 +203,7 @@ test("un corps sans citation est soumis en entier", () => {
 
 test("les zones citées portent leur motif", () => {
   const motifs = zonesCitees(reponseAuDessus()).map((z) => z.motif);
-  assert.deepStrictEqual(motifs, ["moz-cite-prefix", "citation", "moz-signature"]);
+  assert.deepStrictEqual(motifs, ["citation", "moz-signature"]);
 });
 
 /* Le trajet retour est ce qui garantit que le soulignement tombe sur le
