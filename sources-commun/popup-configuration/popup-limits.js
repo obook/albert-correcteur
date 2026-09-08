@@ -3,9 +3,11 @@
  *
  * Trois sections affichées dans le bloc "Limites du compte" :
  *
- *   1. Limites du compte (depuis /v1/me/info)
- *      Quotas rpm/rpd/tpm/tpd. Si plusieurs limites du même type
- *      existent, la valeur la plus restrictive est affichée.
+ *   1. Plafonds du modèle sélectionné (depuis /v1/me/info)
+ *      Quotas rpm/rpd/tpm/tpd, rattachés au modèle par
+ *      [[limitsForModel]]. Si le rattachement échoue, la valeur la
+ *      plus restrictive du compte est affichée, sous un titre qui le
+ *      dit : elle appartient alors à un autre modèle.
  *
  *   2. Usage journalier réel (depuis /v1/me/usage)
  *      Compte les requêtes et tokens consommés depuis minuit UTC
@@ -125,6 +127,30 @@ function buildTierRow(title, tier) {
 }
 
 /**
+ * Liste des modèles servis, vide si l'appel échoue.
+ *
+ * Elle sert deux fois : à rattacher les plafonds du compte au modèle
+ * choisi et à retrouver ses autres noms pour l'usage du jour.
+ *
+ * @param {string} apiBase - URL de base de l'API.
+ * @param {string} apiKey  - Clé API.
+ * @returns {Promise<Array>}
+ */
+async function fetchModels(apiBase, apiKey) {
+  try {
+    const response = await fetch(`${apiBase}/v1/models`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.data || [];
+  } catch {
+    /* Les deux appelants savent se passer de la liste. */
+    return [];
+  }
+}
+
+/**
  * Renvoie tous les noms (id et alias, en minuscules) que /v1/models
  * attache au modèle sélectionné.
  *
@@ -133,32 +159,21 @@ function buildTierRow(title, tier) {
  * un proxy sert le sien, préfixé. Comparer à l'ensemble des noms évite
  * de parier sur un espace de noms plutôt qu'un autre.
  *
- * @param {string} apiBase       - URL de base de l'API.
- * @param {string} apiKey        - Clé API.
+ * @param {Array} models         - Champ `data` de /v1/models.
  * @param {string} selectedModel - Identifiant choisi dans le <select>.
- * @returns {Promise<Set<string>>}
+ * @returns {Set<string>}
  */
-async function fetchModelNames(apiBase, apiKey, selectedModel) {
+function modelNames(models, selectedModel) {
   const choisi = selectedModel.toLowerCase();
   const noms = new Set([choisi]);
-  try {
-    const response = await fetch(`${apiBase}/v1/models`, {
-      headers: { Authorization: `Bearer ${apiKey}` },
-    });
-    if (!response.ok) return noms;
-    const data = await response.json();
-    for (const m of data.data || []) {
-      const entree = [m.id]
-        .concat(Array.isArray(m.aliases) ? m.aliases : [])
-        .filter((n) => typeof n === "string" && n)
-        .map((n) => n.toLowerCase());
-      if (entree.includes(choisi)) {
-        for (const n of entree) noms.add(n);
-      }
+  for (const m of models) {
+    const entree = [m.id]
+      .concat(Array.isArray(m.aliases) ? m.aliases : [])
+      .filter((n) => typeof n === "string" && n)
+      .map((n) => n.toLowerCase());
+    if (entree.includes(choisi)) {
+      for (const n of entree) noms.add(n);
     }
-  } catch {
-    /* Le nom sélectionné seul suffit quand l'API sert le même
-       espace de noms que ses événements d'usage. */
   }
   return noms;
 }
@@ -274,24 +289,26 @@ async function fetchAndShowLimits() {
       return;
     }
 
+    const modelSelect = document.getElementById("model");
+    const selectedModel = modelSelect ? modelSelect.value : "";
+    const models = await fetchModels(apiBase, apiKey);
+
     /*
-     * Regrouper par type et garder la valeur
-     * la plus restrictive (minimum)
+     * Les plafonds du modèle choisi, rattachés par [[limitsForModel]].
+     * À défaut, le plus bas du compte : c'est celui d'un autre modèle,
+     * d'où le titre qui change pour ne pas le faire passer pour le sien.
      */
-    const merged = {};
-    for (const l of rawLimits) {
-      if (!(l.type in merged)) {
-        merged[l.type] = l.value;
-      } else if (l.value === null) {
-        /* null = illimité, on garde la valeur existante (plus restrictive) */
-      } else if (merged[l.type] === null) {
-        merged[l.type] = l.value;
-      } else {
-        merged[l.type] = Math.min(merged[l.type], l.value);
-      }
-    }
+    const parModele = limitsForModel(rawLimits, models, selectedModel);
+    const merged = parModele || limitsMinimum(rawLimits);
 
     limitsInfo.textContent = "";
+    const titre = document.createElement("div");
+    titre.className = "tier-section-title";
+    titre.textContent = parModele
+      ? "Plafonds de ce modèle"
+      : "Plus bas plafond du compte, modèle non rattaché";
+    limitsInfo.appendChild(titre);
+
     for (const [type, value] of Object.entries(merged)) {
       const label = LIMIT_LABELS[type] || type;
       const display = formatLimitValue(value);
@@ -309,16 +326,13 @@ async function fetchAndShowLimits() {
       limitsInfo.appendChild(row);
     }
 
-    const modelSelect = document.getElementById("model");
-    const selectedModel = modelSelect ? modelSelect.value : "";
-
     /*
      * Section "Usage du jour" : interroger /v1/me/usage avec
      * résolution d'alias -> id canonique, car les événements
      * d'usage sont indexés par id canonique.
      */
     if (selectedModel) {
-      const noms = await fetchModelNames(apiBase, apiKey, selectedModel);
+      const noms = modelNames(models, selectedModel);
       const usage = await fetchDailyUsageForModel(apiBase, apiKey, noms);
       if (usage) {
         const usageTitle = document.createElement("div");
