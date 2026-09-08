@@ -56,3 +56,77 @@ function normalizeModelId(id) {
   if (lower.startsWith("openweight-")) return lower;
   return id;
 }
+
+/**
+ * Plafonds du compte qui s'appliquent vraiment à un modèle donné.
+ *
+ * Albert publie ses limites par routeur sans jamais nommer le modèle
+ * (/v1/me/info) et ses modèles sans jamais nommer le routeur
+ * (/v1/models). Les deux listes suivent le même ordre de création : le
+ * routeur de rang N porte les plafonds du modèle de rang N. C'est la
+ * règle qu'applique llm-proxy, vérifiée sur le compte : le rang 1 sort
+ * les plafonds documentés d'openweight-large, le rang 2 ceux
+ * d'openweight-code ; les deux routeurs à 2000 rpm tombent sur les
+ * modèles d'embeddings et de reclassement.
+ *
+ * L'appariement n'est tenté que si les deux listes ont la même longueur.
+ * Sinon la déduction serait une invention : l'appelant retombe alors sur
+ * le minimum tous routeurs confondus, qui sous-estime sans mentir.
+ *
+ * @param {Array} limits   - Champ `limits` de /v1/me/info.
+ * @param {Array} models   - Champ `data` de /v1/models.
+ * @param {string} modelId - Alias ou id canonique du modèle cherché.
+ * @returns {{rpm, rpd, tpm, tpd}|null} null si le rattachement échoue.
+ */
+function limitsForModel(limits, models, modelId) {
+  const routeurs = new Map();
+  for (const l of limits || []) {
+    if (!routeurs.has(l.router_id)) routeurs.set(l.router_id, {});
+    routeurs.get(l.router_id)[l.type] = l.value;
+  }
+
+  const rangs = [...routeurs.keys()].sort((a, b) => a - b);
+  const modeles = [...(models || [])].sort((a, b) => a.created - b.created);
+  if (rangs.length === 0 || rangs.length !== modeles.length) return null;
+
+  /* Le modèle est cherché sous tous ses noms : la configuration retient
+     l'alias, l'API sert l'id canonique, un proxy sert le sien. */
+  const cherche = normalizeModelId(modelId || "").toLowerCase();
+  if (!cherche) return null;
+  const rang = modeles.findIndex((m) => [m.id]
+    .concat(Array.isArray(m.aliases) ? m.aliases : [])
+    .some((nom) => typeof nom === "string"
+      && normalizeModelId(nom).toLowerCase() === cherche));
+
+  return rang < 0 ? null : routeurs.get(rangs[rang]);
+}
+
+/**
+ * Le plus bas plafond de chaque type, tous routeurs confondus.
+ *
+ * Repli quand le rattachement échoue : sous-estimer le quota ralentit
+ * la frappe, le surestimer déclenche des 429. Un `null` vaut "illimité"
+ * et cède donc devant n'importe quelle valeur chiffrée.
+ *
+ * @param {Array} rawLimits - Champ `limits` de /v1/me/info.
+ * @returns {Object} Objet { rpm, rpd, tpm, tpd }.
+ */
+function limitsMinimum(rawLimits) {
+  const limits = {};
+  for (const l of rawLimits || []) {
+    if (!(l.type in limits) || limits[l.type] === null) {
+      limits[l.type] = l.value;
+    } else if (l.value !== null) {
+      limits[l.type] = Math.min(limits[l.type], l.value);
+    }
+  }
+  return limits;
+}
+
+/* Export pour les tests Node. En navigateur, les scripts classiques
+   partagent déjà la portée globale : rien à publier. */
+if (typeof module !== "undefined" && module.exports) {
+  module.exports = {
+    normalizeModelId, limitsForModel, limitsMinimum, DEFAULT_API_BASE,
+  };
+}

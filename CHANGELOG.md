@@ -8,6 +8,15 @@ et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 ## [Non publié]
 
 ### Corrigé
+- Le délai entre deux corrections pendant la frappe était deux fois trop long.
+  L'extension lisait les quotas du compte en gardant le plus bas tous modèles
+  confondus, soit 50 requêtes par minute sur un compte où openweight-code en
+  autorise 100 : le débounce s'établissait à 3 000 ms au lieu de 1 500 ms.
+  Albert ne nomme le modèle ni dans `/v1/me/info` ni le routeur dans
+  `/v1/models`, mais les deux listes suivent le même ordre de création : les
+  plafonds sont maintenant rattachés par rang, comme le fait llm-proxy. Quand
+  les deux listes n'ont pas la même longueur, le plus bas plafond du compte
+  reste appliqué et la popup indique qu'il n'appartient pas au modèle affiché.
 - Des fautes n'étaient jamais signalées, sans trace ni dans la console ni dans
   le badge. Une règle de filtrage exigeait qu'une suggestion garde le « s »
   final du mot erroné, ce qui écartait toute correction consistant à le

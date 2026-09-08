@@ -2,28 +2,18 @@
  * test-merge-limits.js
  * Tests : Fusion des limites API (regroupement par type, valeur minimale).
  *
+ * C'est le repli employé quand les plafonds ne se rattachent pas à leur
+ * modèle, cf. test-limits-par-modele.js.
+ *
  * Auteur : O. Booklage
  * Date : août 2026
  * Licence : MIT
  */
 
 const assert = require("assert");
-
-function mergeLimits(rawLimits) {
-  const merged = {};
-  for (const l of rawLimits) {
-    if (!(l.type in merged)) {
-      merged[l.type] = l.value;
-    } else if (l.value === null) {
-      /* null = illimité, on garde la valeur existante (plus restrictive) */
-    } else if (merged[l.type] === null) {
-      merged[l.type] = l.value;
-    } else {
-      merged[l.type] = Math.min(merged[l.type], l.value);
-    }
-  }
-  return merged;
-}
+const {
+  limitsMinimum: mergeLimits,
+} = require("../sources-commun/util/model-aliases.js");
 
 let passed = 0;
 let failed = 0;
