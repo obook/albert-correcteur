@@ -79,8 +79,13 @@ function estModeleDeChat(m) {
   if (noms.some((n) => typeof n === "string" && MODELES_HORS_SUJET.test(n))) {
     return false;
   }
-  if (CHAT_TYPES.has(m.type)) return true;
-  if (!m.type || m.type === "model") return true;
+  /* Un proxy compatible OpenAI met "model" dans `type` (le type de
+     l'objet, comme chez OpenAI) et range le type de tâche dans
+     `model_type` : sans cette lecture, ses modèles de transcription et
+     d'embeddings passaient pour des modèles de chat. */
+  const tache = m.model_type || m.type;
+  if (CHAT_TYPES.has(tache)) return true;
+  if (!tache || tache === "model") return true;
   if (Array.isArray(m.aliases)) {
     return m.aliases.some((a) => a in MODEL_DESCRIPTIONS);
   }
@@ -141,28 +146,30 @@ function modelLabel(id, recommendedId) {
  * canonique par son alias serveur quand l'alias est connu, et
  * présélectionne le modèle sauvegardé (après normalisation) ou le
  * modèle recommandé.
+ *
+ * @returns {Promise<boolean>} Vrai si la liste a été remplie. En cas
+ *   d'échec, le motif exact est déjà affiché par showStatus : l'appelant
+ *   n'a rien à ajouter.
  */
 async function fetchModels() {
   const apiKey = document.getElementById("api-key").value.trim();
   const apiBase = (document.getElementById("api-base").value.trim()
     || DEFAULT_API_BASE).replace(/\/+$/, "");
 
-  if (!apiKey) {
-    showStatus("Entrez d'abord la clé API.", "err");
-    return;
-  }
-
   modelSelect.innerHTML = '<option value="">Chargement…</option>';
 
   try {
+    /* Clé facultative : un proxy local (llm-proxy, Ollama, LM Studio)
+       sert /v1/models sans authentification, et un en-tête Bearer vide
+       le ferait répondre 401. */
     const response = await fetch(`${apiBase}/v1/models`, {
-      headers: { Authorization: `Bearer ${apiKey}` },
+      headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
     });
 
     if (!response.ok) {
       showStatus(`Erreur API (${response.status})`, "err");
       modelSelect.innerHTML = '<option value="">Erreur de chargement</option>';
-      return;
+      return false;
     }
 
     const data = await response.json();
@@ -180,9 +187,16 @@ async function fetchModels() {
     models.sort();
 
     if (models.length === 0) {
+      /* Seul chemin d'échec qui restait muet : le bouton de rechargement
+         semblait sans effet, et l'enregistrement accusait la clé API
+         alors que la réponse était valide mais vide après filtrage. */
+      showStatus(
+        `Aucun modèle utilisable (${(data.data || []).length} renvoyés par l'API).`,
+        "err"
+      );
       modelSelect.innerHTML =
         '<option value="">Aucun modèle disponible</option>';
-      return;
+      return false;
     }
 
     const saved = normalizeModelId(
@@ -212,9 +226,11 @@ async function fetchModels() {
       `${models.length} modèle${plural} disponible${plural}`,
       "ok"
     );
+    return true;
   } catch (err) {
     showStatus(`Erreur réseau : ${err.message}`, "err");
     modelSelect.innerHTML = '<option value="">Erreur réseau</option>';
+    return false;
   }
 }
 

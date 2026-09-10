@@ -220,5 +220,26 @@ test("Endpoint compatible OpenAI : entrées sans type de tâche gardées", () =>
   );
 });
 
+/* Charge utile réelle de llm-proxy : le type de tâche est dans
+   model_type, `type` valant "model" comme chez OpenAI. Sans lecture de
+   model_type, les modèles de transcription et d'embeddings passaient
+   pour des modèles de chat. */
+test("Proxy local : le type de tâche est lu dans model_type", () => {
+  const reponse = [
+    { id: "anthropic-albert/openweight-large", type: "model",
+      model_type: "text-generation", aliases: ["openweight-large"] },
+    { id: "anthropic-albert/openweight-medium", type: "model",
+      model_type: "image-text-to-text", aliases: ["openweight-medium"] },
+    { id: "openweight-audio", type: "model",
+      model_type: "automatic-speech-recognition", aliases: ["openweight-audio"] },
+    { id: "openweight-embeddings", type: "model",
+      model_type: "text-embeddings-inference", aliases: ["openweight-embeddings"] },
+  ];
+  assert.deepStrictEqual(
+    reponse.filter(estModeleDeChat).map(preferredIdFor),
+    ["openweight-large", "openweight-medium"]
+  );
+});
+
 console.log(`\n${passed} passé(s), ${failed} échoué(s)`);
 process.exit(failed > 0 ? 1 : 0);

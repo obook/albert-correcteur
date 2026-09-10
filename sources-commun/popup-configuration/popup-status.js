@@ -15,6 +15,11 @@
 
 const statusDiv = document.getElementById("status");
 
+/* Minuterie d'effacement du dernier message "ok". Sans cette référence,
+   le message de succès affiché trois secondes plus tôt effaçait l'erreur
+   qui venait de le remplacer. */
+let effacement = null;
+
 /**
  * Affiche un message de statut dans la popup de configuration.
  *
@@ -24,7 +29,9 @@ const statusDiv = document.getElementById("status");
 function showStatus(text, type) {
   statusDiv.textContent = text;
   statusDiv.className = `status ${type}`;
+  clearTimeout(effacement);
+  effacement = null;
   if (type === "ok") {
-    setTimeout(() => { statusDiv.textContent = ""; }, 3000);
+    effacement = setTimeout(() => { statusDiv.textContent = ""; }, 3000);
   }
 }
