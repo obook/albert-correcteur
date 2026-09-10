@@ -22,7 +22,9 @@
     "storage",
     "activeTab",
     "contextMenus",
-    "https://albert.api.etalab.gouv.fr/*"
+    "https://albert.api.etalab.gouv.fr/*",
+    "http://127.0.0.1/*",
+    "http://localhost/*"
   ],
   "icons": {
     "48": "icons/icon-48.png",

@@ -76,7 +76,7 @@ function chargerPopupLimits(reponses) {
   const usine = new Function(
     "document", "fetch",
     alias + "\n" + limits
-    + "\nreturn { fetchAndShowLimits, fetchModels, modelNames,"
+    + "\nreturn { fetchAndShowLimits, listerModelesApi, modelNames,"
     + " fetchDailyUsageForModel };"
   );
   return { ...usine(document, fetchFactice), elements, appels };
@@ -186,7 +186,7 @@ async function main() {
   });
 
   await test("Usage compté derrière un proxy qui renomme les modèles", async () => {
-    const { fetchModels, modelNames, fetchDailyUsageForModel } = chargerPopupLimits({
+    const { listerModelesApi, modelNames, fetchDailyUsageForModel } = chargerPopupLimits({
       "/v1/models": { body: MODELES_PROXY },
       "/v1/me/usage": { body: { data: [
         EVENEMENT("qwen3-coder-30b-A3b-instruct"),
@@ -195,7 +195,7 @@ async function main() {
       ] } },
     });
 
-    const noms = modelNames(await fetchModels("http://p", "sk"), "openweight-code");
+    const noms = modelNames(await listerModelesApi("http://p", "sk"), "openweight-code");
     const usage = await fetchDailyUsageForModel("http://p", "sk", noms);
 
     assert.strictEqual(usage.rpdUsed, 2, "les deux événements du modèle");
@@ -203,14 +203,14 @@ async function main() {
   });
 
   await test("Usage compté contre l'API directe (id canonique)", async () => {
-    const { fetchModels, modelNames, fetchDailyUsageForModel } = chargerPopupLimits({
+    const { listerModelesApi, modelNames, fetchDailyUsageForModel } = chargerPopupLimits({
       "/v1/models": { body: { data: [{
         id: "openai/gpt-oss-120b", aliases: ["openweight-large"],
       }] } },
       "/v1/me/usage": { body: { data: [EVENEMENT("openai/gpt-oss-120b")] } },
     });
 
-    const noms = modelNames(await fetchModels("http://a", "sk"), "openweight-large");
+    const noms = modelNames(await listerModelesApi("http://a", "sk"), "openweight-large");
     const usage = await fetchDailyUsageForModel("http://a", "sk", noms);
 
     assert.strictEqual(usage.rpdUsed, 1);

@@ -132,14 +132,20 @@ function buildTierRow(title, tier) {
  * Elle sert deux fois : à rattacher les plafonds du compte au modèle
  * choisi et à retrouver ses autres noms pour l'usage du jour.
  *
+ * Le nom est explicite parce que les scripts de la popup partagent un
+ * seul espace de noms : appelée fetchModels, elle écrasait la fonction
+ * homonyme de popup-models.js, chargée juste avant, et le bouton de
+ * rechargement comme l'enregistrement partaient dans celle-ci, qui
+ * renvoie un tableau au lieu de remplir la liste déroulante.
+ *
  * @param {string} apiBase - URL de base de l'API.
  * @param {string} apiKey  - Clé API.
  * @returns {Promise<Array>}
  */
-async function fetchModels(apiBase, apiKey) {
+async function listerModelesApi(apiBase, apiKey) {
   try {
     const response = await fetch(`${apiBase}/v1/models`, {
-      headers: { Authorization: `Bearer ${apiKey}` },
+      headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
     });
     if (!response.ok) return [];
     const data = await response.json();
@@ -291,7 +297,7 @@ async function fetchAndShowLimits() {
 
     const modelSelect = document.getElementById("model");
     const selectedModel = modelSelect ? modelSelect.value : "";
-    const models = await fetchModels(apiBase, apiKey);
+    const models = await listerModelesApi(apiBase, apiKey);
 
     /*
      * Les plafonds du modèle choisi, rattachés par [[limitsForModel]].

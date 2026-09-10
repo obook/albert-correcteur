@@ -1,29 +1,22 @@
 /*
  * service-compose-cleanup.js - Nettoyage du courriel avant envoi.
  *
- * Les soulignements d'erreurs entourent des mots du message et vivent
- * donc dans son corps. Le badge, les popups et la zone aria-live ont
- * rejoint un conteneur accroché à <html> (util/ui-root.js), hors du
- * corps, mais restent nettoyés ici : un brouillon enregistré avant ce
- * changement peut encore en contenir. Sans cette intervention, ils
- * partiraient avec le courriel envoyé :
- *   - le destinataire verrait le mot « Albert » (alt de l'image du
- *     badge) en fin de message ;
- *   - des balises <span class="albert-error"> resteraient autour
- *     des mots erronés non corrigés ;
- *   - le texte d'annonce aux lecteurs d'écran (« 1 erreur détectée. »)
- *     issu du div.albert-aria-live apparaîtrait à la fin du message.
+ * Badge, popups, notifications et zone d'annonce aux lecteurs d'écran
+ * vivent dans le conteneur <albert-ui> accroché à <html> (util/ui-root.js),
+ * hors du corps du message. Cela les met à l'abri de l'éditeur, mais pas
+ * de l'envoi : Thunderbird sérialise le document entier, si bien que leur
+ * texte se retrouvait à la fin du courriel reçu, par exemple
+ * « Aucune erreur détectée. » sous la signature.
  *
- * Ce module écoute l'événement compose.onBeforeSend (déclenché juste
- * avant l'envoi) et retire :
- *   - le badge complet (div.albert-badge) ;
- *   - la zone d'annonce aux lecteurs d'écran (div.albert-aria-live) ;
- *   - les spans de soulignement (span.albert-error), en conservant
- *     leur contenu textuel.
+ * Réécrire details.body ou details.plainTextBody ne suffit pas : ces
+ * champs ne portent que le corps, et le conteneur, resté en place, était
+ * de nouveau sérialisé à l'envoi. Il faut donc le retirer du document
+ * lui-même, ce que fait ce module avant de laisser partir le message.
  *
- * Le nettoyage s'applique aussi à plainTextBody (mode texte brut),
- * où le mot « Albert » et les lignes d'annonce d'erreurs peuvent
- * subsister isolés sur leur ligne.
+ * Les soulignements d'erreurs, eux, entourent des mots du message et
+ * vivent dans son corps : ils sont déballés dans details.body, seule
+ * voie pour les retirer sans toucher au reste du texte. En composition
+ * texte brut, les balises disparaissent d'elles-mêmes à la conversion.
  *
  * Auteur : O. Booklage
  * Date : mai 2026
@@ -32,13 +25,7 @@
 
 "use strict";
 
-/* Repère une ligne d'annonce produite par compose-render.js, par
- * exemple « Aucune erreur détectée. », « 1 erreur détectée. » ou
- * « 3 erreurs détectées. ». */
-const REGEX_ANNONCE_ERREURS = /^(Aucune erreur détectée\.|\d+ erreurs? détectées?\.)$/;
-
-/* Nettoie le HTML d'un courriel : retire le badge Albert, la zone
- * aria-live d'annonce, et déballe les spans de soulignement en
+/* Nettoie le HTML d'un courriel : déballe les spans de soulignement en
  * conservant le texte qu'ils entourent.
  *
  * Si le HTML ne contient aucun marqueur Albert, il est renvoyé tel
@@ -53,13 +40,10 @@ function nettoyerCorpsHtml(html) {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
 
-  /* Retirer complètement les éléments injectés par Albert dans le corps
-   * du compose : badge, popups (correction, reformulation, traduction),
-   * notifications et zone d'annonce pour les lecteurs d'écran. Sans ce
-   * nettoyage, un envoi effectué pendant qu'une popup est ouverte
-   * expédierait son HTML au destinataire. */
+  /* Filet pour les brouillons enregistrés avant que l'interface ne sorte
+   * du corps du message : ils peuvent encore contenir ces éléments. */
   doc.querySelectorAll(
-    ".albert-badge, .albert-popup, .albert-toast, .albert-aria-live"
+    "albert-ui, .albert-badge, .albert-popup, .albert-toast, .albert-aria-live"
   ).forEach((node) => node.remove());
 
   /* Déballer les spans de soulignement : déplacer leurs enfants
@@ -75,44 +59,31 @@ function nettoyerCorpsHtml(html) {
   return "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
 }
 
-/* Nettoie la version texte brut : supprime les lignes ne contenant
- * que le mot « Albert » (provenant du alt de l'image du badge lors
- * de la conversion HTML → texte effectuée par Thunderbird) ou une
- * annonce d'erreurs produite par la zone aria-live. */
-function nettoyerCorpsTexte(texte) {
-  if (!texte) return texte;
-  return texte
-    .split("\n")
-    .filter((ligne) => {
-      const ligneSimplifiee = ligne.trim();
-      if (ligneSimplifiee === "Albert") return false;
-      if (REGEX_ANNONCE_ERREURS.test(ligneSimplifiee)) return false;
-      return true;
-    })
-    .join("\n");
+/* Retire du document de composition le conteneur de l'interface. Le
+ * badge repousse tout seul si l'envoi est finalement annulé : son
+ * observateur (compose-badge.js) surveille tout le document. */
+async function retirerInterfaceInjectee(tabId) {
+  try {
+    await browser.tabs.executeScript(tabId, {
+      code: "document.querySelectorAll('albert-ui').forEach((n) => n.remove());",
+    });
+  } catch (err) {
+    AlbertLog.warn("Retrait de l'interface avant envoi impossible :", err);
+  }
 }
 
-browser.compose.onBeforeSend.addListener((tab, details) => {
-  const detailsModifies = {};
+browser.compose.onBeforeSend.addListener(async (tab, details) => {
+  await retirerInterfaceInjectee(tab.id);
 
-  if (details.body) {
-    const corpsNettoye = nettoyerCorpsHtml(details.body);
-    if (corpsNettoye !== details.body) {
-      detailsModifies.body = corpsNettoye;
-    }
-  }
+  /* En texte brut, le retrait du conteneur suffit : les balises
+   * restantes ne survivent pas à la conversion en texte. */
+  if (details.isPlainText) return {};
 
-  if (details.plainTextBody) {
-    const texteNettoye = nettoyerCorpsTexte(details.plainTextBody);
-    if (texteNettoye !== details.plainTextBody) {
-      detailsModifies.plainTextBody = texteNettoye;
-    }
-  }
+  /* Relire le corps une fois le conteneur parti, pour ne pas le
+   * réinjecter avec la version capturée à l'ouverture de l'écouteur. */
+  const frais = await browser.compose.getComposeDetails(tab.id);
+  const corpsNettoye = nettoyerCorpsHtml(frais.body);
+  if (corpsNettoye === frais.body) return {};
 
-  /* Si rien n'a été modifié, on laisse Thunderbird envoyer tel quel. */
-  if (Object.keys(detailsModifies).length === 0) {
-    return {};
-  }
-
-  return { details: detailsModifies };
+  return { details: { body: corpsNettoye } };
 });

@@ -126,6 +126,25 @@ function nettoyerSuggestions(corrections) {
 }
 
 /**
+ * Construit les en-têtes d'un appel à l'API.
+ *
+ * L'en-tête Authorization n'est posé que si une clé est configurée : un
+ * endpoint local (llm-proxy, Ollama, LM Studio) n'en demande pas, et un
+ * "Bearer " vide lui ferait refuser la requête.
+ *
+ * @param {{apiKey: string}} config - Configuration chargée.
+ * @returns {Object} En-têtes de la requête.
+ */
+function enteteApi(config) {
+  const entetes = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  };
+  if (config.apiKey) entetes.Authorization = `Bearer ${config.apiKey}`;
+  return entetes;
+}
+
+/**
  * Envoie un texte à l'API Albert pour correction ou reformulation.
  *
  * @param {string} text       - Texte à vérifier.
@@ -136,10 +155,12 @@ function nettoyerSuggestions(corrections) {
  */
 async function checkText(text, mode, personaId) {
   const config = await loadConfig();
-  if (!config.apiKey) {
+  /* La clé est facultative (un endpoint local n'en demande pas), mais
+     un modèle enregistré prouve que la configuration a été faite. */
+  if (!config.model) {
     return {
-      error: "Clé API non configurée. "
-        + "Cliquez sur l'icône Albert pour la configurer."
+      error: "Albert n'est pas configuré. "
+        + "Cliquez sur l'icône Albert pour le configurer."
     };
   }
 
@@ -163,11 +184,7 @@ async function checkText(text, mode, personaId) {
 
     const response = await fetch(`${config.apiBase}/v1/chat/completions`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${config.apiKey}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers: enteteApi(config),
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(API_TIMEOUT_MS),
     });
@@ -266,8 +283,8 @@ async function checkText(text, mode, personaId) {
  */
 async function translateText(text, targetLang) {
   const config = await loadConfig();
-  if (!config.apiKey) {
-    return { error: "Clé API non configurée." };
+  if (!config.model) {
+    return { error: "Albert n'est pas configuré." };
   }
 
   const langSource = detectLanguage(text);
@@ -288,11 +305,7 @@ async function translateText(text, targetLang) {
 
     const response = await fetch(`${config.apiBase}/v1/chat/completions`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${config.apiKey}`,
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+      headers: enteteApi(config),
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(API_TIMEOUT_MS),
     });
