@@ -49,9 +49,12 @@ window.Albert.uiRoot = function () {
        bas rend le conteneur cible de tout sélecteur [contenteditable]
        de la page : un site qui donne à ses éditeurs un fond, un cadre
        et une hauteur minimale peignait ainsi un rectangle dans le coin
-       haut gauche de la fenêtre. */
+       haut gauche de la fenêtre.
+       Un élément fixe forme son propre contexte d'empilement : sans
+       z-index, le z-index maximal des popups ne vaut qu'à l'intérieur,
+       et les soulignements de la page passaient par-dessus. */
     conteneur.style.cssText =
-      "all:initial;position:fixed;top:0;left:0;width:0;height:0;";
+      "all:initial;position:fixed;top:0;left:0;width:0;height:0;z-index:2147483647;";
     /* La fenêtre de composition de Thunderbird met tout le document en
        designMode, y compris ce qui est accroché à <html>. Sans ce
        garde, les popups deviennent du contenu à éditer : un clic sur un
