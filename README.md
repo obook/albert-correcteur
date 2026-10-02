@@ -52,7 +52,7 @@
 ## Prérequis
 
 - Firefox 128 ou supérieur, Thunderbird 128 ou supérieur, ou Brave (ou un autre navigateur Chromium récent)
-- Une clé API Albert (réservée aux agents de la fonction publique d'État) → [Demander un accès](https://albert.sites.beta.gouv.fr/)
+- Une clé API Albert (réservée aux agents de la fonction publique d'État) → [Demander un accès](https://albert.playground.etalab.gouv.fr/)
 
 ## Installation
 
