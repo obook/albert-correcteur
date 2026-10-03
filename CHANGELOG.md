@@ -5,9 +5,16 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
-## [Non publié]
+## [0.8.4] - 2026-10-03
 
 ### Corrigé
+- Dans une fenêtre modale, comme le cahier de texte d'EcoleDirecte, cliquer sur
+  un mot souligné n'affichait rien : la popup s'ouvrait derrière la modale.
+- Avec un serveur local sans clé API, la liste des modèles restait vide. La clé
+  devient facultative.
+- Thunderbird : le texte du badge et des notifications partait avec le
+  courriel.
+- Thunderbird : un texte collé au-dessus de la citation n'était pas vérifié.
 - Le délai entre deux corrections pendant la frappe était deux fois trop long.
   L'extension lisait les quotas du compte en gardant le plus bas tous modèles
   confondus, soit 50 requêtes par minute sur un compte où openweight-code en
@@ -32,6 +39,7 @@ et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
   tournait assez longtemps pour laisser croire que rien n'était corrigé. Seul
   le texte rédigé part maintenant, et les offsets sont ramenés vers le corps du
   message avant l'affichage des soulignements.
+- Le lien de demande de clé pointe vers albert.playground.etalab.gouv.fr.
 
 ## [0.8.3] - 2026-08-30
 
