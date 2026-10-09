@@ -140,7 +140,7 @@ Olivier Booklage (Académie de Bordeaux)
 ## Licences
 
 - **Code source** : [licence MIT](LICENSE)
-- **Logo Albert** : issu du projet [Albert](https://albert.sites.beta.gouv.fr/) (DINUM), sous [licence Ouverte Etalab 2.0](https://github.com/etalab/licence-ouverte/blob/master/LO.md)
+- **Logo Albert** : issu du projet [Albert](https://albert.sites.beta.gouv.fr/) (DINUM), sous [licence Ouverte Etalab 2.0](https://www.data.gouv.fr/pages/legal/licences/etalab-2.0)
 - **Logo Firefox** : sous [Mozilla Public License Version 2](https://www.mozilla.org/en-US/MPL/2.0/)
 - **Logo Thunderbird** : sous [licence Creative Commons Attribution 3.0 Non Transposé](https://creativecommons.org/licenses/by/3.0/deed.fr)
 
