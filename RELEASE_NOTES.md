@@ -1,14 +1,8 @@
-## Albert Correcteur v0.8.4
+## Albert Correcteur v0.8.5
 
 Version de correction.
 
-Dans une fenêtre modale, comme le cahier de texte d'EcoleDirecte, cliquer sur un mot souligné n'affichait rien : la popup s'ouvrait derrière la modale. Elle passe maintenant devant.
-
-Des fautes n'étaient jamais signalées quand la correction retirait ou remplaçait le "s" final ("chevals", "parmis"). Sur certains comptes, le délai entre deux corrections pendant la frappe était deux fois trop long.
-
-Thunderbird n'envoie plus à l'API le texte cité ni la signature, seulement ce que vous rédigez. Un texte collé au-dessus de la citation est de nouveau vérifié et l'interface de l'extension ne part plus avec le courriel.
-
-L'extension fonctionne avec un serveur local sans clé API : la clé devient facultative. Le lien de demande de clé pointe vers le playground Albert.
+Sur Facebook, dans un post ouvert depuis le fil, cliquer sur un mot souligné n'affichait rien si l'extension "Tracking & Ad Removal on FaceBk" était active : elle bloquait le clic. La popup de correction s'ouvre de nouveau.
 
 ### Téléchargements
 

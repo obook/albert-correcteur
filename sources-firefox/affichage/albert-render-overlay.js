@@ -97,20 +97,12 @@ Albert.renderOverlay = function (el, state) {
   };
   el.addEventListener("scroll", state.scrollHandler, { passive: true });
 
-  /* Garder le focus dans le champ au clic sur un mot souligné. Sans
-     cela, un champ qui s'agrandit au focus (transition CSS) se replie
-     dès le mousedown, sous la popup qui vient de s'ouvrir. L'overlay
-     est en pointer-events: none, seules les marques d'erreur reçoivent
-     cet événement, la pose du curseur ailleurs n'est pas touchée. */
-  overlay.addEventListener("mousedown", (e) => e.preventDefault());
-
-  /* Rendre chaque span d'erreur cliquable pour ouvrir la popup de correction */
+  /* Clic sur un span d'erreur : voir l'écouteur de fenêtre en fin de fichier. */
   overlay.querySelectorAll(".albert-error").forEach((mark) => {
-    mark.addEventListener("click", (e) => {
-      e.stopPropagation();
+    mark.albertOuvrir = () => {
       const idx = parseInt(mark.dataset.idx, 10);
       Albert.showPopup(el, state.corrections[idx], mark);
-    });
+    };
   });
 };
 
@@ -177,10 +169,6 @@ Albert.renderMarquesRange = function (el, state) {
   parent.appendChild(conteneur);
   state.overlay = conteneur;
 
-  /* Garder le focus dans le champ au clic sur un mot souligné : voir
-     le commentaire de même objet dans renderOverlay. */
-  conteneur.addEventListener("mousedown", (e) => e.preventDefault());
-
   const placer = () => {
     conteneur.textContent = "";
     const parentRect = parent.getBoundingClientRect();
@@ -202,15 +190,14 @@ Albert.renderMarquesRange = function (el, state) {
           + "top:" + (rect.top - parentRect.top) + "px;"
           + "width:" + rect.width + "px;"
           + "height:" + rect.height + "px;";
-        marque.addEventListener("click", (e) => {
-          e.stopPropagation();
+        marque.albertOuvrir = () => {
           /* Relire la correction au clic, ne pas garder celle capturée
              au rendu : un remplacement recalibre les offsets des
              corrections restantes, et un objet périmé ferait viser une
              autre occurrence du même mot, ailleurs dans le texte. */
           const courante = state.corrections[idx];
           if (courante) Albert.showPopup(el, courante, marque);
-        });
+        };
         conteneur.appendChild(marque);
       }
     });
@@ -367,3 +354,27 @@ Albert.buildHighlightedDOM = function (container, text, corrections) {
     container.appendChild(document.createTextNode(text.slice(cursor)));
   }
 };
+
+/*
+ * Clic sur un mot souligné, capté sur window en phase de capture : un
+ * écouteur posé sur un ancêtre de la page passe sinon avant la marque
+ * et peut arrêter l'événement (extension "Tracking & Ad Removal on
+ * FaceBk", post Facebook ouvert depuis le fil).
+ */
+function marqueSousClic(e) {
+  const marque = e.target.closest && e.target.closest(".albert-error");
+  return marque && marque.albertOuvrir ? marque : null;
+}
+
+/* Garder le focus dans le champ : sans cela, un champ qui s'agrandit au
+   focus se replie dès le mousedown, sous la popup qui vient de s'ouvrir. */
+window.addEventListener("mousedown", (e) => {
+  if (marqueSousClic(e)) e.preventDefault();
+}, true);
+
+window.addEventListener("click", (e) => {
+  const marque = marqueSousClic(e);
+  if (!marque) return;
+  e.stopPropagation();
+  marque.albertOuvrir();
+}, true);

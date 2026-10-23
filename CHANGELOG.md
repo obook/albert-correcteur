@@ -5,6 +5,14 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.8.5] - 2026-10-23
+
+### Corrigé
+- Sur Facebook, dans un post ouvert depuis le fil, cliquer sur un mot souligné
+  n'affichait rien quand l'extension "Tracking & Ad Removal on FaceBk" était
+  active : elle arrêtait le clic avant qu'il n'atteigne le soulignement.
+  L'extension capte maintenant le clic au niveau de la fenêtre.
+
 ## [0.8.4] - 2026-10-03
 
 ### Corrigé
