@@ -5,6 +5,13 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.8.6] - 2026-11-03
+
+### Corrigé
+- Dans un éditeur placé dans une iframe, comme le cahier de textes de Pronote,
+  le cadre coupait la popup de correction : les suggestions restaient cachées
+  et impossibles à cliquer. La popup s'affiche maintenant dans la page.
+
 ## [0.8.5] - 2026-10-23
 
 ### Corrigé
