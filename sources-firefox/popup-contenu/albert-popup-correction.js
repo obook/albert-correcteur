@@ -206,8 +206,11 @@ Albert.showPopup = function (el, correction, markEl) {
   }
 
   /* Pas document.body : dans une iframe d'éditeur, ce corps est le
-     texte à corriger, la popup s'y insérerait comme du contenu. */
-  Albert.uiRoot().appendChild(popup);
+     texte à corriger, la popup s'y insérerait comme du contenu. Elle
+     va dans le plus haut cadre accessible, que l'iframe ne la rogne pas. */
+  const hote = Albert.fenetreHote();
+  Albert.uiRoot(hote.win.document).appendChild(popup);
+  Albert.ecouterFermeture(hote.win.document);
 
   /* --- Positionnement --- */
   if (Albert.popupPosition) {
@@ -215,23 +218,28 @@ Albert.showPopup = function (el, correction, markEl) {
     popup.style.left = Albert.popupPosition.left + "px";
   } else {
     const markRect = markEl.getBoundingClientRect();
-    popup.style.top = (markRect.bottom + 4) + "px";
-    popup.style.left = markRect.left + "px";
+    const markTop = markRect.top + hote.dy;
+    popup.style.top = (markRect.bottom + hote.dy + 4) + "px";
+    popup.style.left = (markRect.left + hote.dx) + "px";
     requestAnimationFrame(() => {
       const popupRect = popup.getBoundingClientRect();
-      if (popupRect.right > window.innerWidth - 10) {
-        popup.style.left = (window.innerWidth - popupRect.width - 10) + "px";
+      if (popupRect.right > hote.win.innerWidth - 10) {
+        popup.style.left = (hote.win.innerWidth - popupRect.width - 10) + "px";
       }
-      if (popupRect.bottom > window.innerHeight - 10) {
-        /* Bornée : dans une iframe d'éditeur, la fenêtre fait quelques
-           centaines de pixels, la remontée sortait par le haut. */
+      if (popupRect.bottom > hote.win.innerHeight - 10) {
+        /* Bornée : une popup plus haute que la place au-dessus du mot
+           sortirait par le haut. */
         popup.style.top = Albert.bornerDansFenetre(
-          markRect.top - popupRect.height - 4,
-          popupRect.height, window.innerHeight) + "px";
+          markTop - popupRect.height - 4,
+          popupRect.height, hote.win.innerHeight) + "px";
       }
     });
   }
 
+  /* Rendre le focus au champ à la fermeture. trapFocus écarte un
+     <body>, or c'est le champ même d'une iframe d'éditeur : sans cela,
+     le focus restait dans la page, hors de l'éditeur. */
+  if (!Albert._previousFocus) Albert._previousFocus = el;
   Albert.initPopupDrag(popup, handle);
   Albert.trapFocus(popup);
   Albert.activePopup = popup;

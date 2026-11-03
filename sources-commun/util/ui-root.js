@@ -37,12 +37,14 @@ window.Albert = window.Albert || {};
 /**
  * Renvoie le conteneur d'interface, en le créant au premier appel.
  *
+ * @param {Document} [doc=document] - Document hôte : celui d'un cadre
+ *   parent pour une popup ouverte depuis une iframe d'éditeur.
  * @returns {HTMLElement} Élément <albert-ui> enfant de <html>.
  */
-window.Albert.uiRoot = function () {
-  let conteneur = document.querySelector("albert-ui");
+window.Albert.uiRoot = function (doc = document) {
+  let conteneur = doc.querySelector("albert-ui");
   if (!conteneur) {
-    conteneur = document.createElement("albert-ui");
+    conteneur = doc.createElement("albert-ui");
     /* Balise inconnue donc en ligne par défaut : la passer en position
        fixe et de taille nulle évite qu'elle n'occupe une ligne.
        "all:initial" d'abord, car l'attribut contenteditable posé plus
@@ -61,7 +63,7 @@ window.Albert.uiRoot = function () {
        sélecteur ou sur un bouton déplace le curseur au lieu d'agir.
        L'attribut vaut pour toute la descendance. */
     conteneur.contentEditable = "false";
-    document.documentElement.appendChild(conteneur);
+    doc.documentElement.appendChild(conteneur);
   }
 
   /* Isolation par shadow DOM là où la liste des feuilles est fournie
@@ -71,7 +73,7 @@ window.Albert.uiRoot = function () {
      franchissent pas cette frontière, il faut les réimporter. */
   if (!conteneur.shadowRoot && Array.isArray(window.Albert.UI_CSS)) {
     const racine = conteneur.attachShadow({ mode: "open" });
-    const style = document.createElement("style");
+    const style = doc.createElement("style");
     style.textContent = window.Albert.UI_CSS
       .map((f) => "@import url(" + browser.runtime.getURL(f) + ");")
       .join("\n");

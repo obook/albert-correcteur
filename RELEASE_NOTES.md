@@ -1,8 +1,8 @@
-## Albert Correcteur v0.8.5
+## Albert Correcteur v0.8.6
 
 Version de correction.
 
-Sur Facebook, dans un post ouvert depuis le fil, cliquer sur un mot souligné n'affichait rien si l'extension "Tracking & Ad Removal on FaceBk" était active : elle bloquait le clic. La popup de correction s'ouvre de nouveau.
+Dans un éditeur placé dans une iframe, comme le cahier de textes de Pronote, le cadre coupait la popup de correction : les suggestions restaient cachées et impossibles à cliquer. La popup s'affiche maintenant en entier dans la page.
 
 ### Téléchargements
 
