@@ -53,15 +53,49 @@ Albert.closePopup = function () {
   Albert.restoreFocus();
 };
 
+/* --- Fenêtre d'accueil --- */
+
+/**
+ * Fenêtre où afficher une popup ouverte depuis ce cadre, et décalage
+ * du cadre dans cette fenêtre.
+ *
+ * Dans une iframe d'éditeur (TinyMCE de Pronote, 106 px de haut), la
+ * popup était rognée par le cadre, boutons de suggestion compris. On
+ * remonte donc les cadres de même origine : frameElement vaut null
+ * sous un parent d'une autre origine.
+ *
+ * @param {Window} [depart=window] - Fenêtre du champ.
+ * @returns {{win: Window, dx: number, dy: number}}
+ */
+Albert.fenetreHote = function (depart = window) {
+  let win = depart;
+  let dx = 0;
+  let dy = 0;
+  try {
+    while (win.frameElement) {
+      const cadre = win.frameElement;
+      const rect = cadre.getBoundingClientRect();
+      /* shortcut: padding de l'iframe ignoré, nul sur les éditeurs
+         connus ; l'ajouter si un site en met un. */
+      dx += rect.left + cadre.clientLeft;
+      dy += rect.top + cadre.clientTop;
+      win = win.parent;
+    }
+  } catch (e) {
+    /* Parent inaccessible : garder le dernier cadre atteint. */
+  }
+  return { win, dx, dy };
+};
+
 /* --- Fermeture par Échap ou clic en dehors --- */
 
-document.addEventListener("keydown", (e) => {
+function fermerSurEchap(e) {
   if (e.key === "Escape" && Albert.activePopup) {
     Albert.closePopup();
   }
-});
+}
 
-document.addEventListener("mousedown", (e) => {
+function surMousedown(e) {
   if (!Albert.activePopup) return;
   /* composedPath et non contains : la popup vit dans un shadow DOM, la
      cible vue depuis le document est le conteneur hôte, jamais la
@@ -79,7 +113,24 @@ document.addEventListener("mousedown", (e) => {
     && !cible.closest("input, textarea, select, [contenteditable=\"true\"]")) {
     e.preventDefault();
   }
-});
+}
+
+const documentsEcoutes = new WeakSet();
+
+/**
+ * Pose Échap et clic en dehors sur un document, une seule fois. Le
+ * document d'un cadre parent qui accueille la popup en a besoin aussi :
+ * clics et touches dans la popup n'arrivent pas au document du champ.
+ *
+ * @param {Document} doc - Document à écouter.
+ */
+Albert.ecouterFermeture = function (doc) {
+  if (documentsEcoutes.has(doc)) return;
+  documentsEcoutes.add(doc);
+  doc.addEventListener("keydown", fermerSurEchap);
+  doc.addEventListener("mousedown", surMousedown);
+};
+Albert.ecouterFermeture(document);
 
 /* --- Sauvegarde de la sélection avant le menu contextuel --- */
 

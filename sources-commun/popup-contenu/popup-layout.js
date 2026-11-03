@@ -44,6 +44,10 @@ Albert.bornerDansFenetre = function (valeur, taillePopup, tailleFenetre) {
 };
 
 Albert.initPopupDrag = function (popup, handle) {
+  /* Document de la popup et non du script : une popup ouverte depuis
+     une iframe d'éditeur vit dans le cadre parent. */
+  const doc = popup.ownerDocument;
+  const vue = doc.defaultView;
   let isDragging = false;
   let startX, startY, origLeft, origTop;
 
@@ -70,9 +74,9 @@ Albert.initPopupDrag = function (popup, handle) {
     if (!isDragging) return;
     const rect = popup.getBoundingClientRect();
     popup.style.left = Albert.bornerDansFenetre(
-      origLeft + e.clientX - startX, rect.width, window.innerWidth) + "px";
+      origLeft + e.clientX - startX, rect.width, vue.innerWidth) + "px";
     popup.style.top = Albert.bornerDansFenetre(
-      origTop + e.clientY - startY, rect.height, window.innerHeight) + "px";
+      origTop + e.clientY - startY, rect.height, vue.innerHeight) + "px";
   };
 
   const onMouseUp = () => {
@@ -82,14 +86,14 @@ Albert.initPopupDrag = function (popup, handle) {
     }
   };
 
-  document.addEventListener("mousemove", onMouseMove);
-  document.addEventListener("mouseup", onMouseUp);
+  doc.addEventListener("mousemove", onMouseMove);
+  doc.addEventListener("mouseup", onMouseUp);
 
   /* Nettoyage automatique quand le popup est retiré du DOM */
   const observer = new MutationObserver(() => {
     if (!popup.isConnected) {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mouseup", onMouseUp);
+      doc.removeEventListener("mousemove", onMouseMove);
+      doc.removeEventListener("mouseup", onMouseUp);
       observer.disconnect();
     }
   });
