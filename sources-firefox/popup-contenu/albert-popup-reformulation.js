@@ -107,7 +107,11 @@ Albert.showReformulationPopup = function (originalText, suggestions, personaLabe
 
   Albert.positionPopupAtClick(popup);
   Albert.initPopupDrag(popup, handle);
-  Albert.trapFocus(popup);
+  /* Focus laissé au champ : la zone d'appréciation du bulletin de
+     Pronote est retirée de la page dès qu'elle perd le focus, la
+     reformulation visait alors un champ détruit. Au clavier, Tab
+     entre dans la popup (entrerDansPopupSurTab). */
+  Albert.trapFocus(popup, { focusInitial: false });
   Albert.activePopup = popup;
 };
 

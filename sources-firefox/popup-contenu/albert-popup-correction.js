@@ -239,9 +239,15 @@ Albert.showPopup = function (el, correction, markEl) {
   /* Rendre le focus au champ à la fermeture. trapFocus écarte un
      <body>, or c'est le champ même d'une iframe d'éditeur : sans cela,
      le focus restait dans la page, hors de l'éditeur. */
-  if (!Albert._previousFocus) Albert._previousFocus = el;
+  if (!Albert._previousFocus && el.ownerDocument.activeElement === el) {
+    Albert._previousFocus = el;
+  }
   Albert.initPopupDrag(popup, handle);
-  Albert.trapFocus(popup);
+  /* Focus laissé au champ : la zone d'appréciation du bulletin de
+     Pronote est retirée de la page dès qu'elle perd le focus, la
+     suggestion visait alors un champ détruit. Clics dans la popup : voir
+     surMousedown ; clavier : Tab y entre (entrerDansPopupSurTab). */
+  Albert.trapFocus(popup, { focusInitial: false });
   Albert.activePopup = popup;
 };
 

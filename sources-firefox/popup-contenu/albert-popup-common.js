@@ -75,7 +75,7 @@ Albert.fenetreHote = function (depart = window) {
     while (win.frameElement) {
       const cadre = win.frameElement;
       const rect = cadre.getBoundingClientRect();
-      /* shortcut: padding de l'iframe ignoré, nul sur les éditeurs
+      /* ponytail: padding de l'iframe ignoré, nul sur les éditeurs
          connus ; l'ajouter si un site en met un. */
       dx += rect.left + cadre.clientLeft;
       dy += rect.top + cadre.clientTop;
@@ -115,22 +115,66 @@ function surMousedown(e) {
   }
 }
 
-const documentsEcoutes = new WeakSet();
+/*
+ * Tab hors de la popup ouverte : y entrer. Les popups laissent le focus
+ * au champ à l'ouverture (voir showPopup), le clavier y accède ainsi.
+ * Phase de capture : passer avant la page, qui peut traiter Tab dans
+ * son champ (Pronote valide alors la case et passe à la suivante).
+ */
+function entrerDansPopupSurTab(e) {
+  if (e.key !== "Tab" || !Albert.activePopup) {
+    return;
+  }
+  if (e.composedPath().includes(Albert.activePopup)) {
+    return;
+  }
+  const premier = Albert.activePopup.querySelector(SELECTEUR_FOCUSABLES);
+  if (premier) {
+    e.preventDefault();
+    premier.focus();
+  }
+}
+
+/* Documents écoutés, pour retirer les écouteurs à la fermeture du cadre. */
+const documentsEcoutes = new Set();
 
 /**
- * Pose Échap et clic en dehors sur un document, une seule fois. Le
- * document d'un cadre parent qui accueille la popup en a besoin aussi :
- * clics et touches dans la popup n'arrivent pas au document du champ.
+ * Pose Échap, Tab et clic en dehors sur un document. Le document d'un
+ * cadre parent qui accueille la popup en a besoin aussi : clics et
+ * touches dans la popup n'arrivent pas au document du champ.
+ * addEventListener ignore un écouteur déjà posé, l'appel répété est
+ * donc sans effet.
  *
  * @param {Document} doc - Document à écouter.
  */
 Albert.ecouterFermeture = function (doc) {
-  if (documentsEcoutes.has(doc)) return;
   documentsEcoutes.add(doc);
   doc.addEventListener("keydown", fermerSurEchap);
+  doc.addEventListener("keydown", entrerDansPopupSurTab, true);
   doc.addEventListener("mousedown", surMousedown);
 };
 Albert.ecouterFermeture(document);
+
+/*
+ * Cadre qui se ferme (iframe d'éditeur retirée par la page) : sa popup
+ * et ses écouteurs vivent peut-être dans le cadre parent, et plus rien
+ * ne les retirerait. Le document propre au cadre n'est pas touché : il
+ * disparaît avec lui, ou revient tel quel depuis le cache de navigation.
+ */
+window.addEventListener("pagehide", () => {
+  if (Albert.activePopup) {
+    Albert.activePopup.remove();
+    Albert.activePopup = null;
+  }
+  for (const doc of documentsEcoutes) {
+    if (doc !== document) {
+      doc.removeEventListener("keydown", fermerSurEchap);
+      doc.removeEventListener("keydown", entrerDansPopupSurTab, true);
+      doc.removeEventListener("mousedown", surMousedown);
+      documentsEcoutes.delete(doc);
+    }
+  }
+});
 
 /* --- Sauvegarde de la sélection avant le menu contextuel --- */
 

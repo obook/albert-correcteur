@@ -53,7 +53,7 @@ function verifier(intitule, obtenu, attendu) {
     console.log("  ok   " + intitule);
     reussis++;
   } catch (e) {
-    console.log("  ECHEC " + intitule + " : attendu " + JSON.stringify(attendu)
+    console.log("  ÉCHEC " + intitule + " : attendu " + JSON.stringify(attendu)
       + ", obtenu " + JSON.stringify(obtenu));
     echoues++;
   }
