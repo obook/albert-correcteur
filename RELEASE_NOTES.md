@@ -1,8 +1,8 @@
-## Albert Correcteur v0.8.6
+## Albert Correcteur v0.8.7
 
 Version de correction.
 
-Dans un éditeur placé dans une iframe, comme le cahier de textes de Pronote, le cadre coupait la popup de correction : les suggestions restaient cachées et impossibles à cliquer. La popup s'affiche maintenant en entier dans la page.
+Dans les bulletins de Pronote, cliquer sur une suggestion ne corrigeait pas l'appréciation : la case se fermait dès l'ouverture de la popup. Les popups de correction et de reformulation laissent maintenant la case ouverte. Au clavier, Tab fait entrer dans la popup.
 
 ### Téléchargements
 
