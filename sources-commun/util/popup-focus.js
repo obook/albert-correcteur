@@ -33,8 +33,11 @@ Albert._previousFocus = null;
  * laisserait le focus s'échapper.
  *
  * @param {HTMLElement} popup - Popup à rendre modale au clavier.
+ * @param {{focusInitial?: boolean}} [options] - focusInitial à false
+ *   laisse le focus dans le champ : certains champs disparaissent dès
+ *   qu'ils le perdent (appréciations du bulletin de Pronote).
  */
-Albert.trapFocus = function (popup) {
+Albert.trapFocus = function (popup, { focusInitial = true } = {}) {
   if (!Albert._previousFocus) {
     const precedent = document.activeElement;
     Albert._previousFocus =
@@ -43,7 +46,9 @@ Albert.trapFocus = function (popup) {
 
   const focusables = popup.querySelectorAll(SELECTEUR_FOCUSABLES);
   if (focusables.length === 0) return;
-  focusables[0].focus();
+  if (focusInitial) {
+    focusables[0].focus();
+  }
 
   popup._focusTrapHandler = function (e) {
     if (e.key !== "Tab") return;

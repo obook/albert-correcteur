@@ -5,6 +5,14 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.8.7] - 2026-11-04
+
+### Corrigé
+- Dans les bulletins de Pronote, cliquer sur une suggestion ne corrigeait pas
+  l'appréciation : la case se fermait dès l'ouverture de la popup. Les popups
+  de correction et de reformulation laissent maintenant la case ouverte. Au
+  clavier, Tab fait entrer dans la popup.
+
 ## [0.8.6] - 2026-11-03
 
 ### Corrigé
