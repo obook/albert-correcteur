@@ -79,6 +79,17 @@ h1 {
   display: none;
 }
 
+.option-case {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.option-case input:disabled + label {
+  color: var(--pop-text-faint);
+}
+
 .theme-preview {
   width: 80px;
   height: 50px;

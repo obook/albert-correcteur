@@ -55,7 +55,8 @@
       "verification/regles-locales.js",
       "service/service-api.js",
       "service/service-dispatch.js",
-      "service/service-menus.js"
+      "service/service-menus.js",
+      "service/service-grist.js"
     ]
   },
   "content_scripts": [
@@ -94,7 +95,8 @@
         "verification/albert-limites.js",
         "verification/albert-debounce.js",
         "verification/albert-check.js",
-        "demarrage/albert-main.js"
+        "demarrage/albert-main.js",
+        "grist/grist-lecture.js"
       ],
       "css": [
         "css/badge-base.css",
