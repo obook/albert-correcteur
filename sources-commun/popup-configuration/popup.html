@@ -13,6 +13,18 @@
     <h1>Albert Correcteur</h1>
   </div>
 
+  <!-- Affichée par popup-grist.js quand l'option est active et que
+       l'onglet montre un document Grist. -->
+  <form id="grist-form" class="grist-section" autocomplete="off" hidden>
+    <label for="grist-table">Table Grist</label>
+    <select id="grist-table"></select>
+    <label for="grist-question">Rechercher par le sens</label>
+    <input type="text" id="grist-question" placeholder="ex. : achat de chaises de bureau" required>
+    <button type="submit">Rechercher</button>
+    <div id="grist-status" class="status" role="status"></div>
+    <ol id="grist-resultats" class="grist-resultats"></ol>
+  </form>
+
   <form id="config-form" autocomplete="off">
     <label for="api-base">URL de l'API</label>
     <!-- autocomplete="url" et non off : sans jeton explicite, Firefox prend
@@ -69,5 +81,6 @@
   <script src="popup-models.js"></script>
   <script src="popup-limits.js"></script>
   <script src="popup.js"></script>
+  <script src="popup-grist.js"></script>
 </body>
 </html>
