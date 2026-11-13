@@ -54,7 +54,7 @@ navigateur. Les seuls outils nécessaires sont :
 
 Une clé API Albert est requise pour un test fonctionnel complet. Elle est
 réservée aux agents de la fonction publique d'État :
-<https://albert.playground.etalab.gouv.fr/>
+<https://ia.numerique.gouv.fr/outils-ia/albert-api/>
 
 ## Construire et tester l'extension
 
