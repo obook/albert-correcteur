@@ -93,10 +93,29 @@
   background: #eee;
 }
 
-.albert-theme-light .albert-popup-langue[aria-pressed="true"] {
+.albert-theme-light .albert-popup-langue-liste {
+  background: #fff;
+  border-color: #ddd;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.albert-theme-light .albert-popup-langue-liste [role="option"] {
+  color: #333;
+}
+
+.albert-theme-light .albert-popup-langue-liste [role="option"]:hover,
+.albert-theme-light .albert-popup-langue-liste [role="option"]:focus {
+  background: #eee;
+}
+
+.albert-theme-light .albert-popup-langue-liste [role="option"][aria-selected="true"] {
   background: #3b82f6;
-  border-color: #3b82f6;
   color: #fff;
+}
+
+.albert-theme-light .albert-popup-langue-liste [role="option"][aria-selected="true"]:hover,
+.albert-theme-light .albert-popup-langue-liste [role="option"][aria-selected="true"]:focus {
+  background: #2563eb;
 }
 
 .albert-theme-light .albert-popup-translation-result {

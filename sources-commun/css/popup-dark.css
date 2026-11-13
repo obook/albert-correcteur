@@ -249,11 +249,19 @@
 }
 
 /* --- Traduction --- */
-/* Un bouton par langue cible ; le bouton pressé (aria-pressed) reprend
-   la couleur d'action. */
-.albert-popup-langues {
-  display: flex;
-  gap: 4px;
+/* La liste déroulante dépasse sous la popup quand celle-ci est encore
+   courte (traduction en cours) : overflow visible, et le bandeau
+   reprend lui-même l'arrondi que l'overflow hidden lui donnait. */
+.albert-popup-traduction {
+  overflow: visible;
+}
+
+.albert-popup-traduction .albert-popup-header {
+  border-radius: 8px 8px 0 0;
+}
+
+.albert-popup-langue-choix {
+  position: relative;
 }
 
 .albert-popup-langue {
@@ -271,13 +279,65 @@
   background: #3a3a4a;
 }
 
-.albert-popup-langue[aria-pressed="true"] {
+/* Triangle en bordure plutôt qu'en caractère : un lecteur d'écran
+   lirait le caractère. */
+.albert-popup-langue::after {
+  content: "";
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: middle;
+  border: 4px solid transparent;
+  border-top-color: currentColor;
+  border-bottom-width: 0;
+}
+
+.albert-popup-langue-liste {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  z-index: 1;
+  min-width: 100%;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background: #272738;
+  border: 1px solid #4a4a5a;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  /* En designMode (compose Thunderbird), le focus posé sur une option
+     y sélectionne aussi le texte. */
+  user-select: none;
+}
+
+.albert-popup-langue-liste[hidden] {
+  display: none;
+}
+
+.albert-popup-langue-liste [role="option"] {
+  padding: 4px 10px;
+  color: #e0e0e0;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.albert-popup-langue-liste [role="option"]:hover,
+.albert-popup-langue-liste [role="option"]:focus {
+  background: #3a3a4a;
+}
+
+.albert-popup-langue-liste [role="option"]:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+.albert-popup-langue-liste [role="option"][aria-selected="true"] {
   background: #3b82f6;
-  border-color: #3b82f6;
   color: #fff;
 }
 
-.albert-popup-langue[aria-pressed="true"]:hover {
+.albert-popup-langue-liste [role="option"][aria-selected="true"]:hover,
+.albert-popup-langue-liste [role="option"][aria-selected="true"]:focus {
   background: #2563eb;
 }
 

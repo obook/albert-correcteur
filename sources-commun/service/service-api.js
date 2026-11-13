@@ -287,7 +287,15 @@ async function translateText(text, targetLang) {
     return { error: "Albert n'est pas configuré." };
   }
 
-  const langSource = detectLanguage(text);
+  /* null sous le seuil : le "fr" par défaut ferait passer un texte
+     court non reconnu pour déjà traduit vers le français. */
+  const langSource = detectLanguage(text, null);
+
+  /* Texte déjà dans la langue cible : le prompt, rédigé en français,
+     poussait les petits modèles à le traduire en français. */
+  if (langSource === targetLang) {
+    return { translation: text, langSource, langCible: targetLang };
+  }
 
   try {
     const systemPrompt = await buildTranslationPrompt(langSource, targetLang);
