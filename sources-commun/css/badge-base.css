@@ -2,7 +2,7 @@
  * badge-base.css - Apparence commune du badge Albert.
  *
  * États visuels du badge (chargement, erreurs détectées, aucune erreur,
- * limite de débit atteinte) et animation du radar, identiques sur
+ * limite de débit atteinte) et anneau de chargement, identiques sur
  * toutes les cibles.
  *
  * Le positionnement reste propre à chaque cible et vit dans son
@@ -47,40 +47,40 @@
   opacity: 1;
 }
 
+/* Chargement : le logo s'efface, deux points tournent autour du centre
+   du badge (rayon 6,5 px). Rien ne dépasse de la boîte de 16 px, un
+   ascenseur voisin n'est jamais recouvert. */
 .albert-badge.albert-loading {
   opacity: 1 !important;
   transition: none;
-  overflow: visible;
 }
 
-.albert-badge.albert-loading::before {
-  content: "";
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  background: #3b82f6;
-  border-radius: 50%;
-  top: -3px;
-  left: 50%;
-  transform-origin: 50% calc(50% + 3px + 8px - 1.5px);
-  animation: albert-radar 1s linear infinite;
-  z-index: 2147483647;
-  box-shadow: none;
+.albert-badge.albert-loading img {
+  visibility: hidden;
 }
 
+.albert-badge.albert-loading::before,
 .albert-badge.albert-loading::after {
   content: "";
   position: absolute;
   width: 3px;
   height: 3px;
-  background: #e53e3e;
+  left: calc(50% - 1.5px);
   border-radius: 50%;
-  bottom: -3px;
-  left: 50%;
-  transform-origin: 50% calc(-50% - 3px - 8px + 3px);
   animation: albert-radar 1s linear infinite;
-  z-index: 2147483647;
-  box-shadow: none;
+  pointer-events: none;
+}
+
+.albert-badge.albert-loading::before {
+  top: 0;
+  background: #3b82f6;
+  transform-origin: 50% 8px;
+}
+
+.albert-badge.albert-loading::after {
+  bottom: 0;
+  background: #e53e3e;
+  transform-origin: 50% -5px;
 }
 
 .albert-badge.albert-has-errors {
@@ -99,8 +99,8 @@
   filter: grayscale(1) opacity(0.5);
 }
 
-/* Rotation du radar de chargement, utilisée par les deux cibles. */
+/* Rotation de l'anneau de chargement, utilisée par les deux cibles. */
 @keyframes albert-radar {
-  0%   { transform: translateX(-50%) rotate(0deg); }
-  100% { transform: translateX(-50%) rotate(360deg); }
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

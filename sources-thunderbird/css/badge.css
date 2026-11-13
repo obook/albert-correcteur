@@ -21,8 +21,9 @@
   background-image: url("../icons/icon-ok.svg");
 }
 
+/* Pendant la vérification, seuls les deux points de badge-base.css tournent. */
 .albert-badge.albert-loading {
-  background-image: url("../icons/icon.svg");
+  background-image: none;
 }
 
 /* Sans <img> à griser, la mise en veille porte sur le badge lui-même. */

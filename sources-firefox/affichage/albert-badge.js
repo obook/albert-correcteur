@@ -6,7 +6,8 @@
  * l'état de la correction :
  *   - Icône normale       : aucune erreur détectée.
  *   - Icône erreur (rouge) : des corrections sont disponibles.
- *   - Animation radar     : vérification en cours (albert-loading).
+ *   - Deux points tournants : vérification en cours (albert-loading),
+ *                           le logo est masqué pendant ce temps.
  *   - Encart ambre        : panne API persistante (albert-api-error).
  *                           Le tooltip indique la cause et invite
  *                           à cliquer pour réessayer.
@@ -135,8 +136,14 @@ Albert.positionBadge = function (el, badge) {
   const borderRight = parseFloat(cs.borderRightWidth) || 0;
   const paddingRight = parseFloat(cs.paddingRight) || 0;
   const paddingBottom = parseFloat(cs.paddingBottom) || 0;
+  const borderLeft = parseFloat(cs.borderLeftWidth) || 0;
+  /* Largeur d'un ascenseur vertical classique. Vaut 0 pour un ascenseur
+     en surimpression (Firefox Linux) : la marge fixe ci-dessous sert à
+     ne pas le recouvrir quand il apparaît (x.com). */
+  const scrollbarW = Math.max(0, el.offsetWidth - el.clientWidth - borderLeft - borderRight);
+  const marge = 10;
   badge.style.top =
     (rect.bottom - parentRect.top - borderBottom - paddingBottom - 16) + "px";
   badge.style.left =
-    (rect.right - parentRect.left - borderRight - paddingRight - 16) + "px";
+    (rect.right - parentRect.left - borderRight - scrollbarW - paddingRight - marge - 16) + "px";
 };
