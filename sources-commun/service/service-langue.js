@@ -53,9 +53,10 @@ const LANG_NAMES = {
  * Détecte la langue d'un texte par comptage de mots-marqueurs.
  *
  * @param {string} text - Texte à analyser.
- * @returns {string} Code langue détecté (fr, en, es, de).
+ * @param {?string} [defaut="fr"] - Valeur rendue sous le seuil.
+ * @returns {?string} Code langue détecté (fr, en, es, de) ou defaut.
  */
-function detectLanguage(text) {
+function detectLanguage(text, defaut = "fr") {
   const words = text
     .toLowerCase()
     .replace(/[^\p{L}\s]/gu, "")
@@ -68,6 +69,6 @@ function detectLanguage(text) {
 
   const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
   /* Seuil minimum : au moins 2 mots reconnus */
-  if (best[1] < 2) return "fr";
+  if (best[1] < 2) return defaut;
   return best[0];
 }
