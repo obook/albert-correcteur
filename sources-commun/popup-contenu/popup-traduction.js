@@ -3,10 +3,10 @@
  *
  * Affiche une popup après un clic sur "Traduire avec Albert" dans le
  * menu contextuel :
- *   - Sélecteur de langue cible (français, anglais, espagnol, allemand).
+ *   - Liste déroulante de langue cible (français, anglais, espagnol,
+ *     allemand) ; choisir à nouveau la langue courante relance.
  *   - Traduction automatique à l'ouverture, dans la dernière langue
  *     utilisée.
- *   - Bouton "Traduire" pour relancer sans changer de langue.
  *   - Direction affichée en clair ("Français → Anglais").
  *   - Bouton "Copier", avec repli execCommand quand l'API
  *     presse-papiers est refusée.
@@ -125,7 +125,8 @@ Albert.showTranslationPopup = function (texte) {
 
   const theme = Albert.getPopupThemeClass();
   const popup = document.createElement("div");
-  popup.className = "albert-popup" + (theme ? " " + theme : "");
+  popup.className = "albert-popup albert-popup-traduction"
+    + (theme ? " " + theme : "");
   popup.setAttribute("role", "dialog");
   popup.setAttribute("aria-label", "Traduction");
   popup.setAttribute("aria-modal", "true");
@@ -138,31 +139,56 @@ Albert.showTranslationPopup = function (texte) {
   const { headerLeft, handle } =
     Albert.createPopupHeader(popup, Albert.closeTranslationPopup);
 
-  /* Un bouton par langue et non un <select> : dans la fenêtre de
-     composition de Thunderbird, en designMode, Gecko ne déroule pas la
-     liste d'un <select> au clic, il y place le curseur d'édition. Les
-     boutons, eux, répondent partout. Le bouton pressé sert aussi de
-     "retraduire". */
-  const langues = document.createElement("div");
-  langues.className = "albert-popup-langues";
-  langues.setAttribute("role", "group");
-  langues.setAttribute("aria-label", "Langue cible");
-  const boutonsLangue = {};
+  /* Liste maison et non un <select> : dans la fenêtre de composition de
+     Thunderbird, en designMode, Gecko ne déroule pas la liste d'un
+     <select> au clic, il y place le curseur d'édition. */
+  const choix = document.createElement("div");
+  choix.className = "albert-popup-langue-choix";
+  const boutonLangue = document.createElement("button");
+  boutonLangue.className = "albert-popup-langue";
+  boutonLangue.setAttribute("aria-haspopup", "listbox");
+  boutonLangue.setAttribute("aria-expanded", "false");
+  const liste = document.createElement("ul");
+  liste.className = "albert-popup-langue-liste";
+  liste.setAttribute("role", "listbox");
+  liste.setAttribute("aria-label", "Langue cible");
+  liste.hidden = true;
+  const options = [];
   for (const [code, libelle] of Object.entries(Albert.LANG_LABELS)) {
-    const bouton = document.createElement("button");
-    bouton.className = "albert-popup-langue";
-    bouton.textContent = libelle;
-    bouton.dataset.langue = code;
-    bouton.setAttribute("aria-pressed", "false");
-    langues.appendChild(bouton);
-    boutonsLangue[code] = bouton;
+    const option = document.createElement("li");
+    option.setAttribute("role", "option");
+    option.setAttribute("aria-selected", "false");
+    option.tabIndex = -1;
+    option.textContent = libelle;
+    option.dataset.langue = code;
+    liste.appendChild(option);
+    options.push(option);
   }
-  headerLeft.appendChild(langues);
+  choix.append(boutonLangue, liste);
+  headerLeft.appendChild(choix);
 
   const marquerLangue = (code) => {
-    for (const [c, b] of Object.entries(boutonsLangue)) {
-      b.setAttribute("aria-pressed", c === code ? "true" : "false");
+    for (const option of options) {
+      option.setAttribute("aria-selected",
+        option.dataset.langue === code ? "true" : "false");
     }
+    const libelle = Albert.LANG_LABELS[code] || code;
+    boutonLangue.textContent = libelle;
+    boutonLangue.setAttribute("aria-label", "Langue cible : " + libelle);
+  };
+
+  const ouvrirListe = () => {
+    liste.hidden = false;
+    boutonLangue.setAttribute("aria-expanded", "true");
+    (options.find((o) => o.getAttribute("aria-selected") === "true")
+      || options[0]).focus();
+  };
+
+  const fermerListe = () => {
+    if (liste.hidden) return;
+    liste.hidden = true;
+    boutonLangue.setAttribute("aria-expanded", "false");
+    boutonLangue.focus();
   };
 
   const corps = document.createElement("div");
@@ -204,12 +230,63 @@ Albert.showTranslationPopup = function (texte) {
     Albert.doTranslate(texte, code, elements);
   };
 
-  langues.addEventListener("click", (e) => {
-    const bouton = e.target.closest(".albert-popup-langue");
-    if (!bouton) return;
+  /* Choisir à nouveau la langue courante relance la traduction. */
+  const choisir = (code) => {
+    fermerListe();
+    traduire(code);
+  };
+
+  /* Sans preventDefault, le compose Thunderbird reprend le focus et
+     place son curseur au mousedown. */
+  choix.addEventListener("mousedown", (e) => e.preventDefault());
+  popup.addEventListener("mousedown", (e) => {
+    if (!choix.contains(e.target)) fermerListe();
+  });
+
+  boutonLangue.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
-    traduire(bouton.dataset.langue);
+    if (liste.hidden) ouvrirListe();
+    else fermerListe();
+  });
+
+  boutonLangue.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return;
+    e.preventDefault();
+    ouvrirListe();
+  });
+
+  liste.addEventListener("click", (e) => {
+    const option = e.target.closest("[role=option]");
+    if (!option) return;
+    e.preventDefault();
+    e.stopPropagation();
+    choisir(option.dataset.langue);
+  });
+
+  liste.addEventListener("keydown", (e) => {
+    const i = options.indexOf(e.target);
+    const deplacer = {
+      ArrowDown: (i + 1) % options.length,
+      ArrowUp: (i - 1 + options.length) % options.length,
+      Home: 0,
+      End: options.length - 1,
+    }[e.key];
+    if (deplacer !== undefined) {
+      e.preventDefault();
+      options[deplacer].focus();
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      choisir(e.target.dataset.langue);
+    } else if (e.key === "Escape") {
+      /* Échap ferme la liste seule : les écouteurs du document
+         fermeraient toute la popup. */
+      e.preventDefault();
+      e.stopPropagation();
+      fermerListe();
+    } else if (e.key === "Tab") {
+      fermerListe();
+    }
   });
 
   copie.addEventListener("click", (e) => {
