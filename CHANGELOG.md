@@ -5,6 +5,25 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.9.0] - 2026-11-14
+
+### Ajouté
+- La langue de traduction se choisit dans une liste déroulante au lieu de
+  quatre boutons. La liste est faite maison : dans la fenêtre de rédaction de
+  Thunderbird, un `<select>` ne s'ouvre pas au clic.
+- Recherche par le sens dans une table Grist, à partir de la fenêtre de
+  l'extension. L'option reste cachée et désactivée tant que la déclaration de
+  collecte de données AMO n'est pas revue.
+
+### Corrigé
+- Sur x.com, l'ascenseur du champ de rédaction recouvrait le badge et les
+  points tournants de la vérification. Le badge garde maintenant une marge
+  avec le bord du champ et l'animation d'attente tient dans ses 16 px : le
+  logo s'efface, deux points tournent à sa place.
+- Traduire un texte vers sa propre langue le réécrivait en français. Le texte
+  est maintenant rendu tel quel.
+- Le lien de demande de clé API pointait vers l'ancien site Albert.
+
 ## [0.8.7] - 2026-11-04
 
 ### Corrigé
