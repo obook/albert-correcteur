@@ -16,6 +16,9 @@
 
 browser.runtime.onMessage.addListener((message) => {
   if (message.type === "reformulateLoading") {
+    /* S\u00e9lection relev\u00e9e au clic sur le menu : \u00e0 l'arriv\u00e9e du r\u00e9sultat,
+       l'utilisateur a pu en s\u00e9lectionner une autre. */
+    Albert.captureReformulationRange();
     Albert.showToast("Reformulation en cours\u2026", 300000);
     return;
   }

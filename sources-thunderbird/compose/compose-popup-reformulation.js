@@ -23,11 +23,19 @@
 "use strict";
 
 Albert.reformulationPopup = null;
-/* Range cloné au moment où la popup est créée, pour pouvoir restaurer
-   la sélection d'origine dans le corps du compose avant d'appliquer
-   une suggestion. La popup vole le focus dès son ouverture, ce qui
-   collapserait la sélection sinon. */
+/* Range cloné au clic sur le menu, pour restaurer la sélection
+   d'origine dans le corps du compose avant d'appliquer une suggestion.
+   La popup vole le focus dès son ouverture, ce qui collapserait la
+   sélection sinon. reformulationSavedText est son texte à ce moment. */
 Albert.reformulationSavedRange = null;
+Albert.reformulationSavedText = "";
+
+Albert.captureReformulationRange = function () {
+  const sel = window.getSelection();
+  const range = (sel && sel.rangeCount > 0) ? sel.getRangeAt(0).cloneRange() : null;
+  Albert.reformulationSavedRange = range;
+  Albert.reformulationSavedText = range ? range.toString() : "";
+};
 
 Albert.closeReformulationPopup = function () {
   if (Albert.reformulationPopup) {
@@ -37,13 +45,17 @@ Albert.closeReformulationPopup = function () {
     }
     Albert.reformulationPopup.remove();
     Albert.reformulationPopup = null;
+    Albert.reformulationSavedRange = null;
   }
-  Albert.reformulationSavedRange = null;
   Albert.restoreFocus();
 };
 
 Albert.showReformulationPopup = function (originalText, result, personaLabel) {
+  /* La plage relevée au clic survit à la fermeture d'une popup
+     précédente : la fermeture la remettrait à null. */
+  const range = Albert.reformulationSavedRange;
   Albert.closeReformulationPopup();
+  Albert.reformulationSavedRange = range;
   Albert.closeCorrectionPopup();
   /* La popup de traduction est un script à part : garder l'ouverture
      possible si son injection a échoué. */
@@ -51,12 +63,10 @@ Albert.showReformulationPopup = function (originalText, result, personaLabel) {
   const loadingToast = document.querySelector(".albert-toast");
   if (loadingToast) loadingToast.remove();
 
-  /* Capturer la sélection AVANT toute manipulation DOM ou changement de
-     focus, sinon elle est perdue quand la popup s'ouvre. */
-  const sel = window.getSelection();
-  Albert.reformulationSavedRange = (sel && sel.rangeCount > 0)
-    ? sel.getRangeAt(0).cloneRange()
-    : null;
+  /* Repli si la plage n'a pas été relevée au clic, ou si Thunderbird
+     l'avait déjà réduite en fermant le menu : la sélection courante,
+     avant que la popup ne prenne le focus. */
+  if (!range || range.collapsed) Albert.captureReformulationRange();
 
   const theme = Albert.getPopupThemeClass();
   const popup = document.createElement("div");
@@ -167,6 +177,12 @@ Albert.replaceSelection = function (text) {
      execCommand("insertText") opère sur le bouton de la popup au lieu
      du corps du mail et l'insertion est silencieusement perdue. */
   const range = Albert.reformulationSavedRange;
+  /* Un range suit les modifications du DOM : si son texte a changé
+     depuis le clic, le remplacer écraserait la saisie faite depuis. */
+  if (range && range.toString() !== Albert.reformulationSavedText) {
+    Albert.showToast("Reformulation impossible : le texte a changé.", 3000);
+    return;
+  }
   if (range) {
     const body = Albert.getComposeBody();
     if (body) body.focus();
