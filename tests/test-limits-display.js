@@ -63,8 +63,10 @@ function chargerPopupLimits(reponses) {
   };
 
   const appels = [];
-  const fetchFactice = async (url) => {
+  const entetes = [];
+  const fetchFactice = async (url, opts) => {
     appels.push(url);
+    entetes.push((opts && opts.headers) || {});
     const sansRequete = url.split("?")[0];
     const chemin = Object.keys(reponses).find((c) => sansRequete.endsWith(c));
     if (!chemin) return { ok: false, status: 404 };
@@ -79,7 +81,7 @@ function chargerPopupLimits(reponses) {
     + "\nreturn { fetchAndShowLimits, listerModelesApi, modelNames,"
     + " fetchDailyUsageForModel };"
   );
-  return { ...usine(document, fetchFactice), elements, appels };
+  return { ...usine(document, fetchFactice), elements, appels, entetes };
 }
 
 let passed = 0;
@@ -162,13 +164,17 @@ async function main() {
     assert.ok(elements["limits-info"].textContent.length > 0);
   });
 
-  await test("Section masquée tant que la clé API est absente", async () => {
-    const { fetchAndShowLimits, elements } = chargerPopupLimits({});
+  await test("Clé vide (proxy local) : limites demandées sans Authorization", async () => {
+    const { fetchAndShowLimits, elements, entetes } = chargerPopupLimits({
+      "/v1/me/info": { body: { limits: [{ router_id: 1, type: "rpm", value: 10 }] } },
+    });
+    elements["api-key"].value = "";
     elements["limits-section"].hidden = true;
 
     await fetchAndShowLimits();
 
-    assert.strictEqual(elements["limits-section"].hidden, true);
+    assert.strictEqual(elements["limits-section"].hidden, false);
+    assert.ok(entetes.every((h) => !("Authorization" in h)));
   });
 
   /* Espaces de noms réels relevés le 25 août 2026 : le proxy sert son

@@ -220,7 +220,7 @@ async function fetchDailyUsageForModel(apiBase, apiKey, noms) {
       const url = `${apiBase}/v1/me/usage?start_time=${utcMidnight}`
         + `&limit=${USAGE_PAGE_SIZE}&offset=${page * USAGE_PAGE_SIZE}`;
       const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${apiKey}` },
+        headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
       });
       if (!response.ok) return page === 0 ? null : { rpdUsed, tpdUsed };
 
@@ -273,11 +273,11 @@ async function fetchAndShowLimits() {
   const apiKey = document.getElementById("api-key").value.trim();
   const apiBase = (document.getElementById("api-base").value.trim()
     || DEFAULT_API_BASE).replace(/\/+$/, "");
-  if (!apiKey) return;
 
+  /* Clé facultative : un proxy local (llm-proxy) ajoute la sienne. */
   try {
     const response = await fetch(`${apiBase}/v1/me/info`, {
-      headers: { Authorization: `Bearer ${apiKey}` },
+      headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
     });
     if (!response.ok) {
       /* /v1/me/info est propre à Albert : un endpoint compatible OpenAI

@@ -38,7 +38,7 @@ const CACHE_LIMITS_MS = 10 * 60 * 1000;
 async function fetchModels(config) {
   try {
     const response = await fetch(`${config.apiBase}/v1/models`, {
-      headers: { Authorization: `Bearer ${config.apiKey}` },
+      headers: enteteApi(config),
     });
     if (!response.ok) return [];
     const data = await response.json();
@@ -59,12 +59,12 @@ async function fetchLimits() {
   const now = Date.now();
   if (cachedLimits && now < limitsExpiry) return cachedLimits;
 
+  /* Clé facultative : un proxy local (llm-proxy) ajoute la sienne. */
   const config = await loadConfig();
-  if (!config.apiKey) return null;
 
   try {
     const response = await fetch(`${config.apiBase}/v1/me/info`, {
-      headers: { Authorization: `Bearer ${config.apiKey}` },
+      headers: enteteApi(config),
     });
     if (!response.ok) return cachedLimits;
 

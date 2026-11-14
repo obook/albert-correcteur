@@ -238,7 +238,5 @@ refreshBtn.addEventListener("click", async () => {
   await fetchModels();
   /* Rafraîchir aussi les limites : une sélection programmatique du
      <select> ne déclenche pas l'event 'change'. */
-  if (document.getElementById("api-key").value.trim()) {
-    fetchAndShowLimits();
-  }
+  fetchAndShowLimits();
 });
