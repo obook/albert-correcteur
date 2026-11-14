@@ -5,6 +5,13 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.9.1] - 2026-11-14
+
+### Modifié
+- Le projet est hébergé sur GitHub. Les mises à jour automatiques de Firefox
+  et de Thunderbird, les téléchargements et le site de présentation passent
+  par GitHub.
+
 ## [0.9.0] - 2026-11-14
 
 ### Ajouté
