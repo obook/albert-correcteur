@@ -5,7 +5,7 @@
  * champ texte. Ce module :
  * 1. Nettoie la suggestion (suppression du contexte en trop).
  * 2. Choisit la stratégie selon le type de champ :
- *    - Textarea/input : remplacement de .value + pile undo manuelle.
+ *    - Textarea/input : execCommand("insertText"), undo natif.
  *    - Contenteditable simple : Range + execCommand immédiat.
  *    - Éditeur riche : délégation à albert-apply-rich.js.
  * 3. Met à jour les offsets des corrections restantes.
@@ -33,38 +33,20 @@
 
 Albert.applyingCorrection = false;
 
-/* --- Pile undo pour textarea/input (CTRL+Z) --- */
+/* --- Remplacement dans un textarea ou un input --- */
 
-Albert._undoStacks = new WeakMap();
-
-Albert._pushUndo = function (el) {
-  if (!Albert._undoStacks.has(el)) {
-    Albert._undoStacks.set(el, []);
-    el.addEventListener("keydown", Albert._handleUndo);
+/*
+ * Remplace [debut, fin[ par texte. execCommand("insertText") inscrit le
+ * remplacement dans l'historique natif : Ctrl+Z l'annule sans toucher
+ * à la frappe qui a suivi, ce qu'une pile maison ne savait pas faire.
+ */
+Albert.remplacerDansChamp = function (el, debut, fin, texte) {
+  el.focus();
+  el.setSelectionRange(debut, fin);
+  if (!document.execCommand("insertText", false, texte)) {
+    el.setRangeText(texte, debut, fin, "end");
+    el.dispatchEvent(new Event("input", { bubbles: true }));
   }
-  Albert._undoStacks.get(el).push({
-    value: el.value,
-    selStart: el.selectionStart,
-    selEnd: el.selectionEnd,
-  });
-};
-
-Albert._handleUndo = function (e) {
-  if (!(e.ctrlKey || e.metaKey) || e.key !== "z" || e.shiftKey) return;
-  const stack = Albert._undoStacks.get(e.target);
-  if (!stack || stack.length === 0) return;
-  e.preventDefault();
-  const prev = stack.pop();
-  Albert.applyingCorrection = true;
-  e.target.value = prev.value;
-  e.target.setSelectionRange(prev.selStart, prev.selEnd);
-  e.target.dispatchEvent(new Event("input", { bubbles: true }));
-  const state = Albert.getOrCreateState(e.target);
-  state.checkedText = prev.value;
-  state.lastCheckedText = "";
-  Albert.renderCorrections(e.target);
-  setTimeout(() => { Albert.applyingCorrection = false; }, 120);
-  Albert.scheduleCheck(e.target);
 };
 
 /* --- Recherche d'offset --- */
@@ -171,8 +153,8 @@ Albert.applySuggestion = async function (el, correction, suggestion) {
 
 /* --- Stratégies par type de champ --- */
 
-/* Textarea / input : remplacement de .value avec pile undo manuelle (CTRL+Z).
-   Rend l'offset du remplacement, ou -1 si le mot est introuvable. */
+/* Textarea / input. Rend l'offset du remplacement, ou -1 si le mot est
+   introuvable. */
 Albert._applyInTextarea = function (el, correction, suggestion, state) {
   const realOffset = Albert.findRealOffset(el.value, correction, state.checkedText || el.value);
   if (realOffset === -1) {
@@ -181,13 +163,8 @@ Albert._applyInTextarea = function (el, correction, suggestion, state) {
     return -1;
   }
   const wordLen = (correction.word || "").length || correction.length;
-  Albert._pushUndo(el);
-  const before = el.value.slice(0, realOffset);
-  const after = el.value.slice(realOffset + wordLen);
-  el.value = before + suggestion + after;
-  el.setSelectionRange(realOffset + suggestion.length, realOffset + suggestion.length);
+  Albert.remplacerDansChamp(el, realOffset, realOffset + wordLen, suggestion);
   state.checkedText = el.value;
-  el.dispatchEvent(new Event("input", { bubbles: true }));
   return realOffset;
 };
 

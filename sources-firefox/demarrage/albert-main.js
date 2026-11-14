@@ -99,7 +99,10 @@ Albert.attachField = function (el) {
 
     /* Migration des offsets : ajuster les corrections existantes au lieu de tout effacer */
     const newText = Albert.getTextContent(el);
-    const oldText = st.lastCheckedText || "";
+    /* checkedText suit le texte des offsets migrés : partir de
+       lastCheckedText, figé entre deux vérifications, cumulait le
+       décalage à chaque frappe. */
+    const oldText = st.checkedText || st.lastCheckedText || "";
     if (st.corrections && st.corrections.length > 0 && oldText) {
       st.corrections = Albert.migrateCorrections(st.corrections, oldText, newText);
       st.checkedText = newText;

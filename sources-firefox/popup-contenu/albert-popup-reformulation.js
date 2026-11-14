@@ -146,16 +146,13 @@ Albert.applyReformulation = function (originalText, replacement) {
       const trouve = el.value.indexOf(originalText, saved.start);
       idx = (trouve !== -1) ? trouve : -1;
     }
-    if (idx !== -1) {
-      el.value = el.value.slice(0, idx) + replacement
-        + el.value.slice(idx + originalText.length);
-      el.selectionStart = el.selectionEnd = idx + replacement.length;
+    if (idx === -1) {
+      /* Le champ a changé pendant la reformulation : remplacer la plage
+         sauvegardée écraserait du texte sans rapport. */
+      Albert.showToast("Reformulation impossible : le texte a changé.", 3000);
     } else {
-      el.value = el.value.slice(0, saved.start) + replacement + el.value.slice(saved.end);
-      el.selectionStart = el.selectionEnd = saved.start + replacement.length;
+      Albert.remplacerDansChamp(el, idx, idx + originalText.length, replacement);
     }
-    el.focus();
-    el.dispatchEvent(new Event("input", { bubbles: true }));
   } else if (saved && saved.type === "range") {
     const host = saved.host;
     const sel = window.getSelection();
