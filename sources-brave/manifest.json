@@ -41,7 +41,10 @@
       "resources": [
         "icons/icon.svg",
         "icons/icon-ok.svg",
-        "icons/icon-error.svg"
+        "icons/icon-error.svg",
+        "css/popup-dark.css",
+        "css/popup-light.css",
+        "css/toast.css"
       ],
       "matches": [
         "<all_urls>"
@@ -80,7 +83,6 @@
         "correction/albert-apply-segments.js",
         "correction/albert-apply-rich.js",
         "correction/albert-apply.js",
-        "util/ui-root.js",
         "notification/toast.js",
         "verification/rolling-window.js",
         "verification/albert-limites.js",

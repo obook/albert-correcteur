@@ -74,9 +74,12 @@ window.Albert.uiRoot = function (doc = document) {
   if (!conteneur.shadowRoot && Array.isArray(window.Albert.UI_CSS)) {
     const racine = conteneur.attachShadow({ mode: "open" });
     const style = doc.createElement("style");
+    /* --albert-icone : sous Brave (use_dynamic_url), l'URL relative d'une
+       feuille importée se résout avec l'identifiant fixe, refusé. */
     style.textContent = window.Albert.UI_CSS
       .map((f) => "@import url(" + browser.runtime.getURL(f) + ");")
-      .join("\n");
+      .join("\n")
+      + "\n:host { --albert-icone: url(" + browser.runtime.getURL("icons/icon.svg") + "); }";
     racine.appendChild(style);
   }
 

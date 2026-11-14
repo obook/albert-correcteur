@@ -44,7 +44,7 @@
   width: 18px;
   height: 18px;
   flex-shrink: 0;
-  background: url("../icons/icon.svg") center / contain no-repeat;
+  background: var(--albert-icone, url("../icons/icon.svg")) center / contain no-repeat;
 }
 
 /* Menu mode (Correcteur / Reformuler) */

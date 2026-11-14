@@ -28,7 +28,9 @@
 
 "use strict";
 
-window.Albert = {
+/* Fusion et non remplacement : ui-root.js, chargé avant, a déjà posé
+   Albert.uiRoot. Chromium ne recharge pas un script listé deux fois. */
+window.Albert = Object.assign(window.Albert || {}, {
   // ===============================================================
   //  LOGS DE DIAGNOSTIC
   // ===============================================================
@@ -105,7 +107,7 @@ window.Albert = {
   limits: undefined,            /* { rpm, rpd, tpm, tpd } depuis /v1/me/info */
   requestCountToday: 0,    /* compteur de requêtes du jour */
   requestDayStart: 0,      /* début de la journée courante (timestamp ms) */
-};
+});
 /* requestWindow (Albert.RollingWindow, fenêtre 60s) est créé dans
    verification/albert-limites.js, après le chargement de
    verification/rolling-window.js. */

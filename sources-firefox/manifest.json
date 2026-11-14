@@ -89,7 +89,6 @@
         "correction/albert-apply-segments.js",
         "correction/albert-apply-rich.js",
         "correction/albert-apply.js",
-        "util/ui-root.js",
         "notification/toast.js",
         "verification/rolling-window.js",
         "verification/albert-limites.js",
