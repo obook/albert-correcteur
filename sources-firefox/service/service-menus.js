@@ -46,6 +46,20 @@ browser.contextMenus.create({
 /* Préfixe d'id qui identifie un clic sur un sous-item de reformulation. */
 const REFORMULATE_PREFIX = "albert-reformulate-";
 
+/* Le navigateur n'injecte pas les content scripts dans les boutiques
+   d'extensions, les pages internes et les PDF, ni (sous Brave) dans un
+   onglet ouvert avant l'installation : le clic restait sans effet. */
+function signalerPageInaccessible(err) {
+  AlbertLog.warn("Content script injoignable :", err && err.message);
+  browser.notifications.create({
+    type: "basic",
+    iconUrl: browser.runtime.getURL("icons/icon-48.png"),
+    title: "Albert Correcteur",
+    message: "Albert ne peut pas agir sur cette page. "
+      + "Si elle était ouverte avant l'installation, rechargez-la.",
+  }).catch((e) => AlbertLog.warn("Notification impossible :", e && e.message));
+}
+
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
   const text = info.selectionText;
   AlbertLog.log("contextMenu cliqué :", info.menuItemId,
@@ -75,9 +89,12 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
       .catch((err) => AlbertLog.warn(
         "Mémorisation du persona impossible :", err && err.message));
 
-    browser.tabs.sendMessage(tab.id, { type: "reformulateLoading" }, sendOpts)
-      .catch((err) => AlbertLog.error("sendMessage reformulateLoading a échoué :",
-        err && err.message, "(content script absent ou frame non autorisée ?)"));
+    try {
+      await browser.tabs.sendMessage(tab.id, { type: "reformulateLoading" }, sendOpts);
+    } catch (err) {
+      signalerPageInaccessible(err);
+      return;
+    }
 
     AlbertLog.log("checkText(reformulation) persona=" + persona.id,
       "longueur=" + text.length);
@@ -101,7 +118,6 @@ browser.contextMenus.onClicked.addListener(async (info, tab) => {
 
   if (info.menuItemId === "albert-translate") {
     browser.tabs.sendMessage(tab.id, { type: "translateGetSelection" }, sendOpts)
-      .catch((err) => AlbertLog.error("sendMessage translateGetSelection a échoué :",
-        err && err.message));
+      .catch(signalerPageInaccessible);
   }
 });

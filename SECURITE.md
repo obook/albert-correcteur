@@ -12,6 +12,7 @@
 | `storage` | Stockage local de la clé API, préférences, dictionnaire personnel |
 | `activeTab` | Accès au contenu de l'onglet actif uniquement |
 | `contextMenus` | Menu contextuel (corriger, reformuler, traduire) |
+| `notifications` | Prévenir que le menu ne peut pas agir sur la page (boutique d'extensions, pages internes, PDF) |
 | `https://albert.api.etalab.gouv.fr/*` | Seul domaine réseau autorisé |
 | `compose` (Thunderbird) | Accès à la fenêtre de composition |
 | `messagesRead` (Thunderbird) | Lecture du message pour traduction |
