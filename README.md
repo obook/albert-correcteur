@@ -97,7 +97,8 @@ Voir [ARCHITECTURE.md](ARCHITECTURE.md) pour l'arborescence, les flux et les dé
 ## Conformité RGPD
 
 - Aucune bibliothèque externe : pas de CDN, pas de dépendance tierce, tout est embarqué dans l'extension
-- Aucun appel réseau en dehors du serveur API Albert configuré par l'utilisateur
+- Aucun appel réseau du code de l'extension en dehors du serveur API Albert configuré par l'utilisateur
+- Seul le contrôle de mise à jour, fait par Firefox et Thunderbird eux-mêmes, interroge `raw.githubusercontent.com` (`updates.json`), puis GitHub pour télécharger le `.xpi` : ni texte saisi ni clé API n'y sont envoyés
 - Détection de langue locale : réalisée côté client sans appel externe
 - Polices système uniquement (`-apple-system`, `Segoe UI`, etc.)
 - Les données saisies ne transitent que vers le serveur API Albert choisi

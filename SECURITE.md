@@ -63,7 +63,8 @@ script-src 'self'; object-src 'self'     (Brave)
 
 ## Conformité RGPD
 
-- Aucun appel réseau en dehors du serveur API Albert configuré
+- Aucun appel réseau du code de l'extension en dehors du serveur API Albert configuré
+- Seul le contrôle de mise à jour, fait par Firefox et Thunderbird eux-mêmes, interroge `raw.githubusercontent.com` (`updates.json`), puis GitHub pour télécharger le `.xpi` : ni texte saisi ni clé API n'y sont envoyés
 - Détection de langue réalisée localement (pas d'appel externe)
 - Les textes saisis ne transitent que vers le serveur API choisi par l'utilisateur
 - Aucune collecte de données personnelles par l'extension
