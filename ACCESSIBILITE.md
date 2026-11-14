@@ -82,4 +82,4 @@ L'extension Albert Correcteur est en **conformité partielle** avec le RGAA 4.1 
 
 ## Contact
 
-Pour signaler un problème d'accessibilité : ouvrir un ticket sur le dépôt GitForge du projet.
+Pour signaler un problème d'accessibilité : ouvrir un ticket sur le dépôt GitHub du projet.

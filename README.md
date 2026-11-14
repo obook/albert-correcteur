@@ -6,11 +6,11 @@
 ![IA](badges/ia.svg)
 ![RGPD](badges/rgpd.svg)
 
-**Site de présentation** : [albert-ext-61360e.forge.apps.education.fr](https://albert-ext-61360e.forge.apps.education.fr/)
+**Site de présentation** : [obook.github.io/albert-correcteur](https://obook.github.io/albert-correcteur/)
 
 **Extension expérimentale** de correction orthographique et grammaticale et de traduction pour Firefox, Thunderbird et Brave, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web (Firefox et Brave) et dans la fenêtre de composition de courriel (Thunderbird), propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné vers une des quatre langues au choix : français, anglais, espagnol, allemand.
 
-**Téléchargement .xpi (signé par Mozilla)** : [RELEASES](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases) | **Sécurité** : [SECURITE](SECURITE.md) | **Accessibilité** : [RGAA](ACCESSIBILITE.md)
+**Téléchargement .xpi (signé par Mozilla)** : [RELEASES](https://github.com/obook/albert-correcteur/releases) | **Sécurité** : [SECURITE](SECURITE.md) | **Accessibilité** : [RGAA](ACCESSIBILITE.md)
 
 | Correction et reformulation | Traduction multi-langues |
 |:---:|:---:|
@@ -58,7 +58,7 @@
 
 ### <img src="images/firefox.png" width="18" alt="Firefox"> Firefox
 
-1. Télécharger le `.xpi` signé par Mozilla depuis les [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases)
+1. Télécharger le `.xpi` signé par Mozilla depuis les [Releases GitHub](https://github.com/obook/albert-correcteur/releases)
 2. Dans Firefox : `about:addons` → roue dentée → "Installer un module depuis un fichier"
 3. Sélectionner le fichier `.xpi`
 
@@ -68,7 +68,7 @@ Le `.xpi` est signé automatiquement par Mozilla (canal unlisted) lors du pipeli
 
 ### <img src="images/thunderbird.png" width="18" alt="Thunderbird"> Thunderbird
 
-1. Télécharger le `.xpi` Thunderbird depuis les [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases)
+1. Télécharger le `.xpi` Thunderbird depuis les [Releases GitHub](https://github.com/obook/albert-correcteur/releases)
 2. Dans Thunderbird : Menu > Modules complémentaires > roue dentée > « Installer un module depuis un fichier… »
 3. Sélectionner le fichier `.xpi`
 
@@ -78,7 +78,7 @@ Le `.xpi` est signé automatiquement par Mozilla (canal unlisted) lors du pipeli
 
 L'extension n'est pas encore publiée sur le Chrome Web Store. En attendant, on l'installe à la main :
 
-1. Récupérer le `.zip` Brave depuis les [Releases GitForge](https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/releases), puis le décompresser ; ou bien le construire soi-même avec `./build.sh brave`, ou `build.bat brave` sous Windows (le dossier prêt à charger est alors `brave-release/albert-correcteur-brave/`)
+1. Récupérer le `.zip` Brave depuis les [Releases GitHub](https://github.com/obook/albert-correcteur/releases), puis le décompresser ; ou bien le construire soi-même avec `./build.sh brave`, ou `build.bat brave` sous Windows (le dossier prêt à charger est alors `brave-release/albert-correcteur-brave/`)
 2. Ouvrir `brave://extensions`
 3. Activer le "Mode développeur" en haut à droite
 4. Cliquer sur "Charger l'extension non empaquetée" et sélectionner le dossier décompressé

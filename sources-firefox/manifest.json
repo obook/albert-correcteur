@@ -4,11 +4,11 @@
   "version": "0.9.0",
   "description": "Extension expérimentale de correction orthographique, grammaticale et de traduction française propulsée par l'API Albert (DINUM).",
   "author": "Olivier Booklage",
-  "homepage_url": "https://forge.apps.education.fr/booklageolivier/albert-correcteur",
+  "homepage_url": "https://github.com/obook/albert-correcteur",
   "browser_specific_settings": {
     "gecko": {
       "id": "albert-correcteur@ac-bordeaux.fr",
-      "update_url": "https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/raw/main/updates.json",
+      "update_url": "https://raw.githubusercontent.com/obook/albert-correcteur/main/updates.json",
       "strict_min_version": "128.0",
       "data_collection_permissions": {
         "required": [

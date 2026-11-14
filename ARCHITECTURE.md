@@ -157,14 +157,15 @@ albert-correcteur/
     test.html                             <- Page de test multilingue + éditeurs React
     test-react-editors.js                 <- Simulation re-rendu React (Draft.js/Lexical)
   media/                                  <- Captures d'écran pour le README
-  images/                                 <- Logo PNG pour GitForge
+  images/                                 <- Logo PNG pour GitHub
 
   README.md                               <- Documentation principale
   ARCHITECTURE.md                         <- Ce fichier
   THUNDERBIRD.md                          <- Notes et bugs Thunderbird
   LICENSE                                 <- Licence MIT
   updates.json                            <- Manifeste de mise à jour Firefox + Thunderbird
-  .gitlab-ci.yml                          <- Pipeline CI/CD (tests, build, sign, release)
+  .github/workflows/                      <- CI/CD (release : tests, build, sign, release ; pages : site)
+  .gitlab-ci.yml                          <- Ancien pipeline GitLab, conservé tant que la forge sert les mises à jour
   build.sh                                <- Script d'assemblage (firefox, thunderbird, brave ; tout par défaut)
   build.bat                               <- Équivalent Windows de build.sh
   creer-archive-zip.ps1                   <- Archivage ZIP appelé par build.bat

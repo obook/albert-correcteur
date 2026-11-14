@@ -1,0 +1,136 @@
+name: release
+
+# Équivalent du pipeline .gitlab-ci.yml : tests, builds, signature AMO,
+# release, mise à jour de updates.json. Secrets requis :
+# WEB_EXT_API_KEY et WEB_EXT_API_SECRET (identifiants AMO).
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+      WEB_EXT_API_KEY: ${{ secrets.WEB_EXT_API_KEY }}
+      WEB_EXT_API_SECRET: ${{ secrets.WEB_EXT_API_SECRET }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Tests
+        run: bash tests/run-all.sh
+
+      - name: Build des trois extensions
+        run: |
+          VERSION="${TAG#v}"
+          ./build.sh firefox
+          ./build.sh thunderbird
+          ./build.sh brave
+          mv firefox-release/albert-correcteur-firefox.xpi "albert-correcteur-firefox_${VERSION}.xpi"
+          mv thunderbird-release/albert-correcteur-thunderbird.xpi "albert-correcteur-thunderbird_${VERSION}.xpi"
+          mv brave-release/albert-correcteur-brave.zip "albert-correcteur-brave_${VERSION}.zip"
+
+      # Si la version existe déjà sur AMO (erreur 409), le .xpi signé est
+      # récupéré via l'API.
+      - name: Signature Mozilla (Firefox)
+        run: |
+          VERSION="${TAG#v}"
+          XPI_NAME="albert-correcteur-firefox_${VERSION}.xpi"
+          ADDON_ID="albert-correcteur@ac-bordeaux.fr"
+          mkdir -p .build-firefox
+          unzip -q "${XPI_NAME}" -d .build-firefox
+          npx --yes web-ext@7.11.0 sign --source-dir=.build-firefox/ --channel=unlisted \
+            --api-key="${WEB_EXT_API_KEY}" --api-secret="${WEB_EXT_API_SECRET}" || true
+          rm -rf .build-firefox
+          SIGNED_XPI=$(ls web-ext-artifacts/*.xpi 2>/dev/null || true)
+          if [ -n "$SIGNED_XPI" ]; then
+            cp "${SIGNED_XPI}" "${XPI_NAME}"
+            echo "Extension signée -> ${XPI_NAME}"
+          else
+            echo "Pas de .xpi signé en local, récupération depuis AMO"
+            JWT=$(node -e "
+              const crypto = require('crypto');
+              const h = Buffer.from(JSON.stringify({alg:'HS256',typ:'JWT'})).toString('base64url');
+              const now = Math.floor(Date.now()/1000);
+              const p = Buffer.from(JSON.stringify({
+                iss: process.env.WEB_EXT_API_KEY,
+                jti: crypto.randomUUID(),
+                iat: now,
+                exp: now + 300
+              })).toString('base64url');
+              const s = crypto.createHmac('sha256', process.env.WEB_EXT_API_SECRET)
+                .update(h+'.'+p).digest('base64url');
+              console.log(h+'.'+p+'.'+s);
+            ")
+            ENCODED_ID=$(printf '%s' "$ADDON_ID" | sed 's/@/%40/g')
+            DOWNLOAD_URL=$(curl -sf -H "Authorization: JWT ${JWT}" \
+              "https://addons.mozilla.org/api/v5/addons/addon/${ENCODED_ID}/versions/?filter=all_with_unlisted" \
+              | jq -r --arg v "$VERSION" '.results[] | select(.version == $v) | .file.url // empty')
+            if [ -n "$DOWNLOAD_URL" ]; then
+              curl -sfL -o "${XPI_NAME}" -H "Authorization: JWT ${JWT}" "${DOWNLOAD_URL}"
+              echo "Extension signée récupérée depuis AMO -> ${XPI_NAME}"
+            else
+              echo "ERREUR: impossible de récupérer le .xpi signé depuis AMO"
+              exit 1
+            fi
+          fi
+
+      - name: Release GitHub
+        run: |
+          VERSION="${TAG#v}"
+          gh release delete "${TAG}" --yes || true
+          gh release create "${TAG}" \
+            --title "Albert Correcteur ${TAG}" \
+            --notes-file RELEASE_NOTES.md \
+            "albert-correcteur-firefox_${VERSION}.xpi" \
+            "albert-correcteur-thunderbird_${VERSION}.xpi" \
+            "albert-correcteur-brave_${VERSION}.zip"
+
+      - name: Mise à jour de updates.json
+        run: |
+          VERSION="${TAG#v}"
+          BASE="https://github.com/${GITHUB_REPOSITORY}/releases/download/${TAG}"
+          FF="albert-correcteur-firefox_${VERSION}.xpi"
+          TB="albert-correcteur-thunderbird_${VERSION}.xpi"
+          FF_HASH="sha256:$(sha256sum "${FF}" | awk '{print $1}')"
+          TB_HASH="sha256:$(sha256sum "${TB}" | awk '{print $1}')"
+          git fetch origin main
+          git checkout -f main
+          cat > updates.json << ENDJSON
+          {
+            "addons": {
+              "albert-correcteur@ac-bordeaux.fr": {
+                "updates": [
+                  {
+                    "version": "${VERSION}",
+                    "update_link": "${BASE}/${FF}",
+                    "update_hash": "${FF_HASH}"
+                  }
+                ]
+              },
+              "albert-correcteur-thunderbird@ac-bordeaux.fr": {
+                "updates": [
+                  {
+                    "version": "${VERSION}",
+                    "update_link": "${BASE}/${TB}",
+                    "update_hash": "${TB_HASH}"
+                  }
+                ]
+              }
+            }
+          }
+          ENDJSON
+          git config user.email "ci@albert-correcteur"
+          git config user.name "CI Albert Correcteur"
+          git add updates.json
+          git diff --cached --quiet && echo "updates.json déjà à jour" \
+            || (git commit -m "CI - mise à jour updates.json -> v${VERSION}" && git push origin main)

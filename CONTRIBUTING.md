@@ -21,7 +21,7 @@ interne du code, consultez d'abord [ARCHITECTURE.md](ARCHITECTURE.md).
 ## Signaler un bogue ou proposer une amélioration
 
 Les tickets sont gérés sur la forge :
-<https://forge.apps.education.fr/booklageolivier/albert-correcteur/-/issues>
+<https://github.com/obook/albert-correcteur/issues>
 
 Avant d'ouvrir un ticket, vérifiez qu'un ticket similaire n'existe pas déjà.
 Pour un bogue, indiquez autant que possible :
@@ -160,11 +160,11 @@ notable dans [CHANGELOG.md](CHANGELOG.md), sous la section "Non publié".
    `exemple/test.html` lorsque la correction concerne la détection ou le
    remplacement.
 5. Mettez à jour la documentation et le `CHANGELOG.md` si nécessaire.
-6. Ouvrez une merge request vers `main` en décrivant clairement le problème
+6. Ouvrez une pull request vers `main` en décrivant clairement le problème
    résolu et la manière de le vérifier.
 
 Les numéros de version et les releases sont gérés par le mainteneur via la
-chaîne d'intégration continue (`.gitlab-ci.yml`) ; il n'est pas nécessaire de
+chaîne d'intégration continue (`.github/workflows/release.yml`) ; il n'est pas nécessaire de
 modifier le champ `version` des fichiers `manifest.json` dans une contribution.
 
 ## Contraintes à respecter

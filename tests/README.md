@@ -57,4 +57,4 @@ Le script utilise le bon fichier de prompt selon le modèle (cf. `service-prompt
 
 ## Pipeline CI/CD
 
-Les tests sont exécutés automatiquement par GitLab CI sur chaque tag `v*` (voir `.gitlab-ci.yml`). Le pipeline contient ensuite deux jobs de build symétriques (`build-firefox` et `build-thunderbird`), suivis de la signature Mozilla, de la création de la release et de la mise à jour de `updates.json`.
+Les tests sont exécutés automatiquement par GitHub Actions sur chaque tag `v*` (voir `.github/workflows/release.yml`). Le workflow enchaîne ensuite les builds Firefox, Thunderbird et Brave, la signature Mozilla, la création de la release et la mise à jour de `updates.json`.
