@@ -87,13 +87,17 @@ jobs:
       - name: Release GitHub
         run: |
           VERSION="${TAG#v}"
+          sha256sum "albert-correcteur-firefox_${VERSION}.xpi" \
+            "albert-correcteur-thunderbird_${VERSION}.xpi" \
+            "albert-correcteur-brave_${VERSION}.zip" > SHA256SUMS
           gh release delete "${TAG}" --yes || true
           gh release create "${TAG}" \
             --title "Albert Correcteur ${TAG}" \
             --notes-file RELEASE_NOTES.md \
             "albert-correcteur-firefox_${VERSION}.xpi" \
             "albert-correcteur-thunderbird_${VERSION}.xpi" \
-            "albert-correcteur-brave_${VERSION}.zip"
+            "albert-correcteur-brave_${VERSION}.zip" \
+            SHA256SUMS
 
       - name: Mise à jour de updates.json
         run: |
