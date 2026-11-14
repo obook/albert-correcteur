@@ -5,6 +5,32 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.9.2] - 2026-11-15
+
+### Ajouté
+- Une notification signale que le menu contextuel ne peut pas agir sur la
+  page : boutique d'extensions, pages internes du navigateur, PDF. Elle
+  demande la permission `notifications`.
+- La publication s'arrête si la version du tag diffère de celle des
+  manifests ou du site.
+
+### Corrigé
+- Brave : la fenêtre de traduction ne s'ouvrait pas.
+- Avec un proxy local (llm-proxy), les limites du compte s'affichent sans
+  clé API. Sans clé ni adresse personnalisée, l'extension n'interroge plus
+  Albert.
+- Après une correction, Ctrl+Z restaurait le texte d'avant la correction
+  et effaçait la saisie faite depuis.
+- Les soulignements des zones de texte se décalaient à chaque frappe.
+- Une reformulation remplaçait du texte sans rapport si le champ avait
+  changé pendant son chargement. Sous Thunderbird, elle remplaçait la
+  sélection courante au lieu de celle faite au clic sur le menu.
+- Les messages temporaires ne se fermaient plus seuls. Les lecteurs d'écran
+  recevaient une nouvelle zone d'annonce à chaque vérification.
+- Après un dépassement de quota (429), chaque pause de frappe relançait une
+  requête refusée. Une vérification demandée pendant une requête en cours
+  était perdue.
+
 ## [0.9.1] - 2026-11-14
 
 ### Modifié
