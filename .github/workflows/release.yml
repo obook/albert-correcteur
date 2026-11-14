@@ -26,6 +26,18 @@ jobs:
         with:
           node-version: 20
 
+      # Un manifest oublié sous un nouveau tag ferait annoncer par
+      # updates.json une version que l'extension ne porte pas.
+      - name: Version du tag dans les manifests et le site
+        run: |
+          VERSION="${TAG#v}"
+          for m in sources-firefox sources-thunderbird sources-brave; do
+            jq -e --arg v "$VERSION" '.version == $v' "$m/manifest.json" >/dev/null \
+              || { echo "$m/manifest.json n'est pas en $VERSION"; exit 1; }
+          done
+          grep -q "v${VERSION}<" site/index.html \
+            || { echo "site/index.html n'affiche pas v$VERSION"; exit 1; }
+
       - name: Tests
         run: bash tests/run-all.sh
 
