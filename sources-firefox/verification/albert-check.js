@@ -68,6 +68,15 @@ Albert.triggerCheck = async function (el, force) {
   const text = Albert.getTextContent(el);
   const state = Albert.getOrCreateState(el);
 
+  /* Requête en cours sur ce champ : reprendre après elle, sinon ce
+     texte n'était vérifié qu'au cycle suivant. Pas de scheduleCheck,
+     qui abandonnerait la requête déjà facturée. */
+  if (state.checkRunning) {
+    clearTimeout(state.timer);
+    state.timer = setTimeout(() => Albert.triggerCheck(el, force), Albert.DEBOUNCE_MS);
+    return;
+  }
+
   /* Réinitialiser les timers (la vérification se lance) */
   clearTimeout(state.timer);
   clearTimeout(state.maxTimer);
@@ -87,13 +96,16 @@ Albert.triggerCheck = async function (el, force) {
     Albert.clearBadgeApiError(el);
   }
 
+  /* Quota atteint : seule une relance manuelle passe, sinon chaque
+     pause de frappe renvoyait une requête et un toast d'erreur. */
+  if (Albert.rateLimited && !force) return;
+
   if (state.lastCheckedText === text) return;
 
   /* Verrou par champ posé avant le premier await : sans lui, deux
      appels concurrents (frappe et cycle périodique) se croisent pendant
      le chargement des limites, partent tous les deux vers l'API et
      s'écrasent mutuellement le badge. */
-  if (state.checkRunning) return;
   state.checkRunning = true;
 
   try {
