@@ -31,3 +31,10 @@ puces sans case sont des constats, il n'y a rien à y exécuter.
   - [ ] Brancher le filtre dans `Albert.getTextContent()` (`sources-firefox/etat/albert-utils.js`), pour les seuls champs éditables riches.
   - [ ] Ramener les offsets vers le champ dans `albert-check.js`, en vérifiant l'interaction avec le chemin incrémental.
   - [ ] Vérifier sur un vrai Zimbra que les marqueurs sont bien ceux attendus : ils n'ont été observés que dans la documentation, pas sur une instance.
+
+- [ ] **R04.** Option serveur CORS, pour qu'un document Grist en ligne appelle l'API Albert directement depuis le navigateur.
+  - Non implémenté. La recherche Grist actuelle passe par l'extension (`grist-lecture.js`, `service-grist.js`), qui n'a pas besoin de CORS.
+  - Constat du 15/11/2026 : une requête préalable `OPTIONS` sur `/v1/chat/completions` avec l'origine `https://docs.getgrist.com` reçoit `405` et aucun en-tête `Access-Control-*`. Le navigateur bloque donc l'appel.
+  - Le serveur Albert relève de la DINUM. Le projet ne peut pas le configurer lui-même.
+  - [ ] Demander à la DINUM si une liste d'origines autorisées (CORS) est envisageable pour Albert.
+  - [ ] À défaut, étudier l'ajout des en-têtes CORS dans un proxy (llm-proxy), avec une liste d'origines limitée à l'instance Grist. Hypothèse non vérifiée : la clé API serait alors exposée dans le document Grist, ou ajoutée par le proxy.
