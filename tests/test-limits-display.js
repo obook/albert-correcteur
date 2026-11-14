@@ -169,12 +169,24 @@ async function main() {
       "/v1/me/info": { body: { limits: [{ router_id: 1, type: "rpm", value: 10 }] } },
     });
     elements["api-key"].value = "";
+    elements["api-base"].value = "http://127.0.0.1:8080";
     elements["limits-section"].hidden = true;
 
     await fetchAndShowLimits();
 
     assert.strictEqual(elements["limits-section"].hidden, false);
     assert.ok(entetes.every((h) => !("Authorization" in h)));
+  });
+
+  await test("Ni clé ni URL personnalisée : aucune requête", async () => {
+    const { fetchAndShowLimits, elements, appels } = chargerPopupLimits({});
+    elements["api-key"].value = "";
+    elements["limits-section"].hidden = true;
+
+    await fetchAndShowLimits();
+
+    assert.strictEqual(appels.length, 0);
+    assert.strictEqual(elements["limits-section"].hidden, true);
   });
 
   /* Espaces de noms réels relevés le 25 août 2026 : le proxy sert son

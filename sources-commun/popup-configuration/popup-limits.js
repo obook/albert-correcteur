@@ -274,7 +274,9 @@ async function fetchAndShowLimits() {
   const apiBase = (document.getElementById("api-base").value.trim()
     || DEFAULT_API_BASE).replace(/\/+$/, "");
 
-  /* Clé facultative : un proxy local (llm-proxy) ajoute la sienne. */
+  /* Clé facultative pour un proxy (llm-proxy), qui ajoute la sienne.
+     Sans clé ni URL personnalisée, Albert répondrait 401. */
+  if (!apiKey && apiBase === DEFAULT_API_BASE) return;
   try {
     const response = await fetch(`${apiBase}/v1/me/info`, {
       headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},

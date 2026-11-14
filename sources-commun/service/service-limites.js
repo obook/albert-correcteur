@@ -59,8 +59,10 @@ async function fetchLimits() {
   const now = Date.now();
   if (cachedLimits && now < limitsExpiry) return cachedLimits;
 
-  /* Clé facultative : un proxy local (llm-proxy) ajoute la sienne. */
+  /* Clé facultative pour un proxy (llm-proxy), qui ajoute la sienne.
+     Sans clé ni URL personnalisée, Albert répondrait 401 à chaque page. */
   const config = await loadConfig();
+  if (!config.apiKey && config.apiBase === DEFAULT_API_BASE) return null;
 
   try {
     const response = await fetch(`${config.apiBase}/v1/me/info`, {
