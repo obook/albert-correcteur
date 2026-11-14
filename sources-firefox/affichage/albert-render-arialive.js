@@ -29,7 +29,9 @@ Albert._ariaLive = null;
  * reste lisible par les lecteurs d'écran.
  */
 Albert._ensureAriaLive = function () {
-  if (Albert._ariaLive && document.contains(Albert._ariaLive)) {
+  /* isConnected : document.contains est faux sous shadow DOM, une zone
+     était recréée à chaque annonce. */
+  if (Albert._ariaLive && Albert._ariaLive.isConnected) {
     return;
   }
   const el = document.createElement("div");
@@ -51,16 +53,18 @@ Albert._ensureAriaLive = function () {
  * @param {string} lang  - Code langue du texte vérifié (fr, en, es, de).
  */
 Albert._announceErrors = function (count, lang) {
+  const nouvelle = !(Albert._ariaLive && Albert._ariaLive.isConnected);
   Albert._ensureAriaLive();
   const langLabel = Albert.nomLangue(lang);
-  if (count === 0) {
-    Albert._ariaLive.textContent =
-      "Albert : aucune erreur détectée" + (langLabel ? ` (${langLabel})` : "");
-  } else {
-    Albert._ariaLive.textContent =
-      `Albert : ${count} erreur${count > 1 ? "s" : ""}`
+  const texte = count === 0
+    ? "Albert : aucune erreur détectée" + (langLabel ? ` (${langLabel})` : "")
+    : `Albert : ${count} erreur${count > 1 ? "s" : ""}`
       + ` détectée${count > 1 ? "s" : ""}` + (langLabel ? ` (${langLabel})` : "");
-  }
+  /* Un lecteur d'écran ignore une zone insérée avec son texte : la
+     première annonce attend que la zone vide soit en place. */
+  const zone = Albert._ariaLive;
+  if (nouvelle) setTimeout(() => { zone.textContent = texte; }, 100);
+  else zone.textContent = texte;
 };
 
 /**

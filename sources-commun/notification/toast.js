@@ -81,7 +81,9 @@ Albert.showToast = function (message, durationMs) {
      la transition CSS parte bien de l'état initial. */
   requestAnimationFrame(() => toast.classList.add("albert-toast-visible"));
 
+  /* isConnected et non document.contains : sous shadow DOM, ce dernier
+     est toujours faux et le toast ne se fermait jamais. */
   setTimeout(() => {
-    if (document.contains(toast)) fermerToast(toast);
+    if (toast.isConnected) fermerToast(toast);
   }, durationMs || TOAST_DUREE_DEFAUT_MS);
 };
