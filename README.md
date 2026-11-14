@@ -3,6 +3,7 @@
 ![Licence](badges/licence.svg)
 ![Firefox](badges/firefox.svg)
 ![Thunderbird](badges/thunderbird.svg)
+![Brave](badges/brave.svg)
 ![IA](badges/ia.svg)
 ![RGPD](badges/rgpd.svg)
 
@@ -74,7 +75,7 @@ Le `.xpi` est signé automatiquement par Mozilla (canal unlisted) lors du pipeli
 
 **Configuration** : ouvrir une fenêtre de rédaction, puis cliquer sur l'icône Albert Correcteur dans la barre d'outils de composition.
 
-### Brave (et navigateurs Chromium)
+### <img src="images/brave.png" width="18" alt="Brave"> Brave (et navigateurs Chromium)
 
 L'extension n'est pas encore publiée sur le Chrome Web Store. En attendant, on l'installe à la main :
 
