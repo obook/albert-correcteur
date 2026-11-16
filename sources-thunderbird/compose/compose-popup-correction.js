@@ -176,14 +176,19 @@ Albert.showCorrectionPopup = function (correction, markEl) {
   popup.style.top = (rect.bottom + 4) + "px";
   popup.style.left = rect.left + "px";
 
-  /* Éviter le débordement à droite ou en bas */
+  /* Éviter le débordement à droite ou en bas. La bascule au-dessus du
+     mot est bornée comme sous Firefox : près du haut de l'éditeur, la
+     popup partait en négatif et son en-tête passait sous la barre de
+     mise en forme. */
   requestAnimationFrame(() => {
     const popupRect = popup.getBoundingClientRect();
     if (popupRect.right > window.innerWidth - 10) {
       popup.style.left = (window.innerWidth - popupRect.width - 10) + "px";
     }
     if (popupRect.bottom > window.innerHeight - 10) {
-      popup.style.top = (rect.top - popupRect.height - 4) + "px";
+      popup.style.top = Albert.bornerDansFenetre(
+        rect.top - popupRect.height - 4,
+        popupRect.height, window.innerHeight) + "px";
     }
   });
 
