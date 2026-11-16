@@ -8,7 +8,7 @@
  *   - Icône erreur (rouge) : des corrections sont disponibles.
  *   - Deux points tournants : vérification en cours (albert-loading),
  *                           le logo est masqué pendant ce temps.
- *   - Encart ambre        : panne API persistante (albert-api-error).
+ *   - Encart ambre fixe   : panne API persistante (albert-api-error).
  *                           Le tooltip indique la cause et invite
  *                           à cliquer pour réessayer.
  *   - Grisé               : limite de débit atteinte (rate-limited).

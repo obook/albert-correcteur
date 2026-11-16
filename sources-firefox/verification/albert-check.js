@@ -155,6 +155,10 @@ Albert._triggerCheckInterne = async function (el, state, text) {
   }
 
   if (state.badge) {
+    /* Une relance après panne est un chargement comme un autre : sans
+       cet effacement, l'encart ambre et les points tournants se
+       superposent pendant tout l'appel, et le title garde "indisponible". */
+    Albert.clearBadgeApiError(el);
     state.badge.classList.add("albert-loading");
     const img = state.badge.querySelector("img");
     if (img) img.src = Albert.ICON_URL;
@@ -240,8 +244,10 @@ Albert._triggerCheckInterne = async function (el, state, text) {
     if (state.abortController === controller) {
       state.abortController = null;
     }
-    if (state.badge && !state.badge.classList.contains("albert-api-error")) {
+    if (state.badge) {
       state.badge.classList.remove("albert-loading");
+    }
+    if (state.badge && !state.badge.classList.contains("albert-api-error")) {
       const img = state.badge.querySelector("img");
       const hasErrors = state.corrections && state.corrections.length > 0;
       if (img) img.src = hasErrors ? Albert.ICON_ERROR_URL : Albert.ICON_OK_URL;
