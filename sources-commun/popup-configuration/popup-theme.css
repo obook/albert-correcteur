@@ -71,3 +71,24 @@
 body {
   background: var(--pop-bg);
 }
+
+/* Champs de saisie, communs à la configuration et aux paramètres. */
+input[type="text"],
+input[type="password"],
+input[type="url"],
+select {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--pop-input-border);
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--pop-input-bg);
+  color: var(--pop-text);
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--pop-link);
+}

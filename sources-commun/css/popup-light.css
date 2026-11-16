@@ -11,12 +11,19 @@
   border-bottom-color: #e0e0e0;
 }
 
-.albert-theme-light .albert-popup-mode-btn {
+.albert-theme-light .albert-popup-mode-btn,
+.albert-theme-light .albert-popup-langue-select {
   color: #333;
 }
 
-.albert-theme-light .albert-popup-mode-btn:hover {
+.albert-theme-light .albert-popup-mode-btn:hover,
+.albert-theme-light .albert-popup-langue-select:hover {
   background: rgba(0, 0, 0, 0.06);
+}
+
+.albert-theme-light .albert-popup-langue-select option {
+  background: #fff;
+  color: #333;
 }
 
 .albert-theme-light .albert-popup-mode-menu {
@@ -83,13 +90,13 @@
 }
 
 /* --- Traduction thème clair --- */
-.albert-theme-light .albert-popup-langue {
+.albert-theme-light .albert-popup-langue-select {
   background: #fff;
   border-color: #ddd;
   color: #333;
 }
 
-.albert-theme-light .albert-popup-langue:hover {
+.albert-theme-light .albert-popup-langue-select:hover {
   background: #eee;
 }
 

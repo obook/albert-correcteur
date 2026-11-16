@@ -11,6 +11,7 @@ Analyser le texte fourni et retourner les erreurs au format JSON strict. Pour ch
 </tache>
 
 <principes>
+<principe>Les suggestions sont TOUJOURS des mots de la langue du texte fourni, jamais une traduction, même si cette langue n'est pas {{LANG}}. Seul le message est rédigé en {{LANG}}.</principe>
 <principe>Ne signaler que les vraies erreurs ; en cas de doute, ne pas signaler (un faux positif est pire qu'un faux négatif).</principe>
 <principe>Ne jamais corriger les expressions figées ("en rond", "tant pis", "mine de rien", "avoir beau", "à savoir").</principe>
 <principe>Ne jamais proposer le mot erroné lui-même comme suggestion.</principe>

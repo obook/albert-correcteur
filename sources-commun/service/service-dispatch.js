@@ -29,7 +29,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!message || typeof message.type !== "string") return;
 
   if (message.type === "check") {
-    checkText(message.text, message.mode).then(sendResponse);
+    checkText(message.text, message.mode, undefined, message.lang).then(sendResponse);
     return true;
   }
   if (message.type === "getLimits") {

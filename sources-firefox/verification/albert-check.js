@@ -167,7 +167,9 @@ Albert._triggerCheckInterne = async function (el, state, text) {
   try {
     Albert.recordRequest();
     const checkText = incremental ? incremental.sendText : text;
-    const response = await browser.runtime.sendMessage({ type: "check", text: checkText, mode: Albert.mode });
+    const response = await browser.runtime.sendMessage({
+      type: "check", text: checkText, mode: Albert.mode, lang: state.langueChoisie,
+    });
 
     /* Vérifier si la requête a été annulée pendant l'attente */
     if (controller.signal.aborted) return;

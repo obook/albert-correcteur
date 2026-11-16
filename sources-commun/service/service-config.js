@@ -46,13 +46,16 @@ const AlbertLog = {
  * que tous les consommateurs (fallback chain, paliers documentés)
  * manipulent une clé stable.
  *
- * @returns {Promise<{apiKey: string, apiBase: string, model: string}>}
+ * @returns {Promise<{apiKey: string, apiBase: string, model: string, langue: string}>}
  */
 async function loadConfig() {
-  const result = await browser.storage.local.get(["apiKey", "apiBase", "model"]);
+  const result = await browser.storage.local.get(["apiKey", "apiBase", "model", "langue"]);
   return {
     apiKey: result.apiKey || "",
     apiBase: (result.apiBase || DEFAULT_API_BASE).replace(/\/+$/, ""),
     model: normalizeModelId(result.model || ""),
+    /* Langue de correction par défaut : "auto" (devinée) ou un code connu
+       de service-langue.js. Toute autre valeur stockée retombe sur "auto". */
+    langue: LANG_NAMES[result.langue] ? result.langue : "auto",
   };
 }

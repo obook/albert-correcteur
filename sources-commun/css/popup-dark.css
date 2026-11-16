@@ -47,12 +47,13 @@
   background: var(--albert-icone, url("../icons/icon.svg")) center / contain no-repeat;
 }
 
-/* Menu mode (Correcteur / Reformuler) */
+/* Menu mode (Correcteur / Reformuler) et select de langue */
 .albert-popup-mode-wrap {
   position: relative;
 }
 
-.albert-popup-mode-btn {
+.albert-popup-mode-btn,
+.albert-popup-langue-select {
   background: none;
   border: none;
   color: #e0e0e0;
@@ -66,8 +67,15 @@
   gap: 4px;
 }
 
-.albert-popup-mode-btn:hover {
+.albert-popup-mode-btn:hover,
+.albert-popup-langue-select:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+/* Langue de correction : select natif, options dans les tons du menu. */
+.albert-popup-langue-select option {
+  background: #272738;
+  color: #e0e0e0;
 }
 
 .albert-popup-chevron {
@@ -264,7 +272,7 @@
   position: relative;
 }
 
-.albert-popup-langue {
+.albert-popup-langue-select {
   padding: 3px 8px;
   border: 1px solid #4a4a5a;
   border-radius: 4px;
@@ -275,7 +283,7 @@
   font-family: inherit;
 }
 
-.albert-popup-langue:hover {
+.albert-popup-langue-select:hover {
   background: #3a3a4a;
 }
 

@@ -35,6 +35,18 @@
   </div>
 
   <div class="setting">
+    <label for="langue">Langue de correction par défaut</label>
+    <p class="setting-desc">En automatique, la langue est devinée sur le texte. Modifiable au cas par cas depuis la popup de correction.</p>
+    <select id="langue">
+      <option value="auto">Automatique</option>
+      <option value="fr">Français</option>
+      <option value="en">Anglais</option>
+      <option value="es">Espagnol</option>
+      <option value="de">Allemand</option>
+    </select>
+  </div>
+
+  <div class="setting">
     <label>Dictionnaire personnel</label>
     <p class="setting-desc">Mots ignorés par le correcteur.</p>
     <div id="ignored-words" class="ignored-words"></div>

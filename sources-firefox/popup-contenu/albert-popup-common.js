@@ -23,15 +23,24 @@
 /* getPopupThemeClass vit dans util/popup-base.js, partagé avec
    Thunderbird. */
 
+/* Langue de correction par défaut (paramètres) : "auto" ou un code de
+   util/lang-names.js. Sert au libellé de la première entrée du
+   sélecteur de langue de la popup de correction. */
+Albert.langueDefaut = "auto";
+
 Albert.loadPopupTheme = async function () {
-  const result = await browser.storage.local.get("popupTheme");
+  const result = await browser.storage.local.get(["popupTheme", "langue"]);
   Albert.popupTheme = result.popupTheme || "dark";
+  Albert.langueDefaut = result.langue || "auto";
 };
 Albert.loadPopupTheme();
 
 browser.storage.onChanged.addListener((changes) => {
   if (changes.popupTheme) {
     Albert.popupTheme = changes.popupTheme.newValue || "dark";
+  }
+  if (changes.langue) {
+    Albert.langueDefaut = changes.langue.newValue || "auto";
   }
 });
 

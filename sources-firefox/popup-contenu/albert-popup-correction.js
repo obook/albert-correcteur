@@ -4,6 +4,7 @@
  * Affiche une popup flottante au clic sur une erreur soulignée.
  * La popup contient :
  *   - Un sélecteur de mode (Correcteur / Reformuler).
+ *   - Un sélecteur de langue de correction (défaut, fr, en, es, de).
  *   - Le message d'explication de l'erreur.
  *   - Un bouton pour ajouter le mot au dictionnaire personnel.
  *   - L'extrait avec la suggestion principale.
@@ -112,6 +113,40 @@ Albert.showPopup = function (el, correction, markEl) {
   modeWrap.appendChild(modeBtn);
   modeWrap.appendChild(modeMenu);
   headerLeft.appendChild(modeWrap);
+
+  /* Langue de correction : select natif, le navigateur le dessine hors
+     de la popup (overflow hidden) là où un menu maison de cinq entrées
+     serait tronqué. Limite connue : dans un document en designMode,
+     Gecko place le curseur au lieu de dérouler la liste ; la popup de
+     correction vit dans la fenêtre hôte, hors de l'éditeur, sauf cadre
+     d'origine différente. L'entrée "defaut" (langue des paramètres,
+     nommée dans le libellé pour qu'on sache ce qu'on quitte) efface le
+     choix du champ ; un autre champ repart lui aussi sur le défaut. */
+  const langueSelect = document.createElement("select");
+  langueSelect.className = "albert-popup-langue-select";
+  langueSelect.setAttribute("aria-label", "Langue de correction");
+  const libelleDefaut = Albert.langueDefaut === "auto"
+    ? "automatique"
+    : Albert.nomLangue(Albert.langueDefaut);
+  const entreesLangue = [["defaut", "Défaut : " + libelleDefaut]]
+    .concat(Object.entries(Albert.LANG_LABELS));
+  for (const [code, libelle] of entreesLangue) {
+    langueSelect.add(new Option(libelle, code));
+  }
+  langueSelect.value = state.langueChoisie || "defaut";
+  langueSelect.addEventListener("change", () => {
+    if (langueSelect.value === "defaut") {
+      state.langueChoisie = null;
+    } else {
+      state.langueChoisie = langueSelect.value;
+    }
+    state.lastCheckedText = "";
+    Albert.closePopup();
+    /* force : comme le clic sur le badge, un choix explicite passe outre
+       la pause de limite de débit, sinon il serait ignoré sans retour. */
+    Albert.triggerCheck(el, true);
+  });
+  headerLeft.appendChild(langueSelect);
 
   /* --- Corps --- */
   const body = document.createElement("div");

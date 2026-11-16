@@ -1,9 +1,10 @@
 /*
- * popup-settings.js - Page des paramètres (thème et dictionnaire personnel).
+ * popup-settings.js - Page des paramètres (thème, langue, dictionnaire personnel).
  *
  * Cette page est accessible depuis le lien "Paramètres" de la popup
  * de configuration principale (popup.html). Elle permet :
  *   - De choisir le thème des popups (sombre, clair, système).
+ *   - De fixer la langue de correction par défaut (ou de la laisser deviner).
  *   - De consulter et gérer le dictionnaire personnel (mots ignorés
  *     par le correcteur).
  *
@@ -38,6 +39,19 @@ themeRadios.forEach((radio) => {
     await browser.storage.local.set({ popupTheme: radio.value });
     showStatus("Thème enregistré.");
   });
+});
+
+/* --- Langue de correction par défaut --- */
+
+const langueSelect = document.getElementById("langue");
+
+browser.storage.local.get("langue").then((result) => {
+  langueSelect.value = result.langue || "auto";
+});
+
+langueSelect.addEventListener("change", async () => {
+  await browser.storage.local.set({ langue: langueSelect.value });
+  showStatus("Langue enregistrée.");
 });
 
 /* --- Dictionnaire personnel --- */

@@ -151,9 +151,11 @@ function enteteApi(config) {
  * @param {string} mode       - Mode : "correction" ou "reformulation".
  * @param {string} [personaId] - Id de persona (mode reformulation
  *                               uniquement, défaut : "neutre").
+ * @param {?string} [langue]   - Langue imposée pour ce champ (fr, en, es,
+ *                               de) ; absente : langue des paramètres.
  * @returns {Promise<{corrections?: Array, lang?: string, error?: string}>}
  */
-async function checkText(text, mode, personaId) {
+async function checkText(text, mode, personaId, langue) {
   const config = await loadConfig();
   /* La clé est facultative (un endpoint local n'en demande pas), mais
      un modèle enregistré prouve que la configuration a été faite. */
@@ -164,7 +166,12 @@ async function checkText(text, mode, personaId) {
     };
   }
 
-  const lang = detectLanguage(text);
+  /* Priorité : langue choisie dans la popup pour ce champ, puis langue
+     par défaut des paramètres, puis détection. Sur un texte court,
+     detectLanguage retombe sur "fr" et le modèle traduit les suggestions
+     au lieu de corriger, d'où ces deux surcharges. */
+  const langueChoisie = LANG_NAMES[langue] ? langue : config.langue;
+  const lang = langueChoisie === "auto" ? detectLanguage(text) : langueChoisie;
 
   try {
     /* Dans le try : le chargement du prompt échoue si le fichier est
