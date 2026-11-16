@@ -5,6 +5,26 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.9.3] - 2026-11-16
+
+### Ajouté
+- Choix de la langue de correction : une langue par défaut dans les
+  paramètres (automatique, français, anglais, espagnol, allemand) et un
+  sélecteur dans la popup de correction pour le champ courant. Sur un texte
+  anglais court, les suggestions étaient traduites en français.
+- Thunderbird : le bouton Albert revient dans la fenêtre de rédaction, en
+  plus de celui de la barre principale.
+
+### Corrigé
+- Après une erreur de l'API, le badge superposait encart ambre, bulle et
+  points tournants. L'encart ne pulse plus et chaque relance repart d'un
+  badge propre.
+- Thunderbird : l'icône Albert n'apparaissait pas dans la rédaction quand
+  l'API ne répondait pas. Les lectures des limites et des modèles ont un
+  délai maximal de 10 secondes.
+- Thunderbird : la popup de correction d'un mot proche du haut de l'éditeur
+  passait sous la barre de mise en forme.
+
 ## [0.9.2] - 2026-11-15
 
 ### Ajouté
