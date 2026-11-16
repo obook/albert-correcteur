@@ -36,6 +36,11 @@
     "default_title": "Albert",
     "default_area": "maintoolbar"
   },
+  "compose_action": {
+    "default_icon": "icons/icon-48.png",
+    "default_popup": "popup-configuration/popup.html",
+    "default_title": "Albert"
+  },
   "options_ui": {
     "page": "popup-configuration/popup-settings.html",
     "open_in_tab": false

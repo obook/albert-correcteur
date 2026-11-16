@@ -275,10 +275,15 @@ test("manifest Thunderbird - tous les scripts de fond existent", () => {
   }
 });
 
-test("manifest Thunderbird - un seul bouton, dans la barre principale", () => {
+test("manifest Thunderbird - un bouton dans la barre principale et un dans la rédaction", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(THUNDERBIRD, "manifest.json"), "utf-8"));
   assert.ok(manifest.browser_action, "browser_action manquant");
-  assert.ok(!manifest.compose_action, "compose_action ne devrait plus exister");
+  /* Le bouton de rédaction, retiré en août 2026 au profit d'un bouton
+     unique, est revenu : la barre principale le relègue trop loin à
+     droite et c'est en écrivant qu'on change la langue ou le thème. */
+  assert.ok(manifest.compose_action, "compose_action manquant");
+  assert.strictEqual(manifest.compose_action.default_popup, manifest.browser_action.default_popup,
+    "les deux boutons ouvrent la même popup");
 });
 
 test("manifest Thunderbird - messagesModify pour les scripts de message", () => {
