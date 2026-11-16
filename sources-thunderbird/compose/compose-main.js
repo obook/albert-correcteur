@@ -31,10 +31,13 @@
     checkedText: null,
   };
 
-  await Albert.loadLimits();
-
+  /* Le badge d'abord : loadLimits interroge l'API, et tant que la
+     réponse n'arrive pas (API en panne, réseau lent) la fenêtre de
+     composition restait sans icône Albert. */
   Albert.createBadge();
   Albert.watchBadge();
+
+  await Albert.loadLimits();
 
   const body = Albert.getComposeBody();
   if (!body) return;

@@ -29,6 +29,9 @@ let limitsExpiry = 0;
 
 const CACHE_LIMITS_MS = 10 * 60 * 1000;
 
+/** Délai maximal (ms) des appels de lecture des limites et des modèles. */
+const LIMITS_TIMEOUT_MS = 10000;
+
 /**
  * Liste des modèles servis, vide si l'appel échoue.
  *
@@ -39,6 +42,7 @@ async function fetchModels(config) {
   try {
     const response = await fetch(`${config.apiBase}/v1/models`, {
       headers: enteteApi(config),
+      signal: AbortSignal.timeout(LIMITS_TIMEOUT_MS),
     });
     if (!response.ok) return [];
     const data = await response.json();
@@ -67,6 +71,9 @@ async function fetchLimits() {
   try {
     const response = await fetch(`${config.apiBase}/v1/me/info`, {
       headers: enteteApi(config),
+      /* Sans délai maximal, une API qui ne répond pas bloque tout ce
+         qui attend les limites, dont l'initialisation du compose. */
+      signal: AbortSignal.timeout(LIMITS_TIMEOUT_MS),
     });
     if (!response.ok) return cachedLimits;
 
