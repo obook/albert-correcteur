@@ -231,6 +231,7 @@ Albert._triggerCheckInterne = async function (el, state, text) {
     }
 
     state.lang = response.lang || "fr";
+    state.duree = response.duree;
     state.checkedText = text;
     state.lastCheckedText = text;
     Albert.renderCorrections(el);

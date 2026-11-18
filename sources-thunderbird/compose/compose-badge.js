@@ -76,6 +76,9 @@ Albert.setBadgeState = function (state) {
   if (!badge) return;
   badge.className = "albert-badge";
   if (state) badge.classList.add("albert-" + state);
+  /* Le titre d'un résultat ne vaut plus pendant un chargement ou une
+     erreur : renderCorrections le repose. */
+  if (state !== "ok" && state !== "has-errors") badge.title = "Albert Correcteur";
 };
 
 Albert.removeBadge = function () {

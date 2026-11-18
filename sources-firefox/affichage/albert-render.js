@@ -61,10 +61,11 @@ Albert.renderCorrections = function (el) {
     if (img) {
       img.src = hasErrors ? Albert.ICON_ERROR_URL : Albert.ICON_OK_URL;
     }
-    const title = hasErrors
+    const resultat = hasErrors
       ? `${state.corrections.length} erreur${state.corrections.length > 1 ? "s" : ""}`
         + ` trouvée${state.corrections.length > 1 ? "s" : ""}${langSuffix}`
       : `Albert Correcteur : aucune erreur${langSuffix}`;
+    const title = resultat + Albert.texteDuree(state.duree);
     state.badge.title = title;
     state.badge.setAttribute("aria-label", title);
   }

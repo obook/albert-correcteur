@@ -90,6 +90,7 @@ Albert.requestCheck = function (text) {
 
     const filtered = Albert.filterIgnoredCorrections(corrections);
     Albert.log("requestCheck : OK,", filtered.length, "correction(s) après filtrage (", (result.corrections || []).length, "brutes)");
+    Albert.derniereDuree = result.duree;
     Albert.renderCorrections(filtered);
   }).catch((err) => {
     if (controller.signal.aborted) {

@@ -34,6 +34,15 @@ Albert.announce = function (message) {
   setTimeout(() => { live.textContent = message; }, 100);
 };
 
+/* Infobulle du badge après une vérification, avec le temps de réponse
+   d'Albert. */
+Albert.titreBadge = function (resultat) {
+  if (Albert.badge) {
+    Albert.badge.title = "Albert Correcteur : " + resultat
+      + Albert.texteDuree(Albert.derniereDuree);
+  }
+};
+
 Albert.renderCorrections = function (corrections) {
   const state = Albert.composeState;
   if (!state) return;
@@ -43,6 +52,7 @@ Albert.renderCorrections = function (corrections) {
   if (!corrections || corrections.length === 0) {
     Albert.clearUnderlines();
     Albert.setBadgeState("ok");
+    Albert.titreBadge("Aucune erreur");
     Albert.announce("Aucune erreur détectée.");
     return;
   }
@@ -52,5 +62,6 @@ Albert.renderCorrections = function (corrections) {
 
   const n = corrections.length;
   const s = n > 1 ? "s" : "";
+  Albert.titreBadge(n + " erreur" + s + " trouvée" + s);
   Albert.announce(n + " erreur" + s + " détectée" + s + ".");
 };

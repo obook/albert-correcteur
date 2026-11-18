@@ -71,3 +71,9 @@ Albert.findRealOffset = function (text, word, apiOffset) {
   if (idx !== -1) return idx;
   return texte.indexOf(mot);
 };
+
+/* Temps de réponse d'Albert pour l'infobulle du badge ("" si inconnu). */
+Albert.texteDuree = function (ms) {
+  if (typeof ms !== "number") return "";
+  return ` (réponse d'Albert en ${Math.max(1, Math.round(ms / 1000))} s)`;
+};

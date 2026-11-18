@@ -115,3 +115,9 @@ Albert.ignoreWord = async function (word) {
    pendant cette fenêtre car la première vérification ne se lance
    qu'après un focus ou une frappe utilisateur. */
 Albert.loadIgnoredWords();
+
+/* Temps de réponse d'Albert pour l'infobulle du badge ("" si inconnu). */
+Albert.texteDuree = function (ms) {
+  if (typeof ms !== "number") return "";
+  return ` (réponse d'Albert en ${Math.max(1, Math.round(ms / 1000))} s)`;
+};

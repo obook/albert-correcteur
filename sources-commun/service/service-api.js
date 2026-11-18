@@ -199,6 +199,7 @@ async function checkText(text, mode, personaId, langue) {
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(API_TIMEOUT_MS),
     });
+    const debut = Date.now();
     let response = await envoyer();
 
     /* Paramètre refusé par le serveur : retenter sans, plutôt que de
@@ -288,7 +289,9 @@ async function checkText(text, mode, personaId, langue) {
       ? findLocalCorrections(text)
       : [];
     const corrections = mergeCorrections(apiCorrections, localCorrections);
-    return { corrections, lang };
+    /* Durée de l'appel, affichée dans l'infobulle du badge : l'attente
+       vient presque toujours du modèle, pas de l'extension. */
+    return { corrections, lang, duree: Date.now() - debut };
   } catch (err) {
     AlbertLog.error("checkText:", mode, "exception:", err);
     return { error: messageErreurReseau(err) };
