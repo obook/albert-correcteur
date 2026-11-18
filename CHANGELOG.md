@@ -5,6 +5,25 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.9.6] - 2026-11-18
+
+### Ajouté
+- La fenêtre de configuration affiche le numéro de version.
+- Le logo de l'éditeur du modèle choisi s'affiche à côté du menu des
+  modèles.
+
+### Modifié
+- Quand Albert est en panne ou en maintenance, le message le dit et donne
+  l'adresse de la page d'état. Un modèle introuvable est nommé.
+- Les reformulations n'inventent plus de faits et évitent les tics
+  d'écriture des IA (faux contrastes, jargon, formules creuses).
+- La version pour navigateurs Chromium (Chrome, Edge, Brave...) s'appelle
+  désormais Chromium et non plus Brave.
+
+### Corrigé
+- Pendant une panne d'Albert, le menu des modèles listait aussi les
+  modèles d'embeddings, de rerank et d'audio.
+
 ## [0.9.5] - 2026-11-18
 
 ### Ajouté
