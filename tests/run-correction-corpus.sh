@@ -38,7 +38,8 @@ fi
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 CORPUS_FILE="$SCRIPT_DIR/corpus/correction-samples.json"
-PROMPT_FULL="$PROJECT_DIR/sources-commun/prompts/correction.txt"
+# ALBERT_PROMPT remplace ce prompt pour comparer deux versions (ex. correction-complet.txt).
+PROMPT_FULL="${ALBERT_PROMPT:-$PROJECT_DIR/sources-commun/prompts/correction.txt}"
 PROMPT_LARGE="$PROJECT_DIR/sources-commun/prompts/correction-large.txt"
 # URL paramétrable via ALBERT_API_BASE pour tester contre une instance
 # alternative (mirroring, dev). Par défaut : l'API publique de l'État.
