@@ -27,6 +27,10 @@
 /* DEFAULT_API_BASE est déclarée dans util/model-aliases.js, chargé
    avant ce script dans popup.html. */
 
+/* Numéro de version à côté du nom, lu dans le manifest de la cible. */
+document.getElementById("titre").textContent +=
+  " " + browser.runtime.getManifest().version;
+
 const form = document.getElementById("config-form");
 const apiKeyInput = document.getElementById("api-key");
 const apiBaseInput = document.getElementById("api-base");
