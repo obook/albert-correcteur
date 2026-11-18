@@ -5,6 +5,16 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.9.4] - 2026-11-18
+
+### Modifié
+- Avec le modèle large, les soulignements arrivaient après plus de
+  20 secondes. Le modèle raisonne désormais moins longtemps avant de
+  répondre.
+- Le prompt de correction des modèles medium et small passe de 22 Ko à
+  6 Ko, pour des réponses plus rapides. L'ancien reste dans
+  correction-complet.txt.
+
 ## [0.9.3] - 2026-11-16
 
 ### Ajouté
