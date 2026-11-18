@@ -15,8 +15,10 @@ et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 ### Modifié
 - Quand Albert est en panne ou en maintenance, le message le dit et donne
   l'adresse de la page d'état. Un modèle introuvable est nommé.
-- Les reformulations n'inventent plus de faits et évitent les tics
-  d'écriture des IA (faux contrastes, jargon, formules creuses).
+- Le prompt de reformulation interdit d'inventer des faits et liste les
+  tics d'écriture des IA à éviter. Sur 12 textes de test, l'effet n'est
+  pas mesurable : medium et large n'en produisaient déjà pas, small les
+  garde.
 - La version pour navigateurs Chromium (Chrome, Edge, Brave...) s'appelle
   désormais Chromium et non plus Brave.
 
