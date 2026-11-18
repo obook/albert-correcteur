@@ -61,10 +61,14 @@ const CHAT_TYPES = new Set(["text-generation", "image-text-to-text"]);
  * multimodaux : rien dans la réponse de l'API ne les distingue, et ils
  * encombraient la liste sans pouvoir servir à la correction.
  *
+ * Embeddings, rerank et audio sont aussi écartés par leur nom : un proxy
+ * peut servir sa liste sans type de tâche (llm-proxy pendant une panne
+ * d'Albert), et ils passaient alors pour des modèles de chat.
+ *
  * ponytail: filtrage sur le nom, à remplacer le jour où l'API expose
  * une capacité par modèle.
  */
-const MODELES_HORS_SUJET = /ocr/i;
+const MODELES_HORS_SUJET = /ocr|embed|rerank|bge|whisper|audio|tts/i;
 
 /**
  * Indique si une entrée de /v1/models est utilisable pour la correction.

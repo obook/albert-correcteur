@@ -241,5 +241,27 @@ test("Proxy local : le type de tâche est lu dans model_type", () => {
   );
 });
 
+/* Liste servie par llm-proxy pendant une maintenance d'Albert : ni
+   model_type ni type de tâche. Embeddings et rerank passaient alors pour
+   des modèles de chat et encombraient la liste. */
+test("Proxy sans type de tâche : embeddings, rerank et OCR écartés par le nom", () => {
+  const reponse = [
+    { id: "openweight-large", type: "model",
+      aliases: ["openweight-large", "openai/gpt-oss-120b"] },
+    { id: "gemma-4-31b-it", type: "model", aliases: ["google/gemma-4-31B-it"] },
+    { id: "qwen3-vl-embedding-8b", type: "model",
+      aliases: ["Qwen/Qwen3-VL-Embedding-8B"] },
+    { id: "openweight-embeddings", type: "model", aliases: ["BAAI/bge-m3"] },
+    { id: "openweight-rerank", type: "model",
+      aliases: ["BAAI/bge-reranker-v2-m3"] },
+    { id: "openweight-ocr", type: "model", aliases: ["lightonai/LightOnOCR-2-1B"] },
+    { id: "openweight-audio", type: "model", aliases: ["openai/whisper-large-v3"] },
+  ];
+  assert.deepStrictEqual(
+    reponse.filter(estModeleDeChat).map(preferredIdFor),
+    ["openweight-large", "gemma-4-31b-it"]
+  );
+});
+
 console.log(`\n${passed} passé(s), ${failed} échoué(s)`);
 process.exit(failed > 0 ? 1 : 0);
