@@ -25,10 +25,12 @@
    EXP plus serré (1,28 M). */
 const RECOMMENDED_MODEL = "openweight-large";
 
+/* Temps de réponse typiques d'une correction courte, relevés le
+   2026-11-18 via llm-proxy. Ils varient avec la charge d'Albert. */
 const MODEL_DESCRIPTIONS = {
-  "openweight-large": "Complexe (120B)",
-  "openweight-medium": "Modéré (24B)",
-  "openweight-small": "Simple (8B)",
+  "openweight-large": "Complexe (120B), lent, environ 30 s",
+  "openweight-medium": "Modéré (24B), environ 6 s",
+  "openweight-small": "Simple (8B), rapide, environ 2 s",
   "openweight-code": "Spécialisé code (30B)",
 };
 
