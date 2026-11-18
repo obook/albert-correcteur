@@ -5,6 +5,18 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.9.5] - 2026-11-18
+
+### Ajouté
+- L'infobulle du badge indique le temps de réponse d'Albert, pour voir
+  si l'attente vient du modèle.
+- La liste des modèles indique le temps de réponse typique de chacun :
+  environ 2 s pour small, 6 s pour medium, 30 s pour large.
+
+### Corrigé
+- Retour au prompt de correction complet pour les modèles medium et
+  small : la version allégée de la 0.9.4 ratait plus de fautes.
+
 ## [0.9.4] - 2026-11-18
 
 ### Modifié
