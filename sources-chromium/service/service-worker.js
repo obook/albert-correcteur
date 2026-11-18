@@ -1,5 +1,5 @@
 /*
- * service-worker.js - Point d'entrée du background pour Chromium / Brave (Manifest V3).
+ * service-worker.js - Point d'entrée du background pour Chromium (Manifest V3).
  *
  * Sous Manifest V2 (Firefox), le background charge une LISTE de scripts dans un
  * scope global partagé (voir background.scripts du manifest Firefox). Manifest V3

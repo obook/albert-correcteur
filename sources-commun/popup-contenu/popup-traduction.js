@@ -309,7 +309,7 @@ Albert.showTranslationPopup = function (texte) {
        presse-papiers échoue, et execCommand("copy") renvoie vrai sans
        rien copier. Le script de fond, lui, écrit avec la permission
        clipboardWrite ; il est donc consulté en premier et les voies
-       locales ne servent que là où il ne l'a pas (Firefox, Brave). */
+       locales ne servent que là où il ne l'a pas (Firefox, Chromium). */
     const copierParSelection = () => {
       const zone = document.createElement("textarea");
       zone.value = texteACopier;

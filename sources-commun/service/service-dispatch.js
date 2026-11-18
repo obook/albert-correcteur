@@ -1,7 +1,7 @@
 /*
  * service-dispatch.js - Routage des messages reçus par le script de fond.
  *
- * Les content scripts (Firefox, Brave) et les compose scripts
+ * Les content scripts (Firefox, Chromium) et les compose scripts
  * (Thunderbird) n'accèdent ni au réseau ni à la configuration : ils
  * passent par ce point d'entrée unique, identique sur les trois cibles.
  *
@@ -43,7 +43,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
   /* Copie depuis le script de fond : dans le compose Thunderbird, le
      document injecté ne peut pas écrire dans le presse-papiers, ni par
      navigator.clipboard ni par execCommand. Le fond en a le droit avec
-     la permission clipboardWrite. Sans elle (Firefox, Brave), l'appel
+     la permission clipboardWrite. Sans elle (Firefox, Chromium), l'appel
      échoue et le script appelant reçoit ok: false. */
   if (message.type === "copyToClipboard") {
     const clipboard = navigator.clipboard;

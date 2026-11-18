@@ -1,6 +1,6 @@
 .playwright-mcp/
 firefox-release/
 thunderbird-release/
-brave-release/
+chromium-release/
 .env
 *credentials*

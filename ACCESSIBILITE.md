@@ -10,7 +10,7 @@ L'extension Albert Correcteur est en **conformité partielle** avec le RGAA 4.1 
 
 - JavaScript ES6+ (sans dépendance externe)
 - CSS (styles embarqués dans l'extension)
-- API WebExtensions (Manifest V2 pour Firefox et Thunderbird, Manifest V3 pour Brave)
+- API WebExtensions (Manifest V2 pour Firefox et Thunderbird, Manifest V3 pour Chromium)
 
 ## Environnements de test
 
@@ -18,7 +18,7 @@ L'extension Albert Correcteur est en **conformité partielle** avec le RGAA 4.1 
 |------------|---------|---------|
 | Firefox | 128+ | Linux, Windows, macOS |
 | Thunderbird | 128+ | Linux, Windows, macOS |
-| Brave (Chromium) | récent | Linux, Windows, macOS |
+| Chromium (Chrome, Edge, Brave...) | récent | Linux, Windows, macOS |
 
 ## Critères RGAA vérifiés
 

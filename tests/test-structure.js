@@ -365,23 +365,23 @@ test("util/blancs.js est chargé par les trois cibles, après l'état", () => {
      blancs.js avant eux revient à ne pas le charger. */
   const firefox = JSON.parse(fs.readFileSync(
     path.join(ROOT, "sources-firefox", "manifest.json"), "utf8"));
-  const brave = JSON.parse(fs.readFileSync(
-    path.join(ROOT, "sources-brave", "manifest.json"), "utf8"));
+  const chromium = JSON.parse(fs.readFileSync(
+    path.join(ROOT, "sources-chromium", "manifest.json"), "utf8"));
   const thunderbird = JSON.parse(fs.readFileSync(
     path.join(ROOT, "sources-thunderbird", "manifest.json"), "utf8"));
   const worker = fs.readFileSync(
-    path.join(ROOT, "sources-brave", "service", "service-worker.js"), "utf8");
+    path.join(ROOT, "sources-chromium", "service", "service-worker.js"), "utf8");
   const compose = fs.readFileSync(
     path.join(ROOT, "sources-thunderbird", "service", "service-compose-scripts.js"), "utf8");
 
   assert.ok(fs.existsSync(path.join(ROOT, "sources-commun", "util", "blancs.js")));
   assert.ok(firefox.background.scripts.includes("util/blancs.js"));
   assert.ok(thunderbird.background.scripts.includes("util/blancs.js"));
-  assert.ok(worker.includes("../util/blancs.js"), "absent de importScripts (Brave)");
+  assert.ok(worker.includes("../util/blancs.js"), "absent de importScripts (Chromium)");
 
   /* Content scripts : présent et placé après l'état. */
   for (const [nom, liste] of [["Firefox", firefox.content_scripts[0].js],
-    ["Brave", brave.content_scripts[0].js]]) {
+    ["Chromium", chromium.content_scripts[0].js]]) {
     const iBlancs = liste.indexOf("util/blancs.js");
     const iEtat = liste.indexOf("etat/albert-state.js");
     assert.ok(iBlancs !== -1, nom + " : util/blancs.js absent");

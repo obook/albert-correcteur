@@ -7,7 +7,7 @@
  * clavier ou au lecteur d'écran se retrouve à parcourir la page
  * derrière la popup, sans repère.
  *
- * Le même code sert aux popups des pages web (Firefox, Brave) et à
+ * Le même code sert aux popups des pages web (Firefox, Chromium) et à
  * celles de la fenêtre de composition de Thunderbird.
  *
  * Auteur : O. Booklage

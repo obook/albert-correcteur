@@ -8,13 +8,13 @@ ces derniers existant en version Unix (`.sh`) et en version Windows (`.bat`) :
 - **`sources-commun/`** - Code partagé entre toutes les cibles (service API, prompts, icônes, CSS communs, popup de configuration)
 - **`sources-firefox/`** - Code spécifique à Firefox (content scripts, overlays, popups, badge CSS, manifest)
 - **`sources-thunderbird/`** - Code spécifique à Thunderbird (compose scripts, badge CSS, popup traduction lecture, manifest)
-- **`sources-brave/`** - Surcouche Brave/Chromium (manifest Manifest V3, service worker, shim `browser.*`). Les content scripts ne sont pas dupliqués : la cible Brave réutilise ceux de `sources-firefox/`, qui sont indépendants du navigateur.
+- **`sources-chromium/`** - Surcouche Chromium (manifest Manifest V3, service worker, shim `browser.*`). Les content scripts ne sont pas dupliqués : la cible Chromium réutilise ceux de `sources-firefox/`, qui sont indépendants du navigateur.
 
 Le script `build.sh <cible>` assemble le code partagé avec le code spécifique :
 
 - **`./build.sh firefox`** - Copie `sources-commun/` + `sources-firefox/` dans un dossier temporaire, puis crée le `.xpi` Firefox
 - **`./build.sh thunderbird`** - Copie `sources-commun/` + `sources-thunderbird/` dans un dossier temporaire, puis crée le `.xpi` Thunderbird
-- **`./build.sh brave`** - Copie `sources-commun/` + `sources-firefox/` + `sources-brave/` (qui écrase le manifest), puis crée le `.zip` Brave
+- **`./build.sh chromium`** - Copie `sources-commun/` + `sources-firefox/` + `sources-chromium/` (qui écrase le manifest), puis crée le `.zip` Chromium
 - **`./build.sh tout`** - Enchaîne les trois cibles ; c'est aussi ce que fait le script lancé sans argument
 
 Le script `build.bat` est l'équivalent Windows, avec les mêmes cibles, et produit des
@@ -142,8 +142,8 @@ albert-correcteur/
     css/                                  <- Style spécifique Thunderbird
       badge.css                           <- Badge (positionnement fixe)
 
-  sources-brave/                          <- Surcouche Brave / Chromium (Manifest V3)
-    manifest.json                         <- Manifeste Brave (Manifest V3, action, host_permissions, web_accessible_resources)
+  sources-chromium/                       <- Surcouche Chromium (Manifest V3)
+    manifest.json                         <- Manifeste Chromium (Manifest V3, action, host_permissions, web_accessible_resources)
     service/
       service-worker.js                   <- Point d'entrée du fond : importScripts() rejoue l'ordre des background.scripts MV2
     lib/
@@ -166,7 +166,7 @@ albert-correcteur/
   updates.json                            <- Manifeste de mise à jour Firefox + Thunderbird
   .github/workflows/                      <- CI/CD (release : tests, build, sign, release ; pages : site)
   .gitlab-ci.yml                          <- Ancien pipeline GitLab, conservé tant que la forge sert les mises à jour
-  build.sh                                <- Script d'assemblage (firefox, thunderbird, brave ; tout par défaut)
+  build.sh                                <- Script d'assemblage (firefox, thunderbird, chromium ; tout par défaut)
   build.bat                               <- Équivalent Windows de build.sh
   creer-archive-zip.ps1                   <- Archivage ZIP appelé par build.bat
   .gitattributes                          <- Fins de ligne imposées (CRLF pour .bat, LF pour .sh)
@@ -179,12 +179,12 @@ albert-correcteur/
 L'extension se compose de deux parties :
 
 - **Script de fond** (`sources-commun/service/` + `sources-firefox/service/` ou `sources-thunderbird/service/`) - s'exécute en arrière-plan, communique avec l'API Albert, gère les menus contextuels (Reformuler, Traduire), la détection de langue et le cache des limites.
-- **Content scripts Firefox** (`sources-firefox/` : `etat/`, `verification/`, `correction/`, `affichage/`, `notification/`, `demarrage/`, `popup-contenu/`) - injectés dans chaque page, détectent les champs texte, affichent les corrections, la reformulation et la traduction. La cible Brave réutilise ces mêmes content scripts.
+- **Content scripts Firefox** (`sources-firefox/` : `etat/`, `verification/`, `correction/`, `affichage/`, `notification/`, `demarrage/`, `popup-contenu/`) - injectés dans chaque page, détectent les champs texte, affichent les corrections, la reformulation et la traduction. La cible Chromium réutilise ces mêmes content scripts.
 - **Compose scripts Thunderbird** (`sources-thunderbird/compose/`) - injectés dans la fenêtre de composition de courriel, détectent le body de l'éditeur, affichent les corrections, la reformulation et la traduction.
 
-### Spécificités de la cible Brave (Manifest V3)
+### Spécificités de la cible Chromium (Manifest V3)
 
-Brave est basé sur Chromium et n'accepte que le Manifest V3. La cible Brave réutilise tel quel le code commun et les content scripts de Firefox ; seules trois choses changent, regroupées dans `sources-brave/` :
+Chromium n'accepte que le Manifest V3. La cible Chromium réutilise tel quel le code commun et les content scripts de Firefox ; seules trois choses changent, regroupées dans `sources-chromium/` :
 
 - **Service worker au lieu des background scripts.** Le Manifest V2 charge une liste de scripts de fond dans un scope global partagé ; le Manifest V3 n'autorise qu'un seul point d'entrée. Le fichier `service/service-worker.js` reproduit le comportement V2 avec `importScripts()`, qui rejoue les mêmes fichiers dans le même ordre et conserve le scope global partagé. Aucun refactor du code commun n'est donc nécessaire.
 - **Shim `browser.*`.** Le code utilise partout l'API `browser.*` (standard, à base de promesses), que Chromium n'expose pas sous ce nom. Le fichier `lib/browser-shim.js` se contente de l'aliaser sur `chrome.*`, qui renvoie déjà des promesses sous Manifest V3 pour toutes les API employées. Pas de bibliothèque tierce. Il est chargé en premier, aussi bien dans le service worker que dans les content scripts.

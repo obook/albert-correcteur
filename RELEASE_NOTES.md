@@ -8,4 +8,4 @@ La 0.9.4 avait allégé le prompt de correction des modèles medium et small, ma
 
 - Firefox : extension signée par Mozilla (.xpi)
 - Thunderbird : extension (.xpi)
-- Brave / Chromium : archive (.zip)
+- Chromium : archive (.zip)

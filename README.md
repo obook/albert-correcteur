@@ -1,15 +1,15 @@
-# Albert Correcteur - Extension Firefox, Thunderbird et Brave
+# Albert Correcteur - Extension Firefox, Thunderbird et Chromium
 
 ![Licence](badges/licence.svg)
 ![Firefox](badges/firefox.svg)
 ![Thunderbird](badges/thunderbird.svg)
-![Brave](badges/brave.svg)
+![Chromium](badges/chromium.svg)
 ![IA](badges/ia.svg)
 ![RGPD](badges/rgpd.svg)
 
 **Site de présentation** : [obook.github.io/albert-correcteur](https://obook.github.io/albert-correcteur/)
 
-**Extension expérimentale** de correction orthographique et grammaticale et de traduction pour Firefox, Thunderbird et Brave, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web (Firefox et Brave) et dans la fenêtre de composition de courriel (Thunderbird), propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné vers une des quatre langues au choix : français, anglais, espagnol, allemand.
+**Extension expérimentale** de correction orthographique et grammaticale et de traduction pour Firefox, Thunderbird et Chromium, propulsée par l'API [Albert](https://albert.sites.beta.gouv.fr/) (DINUM). Elle détecte les erreurs dans les champs texte des pages web (Firefox et Chromium) et dans la fenêtre de composition de courriel (Thunderbird), propose des corrections en un clic et permet de traduire n'importe quel texte sélectionné vers une des quatre langues au choix : français, anglais, espagnol, allemand.
 
 **Téléchargement .xpi (signé par Mozilla)** : [RELEASES](https://github.com/obook/albert-correcteur/releases) | **Sécurité** : [SECURITE](SECURITE.md) | **Accessibilité** : [RGAA](ACCESSIBILITE.md)
 
@@ -33,16 +33,16 @@
 - Auto-fallback de modèle après deux 429 consécutifs (large -> medium -> small pendant 60 s)
 - Résolution des alias serveur via `/v1/models` pour aligner les requêtes sur les identifiants canoniques des modèles
 - Affichage de l'usage du jour (rpd, tpd) synchronisé avec `/v1/me/usage` (depuis minuit UTC) et des paliers EXP/PROD documentés dans le popup de configuration
-- Fonctionne sur les `<textarea>`, `<input>` et les éléments `contenteditable` (Firefox et Brave)
-- Compatible avec les éditeurs riches : CKEditor, TinyMCE, Quill, ProseMirror, Draft.js, Lexical, WhatsApp Web, Slack (Firefox et Brave)
+- Fonctionne sur les `<textarea>`, `<input>` et les éléments `contenteditable` (Firefox et Chromium)
+- Compatible avec les éditeurs riches : CKEditor, TinyMCE, Quill, ProseMirror, Draft.js, Lexical, WhatsApp Web, Slack (Firefox et Chromium)
 - Gestion des saisies IME (langues CJK) sans déclenchement intempestif
-- Désactivation automatique du correcteur natif du navigateur sur les champs suivis (Firefox et Brave)
-- Masquage automatique des éléments Albert lors de l'ouverture d'une modale Bootstrap (Firefox et Brave)
-- Injection dans les iframes et éditeurs intégrés (Firefox et Brave)
-- Détection automatique des nouveaux champs ajoutés dynamiquement, SPA, etc. (Firefox et Brave)
+- Désactivation automatique du correcteur natif du navigateur sur les champs suivis (Firefox et Chromium)
+- Masquage automatique des éléments Albert lors de l'ouverture d'une modale Bootstrap (Firefox et Chromium)
+- Injection dans les iframes et éditeurs intégrés (Firefox et Chromium)
+- Détection automatique des nouveaux champs ajoutés dynamiquement, SPA, etc. (Firefox et Chromium)
 - Respect de la limite API (fenêtre glissante 60 s via la classe partagée `Albert.RollingWindow`, backoff adaptatif calculé depuis le rpm du compte, lecture du Retry-After dans l'en-tête HTTP et dans le corps de la réponse 429)
 - Accessibilité (RGAA) : attributs ARIA sur le badge, les popups et annonces pour lecteurs d'écran
-- Mises à jour automatiques via `updates.json` (Firefox et Thunderbird vérifient périodiquement les nouvelles versions ; sous Brave, la mise à jour se fait par le Chrome Web Store)
+- Mises à jour automatiques via `updates.json` (Firefox et Thunderbird vérifient périodiquement les nouvelles versions ; sous Chromium, la mise à jour se fait par le Chrome Web Store)
 - Reformulation via le menu contextuel (clic droit dans un champ de saisie)
 - Traduction via le menu contextuel (clic droit sur n'importe quelle sélection de texte)
   - Langues de traduction : français, anglais, espagnol, allemand
@@ -52,7 +52,7 @@
 
 ## Prérequis
 
-- Firefox 128 ou supérieur, Thunderbird 128 ou supérieur, ou Brave (ou un autre navigateur Chromium récent)
+- Firefox 128 ou supérieur, Thunderbird 128 ou supérieur, ou un navigateur Chromium récent (Chrome, Edge, Brave...)
 - Une clé API Albert (réservée aux agents de la fonction publique d'État) → [Demander un accès](https://ia.numerique.gouv.fr/outils-ia/albert-api/)
 
 ## Installation
@@ -75,16 +75,16 @@ Le `.xpi` est signé automatiquement par Mozilla (canal unlisted) lors du pipeli
 
 **Configuration** : ouvrir une fenêtre de rédaction, puis cliquer sur l'icône Albert Correcteur dans la barre d'outils de composition.
 
-### <img src="images/brave.png" width="18" alt="Brave"> Brave (et navigateurs Chromium)
+### <img src="images/chromium.png" width="18" alt="Chromium"> Chromium (Chrome, Edge, Brave...)
 
 L'extension n'est pas encore publiée sur le Chrome Web Store. En attendant, on l'installe à la main :
 
-1. Récupérer le `.zip` Brave depuis les [Releases GitHub](https://github.com/obook/albert-correcteur/releases), puis le décompresser ; ou bien le construire soi-même avec `./build.sh brave`, ou `build.bat brave` sous Windows (le dossier prêt à charger est alors `brave-release/albert-correcteur-brave/`)
-2. Ouvrir `brave://extensions`
+1. Récupérer le `.zip` Chromium depuis les [Releases GitHub](https://github.com/obook/albert-correcteur/releases), puis le décompresser ; ou bien le construire soi-même avec `./build.sh chromium`, ou `build.bat chromium` sous Windows (le dossier prêt à charger est alors `chromium-release/albert-correcteur-chromium/`)
+2. Ouvrir `chrome://extensions`
 3. Activer le "Mode développeur" en haut à droite
 4. Cliquer sur "Charger l'extension non empaquetée" et sélectionner le dossier décompressé
 
-**Configuration** : cliquer sur l'icône Albert dans la barre d'outils de Brave.
+**Configuration** : cliquer sur l'icône Albert dans la barre d'outils du navigateur.
 
 ## Fonctionnement
 
@@ -124,16 +124,16 @@ Le fichier `.xpi` distribué est signé par Mozilla, mais pendant le développem
 - Cliquer sur « Charger un module complémentaire temporaire… »
 - Sélectionner le fichier `manifest.json` à la racine du répertoire source
 
-### Tester l'extension sous Brave
+### Tester l'extension sous Chromium
 
-Brave accepte les extensions Chromium sans signature, en mode développeur :
+Les navigateurs Chromium acceptent les extensions sans signature, en mode développeur :
 
-1. Construire le paquet avec `./build.sh brave` (ou `build.bat brave` sous Windows)
-2. Ouvrir `brave://extensions` et activer le "Mode développeur"
-3. Cliquer sur "Charger l'extension non empaquetée" et sélectionner le dossier `brave-release/albert-correcteur-brave/`
+1. Construire le paquet avec `./build.sh chromium` (ou `build.bat chromium` sous Windows)
+2. Ouvrir `chrome://extensions` et activer le "Mode développeur"
+3. Cliquer sur "Charger l'extension non empaquetée" et sélectionner le dossier `chromium-release/albert-correcteur-chromium/`
 4. Après chaque modification du code, relancer le build puis cliquer sur le bouton de rechargement de l'extension
 
-Pour inspecter le service worker (les logs du fond), cliquer sur le lien "service worker" depuis la fiche de l'extension dans `brave://extensions`.
+Pour inspecter le service worker (les logs du fond), cliquer sur le lien "service worker" depuis la fiche de l'extension dans `chrome://extensions`.
 
 ## Auteur
 

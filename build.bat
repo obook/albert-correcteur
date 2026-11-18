@@ -4,14 +4,14 @@ rem
 rem Cibles :
 rem   firefox      : firefox-release\albert-correcteur-firefox.xpi
 rem   thunderbird  : thunderbird-release\albert-correcteur-thunderbird.xpi
-rem   brave        : brave-release\albert-correcteur-brave.zip
-rem                   + brave-release\albert-correcteur-brave\ (dossier à charger)
+rem   chromium        : chromium-release\albert-correcteur-chromium.zip
+rem                   + chromium-release\albert-correcteur-chromium\ (dossier à charger)
 rem   tout         : les trois (valeur par défaut si aucun argument)
 rem
 rem Chaque paquet est assemblé en empilant des dossiers sources : le code partagé
 rem d'abord, les fichiers spécifiques ensuite (qui écrasent en cas de conflit).
 rem
-rem Usage : build.bat [cible], où cible vaut firefox, thunderbird, brave ou tout.
+rem Usage : build.bat [cible], où cible vaut firefox, thunderbird, chromium ou tout.
 rem Sans argument, les trois cibles sont construites.
 rem
 rem Equivalent Windows de build.sh. Le batch n'a pas d'équivalent de "set -e" :
@@ -28,16 +28,16 @@ set "SCRIPT_DIR=%~dp0"
 cd /d "%SCRIPT_DIR%"
 
 rem Sans argument : construire les trois cibles.
-set "CIBLES=firefox thunderbird brave"
+set "CIBLES=firefox thunderbird chromium"
 if not "%~1"=="" set "CIBLES="
 if /i "%~1"=="firefox"     set "CIBLES=firefox"
 if /i "%~1"=="thunderbird" set "CIBLES=thunderbird"
-if /i "%~1"=="brave"       set "CIBLES=brave"
-if /i "%~1"=="tout"        set "CIBLES=firefox thunderbird brave"
-if /i "%~1"=="tous"        set "CIBLES=firefox thunderbird brave"
+if /i "%~1"=="chromium"       set "CIBLES=chromium"
+if /i "%~1"=="tout"        set "CIBLES=firefox thunderbird chromium"
+if /i "%~1"=="tous"        set "CIBLES=firefox thunderbird chromium"
 
 if not defined CIBLES (
-    echo Usage : build.bat [firefox^|thunderbird^|brave^|tout]
+    echo Usage : build.bat [firefox^|thunderbird^|chromium^|tout]
     echo Sans argument, les trois cibles sont construites.
     exit /b 1
 )
@@ -50,7 +50,7 @@ exit /b 0
 
 
 rem ---------------------------------------------------------------------------
-rem Construit une cible. Argument : firefox, thunderbird ou brave.
+rem Construit une cible. Argument : firefox, thunderbird ou chromium.
 rem ---------------------------------------------------------------------------
 :construire
 setlocal
@@ -68,15 +68,15 @@ if "%CIBLE%"=="thunderbird" (
     set "BUILD_DIR=.build-thunderbird"
     set "OUT=thunderbird-release\albert-correcteur-thunderbird.xpi"
 )
-rem Pour Brave : sources-firefox apporte la logique content/UI, agnostique du
-rem navigateur ; sources-brave passe en dernier et écrase le manifest Firefox
+rem Pour Chromium : sources-firefox apporte la logique content/UI, agnostique du
+rem navigateur ; sources-chromium passe en dernier et écrase le manifest Firefox
 rem par les overrides MV3 : service worker, shim browser.* Le dossier
 rem d'assemblage est conservé, il sert au chargement en mode développeur.
-if "%CIBLE%"=="brave" (
-    set "SOURCES=sources-commun sources-firefox sources-brave"
-    set "OUT_DIR=brave-release"
-    set "BUILD_DIR=brave-release\albert-correcteur-brave"
-    set "OUT=brave-release\albert-correcteur-brave.zip"
+if "%CIBLE%"=="chromium" (
+    set "SOURCES=sources-commun sources-firefox sources-chromium"
+    set "OUT_DIR=chromium-release"
+    set "BUILD_DIR=chromium-release\albert-correcteur-chromium"
+    set "OUT=chromium-release\albert-correcteur-chromium.zip"
 )
 
 rem Vérifier que les dossiers source existent
@@ -104,7 +104,7 @@ if exist "%OUT%" del /f /q "%OUT%"
 powershell -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%creer-archive-zip.ps1" -Source "%BUILD_DIR%" -Destination "%OUT%"
 if errorlevel 1 exit /b 1
 
-if not "%CIBLE%"=="brave" rmdir /s /q "%BUILD_DIR%"
+if not "%CIBLE%"=="chromium" rmdir /s /q "%BUILD_DIR%"
 
 echo.
 call :message_%CIBLE%
@@ -129,12 +129,12 @@ echo   2. Roue dentée -^> Installer un module depuis un fichier...
 echo   3. Sélectionner albert-correcteur-thunderbird.xpi
 exit /b 0
 
-:message_brave
+:message_chromium
 echo Extension assemblée (dossier) : %BUILD_DIR%
 echo Paquet Chrome Web Store (.zip) : %OUT%
 echo.
-echo Pour tester dans Brave :
-echo   1. Ouvrir brave://extensions
+echo Pour tester dans Chromium :
+echo   1. Ouvrir chrome://extensions
 echo   2. Activer le "Mode développeur" (en haut à droite)
 echo   3. "Charger l'extension non empaquetée" -^> sélectionner :
 echo      %SCRIPT_DIR%%BUILD_DIR%

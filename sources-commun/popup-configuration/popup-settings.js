@@ -91,7 +91,7 @@ loadIgnoredWords();
 /* --- Recherche Grist --- */
 
 /* La case n'apparaît que dans une version qui embarque la lecture de
-   Grist : Thunderbird et Brave partagent cette page sans la fonction.
+   Grist : Thunderbird et Chromium partagent cette page sans la fonction.
    Firefox rend les chemins du manifeste en URL complètes, d'où endsWith. */
 const gristCase = document.getElementById("recherche-grist");
 if ((browser.runtime.getManifest().content_scripts || [])

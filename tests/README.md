@@ -57,4 +57,4 @@ Le script utilise le bon fichier de prompt selon le modèle (cf. `service-prompt
 
 ## Pipeline CI/CD
 
-Les tests sont exécutés automatiquement par GitHub Actions sur chaque tag `v*` (voir `.github/workflows/release.yml`). Le workflow enchaîne ensuite les builds Firefox, Thunderbird et Brave, la signature Mozilla, la création de la release et la mise à jour de `updates.json`.
+Les tests sont exécutés automatiquement par GitHub Actions sur chaque tag `v*` (voir `.github/workflows/release.yml`). Le workflow enchaîne ensuite les builds Firefox, Thunderbird et Chromium, la signature Mozilla, la création de la release et la mise à jour de `updates.json`.

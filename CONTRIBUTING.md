@@ -50,7 +50,7 @@ navigateur. Les seuls outils nécessaires sont :
   sur PowerShell ;
 - Firefox Developer Edition (ou Nightly) pour charger une version non signée ;
 - Thunderbird 128 ou supérieur pour la partie courriel ;
-- Brave (ou un autre navigateur Chromium récent) pour la partie navigateur Chromium.
+- un navigateur Chromium récent (Chrome, Edge, Brave...) pour la partie navigateur Chromium.
 
 Une clé API Albert est requise pour un test fonctionnel complet. Elle est
 réservée aux agents de la fonction publique d'État :
@@ -64,7 +64,7 @@ spécifique à la plateforme demandée :
 ```bash
 ./build.sh firefox       # produit firefox-release/albert-correcteur-firefox.xpi
 ./build.sh thunderbird   # produit thunderbird-release/albert-correcteur-thunderbird.xpi
-./build.sh brave         # produit brave-release/albert-correcteur-brave.zip et le dossier à charger
+./build.sh chromium         # produit chromium-release/albert-correcteur-chromium.zip et le dossier à charger
 ./build.sh tout          # les trois d'affilée (idem sans argument)
 ```
 
@@ -74,7 +74,7 @@ paquets :
 ```bat
 build.bat firefox
 build.bat thunderbird
-build.bat brave
+build.bat chromium
 build.bat tout           rem idem sans argument
 ```
 
@@ -92,8 +92,8 @@ Pour tester sous Firefox sans signature Mozilla, deux options :
    `xpinstall.signatures.required` à `false` dans `about:config`, puis installer
    le `.xpi` via `about:addons`.
 
-Pour tester sous Brave, ouvrir `brave://extensions`, activer le "Mode
-développeur", puis charger le dossier `brave-release/albert-correcteur-brave/`
+Pour tester sous Chromium, ouvrir `chrome://extensions`, activer le "Mode
+développeur", puis charger le dossier `chromium-release/albert-correcteur-chromium/`
 avec "Charger l'extension non empaquetée". Après chaque modification, relancer
 le build et recharger l'extension.
 
@@ -106,9 +106,9 @@ vérifier manuellement la détection et le remplacement.
 | Dossier | Rôle |
 |---------|------|
 | `sources-commun/` | Code partagé entre toutes les cibles |
-| `sources-firefox/` | Code spécifique à Firefox (réutilisé par Brave) |
+| `sources-firefox/` | Code spécifique à Firefox (réutilisé par Chromium) |
 | `sources-thunderbird/` | Code spécifique à Thunderbird |
-| `sources-brave/` | Surcouche Brave / Chromium (manifest V3, service worker, shim `browser.*`) |
+| `sources-chromium/` | Surcouche Chromium (manifest V3, service worker, shim `browser.*`) |
 | `sources-commun/prompts/` | Prompts système (correction, reformulation, traduction) |
 | `exemple/` | Page de test manuel |
 | `tests/` | Ressources de test |
@@ -156,7 +156,7 @@ notable dans [CHANGELOG.md](CHANGELOG.md), sous la section "Non publié".
 2. Créez une branche dédiée à partir de `main`
    (par exemple `fix/badge-tchap` ou `feat/traduction-italien`).
 3. Réalisez vos modifications en respectant les conventions ci-dessus.
-4. Testez l'extension construite (Firefox, Thunderbird et/ou Brave) ainsi que la page
+4. Testez l'extension construite (Firefox, Thunderbird et/ou Chromium) ainsi que la page
    `exemple/test.html` lorsque la correction concerne la détection ou le
    remplacement.
 5. Mettez à jour la documentation et le `CHANGELOG.md` si nécessaire.

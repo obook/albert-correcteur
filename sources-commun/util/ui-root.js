@@ -21,7 +21,7 @@
  * du texte et restent dans le corps du message.
  *
  * Utilisé par :
- *   - Firefox et Brave : notification/toast.js
+ *   - Firefox et Chromium : notification/toast.js
  *   - Thunderbird      : compose-badge.js, compose-render.js et les
  *                        trois popups de composition
  *
@@ -67,14 +67,14 @@ window.Albert.uiRoot = function (doc = document) {
   }
 
   /* Isolation par shadow DOM là où la liste des feuilles est fournie
-     (Firefox et Brave). Les sites aux CSS agressives ne peuvent plus
+     (Firefox et Chromium). Les sites aux CSS agressives ne peuvent plus
      déformer badge, popups et notifications, et nos règles ne fuient
      plus dans la page. Les feuilles déclarées par le manifest ne
      franchissent pas cette frontière, il faut les réimporter. */
   if (!conteneur.shadowRoot && Array.isArray(window.Albert.UI_CSS)) {
     const racine = conteneur.attachShadow({ mode: "open" });
     const style = doc.createElement("style");
-    /* --albert-icone : sous Brave (use_dynamic_url), l'URL relative d'une
+    /* --albert-icone : sous Chromium (use_dynamic_url), l'URL relative d'une
        feuille importée se résout avec l'identifiant fixe, refusé. */
     style.textContent = window.Albert.UI_CSS
       .map((f) => "@import url(" + browser.runtime.getURL(f) + ");")

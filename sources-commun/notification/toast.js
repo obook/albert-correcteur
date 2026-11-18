@@ -5,7 +5,7 @@
  * de débit atteinte, confirmation d'une action. Un seul toast est
  * visible à la fois, l'ancien est retiré avant d'afficher le nouveau.
  *
- * Le même code sert dans les pages web (Firefox, Brave) et dans la
+ * Le même code sert dans les pages web (Firefox, Chromium) et dans la
  * fenêtre de composition de Thunderbird. Seule l'icône diffère : elle
  * n'est ajoutée que si Albert.ICON_URL est défini, ce qui est le cas
  * des content scripts mais pas des compose scripts.

@@ -18,7 +18,7 @@
  * se rechargent de toute façon.
  *
  * Fonctionne tel quel sur les trois cibles : Firefox et Thunderbird
- * (Manifest V2), Brave / Chromium (Manifest V3 via browser-shim.js).
+ * (Manifest V2), Chromium (Manifest V3 via browser-shim.js).
  *
  * Auteur : O. Booklage
  * Date : juin 2026

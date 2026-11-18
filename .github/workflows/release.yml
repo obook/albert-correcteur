@@ -31,7 +31,7 @@ jobs:
       - name: Version du tag dans les manifests et le site
         run: |
           VERSION="${TAG#v}"
-          for m in sources-firefox sources-thunderbird sources-brave; do
+          for m in sources-firefox sources-thunderbird sources-chromium; do
             jq -e --arg v "$VERSION" '.version == $v' "$m/manifest.json" >/dev/null \
               || { echo "$m/manifest.json n'est pas en $VERSION"; exit 1; }
           done
@@ -46,10 +46,10 @@ jobs:
           VERSION="${TAG#v}"
           ./build.sh firefox
           ./build.sh thunderbird
-          ./build.sh brave
+          ./build.sh chromium
           mv firefox-release/albert-correcteur-firefox.xpi "albert-correcteur-firefox_${VERSION}.xpi"
           mv thunderbird-release/albert-correcteur-thunderbird.xpi "albert-correcteur-thunderbird_${VERSION}.xpi"
-          mv brave-release/albert-correcteur-brave.zip "albert-correcteur-brave_${VERSION}.zip"
+          mv chromium-release/albert-correcteur-chromium.zip "albert-correcteur-chromium_${VERSION}.zip"
 
       # Si la version existe déjà sur AMO (erreur 409), le .xpi signé est
       # récupéré via l'API.
@@ -101,14 +101,14 @@ jobs:
           VERSION="${TAG#v}"
           sha256sum "albert-correcteur-firefox_${VERSION}.xpi" \
             "albert-correcteur-thunderbird_${VERSION}.xpi" \
-            "albert-correcteur-brave_${VERSION}.zip" > SHA256SUMS
+            "albert-correcteur-chromium_${VERSION}.zip" > SHA256SUMS
           gh release delete "${TAG}" --yes || true
           gh release create "${TAG}" \
             --title "Albert Correcteur ${TAG}" \
             --notes-file RELEASE_NOTES.md \
             "albert-correcteur-firefox_${VERSION}.xpi" \
             "albert-correcteur-thunderbird_${VERSION}.xpi" \
-            "albert-correcteur-brave_${VERSION}.zip" \
+            "albert-correcteur-chromium_${VERSION}.zip" \
             SHA256SUMS
 
       - name: Mise à jour de updates.json

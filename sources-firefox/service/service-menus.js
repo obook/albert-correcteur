@@ -47,7 +47,7 @@ browser.contextMenus.create({
 const REFORMULATE_PREFIX = "albert-reformulate-";
 
 /* Le navigateur n'injecte pas les content scripts dans les boutiques
-   d'extensions, les pages internes et les PDF, ni (sous Brave) dans un
+   d'extensions, les pages internes et les PDF, ni (sous Chromium) dans un
    onglet ouvert avant l'installation : le clic restait sans effet. */
 function signalerPageInaccessible(err) {
   AlbertLog.warn("Content script injoignable :", err && err.message);

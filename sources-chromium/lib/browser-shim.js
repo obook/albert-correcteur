@@ -1,5 +1,5 @@
 /*
- * browser-shim.js - Pont minimal browser.* -> chrome.* pour Brave / Chromium.
+ * browser-shim.js - Pont minimal browser.* -> chrome.* pour Chromium.
  *
  * Le code commun et les content scripts utilisent partout l'API "browser.*"
  * (standard WebExtensions, à base de promesses), que Chromium n'expose pas sous
