@@ -43,6 +43,36 @@
    client n'abandonne pas pendant que le proxy attend encore. */
 const API_TIMEOUT_MS = 300000;
 
+/* Page d'état publiée par l'équipe Albert (pannes, maintenances). */
+const ALBERT_STATUS_URL = "https://albert.status.etalab.gouv.fr/";
+
+const ALBERT_INJOIGNABLE = "Albert est injoignable (panne ou maintenance). "
+  + `État du service : ${ALBERT_STATUS_URL}`;
+
+/**
+ * Traduit un statut HTTP d'erreur en message affichable.
+ *
+ * Un 5xx vient d'Albert ou du proxy placé devant lui (llm-proxy répond
+ * 500 quand Albert est arrêté) : l'utilisateur n'y peut rien, on le
+ * renvoie vers la page d'état. Un 404 vise le modèle demandé.
+ *
+ * @param {number} status - Statut HTTP de la réponse.
+ * @param {string} model  - Modèle demandé.
+ * @returns {string} Message destiné à l'utilisateur.
+ */
+function messageErreurHttp(status, model) {
+  if (status === 502 || status === 503 || status === 504) return ALBERT_INJOIGNABLE;
+  if (status >= 500) {
+    return `Erreur d'Albert (${status}), peut-être une panne ou une maintenance. `
+      + `État du service : ${ALBERT_STATUS_URL}`;
+  }
+  if (status === 404) {
+    return `Le modèle ${model} est introuvable ou indisponible. `
+      + "Choisissez un autre modèle dans la configuration d'Albert.";
+  }
+  return `Erreur API (${status}). Voir la console du service worker pour le détail.`;
+}
+
 /**
  * Traduit une exception en message affichable par l'utilisateur.
  *
@@ -55,8 +85,9 @@ function messageErreurReseau(err) {
     return "Délai dépassé : l'API Albert n'a pas répondu en "
       + (API_TIMEOUT_MS / 1000) + " secondes.";
   }
-  /* fetch signale une panne réseau par une TypeError. */
-  if (err.name === "TypeError") return `Erreur réseau : ${err.message}`;
+  /* fetch signale une panne réseau par une TypeError : réseau coupé,
+     ou Albert arrêté (maintenance). */
+  if (err.name === "TypeError") return ALBERT_INJOIGNABLE;
   return err.message || "Erreur inconnue.";
 }
 
@@ -224,7 +255,7 @@ async function checkText(text, mode, personaId, langue) {
         return { error: `Clé API invalide ou non autorisée (${response.status}). Cliquez sur l'icône Albert pour vérifier la clé.` };
       }
       AlbertLog.error("checkText:", mode, "API", response.status, "-", detail.slice(0, 500));
-      return { error: `Erreur API (${response.status}). Voir la console du service worker pour le détail.` };
+      return { error: messageErreurHttp(response.status, effectiveModel) };
     }
 
     recordSuccess(config.model);
@@ -355,7 +386,7 @@ async function translateText(text, targetLang) {
         return { error: `Clé API invalide ou non autorisée (${response.status}). Cliquez sur l'icône Albert pour vérifier la clé.` };
       }
       AlbertLog.error("translateText: API", response.status, "-", detail.slice(0, 500));
-      return { error: `Erreur API (${response.status}). Voir la console du service worker pour le détail.` };
+      return { error: messageErreurHttp(response.status, effectiveModel) };
     }
 
     recordSuccess(config.model);
@@ -391,5 +422,5 @@ async function translateText(text, targetLang) {
 /* Export pour les tests Node. Le service worker charge ce fichier comme
    un script classique, où module est indéfini. */
 if (typeof module !== "undefined" && module.exports) {
-  module.exports = { coerceSuggestion, nettoyerSuggestions };
+  module.exports = { coerceSuggestion, nettoyerSuggestions, messageErreurHttp, messageErreurReseau };
 }
