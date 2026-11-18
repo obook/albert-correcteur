@@ -96,6 +96,38 @@ function estModeleDeChat(m) {
 
 const modelSelect = document.getElementById("model");
 const refreshBtn = document.getElementById("refresh-models");
+const modelLogo = document.getElementById("model-logo");
+
+/* Logos des éditeurs (repris d'albert-go et de la page des modèles
+   d'Albert API), reconnus au nom réel du modèle : l'alias
+   openweight-large ne dit pas qu'il s'agit d'un modèle OpenAI. */
+const EDITEURS = [
+  ["qwen", /qwen/i],
+  ["deepseek", /deepseek/i],
+  ["openai", /openai|gpt/i],
+  ["mistral", /mistral|ministral|magistral|codestral|devstral|pixtral/i],
+  ["gemma", /gemma|google/i],
+];
+
+/* Alias affiché -> id et alias renvoyés par l'API, remplie par fetchModels. */
+const nomsReels = new Map();
+
+/**
+ * Affiche à gauche du <select> le logo de l'éditeur du modèle choisi.
+ * Un <option> natif ne peut pas porter d'image.
+ */
+function majLogoModele() {
+  const id = modelSelect.value;
+  modelLogo.hidden = !id;
+  if (!id) return;
+  const reel = nomsReels.get(id) || id;
+  const trouve = EDITEURS.find(([, motif]) => motif.test(reel));
+  modelLogo.src = trouve
+    ? `../icons/editeurs/${trouve[0]}.png`
+    : "../icons/editeurs/inconnu.svg";
+}
+
+modelSelect.addEventListener("change", majLogoModele);
 
 /**
  * Renvoie l'identifiant à afficher pour un modèle de la réponse API.
@@ -185,6 +217,7 @@ async function fetchModels() {
       if (seen.has(id)) continue;
       seen.add(id);
       models.push(id);
+      nomsReels.set(id, [m.id, ...(m.aliases || [])].join(" "));
     }
     models.sort();
 
@@ -233,6 +266,8 @@ async function fetchModels() {
     showStatus(`Erreur réseau : ${err.message}`, "err");
     modelSelect.innerHTML = '<option value="">Erreur réseau</option>';
     return false;
+  } finally {
+    majLogoModele();
   }
 }
 
