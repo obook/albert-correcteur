@@ -188,13 +188,27 @@ async function checkText(text, mode, personaId, langue) {
       temperature: 0.1,
       response_format: { type: "json_object" },
     };
+    /* gpt-oss-120b raisonne avant de répondre : à l'effort par défaut,
+       une correction prend 20 s et plus. Une correction n'a pas besoin
+       d'un long raisonnement. */
+    if (effectiveModel === "openweight-large") body.reasoning_effort = "low";
 
-    const response = await fetch(`${config.apiBase}/v1/chat/completions`, {
+    const envoyer = () => fetch(`${config.apiBase}/v1/chat/completions`, {
       method: "POST",
       headers: enteteApi(config),
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(API_TIMEOUT_MS),
     });
+    let response = await envoyer();
+
+    /* Paramètre refusé par le serveur : retenter sans, plutôt que de
+       priver l'utilisateur de correction. */
+    if ((response.status === 400 || response.status === 422)
+      && body.reasoning_effort) {
+      AlbertLog.warn("checkText: reasoning_effort refusé (" + response.status + "), nouvel essai sans");
+      delete body.reasoning_effort;
+      response = await envoyer();
+    }
 
     if (!response.ok) {
       const detail = await response.text();
