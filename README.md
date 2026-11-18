@@ -146,6 +146,7 @@ Olivier Booklage (Académie de Bordeaux)
 - **Logo Firefox** : sous [Mozilla Public License Version 2](https://www.mozilla.org/en-US/MPL/2.0/)
 - **Logo Thunderbird** : sous [licence Creative Commons Attribution 3.0 Non Transposé](https://creativecommons.org/licenses/by/3.0/deed.fr)
 - **Logo Chromium** : issu des sources de Chromium, sous [licence BSD](https://chromium.googlesource.com/chromium/src/+/main/LICENSE)
+- **Règles anti-tics du prompt de reformulation** : inspirées de [Stop Slop](https://hvpandya.com) (c) 2025 Hardik Pandya, sous licence MIT
 - **Logos des éditeurs de modèles** (`sources-commun/icons/editeurs/`) : marques de leurs éditeurs, reprises de la [page des modèles d'Albert API](https://ia.numerique.gouv.fr/outils-ia/albert-api/mod%C3%A8les/)
 
 > Firefox est une marque déposée de la Mozilla Foundation. Thunderbird est une marque déposée de MZLA Technologies Corporation.
