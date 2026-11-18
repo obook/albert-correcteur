@@ -8,14 +8,10 @@
  * les noms de langues détectés.
  *
  * Prompts disponibles :
- *   - correction.txt        : version allégée (toutes les règles,
- *                             condensées, et 6 exemples) utilisée par
- *                             défaut sur les modèles medium/small.
- *   - correction-complet.txt : ancienne version étoffée (22 Ko, 21
- *                             exemples), non chargée. Conservée pour
- *                             comparaison (ALBERT_PROMPT du script
- *                             tests/run-correction-corpus.sh) ou retour
- *                             arrière.
+ *   - correction.txt        : version étoffée (XML, few-shot exhaustifs)
+ *                             utilisée par défaut sur les modèles
+ *                             medium/small qui ont besoin d'exemples
+ *                             concrets pour ne pas rater les fautes.
  *   - correction-large.txt  : version compacte (règles condensées, pas
  *                             de few-shot) pour openweight-large.
  *                             Économise des tokens sur le modèle dont
