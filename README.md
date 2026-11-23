@@ -77,7 +77,7 @@ Le `.xpi` est signé automatiquement par Mozilla (canal unlisted) lors du pipeli
 
 ### <img src="images/chromium.png" width="18" alt="Chromium"> Chromium (Chrome, Edge, Brave...)
 
-L'extension n'est pas encore publiée sur le Chrome Web Store. En attendant, on l'installe à la main :
+L'extension est en cours d'examen sur le Chrome Web Store. En attendant, on l'installe à la main :
 
 1. Récupérer le `.zip` Chromium depuis les [Releases GitHub](https://github.com/obook/albert-correcteur/releases), puis le décompresser ; ou bien le construire soi-même avec `./build.sh chromium`, ou `build.bat chromium` sous Windows (le dossier prêt à charger est alors `chromium-release/albert-correcteur-chromium/`)
 2. Ouvrir `chrome://extensions`
