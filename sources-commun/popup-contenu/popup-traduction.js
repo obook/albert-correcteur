@@ -145,7 +145,7 @@ Albert.showTranslationPopup = function (texte) {
   const choix = document.createElement("div");
   choix.className = "albert-popup-langue-choix";
   const boutonLangue = document.createElement("button");
-  boutonLangue.className = "albert-popup-langue";
+  boutonLangue.className = "albert-popup-langue albert-popup-langue-select";
   boutonLangue.setAttribute("aria-haspopup", "listbox");
   boutonLangue.setAttribute("aria-expanded", "false");
   const liste = document.createElement("ul");
