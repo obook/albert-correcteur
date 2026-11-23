@@ -200,6 +200,7 @@ Albert.showTranslationPopup = function (texte) {
 
   const chargement = document.createElement("div");
   chargement.className = "albert-popup-message albert-chargement";
+  chargement.setAttribute("role", "status");
   chargement.textContent = "Traduction en cours…";
   corps.appendChild(chargement);
 
