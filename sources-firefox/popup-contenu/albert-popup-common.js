@@ -116,10 +116,12 @@ function surMousedown(e) {
   /* Clic dans la popup : garder le focus dans le champ corrigé. Sans
      cela, un champ qui s'agrandit au focus se replie au moment même où
      l'utilisateur clique sur la suggestion. Les champs de saisie de la
-     popup gardent leur comportement normal. */
+     popup gardent leur comportement normal, la traduction aussi pour
+     qu'on puisse en sélectionner une partie. */
   const cible = e.composedPath()[0];
   if (cible && cible.closest
-    && !cible.closest("input, textarea, select, [contenteditable=\"true\"]")) {
+    && !cible.closest("input, textarea, select, [contenteditable=\"true\"], "
+      + ".albert-popup-translation-result")) {
     e.preventDefault();
   }
 }
