@@ -5,6 +5,17 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.9.7] - 2026-11-23
+
+### Ajouté
+- Une animation accompagne l'attente de la traduction. Les lecteurs d'écran
+  annoncent cette attente.
+
+### Corrigé
+- Le menu des langues de la traduction restait blanc avec le thème sombre.
+- Dans Firefox et Chromium, on ne pouvait pas sélectionner une partie du
+  texte traduit.
+
 ## [0.9.6] - 2026-11-18
 
 ### Ajouté
