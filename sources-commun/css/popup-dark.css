@@ -349,6 +349,34 @@
   background: #2563eb;
 }
 
+/* Attente de la traduction : les deux points tournants du badge. Le
+   message est vidé à l'arrivée de la réponse, ce qui arrête l'animation. */
+.albert-chargement:not(:empty)::before {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  vertical-align: -2px;
+  background:
+    radial-gradient(circle at 50% 2px, #3b82f6 1.5px, transparent 2px),
+    radial-gradient(circle at 50% 10px, #e53e3e 1.5px, transparent 2px);
+  animation: albert-radar 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .albert-chargement::before {
+    animation: none;
+  }
+}
+
+/* Copie de badge-base.css, que la popup ne charge pas partout (shadow
+   DOM sous Firefox, lecture de message sous Thunderbird). */
+@keyframes albert-radar {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .albert-popup-translation-result {
   padding: 10px;
   background: #272738;
