@@ -171,16 +171,6 @@ button:hover {
   color: var(--pop-text-muted);
 }
 
-.limits-info .tier-row {
-  margin-top: 4px;
-}
-
-.limits-info .tier-title {
-  font-size: 11px;
-  color: var(--pop-text-dim);
-  font-weight: 500;
-}
-
 .limits-info .tier-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

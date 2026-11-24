@@ -104,7 +104,7 @@ window.Albert = Object.assign(window.Albert || {}, {
   //  LIMITES API
   // ===============================================================
 
-  limits: undefined,            /* { rpm, rpd, tpm, tpd } depuis /v1/me/info */
+  limits: undefined,            /* { rpm, rpd, tpm, tpd } depuis /v1/me */
   requestCountToday: 0,    /* compteur de requêtes du jour */
   requestDayStart: 0,      /* début de la journée courante (timestamp ms) */
 });

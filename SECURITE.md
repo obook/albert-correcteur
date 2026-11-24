@@ -22,7 +22,7 @@
 - **Unique destination :** le serveur API Albert configuré par l'utilisateur
 - **Protocole :** HTTPS exclusivement (imposé par le domaine dans le manifest)
 - **En-têtes :** `Authorization: Bearer <clé>`, `Content-Type: application/json`, `Accept: application/json`
-- **Endpoints utilisés :** `/v1/chat/completions` (correction, reformulation, traduction), `/v1/me/info` (limites du compte), `/v1/me/usage` (compteur journalier rpd/tpd), `/v1/models` (résolution des alias)
+- **Endpoints utilisés :** `/v1/chat/completions` (correction, reformulation, traduction), `/v1/me` (limites du compte), `/v1/usage` (compteur journalier rpd/tpd), `/v1/models` (résolution des alias)
 - **Aucun CDN, aucun service tiers, aucune télémétrie**
 
 ### Stockage

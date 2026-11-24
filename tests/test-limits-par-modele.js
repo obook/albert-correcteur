@@ -2,7 +2,7 @@
  * test-limits-par-modele.js
  * Tests : rattachement des plafonds du compte au modèle qui les porte.
  *
- * Albert ne nomme jamais le modèle dans /v1/me/info ni le routeur dans
+ * Albert ne nomme jamais le modèle dans /v1/me ni le routeur dans
  * /v1/models : le rattachement se fait par rang de création. Les données
  * du premier cas sont celles relevées sur le compte le 8 septembre 2026,
  * réduites aux quatre premiers rangs.

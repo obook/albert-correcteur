@@ -43,7 +43,7 @@ const AlbertLog = {
  * Charge la configuration de l'extension depuis le storage local.
  *
  * Le modèle est normalisé en alias serveur ([[normalizeModelId]]) pour
- * que tous les consommateurs (fallback chain, paliers documentés)
+ * que tous les consommateurs (fallback chain, limites)
  * manipulent une clé stable.
  *
  * @returns {Promise<{apiKey: string, apiBase: string, model: string, langue: string}>}
