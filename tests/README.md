@@ -21,7 +21,6 @@ node tests/test-detect-language.js
 | `test-structure.js` | 62 | Arborescence du projet, manifest.json (permissions, icônes, scripts), dossiers métier, fichiers supprimés, licence |
 | `test-parse-rate-limit-429.js` | 25 | Lecture du Retry-After (en-tête HTTP, champ JSON `retry_after`, message texte), limite journalière alignée sur minuit UTC, type de limite (rpm/rpd/tpm/tpd), message affiché |
 | `test-prompt-templates.js` | 18 | Fichiers prompts (correction, reformulation, traduction), placeholders, substitution des langues |
-| `test-daily-usage.js` | 16 | Usage journalier (rpd, tpd) depuis `/v1/me/usage`, somme des tokens de prompt et de complétion, filtrage par modèle et par minuit UTC |
 | `test-detect-language.js` | 16 | Détection de langue (FR/EN/ES/DE), repli sur le français, casse, ponctuation, mélanges |
 | `test-pluriel.js` | 16 | Pluralisation française : règles en -eu, -au, -al et leurs exceptions |
 | `test-model-selection.js` | 15 | Identifiant préféré d'un modèle, libellé du sélecteur, présélection du modèle recommandé |

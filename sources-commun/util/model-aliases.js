@@ -61,7 +61,7 @@ function normalizeModelId(id) {
  * Plafonds du compte qui s'appliquent vraiment à un modèle donné.
  *
  * Albert publie ses limites par routeur sans jamais nommer le modèle
- * (/v1/me/info) et ses modèles sans jamais nommer le routeur
+ * (/v1/me) et ses modèles sans jamais nommer le routeur
  * (/v1/models). Les deux listes suivent le même ordre de création : le
  * routeur de rang N porte les plafonds du modèle de rang N. C'est la
  * règle qu'applique llm-proxy, vérifiée sur le compte : le rang 1 sort
@@ -73,7 +73,7 @@ function normalizeModelId(id) {
  * Sinon la déduction serait une invention : l'appelant retombe alors sur
  * le minimum tous routeurs confondus, qui sous-estime sans mentir.
  *
- * @param {Array} limits   - Champ `limits` de /v1/me/info.
+ * @param {Array} limits   - Champ `limits` de /v1/me.
  * @param {Array} models   - Champ `data` de /v1/models.
  * @param {string} modelId - Alias ou id canonique du modèle cherché.
  * @returns {{rpm, rpd, tpm, tpd}|null} null si le rattachement échoue.
@@ -108,7 +108,7 @@ function limitsForModel(limits, models, modelId) {
  * la frappe, le surestimer déclenche des 429. Un `null` vaut "illimité"
  * et cède donc devant n'importe quelle valeur chiffrée.
  *
- * @param {Array} rawLimits - Champ `limits` de /v1/me/info.
+ * @param {Array} rawLimits - Champ `limits` de /v1/me.
  * @returns {Object} Objet { rpm, rpd, tpm, tpd }.
  */
 function limitsMinimum(rawLimits) {

@@ -30,7 +30,7 @@ albert-correcteur/
       service-config.js                   <- Chargement de la configuration (clé, modèle, URL)
       service-langue.js                   <- Détection de langue locale (RGPD)
       service-prompts.js                  <- Chargement et construction des prompts
-      service-limites.js                  <- Cache des limites du compte (/v1/me/info)
+      service-limites.js                  <- Cache des limites du compte (/v1/me)
       service-api.js                      <- Appels API + parseRateLimit429 + auto-fallback de modèle
       service-dispatch.js                 <- Routage des messages reçus (check, translate, getLimits)
 
@@ -422,10 +422,10 @@ Les 5 fichiers de `sources-commun/service/` sont communs aux deux extensions. Ch
          v
   service-limites.js (côté service worker)
          |
-         +-- fetchLimits()       <- /v1/me/info  (cache 10 min)
+         +-- fetchLimits()       <- /v1/me       (cache 10 min)
          +-- fetchAliases()      <- /v1/models   (cache 10 min)
          |     +-- Map { alias serveur -> id canonique }
-         +-- fetchDailyUsage()   <- /v1/me/usage (cache 30 s)
+         +-- fetchDailyUsage()   <- /v1/usage    (cache 30 s)
                +-- Filtre par modèle canonique (résolution alias en amont)
                +-- Somme requêtes et prompt_tokens depuis minuit UTC
          |

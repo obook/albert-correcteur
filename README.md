@@ -32,7 +32,7 @@
 - Indication visuelle d'une panne API (badge ambre cliquable pour relancer la vérification, message explicite en bulle d'aide)
 - Auto-fallback de modèle après deux 429 consécutifs (large -> medium -> small pendant 60 s)
 - Résolution des alias serveur via `/v1/models` pour aligner les requêtes sur les identifiants canoniques des modèles
-- Affichage de l'usage du jour (rpd, tpd) synchronisé avec `/v1/me/usage` (depuis minuit UTC) et des paliers EXP/PROD documentés dans le popup de configuration
+- Affichage de l'usage du jour (rpd, tpd) synchronisé avec `/v1/usage` (depuis minuit UTC) et des paliers EXP/PROD documentés dans le popup de configuration
 - Fonctionne sur les `<textarea>`, `<input>` et les éléments `contenteditable` (Firefox et Chromium)
 - Compatible avec les éditeurs riches : CKEditor, TinyMCE, Quill, ProseMirror, Draft.js, Lexical, WhatsApp Web, Slack (Firefox et Chromium)
 - Gestion des saisies IME (langues CJK) sans déclenchement intempestif

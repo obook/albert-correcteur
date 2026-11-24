@@ -3,18 +3,17 @@
  *
  * Trois sections affichées dans le bloc "Limites du compte" :
  *
- *   1. Plafonds du modèle sélectionné (depuis /v1/me/info)
+ *   1. Plafonds du modèle sélectionné (depuis /v1/me)
  *      Quotas rpm/rpd/tpm/tpd, rattachés au modèle par
  *      [[limitsForModel]]. Si le rattachement échoue, la valeur la
  *      plus restrictive du compte est affichée, sous un titre qui le
  *      dit : elle appartient alors à un autre modèle.
  *
- *   2. Usage journalier réel (depuis /v1/me/usage)
- *      Compte les requêtes et tokens consommés depuis minuit UTC
- *      pour le modèle sélectionné, en paginant jusqu'à épuisement.
- *      Les événements portent l'identifiant amont : /v1/models fournit
- *      tous les noms du modèle, et l'appariement se fait sur cet
- *      ensemble, ce qui vaut aussi derrière un proxy qui renomme.
+ *   2. Usage journalier réel (depuis /v1/usage)
+ *      Requêtes et tokens consommés depuis minuit UTC pour le modèle
+ *      sélectionné. Albert les compte sous le nom de son routeur :
+ *      /v1/models fournit tous les noms du modèle, et chacun est
+ *      interrogé, ce qui vaut aussi derrière un proxy qui renomme.
  *
  *   3. Paliers documentés EXP/PROD pour le modèle sélectionné
  *      Lus dans la table DOCUMENTED_MODEL_LIMITS. Permet de
@@ -157,13 +156,13 @@ async function listerModelesApi(apiBase, apiKey) {
 }
 
 /**
- * Renvoie tous les noms (id et alias, en minuscules) que /v1/models
- * attache au modèle sélectionné.
+ * Renvoie tous les noms (id et alias) que /v1/models attache au
+ * modèle sélectionné, dans leur casse d'origine.
  *
- * Les événements de /v1/me/usage portent l'identifiant amont, qui n'est
- * pas forcément celui du <select> : l'API Albert sert son id canonique,
- * un proxy sert le sien, préfixé. Comparer à l'ensemble des noms évite
- * de parier sur un espace de noms plutôt qu'un autre.
+ * /v1/usage filtre par nom exact du routeur, qui n'est pas forcément
+ * celui du <select> : l'API Albert sert son id canonique, un proxy sert
+ * le sien, préfixé. Interroger l'ensemble des noms évite de parier sur
+ * un espace de noms plutôt qu'un autre.
  *
  * @param {Array} models         - Champ `data` de /v1/models.
  * @param {string} selectedModel - Identifiant choisi dans le <select>.
@@ -171,34 +170,29 @@ async function listerModelesApi(apiBase, apiKey) {
  */
 function modelNames(models, selectedModel) {
   const choisi = selectedModel.toLowerCase();
-  const noms = new Set([choisi]);
+  const noms = new Set([selectedModel]);
   for (const m of models) {
     const entree = [m.id]
       .concat(Array.isArray(m.aliases) ? m.aliases : [])
-      .filter((n) => typeof n === "string" && n)
-      .map((n) => n.toLowerCase());
-    if (entree.includes(choisi)) {
+      .filter((n) => typeof n === "string" && n);
+    if (entree.some((n) => n.toLowerCase() === choisi)) {
       for (const n of entree) noms.add(n);
     }
   }
   return noms;
 }
 
-/* Maximum accepté par /v1/me/usage. Sans paramètre, l'API n'en renvoie
-   que 10, ce qui faisait afficher un usage journalier tronqué. */
-const USAGE_PAGE_SIZE = 100;
-
-/* ponytail: 20 pages, soit 2000 événements par jour. Au-delà le
-   compteur sous-estime ; paginer jusqu'au bout si un compte y arrive. */
-const USAGE_MAX_PAGES = 20;
-
 /**
- * Calcule l'usage journalier (rpd, tpd) pour un modèle depuis /v1/me/usage.
+ * Calcule l'usage journalier (rpd, tpd) pour un modèle depuis /v1/usage.
  * Renvoie null si l'endpoint n'est pas disponible.
  *
- * @param {string} apiBase - URL de base de l'API.
+ * Albert renvoie un total par jour UTC et par nom exact de routeur :
+ * une requête par nom, et le plus grand total. Aujourd'hui un seul nom
+ * répond ; si Albert résout un jour les alias, une somme doublerait.
+ *
+ * @param {string} apiBase  - URL de base de l'API.
  * @param {string} apiKey  - Clé API.
- * @param {Set<string>} noms - Noms du modèle, en minuscules.
+ * @param {Set<string>} noms - Noms du modèle, dans leur casse d'origine.
  * @returns {Promise<{rpdUsed: number, tpdUsed: number} | null>}
  */
 async function fetchDailyUsageForModel(apiBase, apiKey, noms) {
@@ -212,36 +206,32 @@ async function fetchDailyUsageForModel(apiBase, apiKey, noms) {
       maintenant.getUTCDate()
     ) / 1000
   );
+  const fin = Math.floor(maintenant.getTime() / 1000);
 
-  let rpdUsed = 0;
-  let tpdUsed = 0;
   try {
-    for (let page = 0; page < USAGE_MAX_PAGES; page++) {
-      const url = `${apiBase}/v1/me/usage?start_time=${utcMidnight}`
-        + `&limit=${USAGE_PAGE_SIZE}&offset=${page * USAGE_PAGE_SIZE}`;
-      const response = await fetch(url, {
-        headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
-      });
-      if (!response.ok) return page === 0 ? null : { rpdUsed, tpdUsed };
+    const reponses = await Promise.all([...noms].map((nom) => fetch(
+      `${apiBase}/v1/usage?start_time=${utcMidnight}&end_time=${fin}`
+        + `&model=${encodeURIComponent(nom)}`,
+      { headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {} }
+    )));
+    if (reponses.some((r) => !r.ok)) return null;
 
+    const nombre = (v) => (typeof v === "number" ? v : 0);
+    let rpdUsed = 0;
+    let tpdUsed = 0;
+    for (const response of reponses) {
       const data = await response.json();
-      const events = Array.isArray(data.data) ? data.data : [];
-      for (const ev of events) {
-        if (!ev || typeof ev.model !== "string") continue;
-        if (!noms.has(ev.model.toLowerCase())) continue;
-        /* Filet si start_time est ignoré en amont. */
-        if (typeof ev.created === "number" && ev.created < utcMidnight) continue;
-        rpdUsed += 1;
+      let rpd = 0;
+      let tpd = 0;
+      for (const jour of Array.isArray(data.data) ? data.data : []) {
+        if (!jour) continue;
+        rpd += nombre(jour.requests);
         /* Le quota tpd côté Albert couvre prompt + completion. Sommer les
            deux pour ne pas sous-évaluer l'usage affiché. */
-        const usage = ev.usage || {};
-        const promptTokens = typeof usage.prompt_tokens === "number"
-          ? usage.prompt_tokens : 0;
-        const completionTokens = typeof usage.completion_tokens === "number"
-          ? usage.completion_tokens : 0;
-        tpdUsed += promptTokens + completionTokens;
+        tpd += nombre(jour.prompt_tokens) + nombre(jour.completion_tokens);
       }
-      if (events.length < USAGE_PAGE_SIZE) break;
+      rpdUsed = Math.max(rpdUsed, rpd);
+      tpdUsed = Math.max(tpdUsed, tpd);
     }
     return { rpdUsed, tpdUsed };
   } catch {
@@ -278,11 +268,11 @@ async function fetchAndShowLimits() {
      Sans clé ni URL personnalisée, Albert répondrait 401. */
   if (!apiKey && apiBase === DEFAULT_API_BASE) return;
   try {
-    const response = await fetch(`${apiBase}/v1/me/info`, {
+    const response = await fetch(`${apiBase}/v1/me`, {
       headers: apiKey ? { Authorization: `Bearer ${apiKey}` } : {},
     });
     if (!response.ok) {
-      /* /v1/me/info est propre à Albert : un endpoint compatible OpenAI
+      /* /v1/me est propre à Albert : un endpoint compatible OpenAI
          répond 404 sans que rien ne soit en panne. */
       showLimitsMessage(response.status === 404
         ? "Cet endpoint ne publie pas les limites du compte."
@@ -335,9 +325,9 @@ async function fetchAndShowLimits() {
     }
 
     /*
-     * Section "Usage du jour" : interroger /v1/me/usage avec
-     * résolution d'alias -> id canonique, car les événements
-     * d'usage sont indexés par id canonique.
+     * Section "Usage du jour" : interroger /v1/usage sous chacun
+     * des noms du modèle, car Albert indexe l'usage par nom de
+     * routeur.
      */
     if (selectedModel) {
       const noms = modelNames(models, selectedModel);

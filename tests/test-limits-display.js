@@ -1,7 +1,7 @@
 /*
  * test-limits-display.js
  * Tests : la section "Limites du compte" est bien révélée après un
- * appel réussi à /v1/me/info, et reste masquée quand l'endpoint
+ * appel réussi à /v1/me, et reste masquée quand l'endpoint
  * répond en erreur.
  *
  * La source popup-limits.js est chargée telle quelle, jamais recopiée.
@@ -103,7 +103,7 @@ async function main() {
 
   await test("Section révélée après une réponse valide", async () => {
     const { fetchAndShowLimits, elements } = chargerPopupLimits({
-      "/v1/me/info": {
+      "/v1/me": {
         body: {
           limits: [
             { router_id: 1, type: "rpm", value: 10 },
@@ -112,7 +112,7 @@ async function main() {
         },
       },
       "/v1/models": { body: { data: [] } },
-      "/v1/me/usage": { body: { data: [] } },
+      "/v1/usage": { body: { data: [] } },
     });
     elements["api-key"].value = "sk-test";
     elements["model"].value = "openweight-large";
@@ -125,9 +125,9 @@ async function main() {
       "les lignes de quota doivent être ajoutées");
   });
 
-  await test("Motif affiché si /v1/me/info échoue", async () => {
+  await test("Motif affiché si /v1/me échoue", async () => {
     const { fetchAndShowLimits, elements } = chargerPopupLimits({
-      "/v1/me/info": { ok: false, status: 401, body: {} },
+      "/v1/me": { ok: false, status: 401, body: {} },
     });
     elements["api-key"].value = "sk-test";
     elements["limits-section"].hidden = true;
@@ -139,7 +139,7 @@ async function main() {
       "le code HTTP doit apparaître");
   });
 
-  await test("Endpoint sans /v1/me/info : message dédié, pas d'erreur", async () => {
+  await test("Endpoint sans /v1/me : message dédié, pas d'erreur", async () => {
     const { fetchAndShowLimits, elements } = chargerPopupLimits({});
     elements["api-key"].value = "sk-test";
     elements["limits-section"].hidden = true;
@@ -153,7 +153,7 @@ async function main() {
 
   await test("Motif affiché si la liste de limites est vide", async () => {
     const { fetchAndShowLimits, elements } = chargerPopupLimits({
-      "/v1/me/info": { body: { limits: [] } },
+      "/v1/me": { body: { limits: [] } },
     });
     elements["api-key"].value = "sk-test";
     elements["limits-section"].hidden = true;
@@ -166,7 +166,7 @@ async function main() {
 
   await test("Clé vide (proxy local) : limites demandées sans Authorization", async () => {
     const { fetchAndShowLimits, elements, entetes } = chargerPopupLimits({
-      "/v1/me/info": { body: { limits: [{ router_id: 1, type: "rpm", value: 10 }] } },
+      "/v1/me": { body: { limits: [{ router_id: 1, type: "rpm", value: 10 }] } },
     });
     elements["api-key"].value = "";
     elements["api-base"].value = "http://127.0.0.1:8080";
@@ -190,65 +190,76 @@ async function main() {
   });
 
   /* Espaces de noms réels relevés le 25 août 2026 : le proxy sert son
-     propre id préfixé, /v1/me/usage les identifiants amont d'Albert. */
+     propre id préfixé, Albert compte l'usage sous le nom de son routeur. */
   const MODELES_PROXY = {
     data: [{
       id: "anthropic-albert/openweight-code",
       aliases: ["openweight-code", "qwen3-coder-30b-A3b-instruct"],
     }],
   };
-  const EVENEMENT = (modele) => ({
-    model: modele,
-    created: Math.floor(Date.now() / 1000),
-    usage: { prompt_tokens: 100, completion_tokens: 20 },
-  });
+  /* Albert 0.9.3 : un total par jour UTC, filtré par nom exact de routeur. */
+  const USAGE_DU_ROUTEUR = (routeur, requetes) => ({ body: (url) => ({
+    data: new URL(url).searchParams.get("model") === routeur
+      ? [{ requests: requetes, prompt_tokens: 100 * requetes,
+        completion_tokens: 20 * requetes }]
+      : [],
+  }) });
 
   await test("Usage compté derrière un proxy qui renomme les modèles", async () => {
     const { listerModelesApi, modelNames, fetchDailyUsageForModel } = chargerPopupLimits({
       "/v1/models": { body: MODELES_PROXY },
-      "/v1/me/usage": { body: { data: [
-        EVENEMENT("qwen3-coder-30b-A3b-instruct"),
-        EVENEMENT("qwen3-coder-30b-A3b-instruct"),
-        EVENEMENT("openai/gpt-oss-120b"),
-      ] } },
+      "/v1/usage": USAGE_DU_ROUTEUR("qwen3-coder-30b-A3b-instruct", 2),
     });
 
     const noms = modelNames(await listerModelesApi("http://p", "sk"), "openweight-code");
     const usage = await fetchDailyUsageForModel("http://p", "sk", noms);
 
-    assert.strictEqual(usage.rpdUsed, 2, "les deux événements du modèle");
+    assert.strictEqual(usage.rpdUsed, 2, "le nom du routeur garde sa casse");
     assert.strictEqual(usage.tpdUsed, 240, "prompt + completion sommés");
   });
 
   await test("Usage compté contre l'API directe (id canonique)", async () => {
-    const { listerModelesApi, modelNames, fetchDailyUsageForModel } = chargerPopupLimits({
+    const { listerModelesApi, modelNames, fetchDailyUsageForModel, appels } = chargerPopupLimits({
       "/v1/models": { body: { data: [{
         id: "openai/gpt-oss-120b", aliases: ["openweight-large"],
       }] } },
-      "/v1/me/usage": { body: { data: [EVENEMENT("openai/gpt-oss-120b")] } },
+      "/v1/usage": USAGE_DU_ROUTEUR("openai/gpt-oss-120b", 1),
     });
 
     const noms = modelNames(await listerModelesApi("http://a", "sk"), "openweight-large");
     const usage = await fetchDailyUsageForModel("http://a", "sk", noms);
 
     assert.strictEqual(usage.rpdUsed, 1);
+    const requete = new URL(appels.find((u) => u.includes("/v1/usage")));
+    const minuit = Number(requete.searchParams.get("start_time"));
+    assert.strictEqual(minuit % 86400, 0, "borne de minuit UTC posée");
+    assert.ok(Number(requete.searchParams.get("end_time")) > minuit,
+      "end_time est obligatoire");
   });
 
-  await test("Pagination : au-delà de 100 événements", async () => {
-    const pleine = Array.from({ length: 100 }, () => EVENEMENT("m"));
-    const { fetchDailyUsageForModel, appels } = chargerPopupLimits({
-      "/v1/me/usage": { body: (url) => ({
-        data: url.includes("offset=0") ? pleine : [EVENEMENT("m")],
-      }) },
+  await test("Deux noms qui rendent le même total : pas de double compte", async () => {
+    const { fetchDailyUsageForModel } = chargerPopupLimits({
+      "/v1/usage": { body: { data: [
+        { requests: 3, prompt_tokens: 300, completion_tokens: 60 },
+      ] } },
     });
 
     const usage = await fetchDailyUsageForModel(
-      "http://a", "sk", new Set(["m"])
+      "http://a", "sk", new Set(["openai/gpt-oss-120b", "openweight-large"])
     );
 
-    assert.strictEqual(usage.rpdUsed, 101, "les deux pages comptées");
-    assert.ok(appels[0].includes("limit=100"), "limite maximale demandée");
-    assert.ok(appels[0].includes("start_time="), "borne de minuit UTC posée");
+    assert.deepStrictEqual(usage, { rpdUsed: 3, tpdUsed: 360 },
+      "si Albert résout un jour les alias, la somme doublerait");
+  });
+
+  await test("Usage indisponible : section masquée, pas de zéro trompeur", async () => {
+    const { fetchDailyUsageForModel } = chargerPopupLimits({
+      "/v1/usage": { ok: false, status: 422, body: {} },
+    });
+
+    assert.strictEqual(
+      await fetchDailyUsageForModel("http://a", "sk", new Set(["m"])), null
+    );
   });
 
   console.log(`\n${passed} réussis, ${failed} échoués`);

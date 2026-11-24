@@ -4,7 +4,7 @@
  * Une seule fonction exposée au reste du service worker :
  *
  *   - fetchLimits()
- *       Interroge /v1/me/info pour obtenir les quotas (rpm, rpd, tpm,
+ *       Interroge /v1/me pour obtenir les quotas (rpm, rpd, tpm,
  *       tpd) du modèle configuré, rattachés par [[limitsForModel]].
  *       Quand le rattachement échoue, la valeur la plus restrictive
  *       tous routeurs confondus est conservée. Cache 10 minutes.
@@ -13,7 +13,7 @@
  * (clé API, modèle, URL de base).
  *
  * L'usage journalier (rpd et tpd consommés) est calculé côté popup de
- * configuration, dans popup-limits.js, qui interroge /v1/me/usage
+ * configuration, dans popup-limits.js, qui interroge /v1/usage
  * directement : c'est le seul endroit où cette information est affichée,
  * et le service worker n'a pas à la relayer.
  *
@@ -69,7 +69,7 @@ async function fetchLimits() {
   if (!config.apiKey && config.apiBase === DEFAULT_API_BASE) return null;
 
   try {
-    const response = await fetch(`${config.apiBase}/v1/me/info`, {
+    const response = await fetch(`${config.apiBase}/v1/me`, {
       headers: enteteApi(config),
       /* Sans délai maximal, une API qui ne répond pas bloque tout ce
          qui attend les limites, dont l'initialisation du compose. */
