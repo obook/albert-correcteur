@@ -5,6 +5,12 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.9.9] - 2026-11-24
+
+### Corrigé
+- En thème sombre, les logos des éditeurs de modèles étaient peu visibles,
+  celui d'OpenAI en particulier.
+
 ## [0.9.8] - 2026-11-24
 
 ### Corrigé
