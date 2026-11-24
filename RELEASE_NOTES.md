@@ -1,8 +1,8 @@
-## Albert Correcteur v0.9.7
+## Albert Correcteur v0.9.8
 
-Dans la fenêtre de traduction, le menu des langues suit maintenant le thème sombre et on peut sélectionner une partie du texte traduit pour la copier.
+Albert a changé son API : la fenêtre de configuration affichait "Cet endpoint ne publie pas les limites du compte." au lieu des quotas du compte. Les quotas et l'usage du jour s'affichent de nouveau. L'extension ralentit aussi de nouveau les corrections avant d'atteindre la limite de requêtes par minute.
 
-Pendant qu'Albert traduit, une animation montre que la demande est en cours ; les lecteurs d'écran annoncent l'attente.
+Les paliers EXP/PROD recopiés de la documentation d'Albert ne sont plus affichés : ils n'étaient pas tenus à jour.
 
 ### Téléchargements
 

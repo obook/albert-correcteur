@@ -5,6 +5,19 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.9.8] - 2026-11-24
+
+### Corrigé
+- Depuis la version 0.9.3 de l'API d'Albert, la fenêtre de configuration
+  affichait "Cet endpoint ne publie pas les limites du compte." au lieu
+  des quotas et de l'usage du jour. Elle les affiche de nouveau.
+- Sans ces quotas, l'extension ne ralentissait plus les corrections avant
+  d'atteindre la limite de requêtes par minute.
+
+### Supprimé
+- Les paliers EXP/PROD recopiés de la page tarifs d'Albert, qui ne
+  suivaient pas ses changements.
+
 ## [0.9.7] - 2026-11-23
 
 ### Ajouté
