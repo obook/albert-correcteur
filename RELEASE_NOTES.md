@@ -1,6 +1,6 @@
-## Albert Correcteur v0.9.9
+## Albert Correcteur v0.9.10
 
-En thème sombre, le logo de l'éditeur du modèle choisi s'affiche sur un fond clair : celui d'OpenAI, tout en noir, était invisible.
+Sur un thème sombre de Firefox ou de Thunderbird, l'icône de l'extension s'affiche en couleurs claires : son bleu foncé se voyait mal sur la barre d'outils.
 
 ### Téléchargements
 

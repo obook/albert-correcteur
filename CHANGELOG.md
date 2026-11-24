@@ -5,6 +5,15 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.9.10] - 2026-11-24
+
+### Corrigé
+- Sur un thème sombre de Firefox ou de Thunderbird, l'icône de l'extension
+  passe en couleurs claires : son bleu foncé se voyait mal.
+
+### Modifié
+- Le libellé de la clé API ne mentionne plus l'endpoint local.
+
 ## [0.9.9] - 2026-11-24
 
 ### Corrigé
