@@ -32,12 +32,20 @@
   },
   "browser_action": {
     "default_icon": "icons/icon-48.png",
+    "theme_icons": [
+      { "light": "icons/icon-clair.svg", "dark": "icons/icon.svg", "size": 16 },
+      { "light": "icons/icon-clair.svg", "dark": "icons/icon.svg", "size": 32 }
+    ],
     "default_popup": "popup-configuration/popup.html",
     "default_title": "Albert",
     "default_area": "maintoolbar"
   },
   "compose_action": {
     "default_icon": "icons/icon-48.png",
+    "theme_icons": [
+      { "light": "icons/icon-clair.svg", "dark": "icons/icon.svg", "size": 16 },
+      { "light": "icons/icon-clair.svg", "dark": "icons/icon.svg", "size": 32 }
+    ],
     "default_popup": "popup-configuration/popup.html",
     "default_title": "Albert"
   },
