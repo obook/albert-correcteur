@@ -47,8 +47,8 @@ browser.storage.local.get(["apiKey", "apiBase", "model"]).then(async (result) =>
   if (result.apiKey || result.apiBase) {
     /* fetchModels remplit le <select> et sélectionne le modèle sauvegardé.
        Il faut attendre cette étape avant d'afficher les limites, sinon
-       modelSelect.value est encore vide et les sections "Usage du jour"
-       et "Paliers documentés" sont sautées au premier rendu. */
+       modelSelect.value est encore vide et la section "Usage du jour"
+       est sautée au premier rendu. */
     await fetchModels();
     fetchAndShowLimits();
   }
@@ -88,7 +88,7 @@ form.addEventListener("submit", async (e) => {
   fetchAndShowLimits();
 });
 
-/* Rafraîchir les paliers documentés quand l'utilisateur change de modèle. */
+/* Rafraîchir plafonds et usage quand l'utilisateur change de modèle. */
 
 modelSelect.addEventListener("change", fetchAndShowLimits);
 

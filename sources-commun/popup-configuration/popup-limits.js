@@ -1,7 +1,7 @@
 /*
  * popup-limits.js - Affichage des limites du compte API.
  *
- * Trois sections affichées dans le bloc "Limites du compte" :
+ * Deux sections affichées dans le bloc "Limites du compte" :
  *
  *   1. Plafonds du modèle sélectionné (depuis /v1/me)
  *      Quotas rpm/rpd/tpm/tpd, rattachés au modèle par
@@ -14,11 +14,6 @@
  *      sélectionné. Albert les compte sous le nom de son routeur :
  *      /v1/models fournit tous les noms du modèle, et chacun est
  *      interrogé, ce qui vaut aussi derrière un proxy qui renomme.
- *
- *   3. Paliers documentés EXP/PROD pour le modèle sélectionné
- *      Lus dans la table DOCUMENTED_MODEL_LIMITS. Permet de
- *      repérer si le compte est sur le palier expérimental ou
- *      production.
  *
  * Auteur : O. Booklage
  * Date : avril 2026
@@ -37,55 +32,6 @@ const LIMIT_LABELS = {
   tpd: "Tokens / jour",
 };
 
-/*
- * Paliers documentés Albert par modèle (source : page tarifs publique
- * https://ia.numerique.gouv.fr/outils-ia/albert-api/tarifs-et-limites/,
- * page lue le 2026-08-29).
- *
- * Indexés uniquement par alias serveur. Toute entrée reçue sous forme
- * d'id canonique est convertie en alias par normalizeModelId() (cf.
- * popup-models.js) avant le lookup.
- *
- * Une valeur null représente un quota "illimité" selon la documentation.
- *
- * Correspondance openweight-code -> Qwen/Qwen3-Coder-30B-A3B-Instruct
- * relevée sur /v1/models le 2026-08-29.
- */
-const DOCUMENTED_MODEL_LIMITS = {
-  "openweight-large": {
-    exp:  { rpm: 10, rpd: 1000,   tpm: 128000, tpd: 1280000 },
-    prod: { rpm: 50, rpd: 5000,   tpm: 246000, tpd: null },
-  },
-  "openweight-medium": {
-    exp:  { rpm: 50,  rpd: 1000,  tpm: 128000, tpd: 2460000 },
-    prod: { rpm: 100, rpd: 50000, tpm: 246000, tpd: null },
-  },
-  "openweight-small": {
-    exp:  { rpm: 50,  rpd: 1000,  tpm: 128000, tpd: 2460000 },
-    prod: { rpm: 100, rpd: 50000, tpm: 246000, tpd: null },
-  },
-  "openweight-code": {
-    exp:  { rpm: 50,  rpd: 1000,  tpm: 128000, tpd: 2460000 },
-    prod: { rpm: 100, rpd: 50000, tpm: 246000, tpd: null },
-  },
-};
-
-/**
- * Cherche les paliers documentés pour un identifiant de modèle.
- *
- * Normalise l'identifiant en alias serveur ([[normalizeModelId]] de
- * popup-models.js) pour gérer les configurations héritées qui auraient
- * été enregistrées sous un id canonique.
- *
- * @param {string} modelId - Alias ou id canonique du modèle.
- * @returns {{exp: Object, prod: Object} | null}
- */
-function documentedLimitsFor(modelId) {
-  if (!modelId) return null;
-  const alias = normalizeModelId(modelId);
-  return DOCUMENTED_MODEL_LIMITS[alias] || null;
-}
-
 /**
  * Formate une valeur de quota pour l'affichage.
  *
@@ -95,34 +41,6 @@ function documentedLimitsFor(modelId) {
 function formatLimitValue(value) {
   if (value === null || value === undefined) return "illimité";
   return value.toLocaleString("fr-FR");
-}
-
-/**
- * Construit la ligne d'un palier documenté (EXP ou PROD).
- *
- * @param {string} title  - Libellé du palier.
- * @param {Object} tier   - {rpm, rpd, tpm, tpd}.
- * @returns {HTMLElement}
- */
-function buildTierRow(title, tier) {
-  const row = document.createElement("div");
-  row.className = "tier-row";
-
-  const titleEl = document.createElement("div");
-  titleEl.className = "tier-title";
-  titleEl.textContent = title;
-  row.appendChild(titleEl);
-
-  const grid = document.createElement("div");
-  grid.className = "tier-grid";
-  for (const key of ["rpm", "rpd", "tpm", "tpd"]) {
-    const cell = document.createElement("span");
-    cell.className = "tier-cell";
-    cell.textContent = `${key} ${formatLimitValue(tier[key])}`;
-    grid.appendChild(cell);
-  }
-  row.appendChild(grid);
-  return row;
 }
 
 /**
@@ -256,8 +174,8 @@ function showLimitsMessage(texte) {
 /**
  * Récupère et affiche les limites du compte dans la section dédiée.
  *
- * Trois sections : limites du compte, usage journalier réel pour le
- * modèle sélectionné, paliers documentés EXP/PROD.
+ * Deux sections : limites du compte, usage journalier réel pour le
+ * modèle sélectionné.
  */
 async function fetchAndShowLimits() {
   const apiKey = document.getElementById("api-key").value.trim();
@@ -356,17 +274,6 @@ async function fetchAndShowLimits() {
         }
         limitsInfo.appendChild(usageRow);
       }
-    }
-
-    /* Paliers documentés (EXP/PROD) si connus pour le modèle. */
-    const tiers = documentedLimitsFor(selectedModel);
-    if (tiers) {
-      const sep = document.createElement("div");
-      sep.className = "tier-section-title";
-      sep.textContent = "Paliers documentés pour ce modèle";
-      limitsInfo.appendChild(sep);
-      limitsInfo.appendChild(buildTierRow("Expérimental", tiers.exp));
-      limitsInfo.appendChild(buildTierRow("Production", tiers.prod));
     }
 
     /* La section porte l'attribut hidden : la lever par style.display

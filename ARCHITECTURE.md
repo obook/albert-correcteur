@@ -434,7 +434,6 @@ Les 5 fichiers de `sources-commun/service/` sont communs aux deux extensions. Ch
          |
          +-- Affiche la limite du compte (rpm, rpd, tpm, tpd)
          +-- Affiche l'usage du jour (rpd_used / rpd_limit, tpd_used / tpd_limit)
-         +-- Affiche la table DOCUMENTED_MODEL_LIMITS (paliers EXP / PROD documentés)
 ```
 
 ### Modules content script (Firefox)
