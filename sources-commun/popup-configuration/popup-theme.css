@@ -23,6 +23,7 @@
   --pop-link-tint: rgba(0, 0, 145, 0.2);
   --pop-input-bg: #fff;
   --pop-input-border: #ccc;
+  --pop-logo-bg: transparent;
   --pop-back-hover: #f0f0f0;
   --pop-section-bg: #f6f6f6;
   --pop-section-hover: #eee;
@@ -52,6 +53,8 @@
   --pop-link-tint: rgba(108, 182, 255, 0.25);
   --pop-input-bg: #272738;
   --pop-input-border: #4a4a5a;
+  /* Les logos d'éditeur sont dessinés pour un fond clair (OpenAI en noir). */
+  --pop-logo-bg: #e8e8ee;
   --pop-back-hover: #2a2a3c;
   --pop-section-bg: #272738;
   --pop-section-hover: #2f2f44;
