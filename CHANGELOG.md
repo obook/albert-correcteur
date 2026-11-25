@@ -5,6 +5,16 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.9.11] - 2026-11-25
+
+### Ajouté
+- Page de règles de confidentialité sur le site, exigée par le
+  Chrome Web Store.
+
+### Retiré
+- Recherche par le sens dans une table Grist : l'option, cachée et
+  désactivée, n'a jamais servi.
+
 ## [0.9.10] - 2026-11-24
 
 ### Corrigé

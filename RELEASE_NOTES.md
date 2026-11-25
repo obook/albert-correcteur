@@ -1,6 +1,6 @@
-## Albert Correcteur v0.9.10
+## Albert Correcteur v0.9.11
 
-Sur un thème sombre de Firefox ou de Thunderbird, l'icône de l'extension s'affiche en couleurs claires : son bleu foncé se voyait mal sur la barre d'outils.
+Le site a une page de règles de confidentialité : le Chrome Web Store l'exige pour publier l'extension. L'option cachée de recherche dans une table Grist, qui n'a jamais servi, disparaît.
 
 ### Téléchargements
 
