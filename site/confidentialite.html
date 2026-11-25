@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Règles de confidentialité - Albert Correcteur</title>
+<meta name="description" content="Règles de confidentialité de l'extension Albert Correcteur pour Firefox, Thunderbird et Chromium.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' rx='8' fill='%232845C1'/></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="entete">
+  <div class="enveloppe">
+    <a class="marque" href="./">Albert Correcteur</a>
+  </div>
+</header>
+
+<main>
+  <div class="enveloppe">
+    <h1>Règles de confidentialité</h1>
+    <p>Ces règles s'appliquent à l'extension Albert Correcteur pour Firefox,
+      Thunderbird et Chromium (Chrome, Edge, Brave). Dernière mise à jour :
+      25 novembre 2026.</p>
+
+    <h2>Responsable</h2>
+    <p>Olivier Booklage, auteur de l'extension :
+      <a href="mailto:olivier.booklage@ac-bordeaux.fr">olivier.booklage@ac-bordeaux.fr</a>.
+      L'extension n'est pas un produit officiel de la DINUM.</p>
+
+    <h2>Données traitées</h2>
+    <ul>
+      <li><strong>Texte saisi.</strong> Pour la vérification, l'extension envoie
+        le texte du champ en cours de saisie (zone de texte, champ texte, éditeur
+        de page web ou de courriel) au serveur d'API choisi dans les réglages.
+        Pour la traduction et la reformulation, elle envoie le texte sélectionné.
+        Les champs de mot de passe et d'identifiant ne sont jamais lus.</li>
+      <li><strong>Clé API.</strong> La clé saisie dans les réglages est envoyée
+        uniquement au serveur d'API choisi, pour authentifier les requêtes.</li>
+      <li><strong>Réglages.</strong> Adresse du serveur, modèle, langue, thème,
+        mots ignorés et clé API sont enregistrés dans le stockage local du
+        navigateur, sur l'appareil de l'utilisateur.</li>
+    </ul>
+
+    <h2>Destinataire</h2>
+    <p>Le seul destinataire est le serveur d'API choisi par l'utilisateur. Par
+      défaut, c'est l'API Albert de la DINUM
+      (<code>albert.api.etalab.gouv.fr</code>), qui traite les textes selon ses
+      propres conditions : voir <a href="https://albert.sites.beta.gouv.fr/">le site
+      d'Albert</a>. Les échanges avec l'API Albert sont chiffrés (HTTPS).</p>
+
+    <h2>Ce que l'extension ne fait pas</h2>
+    <ul>
+      <li>Elle n'envoie aucune donnée à son auteur : aucun serveur propre, aucune
+        statistique d'usage, aucun traceur, aucune publicité.</li>
+      <li>Elle ne vend ni ne transmet aucune donnée à des tiers autres que le
+        serveur d'API choisi.</li>
+      <li>Elle ne lit ni l'historique de navigation ni les cookies.</li>
+      <li>La détection de la langue se fait sur l'appareil, sans appel externe.</li>
+    </ul>
+
+    <h2>Conservation et suppression</h2>
+    <p>Les données locales restent sur l'appareil jusqu'à leur modification dans
+      les réglages ou la désinstallation de l'extension, qui les efface.</p>
+
+    <h2>Contact</h2>
+    <p>Pour toute question sur ces règles :
+      <a href="mailto:olivier.booklage@ac-bordeaux.fr">olivier.booklage@ac-bordeaux.fr</a>.
+      Le code source est public :
+      <a href="https://github.com/obook/albert-correcteur">github.com/obook/albert-correcteur</a>.</p>
+  </div>
+</main>
+
+</body>
+</html>
