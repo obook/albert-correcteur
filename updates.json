@@ -3,18 +3,18 @@
     "albert-correcteur@ac-bordeaux.fr": {
       "updates": [
         {
-          "version": "0.9.10",
-          "update_link": "https://github.com/obook/albert-correcteur/releases/download/v0.9.10/albert-correcteur-firefox_0.9.10.xpi",
-          "update_hash": "sha256:f1399a6ccf6238a69243a6c58b8488cc62f2073f6671b6a2b8601803868914db"
+          "version": "0.9.11",
+          "update_link": "https://github.com/obook/albert-correcteur/releases/download/v0.9.11/albert-correcteur-firefox_0.9.11.xpi",
+          "update_hash": "sha256:099ecbfdd2702398608dad80d1f86ab6d9a810d6e3e412ecd737e49219f4dcc6"
         }
       ]
     },
     "albert-correcteur-thunderbird@ac-bordeaux.fr": {
       "updates": [
         {
-          "version": "0.9.10",
-          "update_link": "https://github.com/obook/albert-correcteur/releases/download/v0.9.10/albert-correcteur-thunderbird_0.9.10.xpi",
-          "update_hash": "sha256:6f8569d0b714fd797ce8b7243a037108f9a59e4f70d3e1a2389081046db87522"
+          "version": "0.9.11",
+          "update_link": "https://github.com/obook/albert-correcteur/releases/download/v0.9.11/albert-correcteur-thunderbird_0.9.11.xpi",
+          "update_hash": "sha256:dbc0c2ec6166732d5fc5e502221d59176e0243bd6180a4f3e73c0709c962d50b"
         }
       ]
     }
