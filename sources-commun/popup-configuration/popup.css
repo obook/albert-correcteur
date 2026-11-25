@@ -103,18 +103,6 @@ button:hover {
 .status.ok { color: var(--pop-status-ok); }
 .status.err { color: var(--pop-status-err); }
 
-.grist-section {
-  margin-bottom: 16px;
-  padding: 10px;
-  background: var(--pop-section-bg);
-  border-radius: 4px;
-}
-
-.grist-resultats {
-  padding-left: 20px;
-  line-height: 1.5;
-}
-
 .limits-section {
   margin-top: 14px;
   background: var(--pop-section-bg);

@@ -88,29 +88,6 @@ async function loadIgnoredWords() {
 
 loadIgnoredWords();
 
-/* --- Recherche Grist --- */
-
-/* La case n'apparaît que dans une version qui embarque la lecture de
-   Grist : Thunderbird et Chromium partagent cette page sans la fonction.
-   Firefox rend les chemins du manifeste en URL complètes, d'où endsWith. */
-const gristCase = document.getElementById("recherche-grist");
-if ((browser.runtime.getManifest().content_scripts || [])
-  .some((cs) => (cs.js || []).some((f) => f.endsWith("grist/grist-lecture.js")))) {
-  document.getElementById("grist-setting").hidden = false;
-  browser.storage.local.get("rechercheGrist").then((result) => {
-    gristCase.checked = result.rechercheGrist === true;
-  });
-  gristCase.addEventListener("change", async () => {
-    await browser.storage.local.set({ rechercheGrist: gristCase.checked });
-    /* Décocher efface aussi le texte des lignes et leurs vecteurs. */
-    if (!gristCase.checked) {
-      const tout = await browser.storage.local.get(null);
-      await browser.storage.local.remove(Object.keys(tout).filter((k) => k.startsWith("gristVecteurs:")));
-    }
-    showStatus(gristCase.checked ? "Recherche Grist activée." : "Recherche Grist désactivée.");
-  });
-}
-
 function showStatus(text) {
   statusDiv.textContent = text;
   statusDiv.className = "status ok";
