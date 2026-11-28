@@ -5,6 +5,12 @@ Toutes les modifications notables de ce projet sont consignées dans ce fichier.
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/)
 et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [0.9.12] - 2026-11-28
+
+### Retiré
+- Permission `activeTab` sous Chromium et Firefox : l'extension ne s'en
+  servait pas et le Chrome Web Store a refusé la 0.9.11 pour cela.
+
 ## [0.9.11] - 2026-11-25
 
 ### Ajouté

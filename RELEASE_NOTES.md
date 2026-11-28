@@ -1,6 +1,6 @@
-## Albert Correcteur v0.9.11
+## Albert Correcteur v0.9.12
 
-Le site a une page de règles de confidentialité : le Chrome Web Store l'exige pour publier l'extension. L'option cachée de recherche dans une table Grist, qui n'a jamais servi, disparaît.
+L'extension ne demande plus la permission `activeTab` sous Chromium et Firefox. Elle ne s'en servait pas et le Chrome Web Store avait refusé la 0.9.11 pour cette raison. Rien ne change à l'usage.
 
 ### Téléchargements
 
