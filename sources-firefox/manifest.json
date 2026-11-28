@@ -20,7 +20,6 @@
   "content_security_policy": "script-src 'self'; object-src 'none'",
   "permissions": [
     "storage",
-    "activeTab",
     "contextMenus",
     "notifications",
     "https://albert.api.etalab.gouv.fr/*",

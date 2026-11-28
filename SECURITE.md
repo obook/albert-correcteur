@@ -10,7 +10,7 @@
 | Permission | Justification |
 |------------|--------------|
 | `storage` | Stockage local de la clé API, préférences, dictionnaire personnel |
-| `activeTab` | Accès au contenu de l'onglet actif uniquement |
+| `activeTab` (Thunderbird) | Redondante avec `compose` et `messagesModify` d'après la documentation Thunderbird (non testé) |
 | `contextMenus` | Menu contextuel (corriger, reformuler, traduire) |
 | `notifications` | Prévenir que le menu ne peut pas agir sur la page (boutique d'extensions, pages internes, PDF) |
 | `https://albert.api.etalab.gouv.fr/*` | Seul domaine réseau autorisé |
